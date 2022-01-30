@@ -1,0 +1,13 @@
+modLoader="javafml"
+loaderVersion="[39,)"
+license="GPLv3"
+[[mods]]
+modId="rubidium"
+version="0.4.0-alpha6"
+displayName="Rubidium"
+logoFile="icon.png"
+description='''
+Rubidium is a Unofficial Fork of the Sodium maked to work on FML.
+'''
+credits="NanoLive, CaffeineMC"
+authors="NanoLive"
