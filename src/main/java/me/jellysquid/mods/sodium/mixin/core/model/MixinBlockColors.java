@@ -30,7 +30,8 @@ public class MixinBlockColors implements BlockColorProviderRegistry {
     private void preRegisterColor(net.minecraft.client.color.block.BlockColorProvider provider, Block[] blocks, CallbackInfo ci) {
         for (Block block : blocks) {
         	synchronized (this) {
-        		this.blocksToColor.put(block, provider::getColor);
+        		if(provider != null)
+        			this.blocksToColor.put(block, provider::getColor);
         	}
         }
     }
