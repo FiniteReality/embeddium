@@ -166,8 +166,10 @@ public class MixinRenderLayer {
             } else if (value == RenderPhase.TRANSLUCENT_TRANSPARENCY) {
                 return BlendFunction.of(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
             }
-
-            throw new UnsupportedOperationException();
+            
+            //TODO okay i'll fix this shit later
+            return null;
+            //throw new UnsupportedOperationException();
         }
     }
 
