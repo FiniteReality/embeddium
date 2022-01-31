@@ -15,7 +15,7 @@ public class SodiumClientMod {
     private static UserConfig CONFIG;
     private static Logger LOGGER;
 
-    private static String MOD_VERSION = "0.4.0";
+    private static String MOD_VERSION = "0.4.0a";
     
     public static final String MODID = "rubidium";
 
