@@ -80,7 +80,8 @@ public class MixinItemRenderer {
                 }
 
                 if (colorProvider == null) {
-                    color = this.colors.getColor(stack, bakedQuad.getColorIndex());
+                	if(bakedQuad.getColorIndex() < 32)
+                    color = ColorARGB.toABGR(this.colors.getColor(stack, bakedQuad.getColorIndex()), 255);
                 } else {
                     color = ColorARGB.toABGR((colorProvider.getColor(stack, bakedQuad.getColorIndex())), 255);
                 }
@@ -89,7 +90,14 @@ public class MixinItemRenderer {
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
 
             for (int i = 0; i < 4; i++) {
-                drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), color, quad.getTexU(i), quad.getTexV(i),
+            	int fColor = color;
+                try {
+                    if (bakedQuad.hasColor()) {
+                    	fColor = multARGBInts(quad.getColor(quad.getColorIndex()), color);
+                    }
+                } catch (Exception ex) {
+                }
+                drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
                         light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
 
@@ -97,5 +105,13 @@ public class MixinItemRenderer {
         }
 
         drain.flush();
+    }
+    
+    private int multARGBInts(int colorA, int colorB) {
+        int a = (int)((ColorARGB.unpackAlpha(colorA)/255.0f) * (ColorARGB.unpackAlpha(colorB)/255.0f) * 255.0f);
+        int b = (int)((ColorARGB.unpackBlue(colorA)/255.0f) * (ColorARGB.unpackBlue(colorB)/255.0f) * 255.0f);
+        int g = (int)((ColorARGB.unpackGreen(colorA)/255.0f) * (ColorARGB.unpackGreen(colorB)/255.0f) * 255.0f);
+        int r = (int)((ColorARGB.unpackRed(colorA)/255.0f) * (ColorARGB.unpackRed(colorB)/255.0f) * 255.0f);
+        return ColorARGB.pack(r, g, b, a);
     }
 }
