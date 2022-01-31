@@ -11,7 +11,7 @@
     "conformVisibility": true
   },
   "client": [
-	"prelaunch.MixinPreLaunch",
+    "prelaunch.MixinPreLaunch",
     "core.MixinFrustum",
     "core.MixinMinecraftClient",
     "core.MixinRenderLayer",
@@ -52,9 +52,7 @@
     "features.entity.fast_render.MixinModelPart",
     "features.fast_biome_colors.MixinBackgroundRenderer",
     "features.fast_biome_colors.MixinClientWorld",
-    //"features.gui.MixinDebugHud",
     "features.gui.fast_loading_screen.MixinLevelLoadingScreen",
-    //"features.gui.font.MixinGlyphRenderer",
     "features.item.MixinItemRenderer",
     "features.matrix_stack.MixinMatrixStack",
     "features.matrix_stack.MixinVertexConsumer",
@@ -65,6 +63,7 @@
     "features.options.MixinWorldRenderer",
     "features.particle.cull.MixinParticleManager",
     "features.particle.fast_render.MixinBillboardParticle",
+	"features.render_layer.MixinRenderLayers",
     "features.render_layer.leaves.MixinLeavesBlock",
     "features.render_layer.leaves.MixinRenderLayers",
     "features.sky.MixinWorldRenderer",
