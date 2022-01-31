@@ -137,7 +137,8 @@ public class MixinRenderLayer {
                 return CullingMode.DISABLE;
             }
 
-            throw new UnsupportedOperationException();
+            return CullingMode.DISABLE;
+            //throw new UnsupportedOperationException();
         }
 
         private static DepthFunc createDepthFunction(RenderPhase.DepthTest value) {
