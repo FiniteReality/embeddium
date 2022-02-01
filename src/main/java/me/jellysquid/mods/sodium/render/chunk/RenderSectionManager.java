@@ -480,7 +480,7 @@ public class RenderSectionManager {
     }
 
     public boolean isChunkPrioritized(RenderSection render) {
-        return render.getSquaredDistance(this.cameraX, this.cameraY, this.cameraZ) <= NEARBY_CHUNK_DISTANCE;
+        return render != null ? render.getSquaredDistance(this.cameraX, this.cameraY, this.cameraZ) <= NEARBY_CHUNK_DISTANCE : false;
     }
 
     public void onChunkRenderUpdates(int x, int y, int z, ChunkRenderData data) {
