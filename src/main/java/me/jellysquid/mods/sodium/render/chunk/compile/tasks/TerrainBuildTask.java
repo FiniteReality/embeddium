@@ -94,6 +94,7 @@ public class TerrainBuildTask extends AbstractBuilderTask {
                             if (!RenderLayers.canRenderInLayer(blockState, layer)) {
                                 continue;
                             }
+                            
                             ForgeHooksClient.setRenderType(layer);
                             IModelData modelData = ModelDataManager.getModelData(Objects.requireNonNull(MinecraftClient.getInstance().world), blockPos);
                             
@@ -105,6 +106,7 @@ public class TerrainBuildTask extends AbstractBuilderTask {
                             if (renderCache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData)) {
                                 rendered = true;
                             }
+                            ForgeHooksClient.setRenderType(null);
                     	}
 
                     }
