@@ -24,7 +24,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
-import org.joml.Matrix4f;
+import repack.joml.Matrix4f;
+
 import org.lwjgl.system.MemoryUtil;
 
 import java.util.Map;

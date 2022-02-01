@@ -3,7 +3,7 @@ package me.jellysquid.mods.sodium.render.chunk.draw;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.jellysquid.mods.sodium.interop.vanilla.math.JomlHelper;
 import net.minecraft.client.util.math.MatrixStack;
-import org.joml.Matrix4f;
+import repack.joml.Matrix4f;
 
 public record ChunkRenderMatrices(Matrix4f projection, Matrix4f modelView) {
     public static ChunkRenderMatrices from(MatrixStack stack) {

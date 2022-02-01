@@ -1,7 +1,8 @@
 package me.jellysquid.mods.sodium.opengl.shader.uniform;
 
 import me.jellysquid.mods.sodium.opengl.util.MemCmp;
-import org.joml.Matrix4f;
+import repack.joml.Matrix4f;
+
 import org.lwjgl.opengl.GL45C;
 
 import java.nio.ByteBuffer;
