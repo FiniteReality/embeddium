@@ -15,10 +15,10 @@ public class SodiumClientMod {
     private static UserConfig CONFIG;
     private static Logger LOGGER;
 
-    private static String MOD_VERSION = "0.4.0c";
+    private static String MOD_VERSION = "0.4.0d";
     
     public static final String MODID = "rubidium";
-
+    
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
     }
