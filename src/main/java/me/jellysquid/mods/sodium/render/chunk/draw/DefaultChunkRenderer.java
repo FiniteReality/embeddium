@@ -62,8 +62,11 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
             for (Map.Entry<RenderRegion, ObjectArrayList<RenderSection>> entry : sortedRegions(list, renderPass.usesReverseOrder())) {
                 var region = entry.getKey();
                 var sections = entry.getValue();
-
-                var handles = this.prepareDrawBatches(sections, renderPass, camera, region.getResources());
+                
+                Handles handles = null;
+                
+                if(region.getResources() != null)
+                handles = this.prepareDrawBatches(sections, renderPass, camera, region.getResources());
 
                 if (handles == null) {
                     continue;
