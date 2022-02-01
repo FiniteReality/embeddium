@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.mixin;
 
 import me.jellysquid.mods.sodium.config.mixin.MixinOption;
+import me.jellysquid.mods.sodium.SodiumPreLaunch;
 import me.jellysquid.mods.sodium.config.mixin.MixinConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +22,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
         try {
+        	SodiumPreLaunch.onPreLaunch();
             this.config = MixinConfig.load(new File("./config/rubidium-mixins.properties"));
         } catch (Exception e) {
             throw new RuntimeException("Could not load configuration file for Rubidium", e);
