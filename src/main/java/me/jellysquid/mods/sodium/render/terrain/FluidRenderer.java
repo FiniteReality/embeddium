@@ -474,7 +474,7 @@ public class FluidRenderer {
                 return -1;
             }
 
-            return state.getFluid().getAttributes().getColor();
+            return state.getFluid().getAttributes().getColor(world, pos);
         }
     }
 }
