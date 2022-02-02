@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium;
 
 import me.jellysquid.mods.sodium.config.user.UserConfig;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -19,6 +20,8 @@ public class SodiumClientMod {
     
     public static final String MODID = "rubidium";
     
+    public static boolean flywheelLoaded = false;
+    
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
     }
@@ -26,6 +29,7 @@ public class SodiumClientMod {
     public void setup(final FMLClientSetupEvent event) {
         LOGGER = LogManager.getLogger("Rubidium");
         CONFIG = loadConfig();
+        flywheelLoaded = ModList.get().isLoaded("flywheel");
     }
 
     public static UserConfig options() {

@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.render.chunk.compile.tasks;
 
 import me.jellysquid.mods.sodium.render.chunk.passes.ChunkRenderPass;
 import me.jellysquid.mods.sodium.render.terrain.TerrainBuildContext;
+import me.jellysquid.mods.sodium.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.render.chunk.state.ChunkMesh;
 import me.jellysquid.mods.sodium.render.chunk.state.ChunkRenderBounds;
@@ -127,7 +128,7 @@ public class TerrainBuildTask extends AbstractBuilderTask {
                         if (entity != null) {
                             BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(entity);
 
-                            if (renderer != null) {
+                            if (renderer != null && FlywheelCompat.addAndFilterBEs(entity)) {
                                 renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
                                 rendered = true;
                             }
