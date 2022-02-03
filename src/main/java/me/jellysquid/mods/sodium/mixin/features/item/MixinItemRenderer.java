@@ -79,11 +79,13 @@ public class MixinItemRenderer {
                     colorProvider = ((ItemColorProviderRegistry) this.colors).getColorProvider(stack);
                 }
 
+                try {
                 if (colorProvider == null) {
-                	if(bakedQuad.getColorIndex() < 32)
                     color = ColorARGB.toABGR(this.colors.getColor(stack, bakedQuad.getColorIndex()), 255);
                 } else {
                     color = ColorARGB.toABGR((colorProvider.getColor(stack, bakedQuad.getColorIndex())), 255);
+                }
+                }catch(Exception e) {
                 }
             }
 
