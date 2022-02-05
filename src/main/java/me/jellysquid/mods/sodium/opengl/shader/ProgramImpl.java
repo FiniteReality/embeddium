@@ -101,9 +101,9 @@ public class ProgramImpl<T> extends ManagedObject implements Program<T> {
 
             int result = GL20C.glGetShaderi(handle, GL20C.GL_COMPILE_STATUS);
 
-            if (result != GL20C.GL_TRUE) {
+            /*if (result != GL20C.GL_TRUE) {
                 throw new RuntimeException("Shader compilation failed, see log for details");
-            }
+            }*/
 
             this.setHandle(handle);
         }
