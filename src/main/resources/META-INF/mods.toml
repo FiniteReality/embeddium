@@ -3,7 +3,7 @@ loaderVersion="[39,)"
 license="LGPL-3.0-only"
 [[mods]]
 modId="rubidium"
-version="0.4.0d"
+version="0.4.0e"
 displayName="Rubidium"
 logoFile="icon.png"
 description='''
