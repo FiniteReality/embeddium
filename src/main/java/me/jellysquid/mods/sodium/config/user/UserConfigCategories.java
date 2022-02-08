@@ -128,13 +128,13 @@ public class UserConfigCategories {
         List<OptionGroup> groups = new ArrayList<>();
 
         groups.add(OptionGroup.createBuilder()
-                .add(OptionImpl.createBuilder(GraphicsMode.class, vanillaOpts)
+                .add(OptionImpl.createBuilder(me.jellysquid.mods.sodium.config.user.misc.GraphicsMode.class, vanillaOpts)
                         .setName(new TranslatableText("options.graphics"))
                         .setTooltip(new TranslatableText("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, GraphicsMode.class, new Text[] { new TranslatableText("options.graphics.fast"), new TranslatableText("options.graphics.fancy"), new TranslatableText("options.graphics.fabulous") }))
+                        .setControl(option -> new CyclingControl<>(option, me.jellysquid.mods.sodium.config.user.misc.GraphicsMode.class, new Text[] { new TranslatableText("options.graphics.fast"), new TranslatableText("options.graphics.fancy")}))
                         .setBinding(
-                                (opts, value) -> opts.graphicsMode = value,
-                                opts -> opts.graphicsMode)
+                                (opts, value) -> opts.graphicsMode = value == me.jellysquid.mods.sodium.config.user.misc.GraphicsMode.FANCY ? GraphicsMode.FANCY : GraphicsMode.FAST,
+                                opts -> opts.graphicsMode == GraphicsMode.FANCY ?  me.jellysquid.mods.sodium.config.user.misc.GraphicsMode.FANCY :  me.jellysquid.mods.sodium.config.user.misc.GraphicsMode.FAST)
                         .setImpact(OptionImpact.HIGH)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
