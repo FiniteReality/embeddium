@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.options;
 
-import me.jellysquid.mods.sodium.gui.screen.UserConfigScreen;
+import me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -20,7 +20,7 @@ public class MixinOptionsScreen extends Screen {
     @Dynamic
     @Inject(method = "m_96271_", at = @At("HEAD"), cancellable = true, remap = false)
     private void open(ButtonWidget widget, CallbackInfo ci) {
-        this.client.setScreen(new UserConfigScreen(this));
+        this.client.setScreen(new SodiumOptionsGUI(this));
 
         ci.cancel();
     }

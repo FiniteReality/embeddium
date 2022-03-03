@@ -23,7 +23,7 @@
  */
 package repack.joml.sampling;
 
-import com.jozufozu.flywheel.repack.joml.Random;
+import repack.joml.Random;
 
 /**
  * Creates samples on a unit quad using an NxN strata grid.

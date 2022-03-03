@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.mixin;
 
-import me.jellysquid.mods.sodium.config.mixin.MixinOption;
-import me.jellysquid.mods.sodium.SodiumPreLaunch;
-import me.jellysquid.mods.sodium.config.mixin.MixinConfig;
+import me.jellysquid.mods.sodium.client.SodiumPreLaunch;
+import me.jellysquid.mods.sodium.common.config.Option;
+import me.jellysquid.mods.sodium.common.config.SodiumConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.ClassNode;
@@ -17,13 +17,13 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     private static final String MIXIN_PACKAGE_ROOT = "me.jellysquid.mods.sodium.mixin.";
 
     private final Logger logger = LogManager.getLogger("Rubidium");
-    private MixinConfig config;
+    private SodiumConfig config;
 
     @Override
     public void onLoad(String mixinPackage) {
         try {
         	SodiumPreLaunch.onPreLaunch();
-            this.config = MixinConfig.load(new File("./config/rubidium-mixins.properties"));
+            this.config = SodiumConfig.load(new File("./config/rubidium-mixins.properties"));
         } catch (Exception e) {
             throw new RuntimeException("Could not load configuration file for Rubidium", e);
         }
@@ -47,7 +47,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
         }
 
         String mixin = mixinClassName.substring(MIXIN_PACKAGE_ROOT.length());
-        MixinOption option = this.config.getEffectiveOptionForMixin(mixin);
+        Option option = this.config.getEffectiveOptionForMixin(mixin);
 
         if (option == null) {
             this.logger.error("No rules matched mixin '{}', treating as foreign and disabling!", mixin);

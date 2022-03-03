@@ -1,4 +1,4 @@
-#version 460 core
+#version 150 core
 
 #import <sodium:include/fog.glsl>
 

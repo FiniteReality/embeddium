@@ -26,9 +26,9 @@ package repack.joml.sampling;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import com.jozufozu.flywheel.repack.joml.Random;
-import com.jozufozu.flywheel.repack.joml.Vector2f;
-import com.jozufozu.flywheel.repack.joml.Vector3f;
+import repack.joml.Random;
+import repack.joml.Vector2f;
+import repack.joml.Vector3f;
 
 /**
  * Creates samples using the "Best Candidate" algorithm.

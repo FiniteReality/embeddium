@@ -5,4 +5,4 @@ uniform mat4 u_ProjectionMatrix;
 uniform mat4 u_ModelViewMatrix;
 
 // The model-view-projection matrix
-uniform mat4 u_ModelViewProjectionMatrix;
+#define u_ModelViewProjectionMatrix uProjectionMatrix * u_ModelViewMatrix

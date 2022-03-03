@@ -8,7 +8,7 @@ loom {
     silentMojangMappingsLicense()
 	forge {
 		mixinConfigs = [
-				"rubidium.mixins.json"
+			"rubidium.mixins.json"
 		]
 	}
 }
@@ -20,13 +20,6 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-configurations {
-    modIncludeImplementation
-
-    include.extendsFrom modIncludeImplementation
-    modImplementation.extendsFrom modIncludeImplementation
-}
-
 repositories {
 
 }
@@ -37,17 +30,14 @@ dependencies {
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 	
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	
-	implementation 'org.joml:joml:1.10.2'
-    include 'org.joml:joml:1.10.2'
 }
 
 processResources {
 	inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
+	filesMatching("META-INF/mods.toml") {
+        expand "version": project.version
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {

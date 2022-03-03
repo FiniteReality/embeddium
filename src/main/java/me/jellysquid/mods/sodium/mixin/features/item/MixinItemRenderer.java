@@ -1,15 +1,5 @@
 package me.jellysquid.mods.sodium.mixin.features.item;
 
-import me.jellysquid.mods.sodium.render.terrain.quad.ModelQuadView;
-import me.jellysquid.mods.sodium.interop.vanilla.vertex.VanillaVertexFormats;
-import me.jellysquid.mods.sodium.render.vertex.VertexDrain;
-import me.jellysquid.mods.sodium.interop.vanilla.vertex.formats.quad.QuadVertexSink;
-import me.jellysquid.mods.sodium.render.texture.SpriteUtil;
-import me.jellysquid.mods.sodium.render.terrain.quad.ModelQuadUtil;
-import me.jellysquid.mods.sodium.util.packed.ColorARGB;
-import me.jellysquid.mods.sodium.util.rand.XoRoShiRoRandom;
-import me.jellysquid.mods.sodium.interop.vanilla.mixin.ItemColorProviderRegistry;
-import me.jellysquid.mods.sodium.util.DirectionUtil;
 import net.minecraft.client.color.item.ItemColorProvider;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.render.VertexConsumer;
@@ -23,6 +13,17 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+
+import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
+import me.jellysquid.mods.sodium.client.model.vertex.VertexDrain;
+import me.jellysquid.mods.sodium.client.model.vertex.formats.quad.QuadVertexSink;
+import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
+import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
+import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
+import me.jellysquid.mods.sodium.client.world.biome.ItemColorsExtended;
+import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class MixinItemRenderer {
         ItemColorProvider colorProvider = null;
 
         QuadVertexSink drain = VertexDrain.of(vertexConsumer)
-                .createSink(VanillaVertexFormats.QUADS);
+                .createSink(VanillaVertexTypes.QUADS);
         drain.ensureCapacity(quads.size() * 4);
 
         for (BakedQuad bakedQuad : quads) {
@@ -76,7 +77,7 @@ public class MixinItemRenderer {
 
             if (!stack.isEmpty() && bakedQuad.hasColor()) {
                 if (colorProvider == null) {
-                    colorProvider = ((ItemColorProviderRegistry) this.colors).getColorProvider(stack);
+                    colorProvider = ((ItemColorsExtended) this.colors).getColorProvider(stack);
                 }
 
                 try {

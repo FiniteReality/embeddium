@@ -25,7 +25,7 @@ package repack.joml.sampling;
 
 import java.nio.FloatBuffer;
 
-import com.jozufozu.flywheel.repack.joml.Math;
+import repack.joml.Math;
 
 /**
  * Generates various convolution kernels.

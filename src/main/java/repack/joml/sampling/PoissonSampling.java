@@ -25,8 +25,8 @@ package repack.joml.sampling;
 
 import java.util.ArrayList;
 
-import com.jozufozu.flywheel.repack.joml.Random;
-import com.jozufozu.flywheel.repack.joml.Vector2f;
+import repack.joml.Random;
+import repack.joml.Vector2f;
 
 /**
  * Generates Poisson samples.
