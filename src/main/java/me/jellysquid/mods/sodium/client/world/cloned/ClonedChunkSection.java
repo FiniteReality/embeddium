@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.world.cloned;
 
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPaletteFallback;
@@ -59,7 +58,7 @@ public class ClonedChunkSection {
 
         ChunkSection section = getChunkSection(world, chunk, pos);
 
-        if (section == null || section.isEmpty()) {
+        if (section == null) {
             section = EMPTY_SECTION;
         }
 
