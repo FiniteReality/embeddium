@@ -28,7 +28,7 @@ package repack.joml.sampling;
  *
  * @author Kai Burjack
  */
-class Math extends com.jozufozu.flywheel.repack.joml.Math {
+class Math extends repack.joml.Math {
 
     static final double PI = java.lang.Math.PI;
     static final double PI2 = PI * 2.0;
