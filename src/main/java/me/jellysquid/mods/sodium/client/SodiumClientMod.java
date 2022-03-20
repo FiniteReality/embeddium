@@ -20,11 +20,14 @@ public class SodiumClientMod {
 
     public static final String MODID = "rubidium";
     
+    public static boolean flywheelLoaded;
+    
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
     }
     
     public void onInitializeClient(final FMLCommonSetupEvent event) {
+    	flywheelLoaded = ModList.get().isLoaded("flywheel");
     	MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
     }
 
