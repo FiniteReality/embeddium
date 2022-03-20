@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
@@ -13,6 +14,7 @@ import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCache
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
+import net.coderbot.iris.compat.sodium.impl.block_id.ChunkBuildBuffersExt;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -97,6 +99,10 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     	for (RenderLayer layer : RenderLayer.getBlockLayers()) {
                             if (!RenderLayers.canRenderInLayer(blockState, layer)) {
                                 continue;
+                            }
+                            
+                            if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
+                                ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(blockState, (short) -1);
                             }
                             
                             ForgeHooksClient.setRenderType(layer);
