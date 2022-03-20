@@ -16,7 +16,7 @@ public class SodiumClientMod {
     private static SodiumGameOptions CONFIG;
     private static Logger LOGGER = LoggerFactory.getLogger("Rubidium");
 
-    private static String MOD_VERSION = "0.5.1";
+    private static String MOD_VERSION = "0.5.1a";
 
     public static final String MODID = "rubidium";
     
