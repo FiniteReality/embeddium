@@ -1,47 +1,27 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
-import me.jellysquid.mods.sodium.client.gl.arena.GlBufferSegment;
-import me.jellysquid.mods.sodium.client.gl.util.ElementRange;
-import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
-import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
-import org.apache.commons.lang3.Validate;
+import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 
-import java.util.Map;
+public abstract class ChunkGraphicsState {
+    private final int x, y, z;
 
-public class ChunkGraphicsState {
-    private final GlBufferSegment vertexSegment;
-    private final GlBufferSegment indexSegment;
-
-    private final ElementRange[] parts;
-
-    public ChunkGraphicsState(GlBufferSegment vertexSegment, GlBufferSegment indexSegment, ChunkMeshData data) {
-        Validate.notNull(vertexSegment);
-        Validate.notNull(indexSegment);
-
-        this.vertexSegment = vertexSegment;
-        this.indexSegment = indexSegment;
-
-        this.parts = new ElementRange[ModelQuadFacing.COUNT];
-
-        for (Map.Entry<ModelQuadFacing, ElementRange> entry : data.getParts().entrySet()) {
-            this.parts[entry.getKey().ordinal()] = entry.getValue();
-        }
+    protected ChunkGraphicsState(ChunkRenderContainer<?> container) {
+        this.x = container.getRenderX();
+        this.y = container.getRenderY();
+        this.z = container.getRenderZ();
     }
 
-    public void delete() {
-        this.vertexSegment.delete();
-        this.indexSegment.delete();
+    public abstract void delete(CommandList commandList);
+
+    public int getX() {
+        return this.x;
     }
 
-    public ElementRange getModelPart(ModelQuadFacing facing) {
-        return this.parts[facing.ordinal()];
+    public int getY() {
+        return this.y;
     }
 
-    public GlBufferSegment getVertexSegment() {
-        return this.vertexSegment;
-    }
-
-    public GlBufferSegment getIndexSegment() {
-        return this.indexSegment;
+    public int getZ() {
+        return this.z;
     }
 }

@@ -5,7 +5,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
 
-@SuppressWarnings("ConstantConditions")
 public class MatrixUtil {
     public static int computeNormal(Matrix3f normalMatrix, Direction facing) {
         return ((Matrix3fExtended) (Object) normalMatrix).computeNormal(facing);

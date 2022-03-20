@@ -1,25 +1,24 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
-import me.jellysquid.mods.sodium.client.gl.buffer.IndexedVertexData;
-import me.jellysquid.mods.sodium.client.gl.util.ElementRange;
-import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
+import me.jellysquid.mods.sodium.client.gl.buffer.VertexData;
+import me.jellysquid.mods.sodium.client.gl.util.BufferSlice;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferBuilder;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.BakedChunkModelBuilder;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.BakedChunkModelBuffers;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuffers;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelVertexTransformer;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
-import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelOffset;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
-import me.jellysquid.mods.sodium.client.util.NativeBuffer;
+import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.util.GlAllocationUtils;
 
-import java.util.Arrays;
-import java.util.EnumMap;
+import java.nio.ByteBuffer;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * A collection of temporary buffers for each worker thread which will be used to build chunk meshes for given render
@@ -27,110 +26,100 @@ import java.util.Objects;
  * shrink a buffer.
  */
 public class ChunkBuildBuffers {
-    private final ChunkModelBuilder[] delegates;
-
-    private final VertexBufferBuilder[] vertexBuffers;
-    private final IndexBufferBuilder[][] indexBuffers;
-
+    private final ChunkModelBuffers[] delegates;
+    private final VertexBufferBuilder[][] buffersByLayer;
     private final ChunkVertexType vertexType;
 
     private final BlockRenderPassManager renderPassManager;
+    private final ChunkModelOffset offset;
 
     public ChunkBuildBuffers(ChunkVertexType vertexType, BlockRenderPassManager renderPassManager) {
         this.vertexType = vertexType;
         this.renderPassManager = renderPassManager;
 
-        this.delegates = new ChunkModelBuilder[BlockRenderPass.COUNT];
+        this.delegates = new ChunkModelBuffers[BlockRenderPass.COUNT];
+        this.buffersByLayer = new VertexBufferBuilder[BlockRenderPass.COUNT][ModelQuadFacing.COUNT];
 
-        this.vertexBuffers = new VertexBufferBuilder[BlockRenderPass.COUNT];
-        this.indexBuffers = new IndexBufferBuilder[BlockRenderPass.COUNT][ModelQuadFacing.COUNT];
+        this.offset = new ChunkModelOffset();
 
-        for (BlockRenderPass pass : BlockRenderPass.VALUES) {
-            IndexBufferBuilder[] indexBuffers = this.indexBuffers[pass.ordinal()];
+        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+            int passId = this.renderPassManager.getRenderPassId(layer);
 
-            for (int facing = 0; facing < ModelQuadFacing.COUNT; facing++) {
-                indexBuffers[facing] = new IndexBufferBuilder(1024);
+            VertexBufferBuilder[] buffers = this.buffersByLayer[passId];
+
+            for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
+                buffers[facing.ordinal()] = new VertexBufferBuilder(vertexType.getBufferVertexFormat(), layer.getExpectedBufferSize() / ModelQuadFacing.COUNT);
             }
-
-            this.vertexBuffers[pass.ordinal()] = new VertexBufferBuilder(this.vertexType.getBufferVertexFormat(),
-                    pass.getLayer().getExpectedBufferSize());
         }
     }
 
-    public void init(ChunkRenderData.Builder renderData, int chunkId) {
-        for (VertexBufferBuilder vertexBuffer : this.vertexBuffers) {
-            vertexBuffer.start();
-        }
+    public void init(ChunkRenderData.Builder renderData) {
+        for (int i = 0; i < this.buffersByLayer.length; i++) {
+            ChunkModelVertexTransformer[] writers = new ChunkModelVertexTransformer[ModelQuadFacing.COUNT];
 
-        for (IndexBufferBuilder[] indexBuffers : this.indexBuffers) {
-            for (IndexBufferBuilder indexBuffer : indexBuffers) {
-                indexBuffer.start();
+            for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
+                writers[facing.ordinal()] = new ChunkModelVertexTransformer(this.vertexType.createBufferWriter(this.buffersByLayer[i][facing.ordinal()], UnsafeUtil.isAvailable()), this.offset);
             }
-        }
 
-        for (int i = 0; i < this.delegates.length; i++) {
-            ModelVertexSink vertexSink = this.vertexType.createBufferWriter(this.vertexBuffers[i]);
-            IndexBufferBuilder[] indexBuffers = this.indexBuffers[i];
-
-            this.delegates[i] = new BakedChunkModelBuilder(indexBuffers, vertexSink, renderData, chunkId);
+            this.delegates[i] = new BakedChunkModelBuffers(writers, renderData);
         }
     }
 
     /**
-     * Return the {@link ChunkModelBuilder} for the given {@link RenderLayer} as mapped by the
+     * Return the {@link ChunkModelVertexTransformer} for the given {@link RenderLayer} as mapped by the
      * {@link BlockRenderPassManager} for this render context.
      */
-    public ChunkModelBuilder get(RenderLayer layer) {
+    public ChunkModelBuffers get(RenderLayer layer) {
         return this.delegates[this.renderPassManager.getRenderPassId(layer)];
     }
 
     /**
-     * Creates immutable baked chunk meshes from all non-empty scratch buffers. This is used after all blocks
-     * have been rendered to pass the finished meshes over to the graphics card. This function can be called multiple
-     * times to return multiple copies.
+     * Creates immutable baked chunk meshes from all non-empty scratch buffers and resets the state of all mesh
+     * builders. This is used after all blocks have been rendered to pass the finished meshes over to the graphics card.
      */
     public ChunkMeshData createMesh(BlockRenderPass pass) {
-        NativeBuffer vertexBuffer = this.vertexBuffers[pass.ordinal()].pop();
+        VertexBufferBuilder[] builders = this.buffersByLayer[pass.ordinal()];
 
-        if (vertexBuffer == null) {
-            return null;
-        }
+        ChunkMeshData meshData = new ChunkMeshData();
+        int bufferLen = 0;
 
-        IndexBufferBuilder.Result[] indexBuffers = Arrays.stream(this.indexBuffers[pass.ordinal()])
-                .map(IndexBufferBuilder::pop)
-                .toArray(IndexBufferBuilder.Result[]::new);
+        for (int facingId = 0; facingId < builders.length; facingId++) {
+            VertexBufferBuilder builder = builders[facingId];
 
-        NativeBuffer indexBuffer = new NativeBuffer(Arrays.stream(indexBuffers)
-                .filter(Objects::nonNull)
-                .mapToInt(IndexBufferBuilder.Result::getByteSize)
-                .sum());
-
-        int indexPointer = 0;
-
-        Map<ModelQuadFacing, ElementRange> ranges = new EnumMap<>(ModelQuadFacing.class);
-
-        for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
-            IndexBufferBuilder.Result indices = indexBuffers[facing.ordinal()];
-
-            if (indices == null) {
+            if (builder == null || builder.isEmpty()) {
                 continue;
             }
 
-            ranges.put(facing,
-                    new ElementRange(indexPointer, indices.getCount(), indices.getFormat(), indices.getBaseVertex()));
+            int start = bufferLen;
+            int size = builder.getSize();
 
-            indexPointer = indices.writeTo(indexPointer, indexBuffer.getDirectBuffer());
+            meshData.setModelSlice(ModelQuadFacing.VALUES[facingId], new BufferSlice(start, size));
+
+            bufferLen += size;
         }
 
-        IndexedVertexData vertexData = new IndexedVertexData(this.vertexType.getCustomVertexFormat(),
-                vertexBuffer, indexBuffer);
+        if (bufferLen <= 0) {
+            return null;
+        }
 
-        return new ChunkMeshData(vertexData, ranges);
+        ByteBuffer buffer = GlAllocationUtils.allocateByteBuffer(bufferLen);
+
+        for (Map.Entry<ModelQuadFacing, BufferSlice> entry : meshData.getSlices()) {
+            BufferSlice slice = entry.getValue();
+            buffer.position(slice.start);
+
+            VertexBufferBuilder builder = this.buffersByLayer[pass.ordinal()][entry.getKey().ordinal()];
+            builder.copyInto(buffer);
+        }
+
+        buffer.flip();
+
+        meshData.setVertexData(new VertexData(buffer, this.vertexType.getCustomVertexFormat()));
+
+        return meshData;
     }
 
-    public void destroy() {
-        for (VertexBufferBuilder builder : this.vertexBuffers) {
-            builder.destroy();
-        }
+    public void setRenderOffset(int x, int y, int z) {
+        this.offset.set(x, y, z);
     }
 }

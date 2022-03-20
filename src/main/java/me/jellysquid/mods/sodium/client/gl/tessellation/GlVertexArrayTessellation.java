@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.gl.tessellation;
 
 import me.jellysquid.mods.sodium.client.gl.array.GlVertexArray;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
+import me.jellysquid.mods.sodium.client.gl.func.GlFunctions;
 
 public class GlVertexArrayTessellation extends GlAbstractTessellation {
     private final GlVertexArray array;
@@ -10,6 +11,10 @@ public class GlVertexArrayTessellation extends GlAbstractTessellation {
         super(primitiveType, bindings);
 
         this.array = array;
+    }
+
+    public static boolean isSupported() {
+        return GlFunctions.isVertexArraySupported();
     }
 
     public void init(CommandList commandList) {

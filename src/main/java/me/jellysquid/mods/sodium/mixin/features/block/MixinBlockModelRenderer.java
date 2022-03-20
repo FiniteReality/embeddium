@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.BlockRenderView;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,11 +50,15 @@ public class MixinBlockModelRenderer {
      * @author JellySquid
      */
     @Overwrite
-    public void renderModel(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockState blockState, BakedModel bakedModel, float red, float green, float blue, int light, int overlay, IModelData data) {
+    public void renderModel(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockState blockState, BakedModel bakedModel, float red, float green, float blue, int light, int overlay, IModelData modelData) {
         QuadVertexSink drain = VertexDrain.of(vertexConsumer)
                 .createSink(VanillaVertexTypes.QUADS);
         XoRoShiRoRandom random = this.random;
 
+        if (modelData == null) {
+        	modelData = EmptyModelData.INSTANCE;
+        }
+        
         // Clamp color ranges
         red = MathHelper.clamp(red, 0.0F, 1.0F);
         green = MathHelper.clamp(green, 0.0F, 1.0F);
@@ -62,14 +67,14 @@ public class MixinBlockModelRenderer {
         int defaultColor = ColorABGR.pack(red, green, blue, 1.0F);
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
-            List<BakedQuad> quads = bakedModel.getQuads(blockState, direction, random.setSeedAndReturn(42L), data);
+            List<BakedQuad> quads = bakedModel.getQuads(blockState, direction, random.setSeedAndReturn(42L), modelData);
 
             if (!quads.isEmpty()) {
                 renderQuad(entry, drain, defaultColor, quads, light, overlay);
             }
         }
 
-        List<BakedQuad> quads = bakedModel.getQuads(blockState, null, random.setSeedAndReturn(42L), data);
+        List<BakedQuad> quads = bakedModel.getQuads(blockState, null, random.setSeedAndReturn(42L), modelData);
 
         if (!quads.isEmpty()) {
             renderQuad(entry, drain, defaultColor, quads, light, overlay);

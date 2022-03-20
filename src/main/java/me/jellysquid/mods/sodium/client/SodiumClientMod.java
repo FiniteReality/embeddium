@@ -1,39 +1,36 @@
 package me.jellysquid.mods.sodium.client;
 
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLPaths;
 
-import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
     private static SodiumGameOptions CONFIG;
-    private static Logger LOGGER = LoggerFactory.getLogger("Rubidium");
+    private static Logger LOGGER = LogManager.getLogger("Rubidium");
 
-    private static String MOD_VERSION = "0.5.1";
+    private static String MOD_VERSION;
 
     public static final String MODID = "rubidium";
     
-    public static boolean flywheelLoaded = false;
-    
     public SodiumClientMod() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
     }
     
-    public void setup(final FMLClientSetupEvent event) {
-        CONFIG = loadConfig();
-        flywheelLoaded = ModList.get().isLoaded("flywheel");
+    public void onInitializeClient(final FMLCommonSetupEvent event) {
+    	MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
     }
 
     public static SodiumGameOptions options() {
         if (CONFIG == null) {
-        	CONFIG = loadConfig();
+            CONFIG = loadConfig();
         }
 
         return CONFIG;
@@ -41,34 +38,21 @@ public class SodiumClientMod {
 
     public static Logger logger() {
         if (LOGGER == null) {
-            throw new IllegalStateException("Logger not yet available");
+            LOGGER = LogManager.getLogger("Rubidium");
         }
 
         return LOGGER;
     }
 
     private static SodiumGameOptions loadConfig() {
-        try {
-            return SodiumGameOptions.load();
-        } catch (Exception e) {
-            LOGGER.error("Failed to load configuration file", e);
-            LOGGER.error("Using default configuration file in read-only mode");
+        SodiumGameOptions config = SodiumGameOptions.load(FMLPaths.CONFIGDIR.get().resolve("rubidium-options.json"));
+        onConfigChanged(config);
 
-            var config = new SodiumGameOptions();
-            config.setReadOnly();
-
-            return config;
-        }
+        return config;
     }
 
-    public static void restoreDefaultOptions() {
-        CONFIG = SodiumGameOptions.defaults();
-
-        try {
-            CONFIG.writeChanges();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to write config file", e);
-        }
+    public static void onConfigChanged(SodiumGameOptions options) {
+        UnsafeUtil.setEnabled(options.advanced.allowDirectMemoryAccess);
     }
 
     public static String getVersion() {
@@ -77,9 +61,5 @@ public class SodiumClientMod {
         }
 
         return MOD_VERSION;
-    }
-
-    public static boolean isDirectMemoryAccessEnabled() {
-        return options().advanced.allowDirectMemoryAccess;
     }
 }

@@ -13,6 +13,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -69,7 +70,7 @@ public abstract class MixinBillboardParticle extends Particle {
         float minV = this.getMinV();
         float maxV = this.getMaxV();
 
-        int color = ColorABGR.pack(this.red, this.green, this.blue, this.alpha);
+        int color = ColorABGR.pack(this.colorRed, this.colorGreen, this.colorBlue, this.colorAlpha);
 
         ParticleVertexSink drain = VertexDrain.of(vertexConsumer)
                 .createSink(VanillaVertexTypes.PARTICLES);
@@ -82,7 +83,6 @@ public abstract class MixinBillboardParticle extends Particle {
         drain.flush();
     }
 
-    @SuppressWarnings("UnnecessaryLocalVariable")
     private static void addVertex(ParticleVertexSink drain, Quaternion rotation,
                                   float x, float y, float posX, float posY, float posZ, float u, float v, int color, int light, float size) {
         // Quaternion q0 = new Quaternion(rotation);

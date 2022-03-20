@@ -1,8 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
-import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
-import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
-import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
+import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
+import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
@@ -19,6 +18,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.client.render.model.BakedModel;
@@ -26,11 +26,8 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
-
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -39,80 +36,74 @@ import java.util.Objects;
  * This task takes a slice of the world from the thread it is created on. Since these slices require rather large
  * array allocations, they are pooled to ensure that the garbage collector doesn't become overloaded.
  */
-public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
-    private final RenderSection render;
-    private final ChunkRenderContext renderContext;
-    private final int frame;
+public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkRenderBuildTask<T> {
+    private final ChunkRenderContainer<T> render;
+    private final BlockPos offset;
 
-    public ChunkRenderRebuildTask(RenderSection render, ChunkRenderContext renderContext, int frame) {
+    private final ChunkRenderContext context;
+
+    public ChunkRenderRebuildTask(ChunkRenderContainer<T> render, ChunkRenderContext context, BlockPos offset) {
         this.render = render;
-        this.renderContext = renderContext;
-        this.frame = frame;
+        this.offset = offset;
+        this.context = context;
     }
 
     @Override
-    public ChunkBuildResult performBuild(ChunkBuildContext buildContext, CancellationSource cancellationSource) {
+    public ChunkBuildResult<T> performBuild(ChunkRenderCacheLocal cache, ChunkBuildBuffers buffers, CancellationSource cancellationSource) {
         ChunkRenderData.Builder renderData = new ChunkRenderData.Builder();
         ChunkOcclusionDataBuilder occluder = new ChunkOcclusionDataBuilder();
         ChunkRenderBounds.Builder bounds = new ChunkRenderBounds.Builder();
 
-        ChunkBuildBuffers buffers = buildContext.buffers;
-        buffers.init(renderData, this.render.getChunkId());
+        buffers.init(renderData);
 
-        ChunkRenderCacheLocal cache = buildContext.cache;
-        cache.init(this.renderContext);
+        cache.init(this.context);
 
         WorldSlice slice = cache.getWorldSlice();
 
-        int minX = this.render.getOriginX();
-        int minY = this.render.getOriginY();
-        int minZ = this.render.getOriginZ();
+        int baseX = this.render.getOriginX();
+        int baseY = this.render.getOriginY();
+        int baseZ = this.render.getOriginZ();
 
-        int maxX = minX + 16;
-        int maxY = minY + 16;
-        int maxZ = minZ + 16;
+        BlockPos.Mutable pos = new BlockPos.Mutable();
+        BlockPos renderOffset = this.offset;
 
-        BlockPos.Mutable blockPos = new BlockPos.Mutable();
-        BlockPos.Mutable offset = new BlockPos.Mutable();
-
-        for (int y = minY; y < maxY; y++) {
+        for (int relY = 0; relY < 16; relY++) {
             if (cancellationSource.isCancelled()) {
                 return null;
             }
 
-            for (int z = minZ; z < maxZ; z++) {
-                for (int x = minX; x < maxX; x++) {
-                    BlockState blockState = slice.getBlockState(x, y, z);
+            for (int relZ = 0; relZ < 16; relZ++) {
+                for (int relX = 0; relX < 16; relX++) {
+                    BlockState blockState = slice.getBlockStateRelative(relX + 16, relY + 16, relZ + 16);
 
                     if (blockState.isAir()) {
                         continue;
                     }
 
-                    blockPos.set(x, y, z);
-                    offset.set(x & 15, y & 15, z & 15);
-
-                    boolean rendered = false;
+                    // TODO: commit this separately
+                    pos.set(baseX + relX, baseY + relY, baseZ + relZ);
+                    buffers.setRenderOffset(pos.getX() - renderOffset.getX(), pos.getY() - renderOffset.getY(), pos.getZ() - renderOffset.getZ());
 
                     if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                    	for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-                            if (!RenderLayers.canRenderInLayer(blockState, layer)) {
-                                continue;
-                            }
-                            
-                            ForgeHooksClient.setRenderType(layer);
-                            IModelData modelData = ModelDataManager.getModelData(Objects.requireNonNull(MinecraftClient.getInstance().world), blockPos);
-                            
-                            BakedModel model = cache.getBlockModels()
-                                    .getModel(blockState);
-
-                            long seed = blockState.getRenderingSeed(blockPos);
-                            
-                            if (cache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData)) {
-                                rendered = true;
-                            }
-                            ForgeHooksClient.setRenderType(null);
-                    	}
-
+                    for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+	                        if (!RenderLayers.canRenderInLayer(blockState, layer)) {
+	                        	continue;
+	                        }
+	                            
+	                        ForgeHooksClient.setRenderLayer(layer);
+	                        IModelData modelData = ModelDataManager.getModelData(MinecraftClient.getInstance().world, pos);
+	
+	                        BakedModel model = cache.getBlockModels()
+	                                .getModel(blockState);
+	
+	                        long seed = blockState.getRenderingSeed(pos);
+	
+	                        if (cache.getBlockRenderer().renderModel(slice, blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
+	                            bounds.addBlock(relX, relY, relZ);
+	                        }
+	                        
+	                        ForgeHooksClient.setRenderLayer(null);
+                        }
                     }
 
                     FluidState fluidState = blockState.getFluidState();
@@ -120,48 +111,48 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     if (!fluidState.isEmpty()) {
                         RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
 
-                        if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
-                            rendered = true;
+                        if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
+                            bounds.addBlock(relX, relY, relZ);
                         }
                     }
 
-                    if (blockState.hasBlockEntity()) {
-                        BlockEntity entity = slice.getBlockEntity(blockPos);
+                    if (blockState.getBlock().hasBlockEntity()) {
+                        BlockEntity entity = slice.getBlockEntity(pos);
 
                         if (entity != null) {
-                            BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(entity);
+                            BlockEntityRenderer<BlockEntity> renderer = BlockEntityRenderDispatcher.INSTANCE.get(entity);
 
-                            if (renderer != null && FlywheelCompat.addAndFilterBEs(entity)) {
+                            if (renderer != null) {
                                 renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
-                                rendered = true;
+
+                                bounds.addBlock(relX, relY, relZ);
                             }
                         }
                     }
 
-                    if (blockState.isOpaqueFullCube(slice, blockPos)) {
-                        occluder.markClosed(blockPos);
-                    }
-
-                    if (rendered) {
-                        bounds.addBlock(x & 15, y & 15, z & 15);
+                    if (blockState.isOpaqueFullCube(slice, pos)) {
+                        occluder.markClosed(pos);
                     }
                 }
             }
         }
 
-        Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
-
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
             ChunkMeshData mesh = buffers.createMesh(pass);
 
             if (mesh != null) {
-                meshes.put(pass, mesh);
+                renderData.setMesh(pass, mesh);
             }
         }
 
         renderData.setOcclusionData(occluder.build());
         renderData.setBounds(bounds.build(this.render.getChunkPos()));
 
-        return new ChunkBuildResult(this.render, renderData.build(), meshes, this.frame);
+        return new ChunkBuildResult<>(this.render, renderData.build());
+    }
+
+    @Override
+    public void releaseResources() {
+        this.context.releaseResources();
     }
 }

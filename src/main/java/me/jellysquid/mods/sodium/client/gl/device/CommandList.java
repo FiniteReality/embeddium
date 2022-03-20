@@ -2,32 +2,38 @@ package me.jellysquid.mods.sodium.client.gl.device;
 
 import me.jellysquid.mods.sodium.client.gl.array.GlVertexArray;
 import me.jellysquid.mods.sodium.client.gl.buffer.*;
-import me.jellysquid.mods.sodium.client.gl.sync.GlFence;
 import me.jellysquid.mods.sodium.client.gl.tessellation.GlPrimitiveType;
 import me.jellysquid.mods.sodium.client.gl.tessellation.GlTessellation;
 import me.jellysquid.mods.sodium.client.gl.tessellation.TessellationBinding;
-import me.jellysquid.mods.sodium.client.gl.util.EnumBitField;
 
 import java.nio.ByteBuffer;
 
 public interface CommandList extends AutoCloseable {
-    GlMutableBuffer createMutableBuffer();
+    GlVertexArray createVertexArray();
 
-    GlImmutableBuffer createImmutableBuffer(long bufferSize, EnumBitField<GlBufferStorageFlags> flags);
+    GlMutableBuffer createMutableBuffer(GlBufferUsage usage);
 
     GlTessellation createTessellation(GlPrimitiveType primitiveType, TessellationBinding[] bindings);
 
     void bindVertexArray(GlVertexArray array);
 
-    void uploadData(GlMutableBuffer glBuffer, ByteBuffer byteBuffer, GlBufferUsage usage);
+    default void uploadData(GlMutableBuffer glBuffer, VertexData data) {
+        this.uploadData(glBuffer, data.buffer);
+    }
 
-    void copyBufferSubData(GlBuffer src, GlBuffer dst, long readOffset, long writeOffset, long bytes);
+    void uploadData(GlMutableBuffer glBuffer, ByteBuffer byteBuffer);
+
+    void copyBufferSubData(GlBuffer src, GlMutableBuffer dst, long readOffset, long writeOffset, long bytes);
 
     void bindBuffer(GlBufferTarget target, GlBuffer buffer);
 
+    void unbindBuffer(GlBufferTarget target);
+
     void unbindVertexArray();
 
-    void allocateStorage(GlMutableBuffer buffer, long bufferSize, GlBufferUsage usage);
+    void invalidateBuffer(GlMutableBuffer glBuffer);
+
+    void allocateBuffer(GlBufferTarget target, GlMutableBuffer buffer, long bufferSize);
 
     void deleteBuffer(GlBuffer buffer);
 
@@ -43,12 +49,4 @@ public interface CommandList extends AutoCloseable {
     default void close() {
         this.flush();
     }
-
-    GlBufferMapping mapBuffer(GlBuffer buffer, long offset, long length, EnumBitField<GlBufferMapFlags> flags);
-
-    void unmap(GlBufferMapping map);
-
-    void flushMappedRange(GlBufferMapping map, int offset, int length);
-
-    GlFence createFence();
 }

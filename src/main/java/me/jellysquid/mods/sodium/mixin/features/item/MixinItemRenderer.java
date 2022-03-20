@@ -1,5 +1,16 @@
 package me.jellysquid.mods.sodium.mixin.features.item;
 
+import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
+import me.jellysquid.mods.sodium.client.model.vertex.VertexDrain;
+import me.jellysquid.mods.sodium.client.model.vertex.formats.quad.QuadVertexSink;
+import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
+import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
+import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
+import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
+import me.jellysquid.mods.sodium.client.world.biome.ItemColorsExtended;
+import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.client.color.item.ItemColorProvider;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.render.VertexConsumer;
@@ -14,17 +25,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
-import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
-import me.jellysquid.mods.sodium.client.model.vertex.VertexDrain;
-import me.jellysquid.mods.sodium.client.model.vertex.formats.quad.QuadVertexSink;
-import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
-import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
-import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
-import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
-import me.jellysquid.mods.sodium.client.world.biome.ItemColorsExtended;
-import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-
 import java.util.List;
 
 @Mixin(ItemRenderer.class)
@@ -33,7 +33,7 @@ public class MixinItemRenderer {
 
     @Shadow
     @Final
-    private ItemColors colors;
+    private ItemColors colorMap;
 
     /**
      * @reason Avoid allocations
@@ -77,15 +77,15 @@ public class MixinItemRenderer {
 
             if (!stack.isEmpty() && bakedQuad.hasColor()) {
                 if (colorProvider == null) {
-                    colorProvider = ((ItemColorsExtended) this.colors).getColorProvider(stack);
+                    colorProvider = ((ItemColorsExtended) this.colorMap).getColorProvider(stack);
                 }
 
                 try {
-                if (colorProvider == null) {
-                    color = ColorARGB.toABGR(this.colors.getColor(stack, bakedQuad.getColorIndex()), 255);
-                } else {
-                    color = ColorARGB.toABGR((colorProvider.getColor(stack, bakedQuad.getColorIndex())), 255);
-                }
+	                if (colorProvider == null) {
+	                    color = ColorARGB.toABGR(this.colorMap.getColorMultiplier(stack, bakedQuad.getColorIndex()), 255);
+	                } else {
+	                    color = ColorARGB.toABGR((colorProvider.getColor(stack, bakedQuad.getColorIndex())), 255);
+	                }
                 }catch(Exception e) {
                 }
             }
@@ -93,14 +93,17 @@ public class MixinItemRenderer {
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
 
             for (int i = 0; i < 4; i++) {
-            	int fColor = color;
+            	
+            	int finalColor = color;
+            	
                 try {
                     if (bakedQuad.hasColor()) {
-                    	fColor = multARGBInts(quad.getColor(quad.getColorIndex()), color);
+                        finalColor = multABGRInts(quad.getColor(quad.getColorIndex()), color);
                     }
                 } catch (Exception ex) {
                 }
-                drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
+            	
+                drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), finalColor, quad.getTexU(i), quad.getTexV(i),
                         light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
 
@@ -110,11 +113,12 @@ public class MixinItemRenderer {
         drain.flush();
     }
     
-    private int multARGBInts(int colorA, int colorB) {
-        int a = (int)((ColorARGB.unpackAlpha(colorA)/255.0f) * (ColorARGB.unpackAlpha(colorB)/255.0f) * 255.0f);
-        int b = (int)((ColorARGB.unpackBlue(colorA)/255.0f) * (ColorARGB.unpackBlue(colorB)/255.0f) * 255.0f);
-        int g = (int)((ColorARGB.unpackGreen(colorA)/255.0f) * (ColorARGB.unpackGreen(colorB)/255.0f) * 255.0f);
-        int r = (int)((ColorARGB.unpackRed(colorA)/255.0f) * (ColorARGB.unpackRed(colorB)/255.0f) * 255.0f);
-        return ColorARGB.pack(r, g, b, a);
+    private int multABGRInts(int colorA, int colorB) {
+        int a = (int)((ColorABGR.unpackAlpha(colorA)/255.0f) * (ColorABGR.unpackAlpha(colorB)/255.0f) * 255.0f);
+        int b = (int)((ColorABGR.unpackBlue(colorA)/255.0f) * (ColorABGR.unpackBlue(colorB)/255.0f) * 255.0f);
+        int g = (int)((ColorABGR.unpackGreen(colorA)/255.0f) * (ColorABGR.unpackGreen(colorB)/255.0f) * 255.0f);
+        int r = (int)((ColorABGR.unpackRed(colorA)/255.0f) * (ColorABGR.unpackRed(colorB)/255.0f) * 255.0f);
+        return ColorABGR.pack(r, g, b, a);
     }
+    
 }

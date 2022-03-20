@@ -14,17 +14,18 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vector4f;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BufferBuilder.class)
 public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
     @Shadow
-    private boolean textured;
+    private boolean field_227826_s_; // is baked quad format
 
     @Override
     public void quad(MatrixStack.Entry matrices, BakedQuad quad, float[] brightnessTable, float r, float g, float b, int[] light, int overlay, boolean colorize) {
-        if (!this.textured) {
+        if (!this.field_227826_s_) {
             super.quad(matrices, quad, brightnessTable, r, g, b, light, overlay, colorize);
 
             return;
@@ -36,8 +37,8 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
 
         ModelQuadView quadView = (ModelQuadView) quad;
 
-        Matrix4f positionMatrix = matrices.getPositionMatrix();
-        Matrix3f normalMatrix = matrices.getNormalMatrix();
+        Matrix4f modelMatrix = matrices.getModel();
+        Matrix3f normalMatrix = matrices.getNormal();
 
         int norm = MatrixUtil.computeNormal(normalMatrix, quad.getFace());
 
@@ -78,7 +79,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
             int color = ColorABGR.pack(fR, fG, fB, 1.0F);
 
             Vector4f pos = new Vector4f(x, y, z, 1.0F);
-            pos.transform(positionMatrix);
+            pos.transform(modelMatrix);
 
             drain.writeQuad(pos.getX(), pos.getY(), pos.getZ(), color, u, v, light[i], overlay, norm);
         }

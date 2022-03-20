@@ -1,5 +1,7 @@
 package me.jellysquid.mods.sodium.client.gl.buffer;
 
+import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
+
 /**
  * A mutable buffer type which is supported with OpenGL 1.5+. The buffer's storage can be reallocated at any time
  * without needing to re-create the buffer itself.
@@ -7,8 +9,8 @@ package me.jellysquid.mods.sodium.client.gl.buffer;
 public class GlMutableBuffer extends GlBuffer {
     private long size = 0L;
 
-    public GlMutableBuffer() {
-        super();
+    public GlMutableBuffer(RenderDevice owner, GlBufferUsage usage) {
+        super(owner, usage);
     }
 
     public void setSize(long size) {

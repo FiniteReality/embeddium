@@ -11,12 +11,14 @@ import java.util.EnumMap;
 public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
     private final Class<T> attributeEnum;
     private final EnumMap<T, GlVertexAttribute> attributesKeyed;
+    private final GlVertexAttribute[] attributesArray;
 
     private final int stride;
 
     public GlVertexFormat(Class<T> attributeEnum, EnumMap<T, GlVertexAttribute> attributesKeyed, int stride) {
         this.attributeEnum = attributeEnum;
         this.attributesKeyed = attributesKeyed;
+        this.attributesArray = attributesKeyed.values().toArray(new GlVertexAttribute[0]);
         this.stride = stride;
     }
 
@@ -49,6 +51,10 @@ public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
     public String toString() {
         return String.format("GlVertexFormat<%s>{attributes=%d,stride=%d}", this.attributeEnum.getName(),
                 this.attributesKeyed.size(), this.stride);
+    }
+
+    public GlVertexAttribute[] getAttributesArray() {
+        return this.attributesArray;
     }
 
     public static class Builder<T extends Enum<T>> {

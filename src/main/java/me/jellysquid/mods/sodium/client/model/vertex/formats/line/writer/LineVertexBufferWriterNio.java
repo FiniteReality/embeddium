@@ -13,18 +13,7 @@ public class LineVertexBufferWriterNio extends VertexBufferWriterNio implements 
     }
 
     @Override
-    public void ensureCapacity(int count) {
-        super.ensureCapacity(count * 2);
-    }
-
-    @Override
-    public void vertexLine(float x, float y, float z, int color, int normal) {
-        for (int i = 0; i < 2; i++) {
-            this.vertexLine0(x, y, z, color, normal);
-        }
-    }
-
-    private void vertexLine0(float x, float y, float z, int color, int normal) {
+    public void vertexLine(float x, float y, float z, int color) {
         int i = this.writeOffset;
 
         ByteBuffer buffer = this.byteBuffer;
@@ -32,7 +21,6 @@ public class LineVertexBufferWriterNio extends VertexBufferWriterNio implements 
         buffer.putFloat(i + 4, y);
         buffer.putFloat(i + 8, z);
         buffer.putInt(i + 12, color);
-        buffer.putInt(i + 16, normal);
 
         this.advance();
     }

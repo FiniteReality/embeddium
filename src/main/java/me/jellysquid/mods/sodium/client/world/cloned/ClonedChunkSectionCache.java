@@ -44,7 +44,7 @@ public class ClonedChunkSectionCache {
         }
 
         ChunkSectionPos pos = ChunkSectionPos.from(x, y, z);
-        section.init(this.world, pos);
+        section.init(pos);
 
         this.byPosition.put(pos.asLong(), section);
 
@@ -62,7 +62,7 @@ public class ClonedChunkSectionCache {
     }
 
     private ClonedChunkSection allocate() {
-        return new ClonedChunkSection(this);
+        return new ClonedChunkSection(this, this.world);
     }
 
     private void tryReclaim(ClonedChunkSection section) {

@@ -1,24 +1,24 @@
 package me.jellysquid.mods.sodium.mixin.core.pipeline;
 
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.attribute.BufferVertexFormat;
 import me.jellysquid.mods.sodium.client.model.vertex.VertexDrain;
 import me.jellysquid.mods.sodium.client.model.vertex.VertexSink;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.type.BlittableVertexType;
 import me.jellysquid.mods.sodium.client.model.vertex.type.VertexType;
+import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.util.GlAllocationUtils;
-
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 @Mixin(BufferBuilder.class)
@@ -44,19 +44,16 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
     @Shadow
     private int vertexCount;
 
-    @Redirect(method = "popData", at = @At(value = "INVOKE", target = "Ljava/nio/ByteBuffer;limit(I)Ljava/nio/ByteBuffer;"))
-    public ByteBuffer debugGetNextBuffer(ByteBuffer buffer, int newLimit) {
+    @Redirect(method = "popData", at = @At(value = "INVOKE", target = "Ljava/nio/Buffer;limit(I)Ljava/nio/Buffer;"))
+    public Buffer debugGetNextBuffer(Buffer buffer, int newLimit) {
         ensureBufferCapacity(newLimit);
-        buffer = this.buffer;
+        buffer = (Buffer) this.buffer;
         buffer.limit(newLimit);
         return buffer;
     }
     
     @Override
     public boolean ensureBufferCapacity(int bytes) {
-    	if(format == null)
-    		return false;
-    	
         // Ensure that there is always space for 1 more vertex; see BufferBuilder.next()
         bytes += format.getVertexSize();
 
@@ -109,7 +106,7 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
         BlittableVertexType<T> blittable = factory.asBlittable();
 
         if (blittable != null && blittable.getBufferVertexFormat() == this.getVertexFormat())  {
-            return blittable.createBufferWriter(this, SodiumClientMod.isDirectMemoryAccessEnabled());
+            return blittable.createBufferWriter(this, UnsafeUtil.isAvailable());
         }
 
         return factory.createFallbackWriter((VertexConsumer) this);

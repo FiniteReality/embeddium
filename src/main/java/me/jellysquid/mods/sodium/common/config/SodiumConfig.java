@@ -3,6 +3,8 @@ package me.jellysquid.mods.sodium.common.config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraftforge.fml.loading.FMLLoader;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,13 +46,15 @@ public class SodiumConfig {
         this.addMixinRule("features.particle.cull", true);
         this.addMixinRule("features.particle.fast_render", true);
         this.addMixinRule("features.render_layer", true);
-        this.addMixinRule("features.render_layer.leaves", true);
         this.addMixinRule("features.sky", true);
         this.addMixinRule("features.texture_tracking", true);
-        this.addMixinRule("features.texture_updates", true);
         this.addMixinRule("features.world_ticking", true);
         this.addMixinRule("features.fast_biome_colors", true);
-        this.addMixinRule("features.shader", true);
+        
+        if(FMLLoader.getLoadingModList().getModFileById("seamless_loading_screen") != null) { this.options.get("mixin.features.gui.fast_loading_screen").addModOverride(false, "seamless_loading_screen"); }
+
+        if(FMLLoader.getLoadingModList().getModFileById("abnormals_core") != null) { this.options.get("mixin.features.world_ticking").addModOverride(false, "abnormals_core"); }
+        
     }
 
     /**
@@ -93,50 +97,6 @@ public class SodiumConfig {
             option.setEnabled(enabled, true);
         }
     }
-
-    /*private void applyModOverrides() {
-        for (ModContainer container : FabricLoader.getInstance().getAllMods()) {
-            ModMetadata meta = container.getMetadata();
-
-            if (meta.containsCustomValue(JSON_KEY_SODIUM_OPTIONS)) {
-                CustomValue overrides = meta.getCustomValue(JSON_KEY_SODIUM_OPTIONS);
-
-                if (overrides.getType() != CustomValue.CvType.OBJECT) {
-                    LOGGER.warn("Mod '{}' contains invalid Sodium option overrides, ignoring", meta.getId());
-                    continue;
-                }
-
-                for (Map.Entry<String, CustomValue> entry : overrides.getAsObject()) {
-                    this.applyModOverride(meta, entry.getKey(), entry.getValue());
-                }
-            }
-        }
-    }
-
-    private void applyModOverride(ModMetadata meta, String name, CustomValue value) {
-        Option option = this.options.get(name);
-
-        if (option == null) {
-            LOGGER.warn("Mod '{}' attempted to override option '{}', which doesn't exist, ignoring", meta.getId(), name);
-            return;
-        }
-
-        if (value.getType() != CustomValue.CvType.BOOLEAN) {
-            LOGGER.warn("Mod '{}' attempted to override option '{}' with an invalid value, ignoring", meta.getId(), name);
-            return;
-        }
-
-        boolean enabled = value.getAsBoolean();
-
-        // disabling the option takes precedence over enabling
-        if (!enabled && option.isEnabled()) {
-            option.clearModsDefiningValue();
-        }
-
-        if (!enabled || option.isEnabled() || option.getDefiningMods().isEmpty()) {
-            option.addModOverride(enabled, meta.getId());
-        }
-    }*/
 
     /**
      * Returns the effective option for the specified class name. This traverses the package path of the given mixin
@@ -183,10 +143,7 @@ public class SodiumConfig {
                 LOGGER.warn("Could not write default configuration file", e);
             }
 
-            SodiumConfig config = new SodiumConfig();
-            //config.applyModOverrides();
-
-            return config;
+            return new SodiumConfig();
         }
 
         Properties props = new Properties();
@@ -199,7 +156,6 @@ public class SodiumConfig {
 
         SodiumConfig config = new SodiumConfig();
         config.readProperties(props);
-        //config.applyModOverrides();
 
         return config;
     }
@@ -216,7 +172,7 @@ public class SodiumConfig {
         }
 
         try (Writer writer = new FileWriter(file)) {
-            writer.write("# This is the configuration file for Rubidium.\n");
+            writer.write("# This is the configuration file for Sodium.\n");
             writer.write("#\n");
             writer.write("# You can find information on editing this file and all the available options here:\n");
             writer.write("# https://github.com/jellysquid3/sodium-fabric/wiki/Configuration-File\n");
