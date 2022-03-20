@@ -23,7 +23,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
         try {
             this.config = SodiumConfig.load(new File("./config/rubidium-mixins.properties"));
         } catch (Exception e) {
-            throw new RuntimeException("Could not load configuration file for Sodium", e);
+            throw new RuntimeException("Could not load configuration file for Rubidium", e);
         }
 
         this.logger.info("Loaded configuration file for Rubidium: {} options available, {} override(s) found",

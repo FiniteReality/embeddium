@@ -21,6 +21,7 @@
     "core.pipeline.MixinBufferBuilder",
     "core.pipeline.MixinVertexConsumer",
     "core.pipeline.MixinVertexFormat",
+	"core.compat.MixinModList",
     "features.block.MixinBlockModelRenderer",
     "features.block.MixinWorldRenderer",
     "features.buffer_builder.fast_advance.MixinBufferBuilder",
