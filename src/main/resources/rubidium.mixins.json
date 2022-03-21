@@ -59,6 +59,7 @@
 	"features.sky.MixinWorldRenderer",
     "features.texture_tracking.MixinSprite",
     "features.texture_tracking.MixinSpriteAtlasTexture",
+	"features.texture_tracking.MixinSpriteBillboardParticle",
     "features.world_ticking.MixinClientWorld",
 	"features.fast_biome_colors.MixinBackgroundRenderer"
   ]
