@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -12,6 +13,7 @@ import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCache
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
+import net.coderbot.iris.compat.sodium.impl.block_id.ChunkBuildBuffersExt;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -26,7 +28,6 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
-import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
 /**
@@ -88,6 +89,11 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     for (RenderLayer layer : RenderLayer.getBlockLayers()) {
 	                        if (!RenderLayers.canRenderInLayer(blockState, layer)) {
 	                        	continue;
+	                        }
+	                        
+	                        // Oculus Compat
+	                        if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
+	                            ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(blockState, (short) -1);
 	                        }
 	                            
 	                        ForgeHooksClient.setRenderLayer(layer);
