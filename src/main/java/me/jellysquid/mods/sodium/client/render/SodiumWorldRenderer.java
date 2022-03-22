@@ -365,6 +365,11 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         if (box.maxY < 0.5D || box.minY > 255.5D) {
             return true;
         }
+        
+        // Ensure entities with outlines or nametags are always visible
+        if (this.client.hasOutline(entity) || entity.shouldRenderName()) {
+            return true;
+        }
 
         int minX = MathHelper.floor(box.minX - 0.5D) >> 4;
         int minY = MathHelper.floor(box.minY - 0.5D) >> 4;
