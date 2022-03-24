@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.mixin.features.gui.fast_status_bars;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.*;
