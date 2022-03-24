@@ -10,6 +10,7 @@ import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.collection.PackedIntegerArray;
 import net.minecraft.util.math.*;
@@ -328,8 +329,13 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
 
-        return this.biomeCaches[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                .getBiome(this, x, relY >> 4, z);
+        int index = getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4);
+        
+        index = index >= biomeCaches.length ? biomeCaches.length - 1 : index;
+        
+        BiomeCache cache = this.biomeCaches[index];
+        return cache != null ? cache
+                .getBiome(this, x, relY >> 4, z) : MinecraftClient.getInstance().world.getBiome(new BlockPos(x, y, z));
     }
 
     public ChunkSectionPos getOrigin() {

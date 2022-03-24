@@ -75,7 +75,12 @@ public class BiomeColorCache {
         int z2 = pos.getZ() - this.blendedColorsMinZ;
 
         int index = (((y2 * BLENDED_COLORS_DIM) + x2) * BLENDED_COLORS_DIM) + z2;
-        int color = this.blendedColorsXYZ[index];
+        
+        index = index >= blendedColorsXYZ.length ? blendedColorsXYZ.length - 1 : index;
+        
+        int color;
+        
+        color = this.blendedColorsXYZ[index];
 
         if (color == -1) {
             this.blendedColorsXYZ[index] = color = this.calculateBlendedColor(pos.getX(), pos.getY(), pos.getZ());
@@ -117,7 +122,12 @@ public class BiomeColorCache {
         int z2 = z - this.blendedColorsMinZ;
 
         int index = (((y2 * BLENDED_COLORS_DIM) + x2) * BLENDED_COLORS_DIM) + z2;
-        int color = this.blendedColorsXZ[index];
+        
+        index = index >= blendedColorsXZ.length ? blendedColorsXZ.length - 1 : index;
+        
+        int color;
+        
+        color = this.blendedColorsXZ[index];
 
         if (color == -1) {
             this.blendedColorsXZ[index] = color = this.calculateBlendedColorXZ(x, y, z);
@@ -156,8 +166,13 @@ public class BiomeColorCache {
         int z2 = z - this.blendedColorsMinZ;
 
         int index = (((y2 * this.dim) + x2) * BLENDED_COLORS_DIM) + z2;
-        int color = this.blendedColorsZ[index];
-
+        
+        index = index >= blendedColorsZ.length ? blendedColorsZ.length - 1 : index;
+        
+        int color;
+        
+        color = this.blendedColorsZ[index];
+        
         if (color == -1) {
             this.blendedColorsZ[index] = color = this.calculateBlendedColorZ(x, y, z);
         }
@@ -193,8 +208,13 @@ public class BiomeColorCache {
         int z2 = z - this.minZ;
 
         int index = (((y2 * this.dim) + x2) * this.dim) + z2;
-        int color = this.cache[index];
-
+        
+        index = index >= cache.length ? cache.length - 1 : index;
+        
+        int color;
+        
+        color = this.cache[index];
+        
         if (color == -1) {
             this.cache[index] = color = this.calculateColor(x, y, z);
         }
@@ -203,6 +223,6 @@ public class BiomeColorCache {
     }
 
     private int calculateColor(int x, int y, int z) {
-        return this.resolver.getColor(this.slice.getBiome(x, y, z), x, z);
+    	return this.resolver.getColor(this.slice.getBiome(x, y, z), x, z);
     }
 }
