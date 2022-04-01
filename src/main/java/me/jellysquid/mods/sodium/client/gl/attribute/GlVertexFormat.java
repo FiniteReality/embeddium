@@ -2,6 +2,8 @@ package me.jellysquid.mods.sodium.client.gl.attribute;
 
 import java.util.EnumMap;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+
 /**
  * Provides a generic vertex format which contains the attributes defined by {@param T}. Other code can then retrieve
  * the attributes and work with encoded data in a generic manner without needing to rely on a specific format.
@@ -25,7 +27,7 @@ public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
     public static <T extends Enum<T>> Builder<T> builder(Class<T> type, int stride) {
         return new Builder<>(type, stride);
     }
-
+    
     /**
      * Returns the {@link GlVertexAttribute} of this vertex format bound to the type {@param name}.
      * @throws NullPointerException If the attribute does not exist in this format
@@ -80,11 +82,11 @@ public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
          * @throws IllegalStateException If an attribute is already bound to the generic type
          */
         private Builder<T> addElement(T type, GlVertexAttribute attribute) {
-            if (attribute.getPointer() >= this.stride) {
+            if ((attribute.getPointer() >= this.stride) && !SodiumClientMod.oculusLoaded) {
                 throw new IllegalArgumentException("Element starts outside vertex format");
             }
 
-            if (attribute.getPointer() + attribute.getSize() > this.stride) {
+            if ((attribute.getPointer() + attribute.getSize() > this.stride) && !SodiumClientMod.oculusLoaded) {
                 throw new IllegalArgumentException("Element extends outside vertex format");
             }
 
@@ -113,7 +115,7 @@ public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
 
             // The stride must be large enough to cover all attributes. This still allows for additional padding
             // to be added to the end of the vertex to accommodate alignment restrictions.
-            if (this.stride < size) {
+            if (this.stride < size && !SodiumClientMod.oculusLoaded) {
                 throw new IllegalArgumentException("Stride is too small");
             }
 
