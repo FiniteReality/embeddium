@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.Control;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
+import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Drawable;
@@ -247,7 +248,7 @@ public class SodiumOptionsGUI extends Screen {
             this.textRenderer.draw(matrixStack, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
         }
     }
-
+    
     private void applyChanges() {
         final HashSet<OptionStorage<?>> dirtyStorages = new HashSet<>();
         final EnumSet<OptionFlag> flags = EnumSet.noneOf(OptionFlag.class);
@@ -265,8 +266,9 @@ public class SodiumOptionsGUI extends Screen {
 
         MinecraftClient client = MinecraftClient.getInstance();
 
-        if (flags.contains(OptionFlag.REQUIRES_RENDERER_RELOAD)) {
+        if (flags.contains(OptionFlag.REQUIRES_RENDERER_RELOAD)) {    	
             client.worldRenderer.reload();
+            SodiumWorldRenderer.hasChanges = true;
         }
 
         if (flags.contains(OptionFlag.REQUIRES_ASSET_RELOAD)) {

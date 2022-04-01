@@ -159,6 +159,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         return this.chunkRenderManager.isBuildComplete();
     }
 
+    public static boolean hasChanges = false;
+    
     /**
      * Called prior to any chunk rendering in order to update necessary state.
      */
@@ -167,8 +169,9 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         this.useEntityCulling = SodiumClientMod.options().advanced.useEntityCulling;
 
-        if (this.client.options.viewDistance != this.renderDistance) {
+        if(hasChanges) {
             this.reload();
+            hasChanges = false;
         }
 
         Profiler profiler = this.client.getProfiler();
@@ -251,8 +254,6 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         RenderDevice device = RenderDevice.INSTANCE;
 
-        this.renderDistance = this.client.options.viewDistance;
-
         SodiumGameOptions opts = SodiumClientMod.options();
 
         this.renderPassManager = BlockRenderPassManager.createDefaultMappings();
@@ -268,7 +269,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         this.chunkRenderBackend = createChunkRenderBackend(device, opts, vertexFormat);
         this.chunkRenderBackend.createShaders(device);
 
-        this.chunkRenderManager = new ChunkRenderManager<>(this, this.chunkRenderBackend, this.renderPassManager, this.world, this.renderDistance);
+        this.chunkRenderManager = new ChunkRenderManager<>(this, this.chunkRenderBackend, this.renderPassManager, this.world, this.client.options.viewDistance);
         this.chunkRenderManager.restoreChunks(this.loadedChunkPositions);
     }
 
