@@ -105,7 +105,12 @@ public class ModelQuad implements ModelQuadViewMutable {
 
     @Override
     public int getColor(int idx) {
-        return this.data[vertexOffset(idx) + COLOR_INDEX];
+    	if(vertexOffset(idx) + COLOR_INDEX < data.length) {
+            return this.data[vertexOffset(idx) + COLOR_INDEX];
+        }
+        else {
+            return data.length;
+        }
     }
 
     @Override
