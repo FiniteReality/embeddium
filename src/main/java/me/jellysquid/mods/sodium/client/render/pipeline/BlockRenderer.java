@@ -61,6 +61,7 @@ public class BlockRenderer {
 
         boolean rendered = false;
 
+        modelData = model.getModelData(world, pos, state, modelData);
         if (modelData == null) {
         	modelData = EmptyModelData.INSTANCE;
         }
