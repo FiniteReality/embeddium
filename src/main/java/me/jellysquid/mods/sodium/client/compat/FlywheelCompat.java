@@ -1,5 +1,7 @@
 package me.jellysquid.mods.sodium.client.compat;
 
+import java.util.Collection;
+
 import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
@@ -22,5 +24,11 @@ public class FlywheelCompat {
 	}else
 		return true;
 	}
+	
+    public static void filterBlockEntityList(Collection<BlockEntity> blockEntities) {
+        if (SodiumClientMod.flywheelLoaded) {
+            blockEntities.removeIf(InstancedRenderRegistry::shouldSkipRender);
+        }
+    }
 	
 }
