@@ -26,8 +26,11 @@ import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
 import java.util.EnumMap;
@@ -74,6 +77,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         int maxY = minY + 16;
         int maxZ = minZ + 16;
 
+        Map<BlockPos, IModelData> modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
+
         BlockPos.Mutable blockPos = new BlockPos.Mutable();
         BlockPos.Mutable offset = new BlockPos.Mutable();
 
@@ -96,38 +101,42 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     boolean rendered = false;
 
                     if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                    	for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
                             if (!RenderLayers.canRenderInLayer(blockState, layer)) {
                                 continue;
                             }
-                            
+
+                            ForgeHooksClient.setRenderType(layer);
+                            IModelData modelData = modelDataMap.getOrDefault(blockPos, EmptyModelData.INSTANCE);
+
                             if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
                                 ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(blockState, (short) -1);
                             }
-                            
-                            ForgeHooksClient.setRenderType(layer);
-                            IModelData modelData = ModelDataManager.getModelData(Objects.requireNonNull(MinecraftClient.getInstance().world), blockPos);
-                            
+
                             BakedModel model = cache.getBlockModels()
                                     .getModel(blockState);
 
                             long seed = blockState.getRenderingSeed(blockPos);
-                            
+
                             if (cache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData)) {
                                 rendered = true;
                             }
-                            ForgeHooksClient.setRenderType(null);
                     	}
-
                     }
 
                     FluidState fluidState = blockState.getFluidState();
 
                     if (!fluidState.isEmpty()) {
-                        RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
+                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+                            if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
+                                continue;
+                            }
 
-                        if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
-                            rendered = true;
+                            ForgeHooksClient.setRenderType(layer);
+
+                            if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
+                                rendered = true;
+                            }
                         }
                     }
 
@@ -154,6 +163,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                 }
             }
         }
+
+        ForgeHooksClient.setRenderType(null);
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
 
