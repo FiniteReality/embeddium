@@ -27,6 +27,7 @@
     "features.buffer_builder.intrinsics.MixinBufferBuilder",
     "features.buffer_builder.intrinsics.MixinSpriteTexturedVertexConsumer",
     "features.buffer_builder.intrinsics.MixinWorldRenderer",
+	"features.chunk_rendering.MixinChunkBuilder",
     "features.chunk_rendering.MixinClientChunkMap",
     "features.chunk_rendering.MixinClientPlayNetworkHandler",
     "features.chunk_rendering.MixinClientWorld",
