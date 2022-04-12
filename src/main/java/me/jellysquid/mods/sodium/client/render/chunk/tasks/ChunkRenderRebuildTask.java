@@ -127,6 +127,11 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                                 continue;
                             }
 
+                            if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
+                                // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
+                                ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
+                            }
+                            
                             ForgeHooksClient.setRenderLayer(layer);
 
 	                        if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
