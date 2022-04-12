@@ -1,5 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
+import java.util.Map;
+
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
@@ -26,8 +28,11 @@ import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
 /**
@@ -39,6 +44,7 @@ import net.minecraftforge.client.model.data.IModelData;
  */
 public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkRenderBuildTask<T> {
     private final ChunkRenderContainer<T> render;
+        
     private final BlockPos offset;
 
     private final ChunkRenderContext context;
@@ -65,6 +71,8 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         int baseY = this.render.getOriginY();
         int baseZ = this.render.getOriginZ();
 
+        Map<BlockPos, IModelData> modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(baseX), ChunkSectionPos.getSectionCoord(baseZ)));
+        
         BlockPos.Mutable pos = new BlockPos.Mutable();
         BlockPos renderOffset = this.offset;
 
@@ -91,13 +99,13 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 	                        	continue;
 	                        }
 	                        
+	                        ForgeHooksClient.setRenderLayer(layer);
+                            IModelData modelData = modelDataMap.getOrDefault(pos, EmptyModelData.INSTANCE);
+	                        
 	                        // Oculus Compat
 	                        if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
 	                            ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(blockState, (short) -1);
 	                        }
-	                            
-	                        ForgeHooksClient.setRenderLayer(layer);
-	                        IModelData modelData = ModelDataManager.getModelData(MinecraftClient.getInstance().world, pos);
 	
 	                        BakedModel model = cache.getBlockModels()
 	                                .getModel(blockState);
@@ -108,17 +116,22 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 	                            bounds.addBlock(relX, relY, relZ);
 	                        }
 	                        
-	                        ForgeHooksClient.setRenderLayer(null);
                         }
                     }
 
                     FluidState fluidState = blockState.getFluidState();
 
                     if (!fluidState.isEmpty()) {
-                        RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
+                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
+                            if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
+                                continue;
+                            }
 
-                        if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
-                            bounds.addBlock(relX, relY, relZ);
+                            ForgeHooksClient.setRenderLayer(layer);
+
+	                        if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
+	                            bounds.addBlock(relX, relY, relZ);
+	                        }
                         }
                     }
 
@@ -142,6 +155,8 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                 }
             }
         }
+        
+        ForgeHooksClient.setRenderLayer(null);
 
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
             ChunkMeshData mesh = buffers.createMesh(pass);

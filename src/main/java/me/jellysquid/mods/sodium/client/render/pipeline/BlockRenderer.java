@@ -62,9 +62,6 @@ public class BlockRenderer {
         boolean rendered = false;
 
         modelData = model.getModelData(world, pos, state, modelData);
-        if (modelData == null) {
-        	modelData = EmptyModelData.INSTANCE;
-        }
         
         for (Direction dir : DirectionUtil.ALL_DIRECTIONS) {
             this.random.setSeed(seed);
