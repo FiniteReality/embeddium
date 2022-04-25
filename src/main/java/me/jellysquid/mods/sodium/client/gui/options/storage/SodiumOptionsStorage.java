@@ -27,6 +27,6 @@ public class SodiumOptionsStorage implements OptionStorage<SodiumGameOptions> {
 
         this.options.notifyListeners();
 
-        SodiumClientMod.logger().info("Flushed changes to Sodium configuration");
+        SodiumClientMod.logger().info("Flushed changes to Rubidium configuration");
     }
 }
