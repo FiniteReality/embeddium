@@ -5,7 +5,7 @@
   "sodium.option_impact.extreme": "Extremo",
   "sodium.option_impact.varies": "Varía",
   "sodium.options.pages.quality": "Calidad",
-  "sodium.options.pages.performance": "Performance",
+  "sodium.options.pages.performance": "Rendimiento",
   "sodium.options.pages.advanced": "Avanzado",
   "sodium.options.view_distance.tooltip": "La distancia de renderizado controla la distancia a la que se renderizará el terreno. Las distancias más cortas significan que se renderizará menos terreno, lo que mejora la velocidad de fotogramas.",
   "sodium.options.simulation_distance.tooltip": "La distancia de simulación controla la distancia a la que se cargarán y marcarán el terreno y las entidades. Las distancias más cortas pueden reducir la carga del servidor interno y pueden mejorar la velocidad de fotogramas.",
