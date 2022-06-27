@@ -7,7 +7,6 @@ import me.jellysquid.mods.sodium.client.model.vertex.formats.quad.QuadVertexSink
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.VertexConsumer;
@@ -18,8 +17,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import net.minecraft.world.BlockRenderView;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraft.util.math.random.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -28,13 +29,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
-import java.util.Random;
 
 @Mixin(BlockModelRenderer.class)
 public class MixinBlockModelRenderer {
-    private final XoRoShiRoRandom random = new XoRoShiRoRandom();
+	private final Xoroshiro128PlusPlusRandom random = new Xoroshiro128PlusPlusRandom(42L);
 
-    @Inject(method = "render(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/client/render/model/BakedModel;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;ZLjava/util/Random;JI)Z", at = @At("HEAD"), cancellable = true)
+    /*@Inject(method = "render(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/client/render/model/BakedModel;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;ZLnet/minecraft/util/math/random/Random;JI)Z", at = @At("HEAD"), cancellable = true)
     private void preRenderBlockInWorld(BlockRenderView world, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrixStack, VertexConsumer consumer, boolean cull, Random rand, long seed, int int_1, CallbackInfoReturnable<Boolean> cir) {
 //        GlobalRenderContext renderer = GlobalRenderContext.getInstance(world);
 //        BlockRenderer blockRenderer = renderer.getBlockRenderer();
@@ -42,7 +42,7 @@ public class MixinBlockModelRenderer {
 //        boolean ret = blockRenderer.renderModel(world, state, pos, model, new FallbackChunkModelBuffers(consumer, matrixStack), cull, seed);
 //
 //        cir.setReturnValue(ret);
-    }
+    }*/
 
     /**
      * @reason Use optimized vertex writer intrinsics, avoid allocations
@@ -52,7 +52,7 @@ public class MixinBlockModelRenderer {
     public void renderModel(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockState blockState, BakedModel bakedModel, float red, float green, float blue, int light, int overlay, IModelData data) {
         QuadVertexSink drain = VertexDrain.of(vertexConsumer)
                 .createSink(VanillaVertexTypes.QUADS);
-        XoRoShiRoRandom random = this.random;
+        Xoroshiro128PlusPlusRandom random = this.random;
 
         // Clamp color ranges
         red = MathHelper.clamp(red, 0.0F, 1.0F);
@@ -62,14 +62,14 @@ public class MixinBlockModelRenderer {
         int defaultColor = ColorABGR.pack(red, green, blue, 1.0F);
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
-            List<BakedQuad> quads = bakedModel.getQuads(blockState, direction, random.setSeedAndReturn(42L), data);
+            List<BakedQuad> quads = bakedModel.getQuads(blockState, direction, random, data);
 
             if (!quads.isEmpty()) {
                 renderQuad(entry, drain, defaultColor, quads, light, overlay);
             }
         }
 
-        List<BakedQuad> quads = bakedModel.getQuads(blockState, null, random.setSeedAndReturn(42L), data);
+        List<BakedQuad> quads = bakedModel.getQuads(blockState, null, random, data);
 
         if (!quads.isEmpty()) {
             renderQuad(entry, drain, defaultColor, quads, light, overlay);

@@ -6,6 +6,7 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.WeightedBakedModel;
 import net.minecraft.util.collection.Weighted;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraftforge.client.model.data.IModelData;
 
 import org.jetbrains.annotations.Nullable;

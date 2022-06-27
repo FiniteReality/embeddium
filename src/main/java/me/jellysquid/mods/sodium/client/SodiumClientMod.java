@@ -20,7 +20,6 @@ public class SodiumClientMod {
 
     public static final String MODID = "rubidium";
     
-    public static boolean flywheelLoaded = false;
     public static boolean oculusLoaded = false;
     
     public SodiumClientMod() {
@@ -30,7 +29,6 @@ public class SodiumClientMod {
     
     public void setup(final FMLClientSetupEvent event) {
         CONFIG = loadConfig();
-        flywheelLoaded = ModList.get().isLoaded("flywheel");
         oculusLoaded = ModList.get().isLoaded("oculus");
     }
 

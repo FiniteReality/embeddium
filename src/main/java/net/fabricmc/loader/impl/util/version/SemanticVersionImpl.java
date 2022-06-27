@@ -26,8 +26,17 @@ import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 
+/**
+ * Parser for a superset of the semantic version format described at <a href="https://semver.org">semver.org</a>.
+ *
+ * <p>This superset allows additionally
+ * <ul><li>Arbitrary number of {@code <version core>} components, but at least 1
+ * <li>{@code x}, {@code X} or {@code *} for the last {@code <version core>} component with {@code storeX} if not the first
+ * <li>Arbitrary {@code <build>} contents
+ * </ul>
+ */
 @SuppressWarnings("deprecation")
-public class SemanticVersionImpl implements SemanticVersion {
+public class SemanticVersionImpl extends net.fabricmc.loader.util.version.SemanticVersionImpl implements SemanticVersion {
 	private static final Pattern DOT_SEPARATED_ID = Pattern.compile("|[-0-9A-Za-z]+(\\.[-0-9A-Za-z]+)*");
 	private static final Pattern UNSIGNED_INTEGER = Pattern.compile("0|[1-9][0-9]*");
 	private final int[] components;
@@ -56,10 +65,6 @@ public class SemanticVersionImpl implements SemanticVersion {
 
 		if (prerelease != null && !DOT_SEPARATED_ID.matcher(prerelease).matches()) {
 			throw new VersionParsingException("Invalid prerelease string '" + prerelease + "'!");
-		}
-
-		if (build != null && !DOT_SEPARATED_ID.matcher(build).matches()) {
-			throw new VersionParsingException("Invalid build string '" + build + "'!");
 		}
 
 		if (version.endsWith(".")) {
@@ -247,7 +252,7 @@ public class SemanticVersionImpl implements SemanticVersion {
 	@Override
 	public int compareTo(Version other) {
 		if (!(other instanceof SemanticVersion)) {
-			return 1;
+			return getFriendlyString().compareTo(other.getFriendlyString());
 		}
 
 		SemanticVersion o = (SemanticVersion) other;

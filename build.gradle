@@ -1,5 +1,5 @@
 plugins {
-	id 'dev.architectury.loom' version '0.10.0-SNAPSHOT'
+	id 'dev.architectury.loom' version '0.11.0-SNAPSHOT'
 	id 'maven-publish'
 	id 'org.ajoberstar.grgit' version '4.1.0'
 }
@@ -28,8 +28,6 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-	
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 }
 
 processResources {

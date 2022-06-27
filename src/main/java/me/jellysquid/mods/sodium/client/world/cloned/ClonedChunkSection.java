@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPaletteFallback;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalleteArray;
+import net.minecraft.class_7522;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -40,7 +41,7 @@ public class ClonedChunkSection {
     private PackedIntegerArray blockStateData;
     private ClonedPalette<BlockState> blockStatePalette;
 
-    private PalettedContainer<RegistryEntry<Biome>> biomeData;
+    private class_7522<RegistryEntry<Biome>> biomeData;
 
     ClonedChunkSection(ClonedChunkSectionCache backingCache) {
         this.backingCache = backingCache;
@@ -99,7 +100,7 @@ public class ClonedChunkSection {
     }
 
     private void copyBiomeData(ChunkSection section) {
-        this.biomeData = section.getBiomeContainer();
+    	this.biomeData = section.getBiomeContainer();
     }
 
     public int getLightLevel(LightType type, int x, int y, int z) {

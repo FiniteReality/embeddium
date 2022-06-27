@@ -33,6 +33,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockRenderView;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.RenderProperties;
 
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -511,7 +512,7 @@ public class FluidRenderer {
                 return -1;
             }
 
-            return state.getFluid().getAttributes().getColor(world, pos);
+            return RenderProperties.get(state).getColorTint(state, world, pos);
         }
     }
 }

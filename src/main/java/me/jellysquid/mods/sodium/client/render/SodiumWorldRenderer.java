@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderMatrices;
@@ -159,7 +158,7 @@ public class SodiumWorldRenderer {
 
         this.useEntityCulling = SodiumClientMod.options().performance.useEntityCulling;
 
-        if (this.client.options.getViewDistance() != this.renderDistance) {
+        if (this.client.options.getClampedViewDistance() != this.renderDistance) {
             this.reload();
         }
 
@@ -208,7 +207,7 @@ public class SodiumWorldRenderer {
 
         profiler.pop();
 
-        Entity.setRenderDistanceMultiplier(MathHelper.clamp((double) this.client.options.getViewDistance() / 8.0D, 1.0D, 2.5D) * (double) this.client.options.entityDistanceScaling);
+        Entity.setRenderDistanceMultiplier(MathHelper.clamp((double) this.client.options.getClampedViewDistance() / 8.0D, 1.0D, 2.5D) * this.client.options.getEntityDistanceScaling().getValue());
     }
 
     /**
@@ -239,7 +238,7 @@ public class SodiumWorldRenderer {
             this.renderSectionManager = null;
         }
 
-        this.renderDistance = this.client.options.getViewDistance();
+        this.renderDistance = this.client.options.getClampedViewDistance();
 
         this.renderPassManager = BlockRenderPassManager.createDefaultMappings();
 
@@ -313,8 +312,6 @@ public class SodiumWorldRenderer {
 
     public void onChunkRenderUpdated(int x, int y, int z, ChunkRenderData meshBefore, ChunkRenderData meshAfter) {
         ListUtil.updateList(this.globalBlockEntities, meshBefore.getGlobalBlockEntities(), meshAfter.getGlobalBlockEntities());
-
-        FlywheelCompat.filterBlockEntityList(this.globalBlockEntities);
         
         this.renderSectionManager.onChunkRenderUpdates(x, y, z, meshAfter);
     }

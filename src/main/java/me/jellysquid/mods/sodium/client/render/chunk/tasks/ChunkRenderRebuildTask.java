@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -151,7 +150,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                         if (entity != null) {
                             BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(entity);
 
-                            if (renderer != null && FlywheelCompat.addAndFilterBEs(entity)) {
+                            if (renderer != null) {
                                 renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
                                 rendered = true;
                             }

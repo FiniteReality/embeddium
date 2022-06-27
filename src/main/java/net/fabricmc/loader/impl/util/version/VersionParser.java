@@ -19,6 +19,7 @@ package net.fabricmc.loader.impl.util.version;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
+import net.fabricmc.loader.util.version.StringVersion;
 
 public final class VersionParser {
 	public static Version parse(String s, boolean storeX) throws VersionParsingException {
