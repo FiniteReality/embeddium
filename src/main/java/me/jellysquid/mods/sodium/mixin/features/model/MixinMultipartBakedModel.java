@@ -7,7 +7,6 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.math.Direction;
 import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.client.model.data.MultipartModelData;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
