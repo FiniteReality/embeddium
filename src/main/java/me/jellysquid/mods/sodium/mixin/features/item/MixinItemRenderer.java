@@ -23,7 +23,6 @@ import me.jellysquid.mods.sodium.client.model.vertex.formats.quad.QuadVertexSink
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
-import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import me.jellysquid.mods.sodium.client.world.biome.ItemColorsExtended;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 
@@ -46,6 +45,7 @@ public class MixinItemRenderer {
     	Xoroshiro128PlusPlusRandom random = this.random;
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
+        	random.setSeed(42L);
             List<BakedQuad> quads = model.getQuads(null, direction, random);
 
             if (!quads.isEmpty()) {
@@ -53,6 +53,7 @@ public class MixinItemRenderer {
             }
         }
 
+        random.setSeed(42L);
         List<BakedQuad> quads = model.getQuads(null, null, random);
 
         if (!quads.isEmpty()) {

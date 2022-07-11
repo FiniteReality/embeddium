@@ -27,14 +27,11 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.ModelDataManager;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
+import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -53,6 +50,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         this.renderContext = renderContext;
         this.frame = frame;
     }
+    
+    private final Xoroshiro128PlusPlusRandom random = new Xoroshiro128PlusPlusRandom(42L);
 
     @Override
     public ChunkBuildResult performBuild(ChunkBuildContext buildContext, CancellationSource cancellationSource) {
@@ -76,7 +75,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         int maxY = minY + 16;
         int maxZ = minZ + 16;
 
-        Map<BlockPos, IModelData> modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
+        Map<BlockPos, ModelData> modelDataMap = MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
 
         BlockPos.Mutable blockPos = new BlockPos.Mutable();
         BlockPos.Mutable offset = new BlockPos.Mutable();
@@ -100,47 +99,35 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     boolean rendered = false;
 
                     if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-                            if (!RenderLayers.canRenderInLayer(blockState, layer)) {
-                                continue;
-                            }
-
-                            ForgeHooksClient.setRenderType(layer);
-                            IModelData modelData = modelDataMap.getOrDefault(blockPos, EmptyModelData.INSTANCE);
-
+                    	BakedModel model = cache.getBlockModels()
+                                .getModel(blockState);
+                    	ModelData modelData = modelDataMap.getOrDefault(blockPos, ModelData.EMPTY);
+                    	random.setSeed(blockState.getRenderingSeed(blockPos));
+                        for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
                             if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
                                 ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(blockState, (short) -1);
                             }
 
-                            BakedModel model = cache.getBlockModels()
-                                    .getModel(blockState);
-
                             long seed = blockState.getRenderingSeed(blockPos);
 
-                            if (cache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData)) {
+                            if (cache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData, layer, random)) {
                                 rendered = true;
                             }
                     	}
                     }
 
                     FluidState fluidState = blockState.getFluidState();
-
+                    
                     if (!fluidState.isEmpty()) {
-                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-                            if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
-                                continue;
-                            }
-                            
-                            if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
-                                // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
-                                ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
-                            }
+                        RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
 
-                            ForgeHooksClient.setRenderType(layer);
-
-                            if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
-                                rendered = true;
-                            }
+                        if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
+                            // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
+                            ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
+                        }
+                        
+                        if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
+                            rendered = true;
                         }
                     }
 
@@ -167,8 +154,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                 }
             }
         }
-
-        ForgeHooksClient.setRenderType(null);
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
 

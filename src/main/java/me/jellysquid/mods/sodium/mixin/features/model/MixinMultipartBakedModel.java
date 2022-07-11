@@ -2,12 +2,13 @@ package me.jellysquid.mods.sodium.mixin.features.model;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.MultipartModelData;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,7 +33,7 @@ public class MixinMultipartBakedModel {
      * @reason Avoid expensive allocations and replace bitfield indirection
      */
     @Overwrite
-    public List<BakedQuad> getQuads(BlockState state, Direction face, Random random, IModelData modelData) {
+    public List<BakedQuad> getQuads(BlockState state, Direction face, Random random, ModelData modelData, RenderLayer layer) {
         if (state == null) {
             return Collections.emptyList();
         }
@@ -64,7 +65,7 @@ public class MixinMultipartBakedModel {
         for (BakedModel model : models) {
             random.setSeed(seed);
 
-            list.addAll(model.getQuads(state, face, random, MultipartModelData.resolve(model, modelData)));
+            list.addAll(model.getQuads(state, face, random, MultipartModelData.resolve(modelData, model), layer));
         }
 
         return list;

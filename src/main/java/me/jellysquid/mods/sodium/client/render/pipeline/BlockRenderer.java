@@ -19,20 +19,20 @@ import me.jellysquid.mods.sodium.client.world.biome.BlockColorsExtended;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.List;
 
 public class BlockRenderer {
-	private final Xoroshiro128PlusPlusRandom random = new Xoroshiro128PlusPlusRandom(42L);
 
     private final BlockColorsExtended blockColors;
     private final BlockOcclusionCache occlusionCache;
@@ -54,7 +54,7 @@ public class BlockRenderer {
         this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
     }
 
-    public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, IModelData modelData) {
+    public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, ModelData modelData, RenderLayer layer, Random random) {
         LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(state, model));
         Vec3d offset = state.getModelOffset(world, pos);
 
@@ -63,9 +63,9 @@ public class BlockRenderer {
         boolean rendered = false;
 
         for (Direction dir : DirectionUtil.ALL_DIRECTIONS) {
-            this.random.setSeed(seed);
+            random.setSeed(seed);
 
-            List<BakedQuad> sided = model.getQuads(state, dir, this.random, modelData);
+            List<BakedQuad> sided = model.getQuads(state, dir, random, modelData, layer);
 
             if (sided.isEmpty()) {
                 continue;
@@ -78,9 +78,9 @@ public class BlockRenderer {
             }
         }
 
-        this.random.setSeed(seed);
+        random.setSeed(seed);
 
-        List<BakedQuad> all = model.getQuads(state, null, this.random, modelData);
+        List<BakedQuad> all = model.getQuads(state, null, random, modelData, layer);
 
         if (!all.isEmpty()) {
             this.renderQuadList(world, state, pos, origin, lighter, offset, buffers, all, ModelQuadFacing.UNASSIGNED);

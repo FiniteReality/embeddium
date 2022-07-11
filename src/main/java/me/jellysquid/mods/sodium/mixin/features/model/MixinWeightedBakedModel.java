@@ -1,13 +1,14 @@
 package me.jellysquid.mods.sodium.mixin.features.model;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.WeightedBakedModel;
 import net.minecraft.util.collection.Weighted;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.model.data.ModelData;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -32,12 +33,12 @@ public class MixinWeightedBakedModel {
      * @reason Avoid excessive object allocations
      */
     @Overwrite
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction face, Random random, IModelData modelData) {
+    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction face, Random random, ModelData modelData, RenderLayer layer) {
         Weighted.Present<BakedModel> quad = getAt(this.models, Math.abs((int) random.nextLong()) % this.totalWeight);
 
         if (quad != null) {
             return quad.getData()
-                    .getQuads(state, face, random, modelData);
+                    .getQuads(state, face, random, modelData, layer);
         }
 
         return Collections.emptyList();
