@@ -1,12 +1,16 @@
 package me.jellysquid.mods.sodium.client;
 
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.NetworkConstants;
 
 import java.io.IOException;
@@ -25,9 +29,11 @@ public class SodiumClientMod {
     
     public static boolean flywheelLoaded = false;
     public static boolean oculusLoaded = false;
+    public static boolean immersiveLoaded = FMLLoader.getLoadingModList().getModFileById("immersiveengineering") != null;
     
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        MinecraftForge.EVENT_BUS.addListener(this::registerReloadListener);
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
 
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
@@ -37,6 +43,11 @@ public class SodiumClientMod {
         CONFIG = loadConfig();
         flywheelLoaded = ModList.get().isLoaded("flywheel");
         oculusLoaded = ModList.get().isLoaded("oculus");
+    }
+    
+    public void registerReloadListener(AddReloadListenerEvent ev) {
+    	if(immersiveLoaded)
+    		ev.addListener(new ImmersiveConnectionRenderer());
     }
 
     public static SodiumGameOptions options() {

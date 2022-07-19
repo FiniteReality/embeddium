@@ -30,6 +30,8 @@ dependencies {
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 	
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	compileOnly files("libs/Flywheel-Forge-1.18-0.6.0.53.jar")
+	compileOnly files("libs/ImmersiveEngineering-1.18.2-8.0.2-149.jar")
 }
 
 processResources {

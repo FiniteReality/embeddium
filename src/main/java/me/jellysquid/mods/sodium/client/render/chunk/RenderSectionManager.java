@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveEmptyChunkChecker;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
@@ -255,7 +256,11 @@ public class RenderSectionManager {
         ChunkSection section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
 
         if (section.isEmpty()) {
-            render.setData(ChunkRenderData.EMPTY);
+        	if(!SodiumClientMod.immersiveLoaded) {
+        		render.setData(ChunkRenderData.EMPTY);
+        	}else if(!ImmersiveEmptyChunkChecker.hasWires(ChunkSectionPos.from(x, y, z))) {
+        		render.setData(ChunkRenderData.EMPTY);
+        	}
         } else {
             render.markForUpdate(ChunkUpdateType.INITIAL_BUILD);
         }
@@ -381,7 +386,9 @@ public class RenderSectionManager {
         int frame = this.currentFrame;
 
         if (context == null) {
-            return new ChunkRenderEmptyBuildTask(render, frame);
+            return SodiumClientMod.immersiveLoaded ? ImmersiveEmptyChunkChecker.makeEmptyRebuildTask(
+                    sectionCache, render.getChunkPos(), render, currentFrame
+            ) : new ChunkRenderEmptyBuildTask(render, frame);
         }
 
         return new ChunkRenderRebuildTask(render, context, frame);

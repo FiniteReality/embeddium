@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -35,7 +36,6 @@ import net.minecraftforge.client.model.data.IModelData;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -172,6 +172,11 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         ForgeHooksClient.setRenderType(null);
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
+        
+        if(SodiumClientMod.immersiveLoaded)
+	        ImmersiveConnectionRenderer.renderConnectionsInSection(
+	                buildContext.buffers, buildContext.cache.getWorldSlice(), render.getChunkPos()
+	        );
 
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
             ChunkMeshData mesh = buffers.createMesh(pass);
