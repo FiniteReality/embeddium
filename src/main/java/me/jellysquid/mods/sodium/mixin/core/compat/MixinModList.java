@@ -19,7 +19,7 @@ public class MixinModList {
 	@Overwrite(remap = false)
     public boolean isLoaded(String modTarget)
     {
-        return modTarget.equals("magnesium") ? true : this.indexedMods.containsKey(modTarget);
+        return modTarget.equals("magnesium") || this.indexedMods.containsKey(modTarget);
     }
 	
 }
