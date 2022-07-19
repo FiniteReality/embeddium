@@ -82,7 +82,6 @@ public abstract class MixinBillboardParticle extends Particle {
         drain.flush();
     }
 
-    @SuppressWarnings("UnnecessaryLocalVariable")
     private static void addVertex(ParticleVertexSink drain, Quaternion rotation,
                                   float x, float y, float posX, float posY, float posZ, float u, float v, int color, int light, float size) {
         // Quaternion q0 = new Quaternion(rotation);
