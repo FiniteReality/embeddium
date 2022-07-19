@@ -1,7 +1,5 @@
 package me.jellysquid.mods.sodium.client.render.vanilla.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.state.State;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
