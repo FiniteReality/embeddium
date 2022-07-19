@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.model.quad.blender;
 
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.color.block.BlockColorProvider;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
@@ -21,4 +22,8 @@ public interface BiomeColorBlender {
      */
     int[] getColors(BlockColorProvider colorizer, BlockRenderView world, BlockState state, BlockPos origin,
                     ModelQuadView quad);
+    
+    static BiomeColorBlender create(MinecraftClient client) {
+        return new ConfigurableColorBlender(client);
+    }
 }
