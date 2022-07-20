@@ -85,10 +85,10 @@ public class SodiumOptionsGUI extends Screen {
         this.rebuildGUIPages();
         this.rebuildGUIOptions();
 
-        this.undoButton = new FlatButtonWidget(new Dim2i(this.width - 211, this.height - 26, 65, 20), "Undo", this::undoChanges);
-        this.applyButton = new FlatButtonWidget(new Dim2i(this.width - 142, this.height - 26, 65, 20), "Apply", this::applyChanges);
-        this.closeButton = new FlatButtonWidget(new Dim2i(this.width - 73, this.height - 26, 65, 20), "Close", this::onClose);
-        this.donateButton = new FlatButtonWidget(new Dim2i(this.width - 128, 6, 100, 20), "Buy us a coffee!", this::openDonationPage);
+        this.undoButton = new FlatButtonWidget(new Dim2i(this.width - 211, this.height - 26, 65, 20), new TranslatableText("sodium.options.buttons.undo").getString(), this::undoChanges);
+        this.applyButton = new FlatButtonWidget(new Dim2i(this.width - 142, this.height - 26, 65, 20), new TranslatableText("sodium.options.buttons.apply").getString(), this::applyChanges);
+        this.closeButton = new FlatButtonWidget(new Dim2i(this.width - 73, this.height - 26, 65, 20), new TranslatableText("gui.done").getString(), this::onClose);
+        this.donateButton = new FlatButtonWidget(new Dim2i(this.width - 128, 6, 100, 20), new TranslatableText("sodium.options.buttons.donate").getString(), this::openDonationPage);
         this.hideDonateButton = new FlatButtonWidget(new Dim2i(this.width - 26, 6, 20, 20), "x", this::hideDonationButton);
 
         if (SodiumClientMod.options().notifications.hideDonationButton) {
@@ -230,7 +230,7 @@ public class SodiumOptionsGUI extends Screen {
         OptionImpact impact = option.getImpact();
 
         if (impact != null) {
-            tooltip.add(Language.getInstance().reorder(new LiteralText(Formatting.GRAY + "Performance Impact: " + impact.toDisplayString())));
+        	tooltip.add(Language.getInstance().reorder(new LiteralText(Formatting.GRAY + "Performance Impact: " + impact.toDisplayString())));
         }
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;

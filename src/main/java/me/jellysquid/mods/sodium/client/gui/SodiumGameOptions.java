@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.client.option.GraphicsMode;
+import net.minecraft.text.TranslatableText;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -55,9 +56,9 @@ public class SodiumGameOptions {
     }
 
     public enum GraphicsQuality implements TextProvider {
-        DEFAULT("Default"),
-        FANCY("Fancy"),
-        FAST("Fast");
+        DEFAULT(new TranslatableText("generator.default").getString()),
+        FANCY(new TranslatableText("options.clouds.fancy").getString()),
+        FAST(new TranslatableText("options.clouds.fast").getString());
 
         private final String name;
 
