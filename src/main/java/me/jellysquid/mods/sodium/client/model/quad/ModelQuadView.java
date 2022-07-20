@@ -81,5 +81,5 @@ public interface ModelQuadView {
     /**
      * @return The sprite texture used by this quad, or null if none is attached
      */
-    Sprite getSprite();
+    Sprite rubidium$getSprite();
 }

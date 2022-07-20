@@ -129,7 +129,7 @@ public class ModelQuad implements ModelQuadViewMutable {
     }
 
     @Override
-    public Sprite getSprite() {
+    public Sprite rubidium$getSprite() {
         return this.sprite;
     }
 

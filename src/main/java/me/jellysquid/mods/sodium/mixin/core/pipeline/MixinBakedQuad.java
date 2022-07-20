@@ -61,7 +61,7 @@ public class MixinBakedQuad implements ModelQuadView {
     }
 
     @Override
-    public Sprite getSprite() {
+    public Sprite rubidium$getSprite() {
         return this.sprite;
     }
 

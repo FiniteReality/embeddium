@@ -397,7 +397,7 @@ public class FluidRenderer {
             vertexIdx += lightOrder;
         }
 
-        Sprite sprite = quad.getSprite();
+        Sprite sprite = quad.rubidium$getSprite();
 
         if (sprite != null) {
             buffers.getRenderData().addSprite(sprite);

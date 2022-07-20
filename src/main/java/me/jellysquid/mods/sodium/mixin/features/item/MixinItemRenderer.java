@@ -107,7 +107,7 @@ public class MixinItemRenderer {
                         light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
 
-            SpriteUtil.markSpriteActive(quad.getSprite());
+            SpriteUtil.markSpriteActive(quad.rubidium$getSprite());
         }
 
         drain.flush();
