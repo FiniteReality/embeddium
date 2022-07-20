@@ -6,7 +6,7 @@ import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
     private static SodiumGameOptions CONFIG;
-    private static Logger LOGGER = LogManager.getLogger("Rubidium");
+    public static Logger LOGGER = LogManager.getLogger("Rubidium");
 
     private static String MOD_VERSION;
 
@@ -33,7 +33,7 @@ public class SodiumClientMod {
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
     }
     
-    public void onInitializeClient(final FMLCommonSetupEvent event) {
+    public void onInitializeClient(final FMLClientSetupEvent event) {
     	flywheelLoaded = ModList.get().isLoaded("flywheel");
     	oculusLoaded = ModList.get().isLoaded("oculus");
     	MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
