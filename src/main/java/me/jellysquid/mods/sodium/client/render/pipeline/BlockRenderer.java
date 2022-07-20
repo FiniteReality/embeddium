@@ -1,5 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.pipeline;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
+import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.light.LightPipelineProvider;
@@ -22,6 +25,7 @@ import net.minecraft.client.color.block.BlockColorProvider;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -30,6 +34,8 @@ import net.minecraftforge.client.model.data.IModelData;
 
 import java.util.List;
 import java.util.Random;
+
+import codechicken.lib.render.block.ICCBlockRenderer;
 
 public class BlockRenderer {
     private final Random random = new XoRoShiRoRandom();
@@ -61,6 +67,22 @@ public class BlockRenderer {
         boolean rendered = false;
 
         modelData = model.getModelData(world, pos, state, modelData);
+        
+        if(SodiumClientMod.cclLoaded) {
+	        final MatrixStack mStack = new MatrixStack();
+	        final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
+	        for (final ICCBlockRenderer renderer : CCLCompat.getCustomRenderers(world, pos)) {
+	            if (renderer.canHandleBlock(world, pos, state)) {
+	                mStack.isEmpty();
+	
+	                builder.reset();
+	                rendered = renderer.renderBlock(state, pos, world, mStack, builder, random, modelData);
+	                builder.flush(buffers);
+	                
+	                return rendered;
+	            }
+	        }
+        }
         
         for (Direction dir : DirectionUtil.ALL_DIRECTIONS) {
             this.random.setSeed(seed);
@@ -147,7 +169,7 @@ public class BlockRenderer {
             sink.writeQuad(x, y, z, color, u, v, lm);
         }
 
-        Sprite sprite = src.getSprite();
+        Sprite sprite = src.rubidium$getSprite();
 
         if (sprite != null) {
             renderData.addSprite(sprite);
