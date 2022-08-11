@@ -31,23 +31,28 @@ public class CCLCompat {
         final FluidState fluidState = state.getFluidState();
         final Fluid fluid = fluidState.getFluid();
 
+        if(customGlobalRenderers == null)
+        	return new ArrayList<>();
+        
         final ArrayList<ICCBlockRenderer> renderers = new ArrayList<>(customGlobalRenderers);
 
-        for (final Map.Entry<IRegistryDelegate<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
-            final Block entryBlock = entry.getKey().get();
+        if(customBlockRenderers != null)
+	        for (final Map.Entry<IRegistryDelegate<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
+	            final Block entryBlock = entry.getKey().get();
+	
+	            if (entryBlock.is(block)) {
+	                renderers.add(entry.getValue());
+	            }
+	        }
 
-            if (entryBlock.is(block)) {
-                renderers.add(entry.getValue());
-            }
-        }
-
-        for (final Map.Entry<IRegistryDelegate<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
-            final Fluid entryFluid = entry.getKey().get();
-
-            if (entryFluid.matchesType(fluid)) {
-                renderers.add(entry.getValue());
-            }
-        }
+        if(customFluidRenderers != null)
+	        for (final Map.Entry<IRegistryDelegate<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
+	            final Fluid entryFluid = entry.getKey().get();
+	
+	            if (entryFluid.matchesType(fluid)) {
+	                renderers.add(entry.getValue());
+	            }
+	        }
 
         return renderers;
     }
