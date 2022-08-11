@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 public class SodiumGameOptions {
-    private static final String DEFAULT_FILE_NAME = "sodium-options.json";
+    private static final String DEFAULT_FILE_NAME = "rubidium-options.json";
 
     public final QualitySettings quality = new QualitySettings();
     public final AdvancedSettings advanced = new AdvancedSettings();
