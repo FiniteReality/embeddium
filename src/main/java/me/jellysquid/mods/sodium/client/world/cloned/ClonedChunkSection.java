@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.world.cloned;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPaletteFallback;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalleteArray;
@@ -27,7 +28,7 @@ public class ClonedChunkSection {
     private final AtomicInteger referenceCount = new AtomicInteger(0);
     private final ClonedChunkSectionCache backingCache;
 
-    private final Long2ObjectOpenHashMap<BlockEntity> blockEntities;
+    private final Short2ObjectMap<BlockEntity> blockEntities;
     private final ChunkNibbleArray[] lightDataArrays;
     private final World world;
 
@@ -41,7 +42,7 @@ public class ClonedChunkSection {
     ClonedChunkSection(ClonedChunkSectionCache backingCache, World world) {
         this.backingCache = backingCache;
         this.world = world;
-        this.blockEntities = new Long2ObjectOpenHashMap<>(8);
+        this.blockEntities = new Short2ObjectOpenHashMap<>();
         this.lightDataArrays = new ChunkNibbleArray[LIGHT_TYPES.length];
     }
 
@@ -81,7 +82,8 @@ public class ClonedChunkSection {
             BlockPos entityPos = entry.getKey();
 
             if (box.contains(entityPos)) {
-                this.blockEntities.put(BlockPos.asLong(entityPos.getX() & 15, entityPos.getY() & 15, entityPos.getZ() & 15), entry.getValue());
+                //this.blockEntities.put(BlockPos.asLong(entityPos.getX() & 15, entityPos.getY() & 15, entityPos.getZ() & 15), entry.getValue());
+            	this.blockEntities.put(ChunkSectionPos.packLocal(entityPos), entry.getValue());
             }
         }
     }
@@ -105,7 +107,7 @@ public class ClonedChunkSection {
     }
 
     public BlockEntity getBlockEntity(int x, int y, int z) {
-        return this.blockEntities.get(BlockPos.asLong(x, y, z));
+        return this.blockEntities.get(packLocal(x, y, z));
     }
 
     public PackedIntegerArray getBlockData() {
@@ -167,5 +169,15 @@ public class ClonedChunkSection {
 
     public ClonedChunkSectionCache getBackingCache() {
         return this.backingCache;
+    }
+    
+    /**
+     * @param x The local x-coordinate
+     * @param y The local y-coordinate
+     * @param z The local z-coordinate
+     * @return An index which can be used to key entities or blocks within a chunk
+     */
+    private static short packLocal(int x, int y, int z) {
+        return (short) (x << 8 | z << 4 | y);
     }
 }
