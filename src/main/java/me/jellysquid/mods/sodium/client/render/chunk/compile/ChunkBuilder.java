@@ -17,6 +17,7 @@ import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.common.util.collections.DequeDrain;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -205,7 +206,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
      * but can be up to the number of available processor threads on the system.
      */
     private static int getOptimalThreadCount() {
-        return Math.max(1, Runtime.getRuntime().availableProcessors());
+        return MathHelper.clamp(Runtime.getRuntime().availableProcessors(), 1, 10);
     }
 
     /**
