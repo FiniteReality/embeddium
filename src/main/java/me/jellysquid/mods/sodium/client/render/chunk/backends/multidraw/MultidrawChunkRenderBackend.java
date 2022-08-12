@@ -34,6 +34,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import org.lwjgl.opengl.GL20C;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -365,7 +367,7 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
         }
 
         // Check to see if the GPU vendor is Intel
-        return Objects.equals(GL20C.glGetString(GL20C.GL_VENDOR), INTEL_VENDOR_NAME);
+        return Objects.equals(GlStateManager.getString(GL20C.GL_VENDOR), INTEL_VENDOR_NAME);
     }
 
     /**
@@ -378,7 +380,7 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
             return false;
         }
 
-        String version = GL20C.glGetString(GL20C.GL_VERSION);
+        String version = GlStateManager.getString(GL20C.GL_VERSION);
 
         // The returned version string may be null in the case of an error
         if (version == null) {

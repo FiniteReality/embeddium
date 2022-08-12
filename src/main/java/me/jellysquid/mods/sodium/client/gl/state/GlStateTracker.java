@@ -3,8 +3,9 @@ package me.jellysquid.mods.sodium.client.gl.state;
 import me.jellysquid.mods.sodium.client.gl.array.GlVertexArray;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBuffer;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBufferTarget;
-import org.lwjgl.opengl.GL20C;
 import org.lwjgl.opengl.GL30C;
+
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import java.util.Arrays;
 
@@ -29,7 +30,7 @@ public class GlStateTracker {
         int prevBuffer = this.bufferState[target.ordinal()];
         
         if (prevBuffer == UNASSIGNED_HANDLE) {
-            this.bufferRestoreState[target.ordinal()] = GL20C.glGetInteger(target.getBindingParameter());
+            this.bufferRestoreState[target.ordinal()] = GlStateManager.getInteger(target.getBindingParameter());
         }
 
         this.bufferState[target.ordinal()] = buffer;
@@ -45,7 +46,7 @@ public class GlStateTracker {
         int prevArray = this.vertexArrayState;
 
         if (prevArray == UNASSIGNED_HANDLE) {
-            this.vertexArrayRestoreState = GL20C.glGetInteger(GL30C.GL_VERTEX_ARRAY_BINDING);
+            this.vertexArrayRestoreState = GlStateManager.getInteger(GL30C.GL_VERTEX_ARRAY_BINDING);
         }
 
         this.vertexArrayState = array;
@@ -57,7 +58,7 @@ public class GlStateTracker {
         for (int i = 0; i < GlBufferTarget.COUNT; i++) {
             if (this.bufferState[i] != this.bufferRestoreState[i] &&
                     this.bufferRestoreState[i] != UNASSIGNED_HANDLE) {
-                GL20C.glBindBuffer(GlBufferTarget.VALUES[i].getTargetParameter(), this.bufferRestoreState[i]);
+            	GlStateManager.bindBuffers(GlBufferTarget.VALUES[i].getTargetParameter(), this.bufferRestoreState[i]);
             }
         }
 

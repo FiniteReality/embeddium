@@ -5,6 +5,8 @@ import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL20C;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import java.nio.FloatBuffer;
 
 /**
@@ -36,7 +38,7 @@ public class LegacyFogHelper {
             return ChunkFogMode.NONE;
         }
 
-        int mode = GL20C.glGetInteger(GL20.GL_FOG_MODE);
+        int mode = GlStateManager.getInteger(GL20.GL_FOG_MODE);
 
         switch (mode) {
             case GL20.GL_EXP2:
@@ -50,7 +52,7 @@ public class LegacyFogHelper {
     }
 
     public static float getFogCutoff() {
-        int mode = GL20C.glGetInteger(GL20.GL_FOG_MODE);
+        int mode = GlStateManager.getInteger(GL20.GL_FOG_MODE);
 
         switch (mode) {
             case GL20.GL_LINEAR:
@@ -65,6 +67,6 @@ public class LegacyFogHelper {
     }
 
     public static void getFogColor(FloatBuffer buf) {
-        GL20C.glGetFloatv(GL20.GL_FOG_COLOR, buf);
+    	GlStateManager.getFloat(GL20.GL_FOG_COLOR, buf);
     }
 }

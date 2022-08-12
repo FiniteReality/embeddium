@@ -10,6 +10,8 @@ import me.jellysquid.mods.sodium.client.gl.state.GlStateTracker;
 import me.jellysquid.mods.sodium.client.gl.tessellation.*;
 import org.lwjgl.opengl.*;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -72,7 +74,7 @@ public class GLRenderDevice implements RenderDevice {
         public void uploadData(GlMutableBuffer glBuffer, ByteBuffer byteBuffer) {
             this.bindBuffer(GlBufferTarget.ARRAY_BUFFER, glBuffer);
 
-            GL20C.glBufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), byteBuffer, glBuffer.getUsageHint().getId());
+            GlStateManager.bufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), byteBuffer, glBuffer.getUsageHint().getId());
 
             glBuffer.setSize(byteBuffer.limit());
         }
@@ -92,14 +94,14 @@ public class GLRenderDevice implements RenderDevice {
         @Override
         public void bindBuffer(GlBufferTarget target, GlBuffer buffer) {
             if (this.stateTracker.makeBufferActive(target, buffer)) {
-                GL20C.glBindBuffer(target.getTargetParameter(), buffer.handle());
+            	GlStateManager.bindBuffers(target.getTargetParameter(), buffer.handle());
             }
         }
 
         @Override
         public void unbindBuffer(GlBufferTarget target) {
             if (this.stateTracker.makeBufferActive(target, null)) {
-                GL20C.glBindBuffer(target.getTargetParameter(), GlBuffer.NULL_BUFFER_ID);
+            	GlStateManager.bindBuffers(target.getTargetParameter(), GlBuffer.NULL_BUFFER_ID);
             }
         }
 
@@ -128,7 +130,7 @@ public class GLRenderDevice implements RenderDevice {
             int handle = buffer.handle();
             buffer.invalidateHandle();
 
-            GL20C.glDeleteBuffers(handle);
+            GlStateManager.deleteBuffers(handle);
         }
 
         @Override

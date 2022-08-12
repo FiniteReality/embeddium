@@ -57,7 +57,7 @@ public abstract class GlProgram extends GlObject {
     }
 
     public void delete() {
-        GL20C.glDeleteProgram(this.handle());
+    	GlStateManager.deleteProgram(this.handle());
 
         this.invalidateHandle();
     }
