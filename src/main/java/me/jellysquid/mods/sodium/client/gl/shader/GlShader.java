@@ -7,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL20C;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -36,7 +38,7 @@ public class GlShader extends GlObject {
             LOGGER.warn("Shader compilation log for " + this.name + ": " + log);
         }
 
-        int result = GL20C.glGetShaderi(handle, GL20C.GL_COMPILE_STATUS);
+        int result = GlStateManager.getShader(handle, GL20C.GL_COMPILE_STATUS);
 
         if (result != GL20C.GL_TRUE) {
             throw new RuntimeException("Shader compilation failed, see log for details");
