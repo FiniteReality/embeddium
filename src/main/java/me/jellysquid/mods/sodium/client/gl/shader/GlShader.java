@@ -28,9 +28,9 @@ public class GlShader extends GlObject {
 
         src = processShader(src, constants);
 
-        int handle = GL20C.glCreateShader(type.id);
+        int handle = GlStateManager.createShader(type.id);
         ShaderWorkarounds.safeShaderSource(handle, src);
-        GL20C.glCompileShader(handle);
+        GlStateManager.compileShader(handle);
 
         String log = GL20C.glGetShaderInfoLog(handle);
 
@@ -85,7 +85,7 @@ public class GlShader extends GlObject {
     }
 
     public void delete() {
-        GL20C.glDeleteShader(this.handle());
+    	GlStateManager.deleteShader(this.handle());
 
         this.invalidateHandle();
     }

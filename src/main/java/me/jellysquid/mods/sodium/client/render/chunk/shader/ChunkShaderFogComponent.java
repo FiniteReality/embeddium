@@ -4,6 +4,8 @@ import me.jellysquid.mods.sodium.client.gl.compat.LegacyFogHelper;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.system.MemoryStack;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import java.nio.FloatBuffer;
 
 /**
@@ -78,7 +80,7 @@ public abstract class ChunkShaderFogComponent {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buf = stack.mallocFloat(4);
             LegacyFogHelper.getFogColor(buf);
-            GL20C.glUniform4fv(index, buf);
+            GlStateManager.uniform4(index, buf);
         }
     }
 

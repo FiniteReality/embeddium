@@ -29,11 +29,11 @@ public abstract class GlProgram extends GlObject {
     }
 
     public void bind() {
-        GL20C.glUseProgram(this.handle());
+    	GlStateManager.useProgram(this.handle());
     }
 
     public void unbind() {
-        GL20C.glUseProgram(0);
+    	GlStateManager.useProgram(0);
     }
 
     public Identifier getName() {
@@ -47,7 +47,7 @@ public abstract class GlProgram extends GlObject {
      * @throws NullPointerException If no uniform exists with the given name
      */
     public int getUniformLocation(String name) {
-        int index = GL20C.glGetUniformLocation(this.handle(), name);
+        int index = GlStateManager.getUniformLocation(this.handle(), name);
 
         if (index < 0) {
             throw new NullPointerException("No uniform exists with name: " + name);
@@ -68,11 +68,11 @@ public abstract class GlProgram extends GlObject {
 
         public Builder(Identifier name) {
             this.name = name;
-            this.program = GL20C.glCreateProgram();
+            this.program = GlStateManager.createProgram();
         }
 
         public Builder attachShader(GlShader shader) {
-            GL20C.glAttachShader(this.program, shader.handle());
+        	GlStateManager.attachShader(this.program, shader.handle());
 
             return this;
         }
@@ -87,7 +87,7 @@ public abstract class GlProgram extends GlObject {
          * @return An instantiated shader container as provided by the factory
          */
         public <P extends GlProgram> P build(ProgramFactory<P> factory) {
-            GL20C.glLinkProgram(this.program);
+        	GlStateManager.linkProgram(this.program);
 
             String log = GL20C.glGetProgramInfoLog(this.program);
 

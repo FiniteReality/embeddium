@@ -8,6 +8,8 @@ import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.system.MemoryStack;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+
 import java.util.function.Function;
 
 /**
@@ -38,8 +40,8 @@ public class ChunkProgram extends GlProgram {
     }
 
     public void setup(MatrixStack matrixStack, float modelScale, float textureScale) {
-        GL20C.glUniform1i(this.uBlockTex, 0);
-        GL20C.glUniform1i(this.uLightTex, 2);
+        GlStateManager.uniform1(this.uBlockTex, 0);
+        GlStateManager.uniform1(this.uLightTex, 2);
 
         GL20C.glUniform3f(this.uModelScale, modelScale, modelScale, modelScale);
         GL20C.glUniform2f(this.uTextureScale, textureScale, textureScale);
@@ -47,7 +49,7 @@ public class ChunkProgram extends GlProgram {
         this.fogShader.setup();
 
         try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-            GL20C.glUniformMatrix4fv(this.uModelViewProjectionMatrix, false,
+        	GlStateManager.uniformMatrix4(this.uModelViewProjectionMatrix, false,
                     GameRendererContext.getModelViewProjectionMatrix(matrixStack.peek(), memoryStack));
         }
     }
