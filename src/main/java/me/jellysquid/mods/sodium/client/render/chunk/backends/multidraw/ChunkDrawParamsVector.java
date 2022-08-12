@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.chunk.backends.multidraw;
 
-import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
 import org.lwjgl.system.MemoryUtil;
-import sun.misc.Unsafe;
+
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 
 import java.nio.ByteBuffer;
 
@@ -21,7 +21,7 @@ public abstract class ChunkDrawParamsVector extends StructBuffer {
     }
 
     public static ChunkDrawParamsVector create(int capacity) {
-        return UnsafeUtil.isAvailable() ? new UnsafeChunkDrawCallVector(capacity) : new NioChunkDrawCallVector(capacity);
+        return SodiumClientMod.isDirectMemoryAccessEnabled() ? new UnsafeChunkDrawCallVector(capacity) : new NioChunkDrawCallVector(capacity);
     }
 
     public abstract void pushChunkDrawParams(float x, float y, float z);
@@ -36,8 +36,6 @@ public abstract class ChunkDrawParamsVector extends StructBuffer {
     }
 
     public static class UnsafeChunkDrawCallVector extends ChunkDrawParamsVector {
-        private static final Unsafe UNSAFE = UnsafeUtil.instanceNullable();
-
         private long basePointer;
         private long writePointer;
 
@@ -53,9 +51,9 @@ public abstract class ChunkDrawParamsVector extends StructBuffer {
                 this.growBuffer();
             }
 
-            UNSAFE.putFloat(this.writePointer    , x);
-            UNSAFE.putFloat(this.writePointer + 4, y);
-            UNSAFE.putFloat(this.writePointer + 8, z);
+            MemoryUtil.memPutFloat(this.writePointer    , x);
+            MemoryUtil.memPutFloat(this.writePointer + 4, y);
+            MemoryUtil.memPutFloat(this.writePointer + 8, z);
 
             this.writePointer += this.stride;
         }

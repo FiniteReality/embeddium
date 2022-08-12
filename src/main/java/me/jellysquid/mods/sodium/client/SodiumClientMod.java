@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.client;
 
 import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -63,14 +62,7 @@ public class SodiumClientMod {
     }
 
     private static SodiumGameOptions loadConfig() {
-        SodiumGameOptions config = SodiumGameOptions.load(FMLPaths.CONFIGDIR.get().resolve("rubidium-options.json"));
-        onConfigChanged(config);
-
-        return config;
-    }
-
-    public static void onConfigChanged(SodiumGameOptions options) {
-        UnsafeUtil.setEnabled(options.advanced.allowDirectMemoryAccess);
+        return SodiumGameOptions.load(FMLPaths.CONFIGDIR.get().resolve("rubidium-options.json"));
     }
 
     public static String getVersion() {
@@ -79,5 +71,9 @@ public class SodiumClientMod {
         }
 
         return MOD_VERSION;
+    }
+    
+    public static boolean isDirectMemoryAccessEnabled() {
+        return options().advanced.allowDirectMemoryAccess;
     }
 }

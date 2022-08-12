@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.core.matrix;
 
-import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.util.math.Matrix4fExtended;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
@@ -8,7 +8,6 @@ import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import sun.misc.Unsafe;
 
 import java.nio.BufferUnderflowException;
 import java.nio.FloatBuffer;
@@ -264,7 +263,7 @@ public class MixinMatrix4f implements Matrix4fExtended {
             throw new BufferUnderflowException();
         }
 
-        if (buf.isDirect() && UnsafeUtil.isAvailable()) {
+        if (buf.isDirect() && SodiumClientMod.isDirectMemoryAccessEnabled()) {
             this.writeToBufferUnsafe(buf);
         } else {
             this.writeToBufferSafe(buf);
@@ -274,23 +273,23 @@ public class MixinMatrix4f implements Matrix4fExtended {
     private void writeToBufferUnsafe(FloatBuffer buf) {
         long addr = MemoryUtil.memAddress(buf);
 
-        Unsafe unsafe = UnsafeUtil.instance();
-        unsafe.putFloat(addr + 0, this.a00);
-        unsafe.putFloat(addr + 4, this.a10);
-        unsafe.putFloat(addr + 8, this.a20);
-        unsafe.putFloat(addr + 12, this.a30);
-        unsafe.putFloat(addr + 16, this.a01);
-        unsafe.putFloat(addr + 20, this.a11);
-        unsafe.putFloat(addr + 24, this.a21);
-        unsafe.putFloat(addr + 28, this.a31);
-        unsafe.putFloat(addr + 32, this.a02);
-        unsafe.putFloat(addr + 36, this.a12);
-        unsafe.putFloat(addr + 40, this.a22);
-        unsafe.putFloat(addr + 44, this.a32);
-        unsafe.putFloat(addr + 48, this.a03);
-        unsafe.putFloat(addr + 52, this.a13);
-        unsafe.putFloat(addr + 56, this.a23);
-        unsafe.putFloat(addr + 60, this.a33);
+        MemoryUtil.memPutFloat(addr + 0, this.a00);
+        MemoryUtil.memPutFloat(addr + 0, this.a00);
+        MemoryUtil.memPutFloat(addr + 4, this.a10);
+        MemoryUtil.memPutFloat(addr + 8, this.a20);
+        MemoryUtil.memPutFloat(addr + 12, this.a30);
+        MemoryUtil.memPutFloat(addr + 16, this.a01);
+        MemoryUtil.memPutFloat(addr + 20, this.a11);
+        MemoryUtil.memPutFloat(addr + 24, this.a21);
+        MemoryUtil.memPutFloat(addr + 28, this.a31);
+        MemoryUtil.memPutFloat(addr + 32, this.a02);
+        MemoryUtil.memPutFloat(addr + 36, this.a12);
+        MemoryUtil.memPutFloat(addr + 40, this.a22);
+        MemoryUtil.memPutFloat(addr + 44, this.a32);
+        MemoryUtil.memPutFloat(addr + 48, this.a03);
+        MemoryUtil.memPutFloat(addr + 52, this.a13);
+        MemoryUtil.memPutFloat(addr + 56, this.a23);
+        MemoryUtil.memPutFloat(addr + 60, this.a33);
     }
 
     private void writeToBufferSafe(FloatBuffer buf) {

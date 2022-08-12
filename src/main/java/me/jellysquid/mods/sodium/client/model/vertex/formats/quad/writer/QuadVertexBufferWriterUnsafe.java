@@ -1,5 +1,7 @@
 package me.jellysquid.mods.sodium.client.model.vertex.formats.quad.writer;
 
+import org.lwjgl.system.MemoryUtil;
+
 import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterUnsafe;
@@ -14,15 +16,15 @@ public class QuadVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe imple
     public void writeQuad(float x, float y, float z, int color, float u, float v, int light, int overlay, int normal) {
         long i = this.writePointer;
 
-        UNSAFE.putFloat(i, x);
-        UNSAFE.putFloat(i + 4, y);
-        UNSAFE.putFloat(i + 8, z);
-        UNSAFE.putInt(i + 12, color);
-        UNSAFE.putFloat(i + 16, u);
-        UNSAFE.putFloat(i + 20, v);
-        UNSAFE.putInt(i + 24, overlay);
-        UNSAFE.putInt(i + 28, light);
-        UNSAFE.putInt(i + 32, normal);
+        MemoryUtil.memPutFloat(i, x);
+        MemoryUtil.memPutFloat(i + 4, y);
+        MemoryUtil.memPutFloat(i + 8, z);
+        MemoryUtil.memPutInt(i + 12, color);
+        MemoryUtil.memPutFloat(i + 16, u);
+        MemoryUtil.memPutFloat(i + 20, v);
+        MemoryUtil.memPutInt(i + 24, overlay);
+        MemoryUtil.memPutInt(i + 28, light);
+        MemoryUtil.memPutInt(i + 32, normal);
 
         this.advance();
     }

@@ -10,7 +10,6 @@ import me.jellysquid.mods.sodium.client.gui.options.control.TickBoxControl;
 import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
 import me.jellysquid.mods.sodium.client.render.chunk.backends.multidraw.MultidrawChunkRenderBackend;
-import me.jellysquid.mods.sodium.client.util.UnsafeUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.option.AttackIndicator;
@@ -320,7 +319,6 @@ public class SodiumGameOptionPages {
                         .setTooltip(new TranslatableText("sodium.options.allow_direct_memory_access.tooltip").getString())
                         .setControl(TickBoxControl::new)
                         .setImpact(OptionImpact.HIGH)
-                        .setEnabled(UnsafeUtil.isSupported())
                         .setBinding((opts, value) -> opts.advanced.allowDirectMemoryAccess = value, opts -> opts.advanced.allowDirectMemoryAccess)
                         .build()
                 )

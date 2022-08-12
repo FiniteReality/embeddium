@@ -1,5 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.format.hfp;
 
+import org.lwjgl.system.MemoryUtil;
+
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterUnsafe;
 import me.jellysquid.mods.sodium.client.render.chunk.format.DefaultModelVertexFormats;
@@ -27,13 +29,13 @@ public class HFPModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsafe i
     private void writeQuadInternal(short x, short y, short z, int color, short u, short v, int light) {
         long i = this.writePointer;
 
-        UNSAFE.putShort(i, x);
-        UNSAFE.putShort(i + 2, y);
-        UNSAFE.putShort(i + 4, z);
-        UNSAFE.putInt(i + 8, color);
-        UNSAFE.putShort(i + 12, u);
-        UNSAFE.putShort(i + 14, v);
-        UNSAFE.putInt(i + 16, light);
+        MemoryUtil.memPutShort(i, x);
+        MemoryUtil.memPutShort(i + 2, y);
+        MemoryUtil.memPutShort(i + 4, z);
+        MemoryUtil.memPutInt(i + 8, color);
+        MemoryUtil.memPutShort(i + 12, u);
+        MemoryUtil.memPutShort(i + 14, v);
+        MemoryUtil.memPutInt(i + 16, light);
 
         this.advance();
     }

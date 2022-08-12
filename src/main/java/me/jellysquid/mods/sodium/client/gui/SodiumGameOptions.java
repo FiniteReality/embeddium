@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.gui;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.text.TranslatableText;
@@ -21,10 +20,6 @@ public class SodiumGameOptions {
     public final NotificationSettings notifications = new NotificationSettings();
 
     private Path configPath;
-
-    public void notifyListeners() {
-        SodiumClientMod.onConfigChanged(this);
-    }
 
     public static class AdvancedSettings {
         public boolean useVertexArrayObjects = true;
