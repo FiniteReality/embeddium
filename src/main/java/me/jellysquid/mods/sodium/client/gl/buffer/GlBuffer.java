@@ -1,7 +1,8 @@
 package me.jellysquid.mods.sodium.client.gl.buffer;
 
 import me.jellysquid.mods.sodium.client.gl.GlObject;
-import org.lwjgl.opengl.GL20C;
+
+import com.mojang.blaze3d.platform.GlStateManager;
 
 public abstract class GlBuffer extends GlObject {
     public static final int NULL_BUFFER_ID = 0;
@@ -9,7 +10,7 @@ public abstract class GlBuffer extends GlObject {
     private GlBufferMapping activeMapping;
 
     protected GlBuffer() {
-        this.setHandle(GL20C.glGenBuffers());
+        this.setHandle(GlStateManager._glGenBuffers());
     }
 
     public GlBufferMapping getActiveMapping() {

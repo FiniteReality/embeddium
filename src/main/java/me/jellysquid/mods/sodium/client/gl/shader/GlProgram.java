@@ -37,22 +37,22 @@ public class GlProgram<T> extends GlObject implements ShaderBindingContext {
     }
 
     public void bind() {
-        GL20C.glUseProgram(this.handle());
+    	GlStateManager._glUseProgram(this.handle());
     }
 
     public void unbind() {
-        GL20C.glUseProgram(0);
+    	GlStateManager._glUseProgram(0);
     }
 
     public void delete() {
-        GL20C.glDeleteProgram(this.handle());
+        GlStateManager.glDeleteProgram(this.handle());
 
         this.invalidateHandle();
     }
 
     @Override
     public <U extends GlUniform<?>> U bindUniform(String name, IntFunction<U> factory) {
-        int index = GL20C.glGetUniformLocation(this.handle(), name);
+        int index = GlStateManager._glGetUniformLocation(this.handle(), name);
 
         if (index < 0) {
             throw new NullPointerException("No uniform exists with name: " + name);
@@ -80,11 +80,11 @@ public class GlProgram<T> extends GlObject implements ShaderBindingContext {
 
         public Builder(Identifier name) {
             this.name = name;
-            this.program = GL20C.glCreateProgram();
+            this.program = GlStateManager.glCreateProgram();
         }
 
         public Builder attachShader(GlShader shader) {
-            GL20C.glAttachShader(this.program, shader.handle());
+        	GlStateManager.glAttachShader(this.program, shader.handle());
 
             return this;
         }
@@ -99,7 +99,7 @@ public class GlProgram<T> extends GlObject implements ShaderBindingContext {
          * @return An instantiated shader container as provided by the factory
          */
         public <U> GlProgram<U> link(Function<ShaderBindingContext, U> factory) {
-            GL20C.glLinkProgram(this.program);
+        	GlStateManager.glLinkProgram(this.program);
 
             String log = GL20C.glGetProgramInfoLog(this.program);
 
@@ -117,7 +117,7 @@ public class GlProgram<T> extends GlObject implements ShaderBindingContext {
         }
 
         public Builder bindAttribute(String name, int index) {
-            GL20C.glBindAttribLocation(this.program, index, name);
+        	GlStateManager._glBindAttribLocation(this.program, index, name);
 
             return this;
         }

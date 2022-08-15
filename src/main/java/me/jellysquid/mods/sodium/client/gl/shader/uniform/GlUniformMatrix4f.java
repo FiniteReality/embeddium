@@ -1,7 +1,8 @@
 package me.jellysquid.mods.sodium.client.gl.shader.uniform;
 
-import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryStack;
+
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import repack.joml.Matrix4f;
 
@@ -18,7 +19,7 @@ public class GlUniformMatrix4f extends GlUniform<Matrix4f>  {
             FloatBuffer buf = stack.callocFloat(16);
             value.get(buf);
 
-            GL30C.glUniformMatrix4fv(this.index, false, buf);
+            GlStateManager._glUniformMatrix4(this.index, false, buf);
         }
     }
 }
