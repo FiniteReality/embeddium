@@ -2,6 +2,8 @@ package me.jellysquid.mods.sodium.client;
 
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.VersionParsingException;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.system.Configuration;
@@ -14,10 +16,10 @@ public class SodiumPreLaunch {
     private static final Logger LOGGER = LogManager.getLogger("Rubidium");
 
     public static void onPreLaunch() {
-        checkJemalloc();
+        DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> SodiumPreLaunch::checkJemalloc);
     }
 
-    private static void checkJemalloc() {
+    private static Object checkJemalloc() {
         // LWJGL 3.2.3 ships Jemalloc 5.2.0 which seems to be broken on Windows and suffers from critical memory leak problems
         // Using the system allocator prevents memory leaks and other problems
         // See changelog here: https://github.com/jemalloc/jemalloc/releases/tag/5.2.1
@@ -28,6 +30,7 @@ public class SodiumPreLaunch {
                 Configuration.MEMORY_ALLOCATOR.set("system");
             }
         }
+        return null;
     }
 
     private static boolean isVersionWithinRange(String curStr, String minStr, String maxStr) {
