@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.gl.shader.uniform;
 
-import org.lwjgl.opengl.GL30C;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 public class GlUniformInt extends GlUniform<Integer> {
     public GlUniformInt(int index) {
@@ -13,6 +13,6 @@ public class GlUniformInt extends GlUniform<Integer> {
     }
 
     public void setInt(int value) {
-        GL30C.glUniform1i(this.index, value);
+    	GlStateManager._glUniform1i(this.index, value);
     }
 }
