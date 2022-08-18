@@ -15,6 +15,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
+import net.minecraftforge.client.ForgeHooksClient;
+
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,6 +39,19 @@ public abstract class MixinWorldRenderer implements WorldRendererExtended {
 
     @Unique
     private int frame;
+    
+    @Shadow
+    private int ticks;
+    
+    @Shadow
+    @Final
+    private MinecraftClient client;
+    
+    @Shadow
+    private Frustum capturedFrustum;
+    
+    @Shadow
+    private Frustum frustum;
 
     @Override
     public SodiumWorldRenderer getSodiumWorldRenderer() {
@@ -101,6 +116,8 @@ public abstract class MixinWorldRenderer implements WorldRendererExtended {
         } finally {
             RenderDevice.exitManagedCode();
         }
+        
+        ForgeHooksClient.dispatchRenderStage(renderLayer, ((WorldRenderer)(Object)this), matrices, matrix, this.ticks, this.client.gameRenderer.getCamera(), (this.capturedFrustum != null) ? this.capturedFrustum : this.frustum);
     }
 
     /**
