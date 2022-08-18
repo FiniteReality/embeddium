@@ -55,8 +55,7 @@ public class FluidRenderer {
     private final LightPipelineProvider lighters;
     private final ColorBlender colorBlender;
 
-    // Cached wrapper type that adapts FluidRenderHandler to support QuadColorProvider<FluidState>
-    private final FabricFluidColorizerAdapter fabricColorProviderAdapter = new FabricFluidColorizerAdapter();
+    private final ForgeFluidColorizerAdapter forgeColorProviderAdapter = new ForgeFluidColorizerAdapter();
 
     private final QuadLightData quadLightData = new QuadLightData();
     private final int[] quadColors = new int[4];
@@ -382,7 +381,7 @@ public class FluidRenderer {
     }
 
     private ColorSampler<FluidState> createColorProviderAdapter(BlockRenderView view, BlockPos pos, FluidState state) {
-        FabricFluidColorizerAdapter adapter = this.fabricColorProviderAdapter;
+    	ForgeFluidColorizerAdapter adapter = this.forgeColorProviderAdapter;
         adapter.setHandler(view, pos, state);
 
         return adapter;
@@ -495,7 +494,7 @@ public class FluidRenderer {
         return -1.0f;
     }
 
-    private static class FabricFluidColorizerAdapter implements ColorSampler<FluidState> {
+    private static class ForgeFluidColorizerAdapter implements ColorSampler<FluidState> {
         private BlockRenderView world;
         private BlockPos pos;
         private FluidState state;
