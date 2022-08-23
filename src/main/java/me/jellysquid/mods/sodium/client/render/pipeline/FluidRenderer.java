@@ -233,7 +233,7 @@ public class FluidRenderer {
             rendered = true;
         }
 
-        this.quad.setFlags(ModelQuadFlags.IS_ALIGNED);
+        quad.setFlags(ModelQuadFlags.IS_ALIGNED);
 
         for (Direction dir : DirectionUtil.HORIZONTAL_DIRECTIONS) {
             float c1;
@@ -353,7 +353,7 @@ public class FluidRenderer {
 
     private void calculateQuadColors(ModelQuadView quad, BlockRenderView world,  BlockPos pos, LightPipeline lighter, Direction dir, float brightness, boolean colorized) {
         QuadLightData light = this.quadLightData;
-        lighter.calculate(quad, pos, light, dir, false);
+        lighter.calculate(quad, pos, light, null, dir, false);
 
         int[] biomeColors = null;
 

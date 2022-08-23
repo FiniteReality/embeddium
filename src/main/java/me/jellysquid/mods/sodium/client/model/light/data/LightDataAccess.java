@@ -24,8 +24,6 @@ import net.minecraft.world.BlockRenderView;
  * You can use the various static pack/unpack methods to extract these values in a usable format.
  */
 public abstract class LightDataAccess {
-    protected static final FluidState EMPTY_FLUID_STATE = Fluids.EMPTY.getDefaultState();
-
     private final BlockPos.Mutable pos = new BlockPos.Mutable();
     protected BlockRenderView world;
 
@@ -74,12 +72,13 @@ public abstract class LightDataAccess {
 
         boolean op = !state.shouldBlockVision(world, pos) || state.getOpacity(world, pos) == 0;
         boolean fo = state.isOpaqueFullCube(world, pos);
+        boolean fc = state.isFullCube(world, pos);
 
         // OPTIMIZE: Do not calculate lightmap data if the block is full and opaque.
         // FIX: Calculate lightmap data for light-emitting or emissive blocks, even though they are full and opaque.
         int lm = (fo && !em) ? 0 : WorldRenderer.getLightmapCoordinates(world, state, pos);
 
-        return packAO(ao) | packLM(lm) | packOP(op) | packFO(fo) | (1L << 60);
+        return packAO(ao) | packLM(lm) | packOP(op) | packFO(fo) | packFC(fc) | (1L << 60);
     }
 
     public static long packOP(boolean opaque) {
@@ -98,6 +97,14 @@ public abstract class LightDataAccess {
         return ((word >>> 57) & 0b1) != 0;
     }
 
+    public static long packFC(boolean fullCube) {
+        return (fullCube ? 1L : 0L) << 58;
+    }
+
+    public static boolean unpackFC(long word) {
+        return ((word >>> 58) & 0b1) != 0;
+    }
+    
     public static long packLM(int lm) {
         return (long) lm & 0xFFFFFFFFL;
     }
