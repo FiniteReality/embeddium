@@ -5,6 +5,8 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.screen.ConfigCorruptedScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
+
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL32C;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,6 +36,8 @@ public class MixinMinecraftClient {
 
     @Inject(method = "render", at = @At("RETURN"))
     private void postRender(boolean tick, CallbackInfo ci) {
+    	if(GLFW.glfwGetCurrentContext() == 0L) return;
+    	
         var fence = GL32C.glFenceSync(GL32C.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 
         if (fence == 0) {
