@@ -44,9 +44,12 @@ public class ClonedChunkSectionCache {
         }
 
         ChunkSectionPos pos = ChunkSectionPos.from(x, y, z);
-        section.init(this.world, pos);
-
-        this.byPosition.put(pos.asLong(), section);
+        long asLong = pos.asLong();
+        
+        if(asLong >= 0) {
+	        section.init(this.world, pos);
+	        this.byPosition.put(asLong, section);
+        }
 
         return section;
     }
