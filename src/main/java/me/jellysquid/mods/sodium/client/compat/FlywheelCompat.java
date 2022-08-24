@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.compat;
 
 import java.util.Collection;
 
+import com.jozufozu.flywheel.backend.Backend;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.block.entity.BlockEntity;
@@ -14,7 +15,7 @@ public class FlywheelCompat {
      * @param blockEntities The collection to be filtered.
      */
     public static void filterBlockEntityList(Collection<BlockEntity> blockEntities) {
-        if (SodiumClientMod.flywheelLoaded) {
+        if (SodiumClientMod.flywheelLoaded && Backend.getInstance().canUseInstancing()) {
             InstancedRenderRegistry r = InstancedRenderRegistry.getInstance();
             blockEntities.removeIf(r::shouldSkipRender);
         }
