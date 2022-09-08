@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -156,6 +157,11 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         }
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
+        
+        if(SodiumClientMod.immersiveLoaded)
+	        ImmersiveConnectionRenderer.renderConnectionsInSection(
+	                buildContext.buffers, buildContext.cache.getWorldSlice(), render.getChunkPos()
+	    );
 
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
             ChunkMeshData mesh = buffers.createMesh(pass);

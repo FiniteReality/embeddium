@@ -28,6 +28,8 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+	
+	compileOnly files("libs/ImmersiveEngineering-1.19.2-9.0.0-153.jar")
 }
 
 processResources {
