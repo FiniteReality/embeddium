@@ -24,8 +24,6 @@ import net.minecraft.text.Text;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.glfw.GLFW;
-
 public class SodiumGameOptionPages {
     private static final SodiumOptionsStorage sodiumOpts = new SodiumOptionsStorage();
     private static final MinecraftOptionsStorage vanillaOpts = new MinecraftOptionsStorage();
@@ -307,20 +305,6 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.HIGH)
                         .setBinding((opts, value) -> opts.performance.animateOnlyVisibleTextures = value, opts -> opts.performance.animateOnlyVisibleTextures)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_UPDATE)
-                        .build()
-                )
-                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setName(Text.translatable("sodium.options.use_adaptive_sync.name"))
-                        .setTooltip(Text.translatable("sodium.options.use_adaptive_sync.tooltip"))
-                        .setControl(TickBoxControl::new)
-                        .setImpact(OptionImpact.VARIES)
-                        .setEnabled(GLFW.glfwExtensionSupported("GLX_EXT_swap_control_tear") || GLFW.glfwExtensionSupported("WGL_EXT_swap_control_tear"))
-                        .setBinding((opts, value) -> {
-                            opts.performance.useAdaptiveSync = value;
-                            if (MinecraftClient.getInstance().getWindow() != null) {
-                                MinecraftClient.getInstance().getWindow().setVsync(MinecraftClient.getInstance().options.getEnableVsync().getValue());
-                            }
-                        }, opts -> opts.performance.useAdaptiveSync)
                         .build()
                 )
                 .build());
