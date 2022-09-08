@@ -26,7 +26,7 @@ public class MixinRenderLayers {
 	@Shadow @Final private static Map<IRegistryDelegate<Block>, Predicate<RenderLayer>> blockRenderChecks;
     @Shadow @Final private static Map<IRegistryDelegate<Fluid>, Predicate<RenderLayer>> fluidRenderChecks;
 	
-    @Inject(remap = false, at = @At("HEAD"), method = "canRenderInLayer(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/renderer/RenderType;)Z", cancellable = true)
+    @Inject(remap = false, at = @At("HEAD"), method = "canRenderInLayer(Lnet/minecraft/block/BlockState;Lnet/minecraft/client/render/RenderLayer;)Z", cancellable = true)
     private static void render(BlockState state, RenderLayer type, CallbackInfoReturnable<Boolean> cir)
     {
         Block block = state.getBlock();
@@ -42,7 +42,7 @@ public class MixinRenderLayers {
         }
     }
 
-    @Inject(remap = false, at = @At("HEAD"), method = "canRenderInLayer(Lnet/minecraft/world/level/material/FluidState;Lnet/minecraft/client/renderer/RenderType;)Z", cancellable = true)
+    @Inject(remap = false, at = @At("HEAD"), method = "canRenderInLayer(Lnet/minecraft/fluid/FluidState;Lnet/minecraft/client/render/RenderLayer;)Z", cancellable = true)
     private static void render(FluidState fluid, RenderLayer type, CallbackInfoReturnable<Boolean> cir)
     {
         Predicate<RenderLayer> rendertype;
