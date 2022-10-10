@@ -17,7 +17,7 @@ public class ClonedChunkSectionCache {
         this.world = world;
     }
 
-    public ClonedChunkSection acquire(int x, int y, int z) {
+    public synchronized ClonedChunkSection acquire(int x, int y, int z) {
         long key = ChunkSectionPos.asLong(x, y, z);
         ClonedChunkSection section = this.byPosition.get(key);
 
@@ -45,13 +45,13 @@ public class ClonedChunkSectionCache {
 
         ChunkSectionPos pos = ChunkSectionPos.from(x, y, z);
 	    section.init(this.world, pos);
-	    
+
 	    this.byPosition.put(pos.asLong(), section);
 
         return section;
     }
 
-    public void invalidate(int x, int y, int z) {
+    public synchronized void invalidate(int x, int y, int z) {
         this.byPosition.remove(ChunkSectionPos.asLong(x, y, z));
     }
 
