@@ -4,8 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlMutableBuffer;
 import me.jellysquid.mods.sodium.client.gl.shader.uniform.*;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
-import repack.joml.Matrix4f;
 
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL32C;
 
 /**

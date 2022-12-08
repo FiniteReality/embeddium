@@ -12,8 +12,9 @@ import net.minecraft.client.gui.WorldGenerationProgressTracker;
 import net.minecraft.client.gui.screen.LevelLoadingScreen;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Matrix4f;
 import net.minecraft.world.chunk.ChunkStatus;
+
+import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 
 /**
@@ -50,7 +51,7 @@ public class MixinLevelLoadingScreen {
                     .forEach(entry -> STATUS_TO_COLOR_FAST.put(entry.getKey(), ColorARGB.toABGR(entry.getIntValue(), 0xFF)));
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
         Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 

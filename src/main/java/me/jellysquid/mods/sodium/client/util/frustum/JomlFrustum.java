@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.util.frustum;
 
-import repack.joml.FrustumIntersection;
-import repack.joml.Matrix4f;
-import repack.joml.Vector3f;
+import org.joml.FrustumIntersection;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 /**
  * Default frustum implementation which extracts planes from a model-view-projection matrix.

@@ -10,19 +10,19 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.collection.PackedIntegerArray;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.ColorResolver;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
-import net.minecraft.world.level.ColorResolver;
 
 /**
  * Takes a slice of world state (block states, biome and light data arrays) and copies the data for use in off-thread

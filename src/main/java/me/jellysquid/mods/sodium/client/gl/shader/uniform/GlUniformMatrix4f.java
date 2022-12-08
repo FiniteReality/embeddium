@@ -1,10 +1,9 @@
 package me.jellysquid.mods.sodium.client.gl.shader.uniform;
 
+import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-
-import repack.joml.Matrix4f;
 
 import java.nio.FloatBuffer;
 

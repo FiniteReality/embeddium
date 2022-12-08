@@ -13,7 +13,6 @@ import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStor
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.option.AoMode;
 import net.minecraft.client.option.AttackIndicator;
 import net.minecraft.client.option.CloudRenderMode;
 import net.minecraft.client.option.GraphicsMode;
@@ -187,7 +186,7 @@ public class SodiumGameOptionPages {
                         .setName(Text.translatable("options.ao"))
                         .setTooltip(Text.translatable("sodium.options.smooth_lighting.tooltip"))
                         .setControl(TickBoxControl::new)
-                        .setBinding((opts, value) -> opts.getAo().setValue(value ? AoMode.MAX : AoMode.OFF), opts -> opts.getAo().getValue() == AoMode.MAX)
+                        .setBinding((opts, value) -> opts.getAo().setValue(value), opts -> opts.getAo().getValue())
                         .setImpact(OptionImpact.LOW)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())

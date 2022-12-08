@@ -8,12 +8,12 @@ import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalleteArray;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.collection.PackedIntegerArray;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.registry.BuiltinRegistries;
-import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClonedChunkSection {
     private static final LightType[] LIGHT_TYPES = LightType.values();
-    private static final ChunkSection EMPTY_SECTION = new ChunkSection(0, BuiltinRegistries.BIOME);
+    private ChunkSection EMPTY_SECTION;
 
     private final AtomicInteger referenceCount = new AtomicInteger(0);
     private final ClonedChunkSectionCache backingCache;
@@ -50,6 +50,7 @@ public class ClonedChunkSection {
     }
 
     public void init(World world, ChunkSectionPos pos) {
+    	EMPTY_SECTION =  new ChunkSection(0, world.getRegistryManager().get(RegistryKeys.BIOME));
         WorldChunk chunk = world.getChunk(pos.getX(), pos.getZ());
 
         if (chunk == null) {
