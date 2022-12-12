@@ -49,7 +49,7 @@ public class BlockOcclusionCache {
                 if (adjShape.isEmpty()){
                     return true; //example: top face of potted plants if top slab is placed above
                 }
-                else if (!adjState.isSideSolid(view,pos,facing.getOpposite(), SideShapeType.FULL)){
+                else if (!adjState.isSideSolid(view,adjPos,facing.getOpposite(), SideShapeType.FULL)){
                     return true; //example: face of potted plants rendered if top stair placed above
                 }
             }
