@@ -1,5 +1,5 @@
 plugins {
-	id 'dev.architectury.loom' version '0.10.0-SNAPSHOT'
+	id 'dev.architectury.loom' version '1.0-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -20,13 +20,22 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-
+	maven {
+		url "https://cursemaven.com"
+		content {
+			includeGroup "curse.maven"
+		}
+	}
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+	modCompileOnly "curse.maven:flywheel-486392:3535459"
+	modCompileOnly "curse.maven:oculus-581495:4105560"
+	modCompileOnly "curse.maven:codechickenlib-242818:3681973"
 	
 	compileOnly files("libs/unsafe.jar")
 }

@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
@@ -57,7 +58,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
     public ChunkBuilder(ChunkVertexType vertexType, ChunkRenderBackend<T> backend) {
         this.vertexType = vertexType;
         this.backend = backend;
-        this.limitThreads = getOptimalThreadCount();
+        this.limitThreads = getThreadCount();
     }
 
     /**
@@ -206,7 +207,16 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
      * but can be up to the number of available processor threads on the system.
      */
     private static int getOptimalThreadCount() {
-        return MathHelper.clamp(Runtime.getRuntime().availableProcessors(), 1, 10);
+        return MathHelper.clamp(Math.max(getMaxThreadCount() / 3, getMaxThreadCount() - 6), 1, 10);
+    }
+
+    private static int getThreadCount() {
+        int requested = SodiumClientMod.options().performance.chunkBuilderThreads;
+        return requested == 0 ? getOptimalThreadCount() : Math.min(requested, getMaxThreadCount());
+    }
+
+    private static int getMaxThreadCount() {
+        return Runtime.getRuntime().availableProcessors();
     }
 
     /**

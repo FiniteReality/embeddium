@@ -94,6 +94,8 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     private boolean useFogCulling;
     private double fogRenderCutoff;
 
+    private boolean alwaysDeferChunkUpdates;
+
     public ChunkRenderManager(SodiumWorldRenderer renderer, ChunkRenderBackend<T> backend, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance) {
         this.backend = backend;
         this.renderer = renderer;
@@ -130,6 +132,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         this.cameraZ = (float) cameraPos.z;
 
         this.useFogCulling = false;
+        this.alwaysDeferChunkUpdates = SodiumClientMod.options().performance.alwaysDeferChunkUpdates;
 
         if (SodiumClientMod.options().advanced.useFogOcclusion) {
             float dist = LegacyFogHelper.getFogCutoff() + FOG_PLANE_OFFSET;
@@ -154,7 +157,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
 
     private void addChunk(ChunkRenderContainer<T> render) {
         if (render.needsRebuild() && render.canRebuild()) {
-            if (render.needsImportantRebuild()) {
+            if (!this.alwaysDeferChunkUpdates && render.needsImportantRebuild()) {
                 this.importantRebuildQueue.enqueue(render);
             } else {
                 this.rebuildQueue.enqueue(render);

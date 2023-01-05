@@ -17,6 +17,7 @@ import java.nio.file.Path;
 public class SodiumGameOptions {
     public final QualitySettings quality = new QualitySettings();
     public final AdvancedSettings advanced = new AdvancedSettings();
+    public final PerformanceSettings performance = new PerformanceSettings();
     public final NotificationSettings notifications = new NotificationSettings();
 
     private Path configPath;
@@ -33,6 +34,11 @@ public class SodiumGameOptions {
         public boolean useBlockFaceCulling = true;
         public boolean allowDirectMemoryAccess = true;
         public boolean ignoreDriverBlacklist = false;
+    }
+
+    public static class PerformanceSettings {
+        public int chunkBuilderThreads = 0;
+        public boolean alwaysDeferChunkUpdates = false;
     }
 
     public static class QualitySettings {
