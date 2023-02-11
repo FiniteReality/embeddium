@@ -93,7 +93,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
 
     private boolean useFogCulling;
     private double fogRenderCutoff;
-
+    
     private boolean alwaysDeferChunkUpdates;
 
     public ChunkRenderManager(SodiumWorldRenderer renderer, ChunkRenderBackend<T> backend, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance) {

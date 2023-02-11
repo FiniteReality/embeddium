@@ -158,6 +158,9 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     public boolean isTerrainRenderComplete() {
         return this.chunkRenderManager.isBuildComplete();
     }
+
+    // We'll keep it to have compatibility with Oculus' older versions
+    public static boolean hasChanges = false;
     
     /**
      * Called prior to any chunk rendering in order to update necessary state.
