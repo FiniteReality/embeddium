@@ -21,7 +21,20 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-
+    maven {
+        name "Flywheel maven"
+        url "https://maven.tterrag.com/"
+    }
+    maven {
+        name "Immersive Engineering maven"
+        url "https://maven.blamejared.com"
+    }
+    maven {
+        url "https://cfa2.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
@@ -30,8 +43,9 @@ dependencies {
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 	
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	compileOnly files("libs/Flywheel-Forge-1.18-0.6.0.53.jar")
-	compileOnly files("libs/ImmersiveEngineering-1.18.2-8.0.2-149.jar")
+	modCompileOnly "com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53"
+	modCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149"
+	modCompileOnly "curse.maven:oculus-581495:4354939"
 }
 
 processResources {
