@@ -158,8 +158,6 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
     public boolean isTerrainRenderComplete() {
         return this.chunkRenderManager.isBuildComplete();
     }
-
-    public static boolean hasChanges = false;
     
     /**
      * Called prior to any chunk rendering in order to update necessary state.
@@ -168,11 +166,6 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         this.frustum = frustum;
 
         this.useEntityCulling = SodiumClientMod.options().advanced.useEntityCulling;
-
-        if(hasChanges) {
-            this.reload();
-            hasChanges = false;
-        }
 
         Profiler profiler = this.client.getProfiler();
         profiler.push("camera_setup");
