@@ -176,4 +176,9 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
         return new ChunkBuildResult(this.render, renderData.build(), meshes, this.frame);
     }
+    
+    @Override
+    public void releaseResources() {
+        this.renderContext.releaseResources();
+    }
 }
