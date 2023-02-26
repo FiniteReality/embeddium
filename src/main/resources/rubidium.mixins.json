@@ -12,6 +12,7 @@
     "conformVisibility": true
   },
   "client": [
+	"core.MixinDirection",
     "core.MixinFrustum",
     "core.MixinMinecraftClient",
     "core.matrix.MixinMatrix3f",
