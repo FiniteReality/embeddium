@@ -53,6 +53,10 @@ public abstract class ChunkDrawCallBatcher extends StructBuffer {
     public int getCount() {
         return this.count;
     }
+    
+    public boolean isEmpty() {
+        return this.count <= 0;
+    }
 
     public static class UnsafeChunkDrawCallBatcher extends ChunkDrawCallBatcher {
 

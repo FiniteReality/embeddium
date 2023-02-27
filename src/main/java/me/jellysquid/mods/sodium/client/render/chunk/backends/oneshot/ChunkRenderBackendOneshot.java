@@ -111,8 +111,10 @@ public class ChunkRenderBackendOneshot extends ChunkRenderShaderBackend<ChunkOne
     protected void drawBatch(CommandList commandList, ChunkOneshotGraphicsState state) {
         this.batch.end();
 
-        try (DrawCommandList drawCommandList = commandList.beginTessellating(state.tessellation)) {
-            drawCommandList.multiDrawArrays(this.batch.getIndicesBuffer(), this.batch.getLengthBuffer());
+        if (!batch.isEmpty()) {
+	        try (DrawCommandList drawCommandList = commandList.beginTessellating(state.tessellation)) {
+	            drawCommandList.multiDrawArrays(this.batch.getIndicesBuffer(), this.batch.getLengthBuffer());
+	        }
         }
     }
 

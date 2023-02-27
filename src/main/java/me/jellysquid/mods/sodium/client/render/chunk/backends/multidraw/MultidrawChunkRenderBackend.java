@@ -208,8 +208,10 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
         for (ChunkRegion<?> region : this.pendingBatches) {
             ChunkDrawCallBatcher batch = region.getDrawBatcher();
 
-            try (DrawCommandList drawCommandList = commandList.beginTessellating(region.getTessellation())) {
-                drawCommandList.multiDrawArraysIndirect(pointer, batch.getCount(), 0 /* tightly packed */);
+            if (!batch.isEmpty()) {
+	            try (DrawCommandList drawCommandList = commandList.beginTessellating(region.getTessellation())) {
+	                drawCommandList.multiDrawArraysIndirect(pointer, batch.getCount(), 0 /* tightly packed */);
+	            }
             }
 
             pointer += batch.getArrayLength();
