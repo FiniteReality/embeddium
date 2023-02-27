@@ -94,16 +94,9 @@ public class MixinItemRenderer {
 
             for (int i = 0; i < 4; i++) {
             	
-            	int finalColor = color;
+            	int fColor = multARGBInts(quad.getColor(i), color);
             	
-                try {
-                    if (bakedQuad.hasColor()) {
-                        finalColor = multABGRInts(quad.getColor(quad.getColorIndex()), color);
-                    }
-                } catch (Exception ex) {
-                }
-            	
-                drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), finalColor, quad.getTexU(i), quad.getTexV(i),
+                drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
                         light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
             }
 
@@ -113,7 +106,14 @@ public class MixinItemRenderer {
         drain.flush();
     }
     
-    private int multABGRInts(int colorA, int colorB) {
+    private int multARGBInts(int colorA, int colorB) {
+    	// Most common case: Either quad coloring or tint-based coloring, but not both
+        if (colorA == -1) {
+            return colorB;
+        } else if (colorB == -1) {
+            return colorA;
+        }
+        // General case (rare): Both colorings, actually perform the multiplication
         int a = (int)((ColorABGR.unpackAlpha(colorA)/255.0f) * (ColorABGR.unpackAlpha(colorB)/255.0f) * 255.0f);
         int b = (int)((ColorABGR.unpackBlue(colorA)/255.0f) * (ColorABGR.unpackBlue(colorB)/255.0f) * 255.0f);
         int g = (int)((ColorABGR.unpackGreen(colorA)/255.0f) * (ColorABGR.unpackGreen(colorB)/255.0f) * 255.0f);
