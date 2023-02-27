@@ -2,6 +2,8 @@ package me.jellysquid.mods.sodium.client.render.chunk.backends.multidraw;
 
 import org.lwjgl.system.MemoryUtil;
 
+import me.jellysquid.mods.sodium.client.gl.util.MemoryUtilHelper;
+
 import java.nio.ByteBuffer;
 
 public abstract class StructBuffer {
@@ -19,7 +21,7 @@ public abstract class StructBuffer {
     }
 
     public void delete() {
-        MemoryUtil.memFree(this.buffer);
+    	MemoryUtilHelper.memFree(this.buffer);
     }
 
     public long getBufferAddress() {
