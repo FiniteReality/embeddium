@@ -9,7 +9,6 @@ import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.util.color.ColorMixer;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
@@ -23,11 +22,11 @@ import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.biome.Biome;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30C;
 
 import java.io.IOException;
@@ -52,7 +51,7 @@ public class CloudRenderer {
 
     private VertexBuffer vertexBuffer;
     private CloudEdges edges;
-    private ShaderProgram clouds;
+    private Shader clouds;
     private final BackgroundRenderer.FogData fogData = new BackgroundRenderer.FogData(BackgroundRenderer.FogType.FOG_TERRAIN);
 
     private int prevCenterCellX, prevCenterCellY, cachedRenderDistance;
@@ -132,7 +131,9 @@ public class CloudRenderer {
         matrices.push();
 
         Matrix4f modelViewMatrix = matrices.peek().getPositionMatrix();
-        modelViewMatrix.translate(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ);
+        //Matrix4f.translate(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ);
+        // TODO
+        modelViewMatrix.multiplyByTranslation(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ);
 
         // PASS 1: Set up depth buffer
         RenderSystem.disableBlend();
@@ -302,7 +303,7 @@ public class CloudRenderer {
         }
 
         try {
-            this.clouds = new ShaderProgram(factory, "clouds", VertexFormats.POSITION_COLOR);
+            this.clouds = new Shader(factory, "clouds", VertexFormats.POSITION_COLOR);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

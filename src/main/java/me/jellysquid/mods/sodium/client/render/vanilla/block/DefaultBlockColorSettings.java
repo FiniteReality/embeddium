@@ -6,16 +6,16 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.util.registry.Registry;
 
 import java.util.Set;
 
 public class DefaultBlockColorSettings {
 	
-	private static final TagKey<Block> MODDED_BLENDED_BLOCKS = TagKey.of(ForgeRegistries.BLOCKS.getRegistryKey(), new Identifier("c", "blendable_blocks"));
-    private static final TagKey<Fluid> MODDED_BLENDED_FLUIDS = TagKey.of(ForgeRegistries.FLUIDS.getRegistryKey(), new Identifier("c", "blendable_fluids"));
+	private static final TagKey<Block> MODDED_BLENDED_BLOCKS = TagKey.of(Registry.BLOCK_KEY, new Identifier("c", "blendable_blocks"));
+    private static final TagKey<Fluid> MODDED_BLENDED_FLUIDS = TagKey.of(Registry.FLUID_KEY, new Identifier("c", "blendable_fluids"));
 	
 	private static final Set<Block> BLENDED_BLOCKS = new ReferenceOpenHashSet<>(Sets.newHashSet(
             Blocks.FERN, Blocks.LARGE_FERN, Blocks.POTTED_FERN, Blocks.GRASS, Blocks.TALL_GRASS,

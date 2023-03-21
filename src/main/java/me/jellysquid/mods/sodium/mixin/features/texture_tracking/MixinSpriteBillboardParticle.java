@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.mixin.features.texture_tracking;
 
-import me.jellysquid.mods.sodium.client.render.texture.SpriteExtended;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import net.minecraft.client.particle.BillboardParticle;
 import net.minecraft.client.particle.SpriteBillboardParticle;
@@ -27,7 +26,7 @@ public abstract class MixinSpriteBillboardParticle extends BillboardParticle {
 
     @Inject(method = "setSprite(Lnet/minecraft/client/texture/Sprite;)V", at = @At("RETURN"))
     private void afterSetSprite(Sprite sprite, CallbackInfo ci) {
-        this.shouldTickSprite = sprite != null && ((SpriteExtended) sprite.getContents()).hasAnimation();
+        this.shouldTickSprite = sprite != null && sprite.getAnimation() != null;
     }
 
     @Override

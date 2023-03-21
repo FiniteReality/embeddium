@@ -41,7 +41,7 @@ public abstract class AbstractWidget implements Drawable, Element, Selectable {
     }
 
     protected void drawQuads(Consumer<VertexConsumer> consumer) {
-    	RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
@@ -54,7 +54,7 @@ public abstract class AbstractWidget implements Drawable, Element, Selectable {
 
         BufferBuilder.BuiltBuffer output = bufferBuilder.end();
 
-        BufferRenderer.drawWithGlobalProgram(output);
+        BufferRenderer.drawWithShader(output);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
