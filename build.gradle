@@ -1,7 +1,6 @@
 plugins {
 	id 'dev.architectury.loom' version '0.10.0-SNAPSHOT'
 	id 'maven-publish'
-	id 'org.ajoberstar.grgit' version '4.1.0'
 }
 
 loom {
@@ -29,10 +28,11 @@ repositories {
         name "Immersive Engineering maven"
         url "https://maven.blamejared.com"
     }
-    maven {
-        url "https://cfa2.cursemaven.com"
+	maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
         content {
-            includeGroup "curse.maven"
+            includeGroup "maven.modrinth"
         }
     }
 }
@@ -42,10 +42,9 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 	
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modCompileOnly "com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53"
 	modCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149"
-	modCompileOnly "curse.maven:oculus-581495:4354939"
+	modCompileOnly "maven.modrinth:oculus:1.18.2-1.4.3a"
 }
 
 processResources {
