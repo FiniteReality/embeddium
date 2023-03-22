@@ -24,7 +24,6 @@ import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SideShapeType;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
@@ -47,8 +46,6 @@ public class FluidRenderer {
     private final MutableFloat scratchHeight = new MutableFloat(0);
     private final MutableInt scratchSamples = new MutableInt();
 
-    private final Sprite waterOverlaySprite;
-
     private final ModelQuadViewMutable quad = new ModelQuad();
 
     private final LightPipelineProvider lighters;
@@ -61,8 +58,6 @@ public class FluidRenderer {
     private final int[] quadColors = new int[4];
 
     public FluidRenderer(LightPipelineProvider lighters, ColorBlender colorBlender) {
-        this.waterOverlaySprite = ModelLoader.WATER_OVERLAY.getSprite();
-
         int normal = Norm3b.pack(0.0f, 1.0f, 0.0f);
 
         for (int i = 0; i < 4; i++) {
@@ -332,15 +327,19 @@ public class FluidRenderer {
                 int adjZ = posZ + dir.getOffsetZ();
 
                 Sprite sprite = sprites[1];
-
-                if (isWater) {
+                
+                boolean isOverlay = false;
+                
+                if (sprites.length > 2) {
                     BlockPos adjPos = this.scratchPos.set(adjX, adjY, adjZ);
                     BlockState adjBlock = world.getBlockState(adjPos);
 
                     if (!adjBlock.isOpaque() && !adjBlock.isAir()) {
-                        // ice, glass, stained glass, tinted glass
-                        sprite = this.waterOverlaySprite;
-
+                        sprite = sprites[2];
+                        if(sprite != null)
+                        	isOverlay = true;
+                        else
+                        	sprite = sprites[1];
                     }
                 }
 
@@ -368,7 +367,7 @@ public class FluidRenderer {
                 buffers.getIndexBufferBuilder(facing)
                         .add(vertexStart, ModelQuadWinding.CLOCKWISE);
 
-                if (sprite != this.waterOverlaySprite) {
+                if (!isOverlay) {
                     buffers.getIndexBufferBuilder(facing.getOpposite())
                             .add(vertexStart, ModelQuadWinding.COUNTERCLOCKWISE);
                 }
