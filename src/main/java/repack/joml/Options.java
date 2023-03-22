@@ -53,15 +53,13 @@ public final class Options {
     /**
      * Whether fast approximations of some java.lang.Math operations should be used.
      */
-    //public static final boolean FASTMATH = hasOption(System.getProperty("joml.fastmath", "false"));
-    public static final boolean FASTMATH = true;
-    
+    public static final boolean FASTMATH = hasOption(System.getProperty("joml.fastmath", "false"));
+
     /**
      * When {@link #FASTMATH} is <code>true</code>, whether to use a lookup table for sin/cos.
      */
-    //public static final boolean SIN_LOOKUP = hasOption(System.getProperty("joml.sinLookup", "false"));
-    public static final boolean SIN_LOOKUP = true;
-    
+    public static final boolean SIN_LOOKUP = hasOption(System.getProperty("joml.sinLookup", "false"));
+
     /**
      * When {@link #SIN_LOOKUP} is <code>true</code>, this determines the table size.
      */
