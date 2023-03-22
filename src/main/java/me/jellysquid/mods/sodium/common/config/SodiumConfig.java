@@ -3,6 +3,8 @@ package me.jellysquid.mods.sodium.common.config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraftforge.fml.loading.LoadingModList;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -95,39 +97,39 @@ public class SodiumConfig {
         }
     }
 
-    /*private void applyModOverrides() {
-        for (ModContainer container : FabricLoader.getInstance().getAllMods()) {
-            ModMetadata meta = container.getMetadata();
-
-            if (meta.containsCustomValue(JSON_KEY_SODIUM_OPTIONS)) {
-                CustomValue overrides = meta.getCustomValue(JSON_KEY_SODIUM_OPTIONS);
-
-                if (overrides.getType() != CustomValue.CvType.OBJECT) {
-                    LOGGER.warn("Mod '{}' contains invalid Sodium option overrides, ignoring", meta.getId());
-                    continue;
+    private void applyModOverrides() {
+        // Example of how to put overrides into the mods.toml file:
+        // ...
+        // [[mods]]
+        // modId="examplemod"
+        // [mods."sodium:options"]
+        // "features.chunk_rendering"=false
+        // ...
+        for (var meta : LoadingModList.get().getMods()) {
+            meta.getConfigElement(JSON_KEY_SODIUM_OPTIONS).ifPresent(overridesObj -> {
+                if (overridesObj instanceof Map overrides && overrides.keySet().stream().allMatch(key -> key instanceof String)) {
+                    overrides.forEach((key, value) -> {
+                        this.applyModOverride(meta.getModId(), (String)key, value);
+                    });
+                } else {
+                    LOGGER.warn("Mod '{}' contains invalid Sodium option overrides, ignoring", meta.getModId());
                 }
-
-                for (Map.Entry<String, CustomValue> entry : overrides.getAsObject()) {
-                    this.applyModOverride(meta, entry.getKey(), entry.getValue());
-                }
-            }
+            });
         }
     }
 
-    private void applyModOverride(ModMetadata meta, String name, CustomValue value) {
+    private void applyModOverride(String modid, String name, Object value) {
         Option option = this.options.get(name);
 
         if (option == null) {
-            LOGGER.warn("Mod '{}' attempted to override option '{}', which doesn't exist, ignoring", meta.getId(), name);
+            LOGGER.warn("Mod '{}' attempted to override option '{}', which doesn't exist, ignoring", modid, name);
             return;
         }
 
-        if (value.getType() != CustomValue.CvType.BOOLEAN) {
-            LOGGER.warn("Mod '{}' attempted to override option '{}' with an invalid value, ignoring", meta.getId(), name);
+        if (!(value instanceof Boolean enabled)) {
+            LOGGER.warn("Mod '{}' attempted to override option '{}' with an invalid value, ignoring", modid, name);
             return;
         }
-
-        boolean enabled = value.getAsBoolean();
 
         // disabling the option takes precedence over enabling
         if (!enabled && option.isEnabled()) {
@@ -135,9 +137,9 @@ public class SodiumConfig {
         }
 
         if (!enabled || option.isEnabled() || option.getDefiningMods().isEmpty()) {
-            option.addModOverride(enabled, meta.getId());
+            option.addModOverride(enabled, modid);
         }
-    }*/
+    }
 
     /**
      * Returns the effective option for the specified class name. This traverses the package path of the given mixin
