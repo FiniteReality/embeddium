@@ -1,5 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
@@ -15,7 +18,6 @@ import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCache
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.coderbot.iris.compat.sodium.impl.block_id.ChunkBuildBuffersExt;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -33,9 +35,6 @@ import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
-
-import java.util.EnumMap;
-import java.util.Map;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -109,10 +108,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                             ForgeHooksClient.setRenderType(layer);
                             IModelData modelData = modelDataMap.getOrDefault(blockPos, EmptyModelData.INSTANCE);
 
-                            if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
-                                ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(blockState, (short) -1);
-                            }
-
                             BakedModel model = cache.getBlockModels()
                                     .getModel(blockState);
 
@@ -130,11 +125,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                         for (RenderLayer layer : RenderLayer.getBlockLayers()) {
                             if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
                                 continue;
-                            }
-                            
-                            if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
-                                // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
-                                ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
                             }
 
                             ForgeHooksClient.setRenderType(layer);
