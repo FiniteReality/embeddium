@@ -35,7 +35,7 @@ public class BlockOcclusionCache {
 
         BlockState adjState = view.getBlockState(adjPos);
 
-        if (selfState.isSideInvisible(adjState, facing)) {
+        if (selfState.isSideInvisible(adjState, facing) || (adjState.hidesNeighborFace(view, pos, selfState, facing.getOpposite()) && selfState.supportsExternalFaceHiding())) {
             return false;
         } else if (adjState.isOpaque()) {
             VoxelShape selfShape = selfState.getCullingFace(view, pos, facing);
