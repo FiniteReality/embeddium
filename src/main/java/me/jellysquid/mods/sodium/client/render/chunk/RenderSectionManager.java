@@ -255,12 +255,16 @@ public class RenderSectionManager {
         Chunk chunk = this.world.getChunk(x, z);
         ChunkSection section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
 
-        if (section.isEmpty()) {
-        	if(!SodiumClientMod.immersiveLoaded) {
-        		render.setData(ChunkRenderData.EMPTY);
-        	}else if(!ImmersiveEmptyChunkChecker.hasWires(ChunkSectionPos.from(x, y, z))) {
-        		render.setData(ChunkRenderData.EMPTY);
-        	}
+        boolean isEmpty;
+        if (!section.isEmpty()) {
+            isEmpty = false;
+        } else if (!SodiumClientMod.immersiveLoaded) {
+            isEmpty = true;
+        } else {
+            isEmpty = !ImmersiveEmptyChunkChecker.hasWires(ChunkSectionPos.from(x, y, z));
+        }
+        if (isEmpty) {
+            render.setData(ChunkRenderData.EMPTY);
         } else {
             render.markForUpdate(ChunkUpdateType.INITIAL_BUILD);
         }
@@ -385,13 +389,11 @@ public class RenderSectionManager {
         ChunkRenderContext context = WorldSlice.prepare(this.world, render.getChunkPos(), this.sectionCache);
         int frame = this.currentFrame;
 
-        if (context == null) {
-            return SodiumClientMod.immersiveLoaded ? ImmersiveEmptyChunkChecker.makeEmptyRebuildTask(
-                    sectionCache, render.getChunkPos(), render, currentFrame
-            ) : new ChunkRenderEmptyBuildTask(render, frame);
+        if (context != null) {
+            return new ChunkRenderRebuildTask(render, context, frame);
+        } else {
+            return new ChunkRenderEmptyBuildTask(render, frame);
         }
-
-        return new ChunkRenderRebuildTask(render, context, frame);
     }
 
     public void markGraphDirty() {
