@@ -6,7 +6,7 @@
 [![](http://cf.way2muchnoise.eu/short_rubidium_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/rubidium)
 [![](http://cf.way2muchnoise.eu/versions/Available%20for_rubidium_full.svg)](https://www.curseforge.com/minecraft/mc-mods/rubidium/files)
 
-Rubidium is an Unofficial Fork of CaffeineMC's ["Sodium"](https://www.curseforge.com/minecraft/mc-mods/sodium), made to work with Forge Mod Loader.
+Rubidium is an Unofficial Fork of CaffeineMC's ["Sodium"](https://modrinth.com/mod/sodium), made to work with Forge Mod Loader.
 
 ## Disclaimer
 Rubidium is not and never will be compatible with Optifine!
