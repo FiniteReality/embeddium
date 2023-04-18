@@ -1,5 +1,5 @@
 plugins {
-	id 'dev.architectury.loom' version '1.0.312'
+	id 'dev.architectury.loom' version '0.10.0-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -26,18 +26,23 @@ repositories {
 			includeGroup "curse.maven"
 		}
 	}
+	maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+    	}
+  	}
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
+		
 	modCompileOnly "curse.maven:flywheel-486392:3535459"
-	modCompileOnly "curse.maven:oculus-581495:4105560"
 	modCompileOnly "curse.maven:codechickenlib-242818:3681973"
-	
-	compileOnly files("libs/unsafe.jar")
+	modCompileOnly "maven.modrinth:oculus:1.16.5-1.4.5"
 }
 
 processResources {
