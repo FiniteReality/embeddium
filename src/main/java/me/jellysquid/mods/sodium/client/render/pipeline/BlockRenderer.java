@@ -61,7 +61,7 @@ public class BlockRenderer {
     }
 
     public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BakedModel model, ChunkModelBuffers buffers, boolean cull, long seed, IModelData modelData) {
-        LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(state, model));
+        LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(state, model, world, pos));
         Vec3d offset = state.getModelOffset(world, pos);
 
         boolean rendered = false;
@@ -177,8 +177,8 @@ public class BlockRenderer {
         }
     }
 
-    private LightMode getLightingMode(BlockState state, BakedModel model) {
-        if (this.useAmbientOcclusion && model.useAmbientOcclusion() && state.getLuminance() == 0) {
+    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos) {
+        if (this.useAmbientOcclusion && model.useAmbientOcclusion() && state.getLightValue(world, pos) == 0) {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;
