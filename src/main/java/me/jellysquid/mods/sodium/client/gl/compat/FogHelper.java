@@ -1,44 +1,37 @@
 package me.jellysquid.mods.sodium.client.gl.compat;
 
-import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkFogMode;
-import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL20C;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
-import java.nio.FloatBuffer;
+import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkFogMode;
+import net.minecraft.client.render.BackgroundRenderer;
+import net.minecraft.util.math.MathHelper;
 
-/**
- * Deprecated functions used for extracting the current fog parameters from OpenGL state, only relevant for the
- * fixed-function pipeline. These are not supported in OpenGL Core.
- */
-@Deprecated
-public class LegacyFogHelper {
+public class FogHelper {
     private static final float FAR_PLANE_THRESHOLD_EXP = (float) Math.log(1.0f / 0.0019f);
     private static final float FAR_PLANE_THRESHOLD_EXP2 = MathHelper.sqrt(FAR_PLANE_THRESHOLD_EXP);
 
     public static float getFogEnd() {
-        return GL20C.glGetFloat(GL20.GL_FOG_END);
+    	return GlStateManager.FOG.end;
     }
 
     public static float getFogStart() {
-        return GL20C.glGetFloat(GL20.GL_FOG_START);
+    	return GlStateManager.FOG.start;
     }
 
     public static float getFogDensity() {
-        return GL20C.glGetFloat(GL20.GL_FOG_DENSITY);
+    	return GlStateManager.FOG.density;
     }
 
     /**
      * Retrieves the current fog mode from the fixed-function pipeline.
      */
     public static ChunkFogMode getFogMode() {
-        if (!GL20C.glGetBoolean(GL20.GL_FOG)) {
-            return ChunkFogMode.NONE;
-        }
-
-        int mode = GlStateManager.getInteger(GL20.GL_FOG_MODE);
+        int mode = GlStateManager.FOG.mode;
+        
+        if(mode == 0.0f)
+        	return ChunkFogMode.NONE;
 
         switch (mode) {
             case GL20.GL_EXP2:
@@ -52,7 +45,7 @@ public class LegacyFogHelper {
     }
 
     public static float getFogCutoff() {
-        int mode = GlStateManager.getInteger(GL20.GL_FOG_MODE);
+    	int mode = GlStateManager.FOG.mode;
 
         switch (mode) {
             case GL20.GL_LINEAR:
@@ -65,8 +58,8 @@ public class LegacyFogHelper {
                 return 0.0f;
         }
     }
-
-    public static void getFogColor(FloatBuffer buf) {
-    	GlStateManager.getFloat(GL20.GL_FOG_COLOR, buf);
+    
+    public static float[] getFogColor() {
+    	return new float[]{BackgroundRenderer.red, BackgroundRenderer.green, BackgroundRenderer.blue, 1.0F};
     }
 }

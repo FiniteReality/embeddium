@@ -1,12 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.shader;
 
-import me.jellysquid.mods.sodium.client.gl.compat.LegacyFogHelper;
+import me.jellysquid.mods.sodium.client.gl.compat.FogHelper;
 import org.lwjgl.opengl.GL20C;
-import org.lwjgl.system.MemoryStack;
-
-import com.mojang.blaze3d.platform.GlStateManager;
-
-import java.nio.FloatBuffer;
 
 /**
  * These shader implementations try to remain compatible with the deprecated fixed function pipeline by manually
@@ -43,9 +38,8 @@ public abstract class ChunkShaderFogComponent {
 
         @Override
         public void setup() {
-            ChunkShaderFogComponent.setupColorUniform(this.uFogColor);
-
-            GL20C.glUniform1f(this.uFogDensity, LegacyFogHelper.getFogDensity());
+            GL20C.glUniform4fv(this.uFogColor, FogHelper.getFogColor());
+            GL20C.glUniform1f(this.uFogDensity, FogHelper.getFogDensity());
         }
     }
 
@@ -62,25 +56,13 @@ public abstract class ChunkShaderFogComponent {
 
         @Override
         public void setup() {
-            ChunkShaderFogComponent.setupColorUniform(this.uFogColor);
+            float end = FogHelper.getFogEnd();
+            float start = FogHelper.getFogStart();
+            float[] color = FogHelper.getFogColor();
 
-            float end = LegacyFogHelper.getFogEnd();
-            float start = LegacyFogHelper.getFogStart();
-
+            GL20C.glUniform4fv(this.uFogColor, color);
             GL20C.glUniform1f(this.uFogLength, end - start);
             GL20C.glUniform1f(this.uFogEnd, end);
-        }
-    }
-
-    /**
-     * Copies the fog color from the deprecated fixed function pipeline and uploads it to the uniform at the
-     * given binding index.
-     */
-    private static void setupColorUniform(int index) {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer buf = stack.mallocFloat(4);
-            LegacyFogHelper.getFogColor(buf);
-            GlStateManager.uniform4(index, buf);
         }
     }
 
