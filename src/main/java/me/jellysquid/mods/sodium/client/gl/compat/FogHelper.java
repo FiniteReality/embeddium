@@ -30,7 +30,7 @@ public class FogHelper {
     public static ChunkFogMode getFogMode() {
         int mode = GlStateManager.FOG.mode;
         
-        if(mode == 0.0f)
+        if(mode == 0)
         	return ChunkFogMode.NONE;
 
         switch (mode) {
