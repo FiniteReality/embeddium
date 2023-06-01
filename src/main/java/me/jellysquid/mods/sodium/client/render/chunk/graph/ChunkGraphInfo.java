@@ -15,7 +15,7 @@ public class ChunkGraphInfo {
     private int lastVisibleFrame = -1;
 
     private long visibilityData;
-    private byte cullingState;
+    private short cullingState;
 
     public ChunkGraphInfo(RenderSection parent) {
         this.parent = parent;
@@ -48,24 +48,37 @@ public class ChunkGraphInfo {
         return visibilityData;
     }
 
-    public boolean isVisibleThrough(Direction from, Direction to) {
-        return ((this.visibilityData & (1L << ((from.ordinal() << 3) + to.ordinal()))) != 0L);
+
+    //The way this works now is that the culling state contains 2 inner states
+    // visited directions mask, and visitable direction mask
+    //On graph start, the root node(s) have the visit and visitable masks set to all visible
+    // when a chunk section is popped off the queue, the visited direction mask is anded with the
+    // visitable direction mask to return a bitfield containing what directions the graph can flow too
+    //When a chunk is visited in the graph the inbound direction is masked off from the visited direction mask
+    // and the visitable direction mask is updated (ored) with the visibilityData of the inbound direction
+    //When a chunk hasnt been visited before, it uses the parents data as the initial visited direction mask
+
+    public short computeQueuePop() {
+        short retVal = (short) (cullingState & (((cullingState >> 8) & 0xFF) | 0xFF00));
+        cullingState = 0;
+        return retVal;
     }
 
-    public void setCullingState(byte parent, Direction dir) {
-        this.cullingState = (byte) (parent | (1 << dir.ordinal()));
+    public void updateCullingState(Direction flow, short parent) {
+        int inbound = flow.ordinal();
+        this.cullingState |= (visibilityData >> (inbound<<3)) & 0xFF;
+        this.cullingState &= ~(1 << (inbound + 8));
+        //NOTE: this isnt strictly needed, due to the properties provided from the bfs search (never backtracking),
+        // but just incase/better readability/understandability
+        this.cullingState &= parent|0x00FF;
     }
 
-    public boolean canCull(Direction dir) {
-        return (this.cullingState & 1 << dir.ordinal()) != 0;
-    }
-
-    public byte getCullingState() {
-        return this.cullingState;
+    public void setCullingState(short parent) {
+        this.cullingState = (short) (parent & 0xFF00);
     }
 
     public void resetCullingState() {
-        this.cullingState = 0;
+        this.cullingState = -1;
     }
 
     public boolean isCulledByFrustum(Frustum frustum) {
