@@ -46,10 +46,6 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
             return false;
         }
         
-        if(mixinClassName.endsWith("MixinModList")) {
-        	return FMLLoader.getLoadingModList().getModFileById("betterendforge") != null;
-        }
-        
         String mixin = mixinClassName.substring(MIXIN_PACKAGE_ROOT.length());
         Option option = this.config.getEffectiveOptionForMixin(mixin);
 
