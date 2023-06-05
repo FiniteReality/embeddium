@@ -9,6 +9,7 @@ import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.FluidState;
@@ -60,6 +61,9 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
 
     // The array size for the section lookup table.
     private static final int SECTION_TABLE_ARRAY_SIZE = TABLE_LENGTH * TABLE_LENGTH * TABLE_LENGTH;
+
+    // Fallback BlockState to use if none were available in the array
+    private static final BlockState NULL_BLOCK_STATE = Blocks.AIR.getDefaultState();
 
     // The world this slice has copied data from
     private final World world;
@@ -216,6 +220,17 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
                 .copyUsingPalette(states, section.getBlockPalette());
     }
 
+    /**
+     * Helper function to ensure a valid BlockState is always returned (air is returned
+     * in place of null).
+     */
+    private static BlockState nullableState(BlockState state) {
+        if(state != null) {
+            return state;
+        } else
+            return NULL_BLOCK_STATE;
+    }
+
     @Override
     public BlockState getBlockState(BlockPos pos) {
         return this.getBlockState(pos.getX(), pos.getY(), pos.getZ());
@@ -226,13 +241,13 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
 
-        return this.blockStatesArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
+        return nullableState(this.blockStatesArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)]);
     }
 
     public BlockState getBlockStateRelative(int x, int y, int z) {
-        return this.blockStatesArrays[getLocalSectionIndex(x >> 4, y >> 4, z >> 4)]
-                [getLocalBlockIndex(x & 15, y & 15, z & 15)];
+        return nullableState(this.blockStatesArrays[getLocalSectionIndex(x >> 4, y >> 4, z >> 4)]
+                [getLocalBlockIndex(x & 15, y & 15, z & 15)]);
     }
 
     @Override
