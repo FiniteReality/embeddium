@@ -1,89 +1,44 @@
-<img src="src/main/resources/assets/sodium/icon.png" width="128">
+<p align="center">
+  <img src="logo.jpeg" width="250">
+</p>
 
-# Sodium (for Fabric)
+# Rubidium
+[![](http://cf.way2muchnoise.eu/short_rubidium_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/rubidium)
+[![](http://cf.way2muchnoise.eu/versions/Available%20for_rubidium_full.svg)](https://www.curseforge.com/minecraft/mc-mods/rubidium/files)
 
-![GitHub license](https://img.shields.io/github/license/CaffeineMC/sodium-fabric.svg)
-![GitHub issues](https://img.shields.io/github/issues/CaffeineMC/sodium-fabric.svg)
-![GitHub tag](https://img.shields.io/github/tag/CaffeineMC/sodium-fabric.svg)
+Rubidium is an Unofficial Fork of CaffeineMC's ["Sodium"](https://modrinth.com/mod/sodium), made to work with Forge Mod Loader.
 
-Sodium is a free and open-source optimization mod for the Minecraft client which improves frame rates and reduces
-micro-stutter  while fixing many graphical issues in Minecraft.
+## Disclaimer
+Rubidium is not and never will be compatible with Optifine!
 
-### 📥 Installation
 
-The latest releases of Sodium are published to our official [Modrinth](https://modrinth.com/mod/sodium) and
-[GitHub release](https://github.com/CaffeineMC/sodium-fabric/releases) pages. These releases are considered by our
-team to be suitable for general use, but they are not guaranteed to be free of bugs and other issues.
+## Shaders
+Want to play Minecraft with shaders with Rubidium? Try [Oculus!](https://www.curseforge.com/minecraft/mc-mods/oculus) made by Asek3!
 
-For more information about downloading and installing the mod, you can read our installation guide on
-[Modrinth](https://modrinth.com/mod/sodium#installation).
-It also contains information about any currently known compatibility issues, which are often useful to read.
+## Features
+* A modern OpenGL rendering pipeline for chunk rendering that takes advantage of multi-draw techniques, allowing for a significant reduction in CPU overhead (~90%) when rendering the world. This can make a huge difference to frame rates for most computers that are not bottle-necked by the GPU or other components. Even if your GPU can't keep up, you'll experience much more stable frame times thanks to the CPU being able to work on other rendering tasks while it waits.
+* Vertex data for rendered chunks is made much more compact, allowing for video memory and bandwidth requirements to be cut by almost 40%.
+* Nearby block updates now take advantage of multi-threading, greatly reducing lag spikes caused by chunks needing to be updated.
+* Chunk faces which are not visible (or facing away from the camera) are culled very early in the rendering process, eliminating a ton of geometry that would have to be processed on the GPU only to be immediately discarded. For integrated GPUs, this can greatly reduce memory bandwidth requirements and provide a modest speedup even when GPU-bound.
+* Plentiful optimizations for chunk loading and block rendering, making chunk loading significantly faster and less damaging to frame rates.
+* Many optimizations for vertex building and matrix transformations, speeding up block entity, mob, and item rendering significantly for when you get carried away placing too many chests in one room.
+* Many improvements to how the game manages memory and allocates objects, which in turn reduces memory consumption and lag spikes caused by garbage collector activity.
+* Many graphical fixes for smooth lighting effects, making the game run better while still applying a healthy amount of optimization.
+* Smooth lighting for fluids and other special blocks.
+* Smooth biome blending for blocks and fluids, providing greatly improved graphical quality that is significantly less computationally intensive.
+* Animated textures which are not visible in the world are not updated, speeding up texture updating on most hardware (especially AMD cards.)
 
-### 🐛 Reporting Issues
+## Discord
+[![](https://dcbadge.vercel.app/api/server/UCsyn5RS4s)](https://discord.gg/UCsyn5RS4s)
 
-You can report bugs and crashes by opening an issue on our [issue tracker](https://github.com/CaffeineMC/sodium-fabric/issues).
-Before opening a new issue, use the search tool to make sure that your issue has not already been reported and ensure
-that you have completely filled out the issue template. Issues that are duplicates or do not contain the necessary
-information to triage and debug may be closed.
+## Contributors
+<a href="https://github.com/Asek3/Rubidium/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Asek3/Rubidium" />
+</a>
 
-Please note that while the issue tracker is open to feature requests, development is primarily focused on
-improving hardware compatibility, performance, and finishing any unimplemented features necessary for parity with
-the vanilla renderer.
+## License
 
-### 💬 Join the Community
+[LGPL-3.0 license](https://github.com/Asek3/Rubidium/blob/1.18/dev/LICENSE)
 
-We have an [official Discord community](https://caffeinemc.net/discord) for all of our projects. By joining, you can:
-- Get installation help and technical support for all of our mods
-- Get the latest updates about development and community events
-- Talk with and collaborate with the rest of our team
-- ... and just hang out with the rest of our community.
-
-## ✅ Hardware Compatibility
-
-We only provide support for graphics cards which have up-to-date drivers for OpenGL 4.6. Most graphics cards which have
-been released since year 2010 are supported, such as the...
-
-- AMD Radeon HD 7000 Series (GCN 1) or newer
-- NVIDIA GeForce 400 Series (Fermi) or newer
-- Intel HD Graphics 500 Series (Skylake) or newer
-
-In some cases, older graphics cards may also work (so long as they have up-to-date drivers which have support for
-OpenGL 3.3), but they are not officially supported, and may not be compatible with future versions of Sodium.
-
-#### OpenGL Compatibility Layers
-
-Devices which need to use OpenGL translation layers (such as GL4ES, ANGLE, etc) are not supported and will very likely
-not work with Sodium. These translation layers do not implement required functionality and they suffer from underlying
-driver bugs which cannot be worked around.
-
-## 🛠️ Developer Guide
-
-### Building from sources
-
-Sodium uses a typical Gradle project structure and can be compiled by simply running the default `build` task. The build
-artifacts (typical mod binaries, and their sources) can be found in the `build/libs` directory.
-
-#### Requirements
-
-We recommend using a package manager (such as [SDKMAN](https://sdkman.io/)) to manage toolchain dependencies and keep
-them up to date. For many Linux distributions, these dependencies will be standard packages in your software
-repositories.
-
-- OpenJDK 17
-    - We recommend using the [Eclipse Termurin](https://adoptium.net/) distribution, as it's known to be high quality 
-      and to work without issues.
-- Gradle 8.2.1 (optional)
-    - The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:using_wrapper) is provided
-      in this repository can be used instead of installing a suitable version of Gradle yourself. However, if you are
-      building many projects, you may prefer to install it yourself through a suitable package manager as to save disk
-      space and to avoid many different Gradle daemons sitting around in memory.
-    - Typically, newer versions of Gradle will work without issues, but the build script is only tested against the
-      version specified by the wrapper script.
-
-## 📜 License
-
-Except where otherwise stated, this source code is provided under the terms of the GNU LGPLv3, a free and open-source
-license. For more information, please see the [license file](LICENSE.txt).
-
-When submitting pull requests to this repository, it is assumed that you are licensing your contribution under the
-GNU LGPLv3, unless you state otherwise.
+## Consider supporting 
+[![Support me on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Dasek3%26type%3Dpatrons&style=for-the-badge)](https://patreon.com/asek3)
