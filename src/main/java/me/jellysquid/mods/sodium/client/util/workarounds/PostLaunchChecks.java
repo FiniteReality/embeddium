@@ -12,8 +12,10 @@ import net.minecraft.util.Util.OperatingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 public class PostLaunchChecks {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-PostlaunchChecks");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-PostlaunchChecks");
 
     public static void checkDrivers() {
         if (isBrokenNvidiaDriverInstalled()) {

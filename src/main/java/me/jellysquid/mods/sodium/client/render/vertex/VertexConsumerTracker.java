@@ -8,8 +8,10 @@ import net.minecraft.client.render.VertexConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 public class VertexConsumerTracker {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-VertexConsumerTracker");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-VertexConsumerTracker");
     private static final ReferenceSet<Class<? extends VertexConsumer>> BAD_CONSUMERS = ReferenceSets.synchronize(new ReferenceOpenHashSet<>());
 
     public static void logBadConsumer(VertexConsumer consumer) {

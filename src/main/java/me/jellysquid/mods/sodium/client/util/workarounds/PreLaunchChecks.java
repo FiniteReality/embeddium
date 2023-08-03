@@ -7,8 +7,10 @@ import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 public class PreLaunchChecks {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-PrelaunchChecks");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-PrelaunchChecks");
 
     public static void checkDrivers() {
         boolean check = Boolean.parseBoolean(System.getProperty("sodium.driver.check", "true"));

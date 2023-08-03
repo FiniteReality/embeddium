@@ -17,7 +17,7 @@ public class OptionsScreenMixin extends Screen {
     }
 
     @Dynamic
-    @Inject(method = "method_19828", at = @At("HEAD"), cancellable = true)
+    @Inject(method = {"method_19828", "m_260753_"}, at = @At("HEAD"), cancellable = true)
     private void open(CallbackInfoReturnable<Screen> ci) {
         ci.setReturnValue(new SodiumOptionsGUI(this));
     }

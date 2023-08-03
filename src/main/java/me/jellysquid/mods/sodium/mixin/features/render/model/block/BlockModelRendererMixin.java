@@ -8,6 +8,7 @@ import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModelRenderer;
 import net.minecraft.client.render.model.BakedModel;
@@ -17,6 +18,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.LocalRandom;
 import net.minecraft.util.math.random.Random;
+import net.minecraftforge.client.model.data.ModelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,8 +36,8 @@ public class BlockModelRendererMixin {
      * @reason Use optimized vertex writer intrinsics, avoid allocations
      * @author JellySquid
      */
-    @Inject(method = "render(Lnet/minecraft/client/util/math/MatrixStack$Entry;Lnet/minecraft/client/render/VertexConsumer;Lnet/minecraft/block/BlockState;Lnet/minecraft/client/render/model/BakedModel;FFFII)V", at = @At("HEAD"), cancellable = true)
-    private void renderFast(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockState blockState, BakedModel bakedModel, float red, float green, float blue, int light, int overlay, CallbackInfo ci) {
+    @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true)
+    private void renderFast(MatrixStack.Entry entry, VertexConsumer vertexConsumer, BlockState blockState, BakedModel bakedModel, float red, float green, float blue, int light, int overlay, ModelData modelData, RenderLayer renderType, CallbackInfo ci) {
         var writer = VertexConsumerUtils.convertOrLog(vertexConsumer);
         if(writer == null) {
             return;
@@ -54,7 +56,7 @@ public class BlockModelRendererMixin {
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
             random.setSeed(42L);
-            List<BakedQuad> quads = bakedModel.getQuads(blockState, direction, random);
+            List<BakedQuad> quads = bakedModel.getQuads(blockState, direction, random, modelData, renderType);
 
             if (!quads.isEmpty()) {
                 renderQuads(entry, writer, defaultColor, quads, light, overlay);
@@ -62,7 +64,7 @@ public class BlockModelRendererMixin {
         }
 
         random.setSeed(42L);
-        List<BakedQuad> quads = bakedModel.getQuads(blockState, null, random);
+        List<BakedQuad> quads = bakedModel.getQuads(blockState, null, random, modelData, renderType);
 
         if (!quads.isEmpty()) {
             renderQuads(entry, writer, defaultColor, quads, light, overlay);

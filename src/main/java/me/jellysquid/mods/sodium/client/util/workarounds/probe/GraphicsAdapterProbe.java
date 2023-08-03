@@ -9,8 +9,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 public class GraphicsAdapterProbe {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-GraphicsAdapterProbe");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-GraphicsAdapterProbe");
 
     private static List<GraphicsAdapterInfo> ADAPTERS;
 

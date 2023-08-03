@@ -21,8 +21,6 @@ import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.NormI8;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SideShapeType;
 import net.minecraft.client.MinecraftClient;
@@ -38,6 +36,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockRenderView;
+import net.minecraftforge.client.ForgeHooksClient;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -125,10 +124,9 @@ public class FluidRenderer {
 
         boolean isWater = fluidState.isIn(FluidTags.WATER);
 
-        final FluidRenderHandler handler = getFluidRenderHandler(fluidState);
-        final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid, handler);
+        final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid);
 
-        Sprite[] sprites = handler.getFluidSprites(world, blockPos, fluidState);
+        Sprite[] sprites = ForgeHooksClient.getFluidSprites(world, blockPos, fluidState);
 
         float fluidHeight = this.fluidHeight(world, fluid, blockPos, Direction.UP);
         float northWestHeight, southWestHeight, southEastHeight, northEastHeight;
@@ -330,9 +328,12 @@ public class FluidRenderer {
                     BlockPos adjPos = this.scratchPos.set(adjX, adjY, adjZ);
                     BlockState adjBlock = world.getBlockState(adjPos);
 
-                    if (FluidRenderHandlerRegistry.INSTANCE.isBlockTransparent(adjBlock.getBlock())) {
+                    if (!adjBlock.isOpaque() && !adjBlock.isAir()) {
                         sprite = sprites[2];
-                        isOverlay = true;
+                        if(sprite != null)
+                            isOverlay = true;
+                        else
+                            sprite = sprites[1];
                     }
                 }
 
@@ -364,25 +365,14 @@ public class FluidRenderer {
         }
     }
 
-    private ColorProvider<FluidState> getColorProvider(Fluid fluid, FluidRenderHandler handler) {
+    private ColorProvider<FluidState> getColorProvider(Fluid fluid) {
         var override = this.colorProviderRegistry.getColorProvider(fluid);
 
         if (override != null) {
             return override;
         }
         
-        return DefaultColorProviders.adapt(handler);
-    }
-
-    private static FluidRenderHandler getFluidRenderHandler(FluidState fluidState) {
-        FluidRenderHandler handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getFluid());
-
-        // Match the vanilla FluidRenderer's behavior if the handler is null
-        if (handler == null) {
-            boolean isLava = fluidState.isIn(FluidTags.LAVA);
-            handler = FluidRenderHandlerRegistry.INSTANCE.get(isLava ? Fluids.LAVA : Fluids.WATER);
-        }
-        return handler;
+        return DefaultColorProviders.getFluidProvider();
     }
 
     private void updateQuad(ModelQuadView quad, WorldSlice world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness,

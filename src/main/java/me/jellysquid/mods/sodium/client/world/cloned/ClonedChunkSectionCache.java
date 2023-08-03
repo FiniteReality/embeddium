@@ -32,7 +32,7 @@ public class ClonedChunkSectionCache {
     }
 
     @Nullable
-    public ClonedChunkSection acquire(int x, int y, int z) {
+    public synchronized ClonedChunkSection acquire(int x, int y, int z) {
         var pos = ChunkSectionPos.asLong(x, y, z);
         var section = this.positionToEntry.getAndMoveToLast(pos);
 
@@ -68,7 +68,7 @@ public class ClonedChunkSectionCache {
         return new ClonedChunkSection(this.world, chunk, section, ChunkSectionPos.from(x, y, z));
     }
 
-    public void invalidate(int x, int y, int z) {
+    public synchronized void invalidate(int x, int y, int z) {
         this.positionToEntry.remove(ChunkSectionPos.asLong(x, y, z));
     }
 

@@ -15,6 +15,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 @Mixin(DebugHud.class)
 public abstract class DebugHudMixin {
     @Shadow
@@ -26,7 +28,7 @@ public abstract class DebugHudMixin {
     private ArrayList<String> redirectRightTextEarly(Object[] elements) {
         ArrayList<String> strings = Lists.newArrayList((String[]) elements);
         strings.add("");
-        strings.add("Sodium Renderer");
+        strings.add(MODNAME + " Renderer");
         strings.add(Formatting.UNDERLINE + getFormattedVersionText());
 
         var renderer = SodiumWorldRenderer.instanceNullable();

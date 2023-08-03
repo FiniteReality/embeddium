@@ -2,8 +2,10 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.client.model.data.ModelData;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -19,12 +21,15 @@ public class BlockRenderContext {
 
     private long seed;
 
+    private ModelData modelData;
+    private RenderLayer renderLayer;
+
 
     public BlockRenderContext(WorldSlice world) {
         this.world = world;
     }
 
-    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed) {
+    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, ModelData modelData, RenderLayer renderLayer) {
         this.pos.set(pos);
         this.origin.set(origin.getX(), origin.getY(), origin.getZ());
 
@@ -32,6 +37,9 @@ public class BlockRenderContext {
         this.model = model;
 
         this.seed = seed;
+
+        this.modelData = modelData;
+        this.renderLayer = renderLayer;
     }
 
     /**
@@ -74,5 +82,19 @@ public class BlockRenderContext {
      */
     public long seed() {
         return this.seed;
+    }
+
+    /**
+     * @return The additional data for model instance
+     */
+    public ModelData modelData() {
+        return this.modelData;
+    }
+
+    /**
+     * @return The render layer for model rendering
+     */
+    public RenderLayer renderLayer() {
+        return this.renderLayer;
     }
 }

@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.viewport.ViewportProvider;
-import me.jellysquid.mods.sodium.client.util.FlawlessFrames;
 import me.jellysquid.mods.sodium.client.world.WorldRendererExtended;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.GameOptions;
@@ -14,6 +13,7 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.client.ForgeHooksClient;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,6 +35,18 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
 
     @Shadow
     private boolean shouldUpdate;
+
+    @Shadow
+    private int ticks;
+
+    @Shadow
+    @Final
+    private MinecraftClient client;
+
+    @Shadow
+    public Frustum getFrustum() {
+        return null;
+    }
 
     @Unique
     private SodiumWorldRenderer renderer;
@@ -105,6 +117,8 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
         } finally {
             RenderDevice.exitManagedCode();
         }
+
+        ForgeHooksClient.dispatchRenderStage(renderLayer, ((WorldRenderer)(Object)this), matrices, matrix, this.ticks, this.client.gameRenderer.getCamera(), this.getFrustum());
     }
 
     /**
@@ -113,14 +127,12 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      */
     @Overwrite
     private void setupTerrain(Camera camera, Frustum frustum, boolean hasForcedFrustum, boolean spectator) {
-
         var viewport = ((ViewportProvider) frustum).sodium$createViewport();
-        var updateChunksImmediately = FlawlessFrames.isActive();
 
         RenderDevice.enterManagedCode();
 
         try {
-            this.renderer.setupTerrain(camera, viewport, this.frame++, spectator, updateChunksImmediately);
+            this.renderer.setupTerrain(camera, viewport, this.frame++, spectator, false);
         } finally {
             RenderDevice.exitManagedCode();
         }

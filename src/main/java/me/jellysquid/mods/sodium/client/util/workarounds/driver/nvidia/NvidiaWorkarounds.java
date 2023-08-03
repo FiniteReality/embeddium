@@ -7,8 +7,10 @@ import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 public class NvidiaWorkarounds {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-NvidiaWorkarounds");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-NvidiaWorkarounds");
 
     public static void install() {
         LOGGER.warn("Attempting to apply workarounds for the NVIDIA Graphics Driver...");

@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 public class SodiumOptionsGUI extends Screen {
     private final List<OptionPage> pages = new ArrayList<>();
 
@@ -45,7 +47,7 @@ public class SodiumOptionsGUI extends Screen {
     private ControlElement<?> hoveredElement;
 
     public SodiumOptionsGUI(Screen prevScreen) {
-        super(Text.translatable("Sodium Options"));
+        super(Text.translatable(MODNAME + " Options"));
 
         this.prevScreen = prevScreen;
 

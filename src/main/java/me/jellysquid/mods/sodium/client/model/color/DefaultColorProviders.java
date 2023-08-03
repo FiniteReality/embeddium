@@ -5,11 +5,11 @@ import me.jellysquid.mods.sodium.client.model.quad.blender.BlendedColorProvider;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeColorSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
-import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColorProvider;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 
 import java.util.Arrays;
 
@@ -18,8 +18,8 @@ public class DefaultColorProviders {
         return new VanillaAdapter(provider);
     }
 
-    public static ColorProvider<FluidState> adapt(FluidRenderHandler handler) {
-        return new FabricFluidAdapter(handler);
+    public static ColorProvider<FluidState> getFluidProvider() {
+        return new ForgeFluidAdapter();
     }
 
     public static class GrassColorProvider<T> extends BlendedColorProvider<T> {
@@ -75,16 +75,15 @@ public class DefaultColorProviders {
         }
     }
 
-    private static class FabricFluidAdapter implements ColorProvider<FluidState> {
-        private final FluidRenderHandler handler;
-
-        public FabricFluidAdapter(FluidRenderHandler handler) {
-            this.handler = handler;
-        }
-
+    private static class ForgeFluidAdapter implements ColorProvider<FluidState> {
         @Override
         public void getColors(WorldSlice view, BlockPos pos, FluidState state, ModelQuadView quad, int[] output) {
-            Arrays.fill(output, this.handler.getFluidColor(view, pos, state));
+            if (view == null || state == null) {
+                Arrays.fill(output, -1);
+                return;
+            }
+
+            Arrays.fill(output, IClientFluidTypeExtensions.of(state).getTintColor(state, view, pos));
         }
     }
 }

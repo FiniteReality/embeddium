@@ -10,7 +10,6 @@ import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -27,7 +26,6 @@ import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
-import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -43,7 +41,7 @@ import java.util.Objects;
  *
  * <p>Object pooling should be used to avoid huge allocations as this class contains many large arrays.</p>
  */
-public final class WorldSlice implements BlockRenderView, RenderAttachedBlockView, BiomeColorView {
+public final class WorldSlice implements BlockRenderView, BiomeColorView {
     private static final LightType[] LIGHT_TYPES = LightType.values();
 
     // The number of blocks in a section.
@@ -65,7 +63,8 @@ public final class WorldSlice implements BlockRenderView, RenderAttachedBlockVie
     private static final int LOCAL_XYZ_BITS = 4;
 
     // The world this slice has copied data from
-    private final ClientWorld world;
+    // TODO That's NOT how this should work. We should write our own getModelDataManager implementation for WorldSlice
+    public final ClientWorld world;
 
     // The accessor used for fetching biome data from the slice
     private final BiomeSlice biomeSlice;
@@ -81,9 +80,6 @@ public final class WorldSlice implements BlockRenderView, RenderAttachedBlockVie
 
     // (Local Section -> Block Entity) table.
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
-
-    // (Local Section -> Block Entity Attachment) table.
-    private final @Nullable Int2ReferenceMap<Object>[] blockEntityAttachmentArrays;
 
     // The starting point from which this slice captures blocks
     private int originX, originY, originZ;
@@ -137,7 +133,6 @@ public final class WorldSlice implements BlockRenderView, RenderAttachedBlockVie
         this.lightArrays = new ChunkNibbleArray[SECTION_ARRAY_SIZE][LIGHT_TYPES.length];
 
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
-        this.blockEntityAttachmentArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, MinecraftClient.getInstance().options.getBiomeBlendRadius().getValue());
@@ -171,7 +166,6 @@ public final class WorldSlice implements BlockRenderView, RenderAttachedBlockVie
         this.lightArrays[sectionIndex][LightType.SKY.ordinal()] = section.getLightArray(LightType.SKY);
 
         this.blockEntityArrays[sectionIndex] = section.getBlockEntityMap();
-        this.blockEntityAttachmentArrays[sectionIndex] = section.getBlockEntityAttachmentMap();
     }
 
     private void unpackBlockData(BlockState[] blockArray, ChunkRenderContext context, ClonedChunkSection section) {
@@ -237,7 +231,6 @@ public final class WorldSlice implements BlockRenderView, RenderAttachedBlockVie
             Arrays.fill(this.lightArrays[sectionIndex], null);
 
             this.blockEntityArrays[sectionIndex] = null;
-            this.blockEntityAttachmentArrays[sectionIndex] = null;
         }
     }
 
@@ -251,8 +244,8 @@ public final class WorldSlice implements BlockRenderView, RenderAttachedBlockVie
         int relY = y - this.originY;
         int relZ = z - this.originZ;
 
-        return this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
+        return Objects.requireNonNullElseGet(this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)], Blocks.AIR::getDefaultState);
     }
 
     @Override
@@ -341,21 +334,6 @@ public final class WorldSlice implements BlockRenderView, RenderAttachedBlockVie
     @Override
     public int getBottomY() {
         return this.world.getBottomY();
-    }
-
-    @Override
-    public @Nullable Object getBlockEntityRenderAttachment(BlockPos pos) {
-        int relX = pos.getX() - this.originX;
-        int relY = pos.getY() - this.originY;
-        int relZ = pos.getZ() - this.originZ;
-
-        var blockEntityAttachments = this.blockEntityAttachmentArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
-
-        if (blockEntityAttachments == null) {
-            return null;
-        }
-
-        return blockEntityAttachments.get(getLocalBlockIndex(relX & 15, relY & 15, relZ & 15));
     }
 
     @Override

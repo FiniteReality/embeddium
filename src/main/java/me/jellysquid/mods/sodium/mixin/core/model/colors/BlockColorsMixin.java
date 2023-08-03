@@ -21,8 +21,11 @@ public class BlockColorsMixin implements BlockColorsExtended {
 
     @Inject(method = "registerColorProvider", at = @At("HEAD"))
     private void preRegisterColorProvider(BlockColorProvider provider, Block[] blocks, CallbackInfo ci) {
-        for (Block block : blocks) {
-            this.blocksToColor.put(block, provider);
+        // Happens with Quark. Why??
+        if(provider != null) {
+            for (Block block : blocks) {
+                this.blocksToColor.put(block, provider);
+            }
         }
     }
 

@@ -5,9 +5,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.text.Text;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,8 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODID;
+
 public class SodiumGameOptions {
-    private static final String DEFAULT_FILE_NAME = "sodium-options.json";
+    private static final String DEFAULT_FILE_NAME = MODID + "-options.json";
 
     public final QualitySettings quality = new QualitySettings();
     public final AdvancedSettings advanced = new AdvancedSettings();
@@ -122,8 +124,7 @@ public class SodiumGameOptions {
     }
 
     private static Path getConfigPath(String name) {
-        return FabricLoader.getInstance()
-                .getConfigDir()
+        return FMLPaths.CONFIGDIR.get()
                 .resolve(name);
     }
 

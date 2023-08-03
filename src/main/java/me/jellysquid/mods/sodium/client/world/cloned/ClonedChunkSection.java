@@ -8,7 +8,6 @@ import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPaletteFallback;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalleteArray;
 import me.jellysquid.mods.sodium.mixin.core.world.chunk.PalettedContainerAccessor;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -32,7 +31,6 @@ public class ClonedChunkSection {
     private final ChunkSectionPos pos;
 
     private @Nullable Int2ReferenceMap<BlockEntity> blockEntities;
-    private @Nullable Int2ReferenceMap<Object> blockEntityAttachments;
 
     private final @Nullable ChunkNibbleArray[] lightDataArrays = new ChunkNibbleArray[LightType.values().length];
 
@@ -117,24 +115,6 @@ public class ClonedChunkSection {
         }
 
         this.blockEntities = blockEntities != null ? blockEntities : Int2ReferenceMaps.emptyMap();
-
-        Int2ReferenceOpenHashMap<Object> blockEntityAttachments = null;
-
-        // Retrieve any render attachments after we have copied all block entities, as this will call into the code of
-        // other mods. This could potentially result in the chunk being modified, which would cause problems if we
-        // were iterating over any data in that chunk.
-        // See https://github.com/CaffeineMC/sodium-fabric/issues/942 for more info.
-        for (var entry : Int2ReferenceMaps.fastIterable(this.blockEntities)) {
-            if (entry.getValue() instanceof RenderAttachmentBlockEntity holder) {
-                if (blockEntityAttachments == null) {
-                    blockEntityAttachments = new Int2ReferenceOpenHashMap<>();
-                }
-
-                blockEntityAttachments.put(entry.getIntKey(), holder.getRenderAttachmentData());
-            }
-        }
-
-        this.blockEntityAttachments = blockEntityAttachments != null ? blockEntityAttachments : Int2ReferenceMaps.emptyMap();
     }
 
     public @Nullable ReadableContainer<RegistryEntry<Biome>> getBiomeData() {
@@ -191,10 +171,6 @@ public class ClonedChunkSection {
 
     public @Nullable Int2ReferenceMap<BlockEntity> getBlockEntityMap() {
         return this.blockEntities;
-    }
-
-    public @Nullable Int2ReferenceMap<Object> getBlockEntityAttachmentMap() {
-        return this.blockEntityAttachments;
     }
 
     public @Nullable ChunkNibbleArray getLightArray(LightType lightType) {

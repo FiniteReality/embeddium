@@ -18,6 +18,7 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.client.render.model.BakedModel;
@@ -26,7 +27,11 @@ import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.util.math.random.LocalRandom;
 import net.minecraft.util.math.random.Random;
+import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.Map;
 
@@ -38,6 +43,9 @@ import java.util.Map;
  * array allocations, they are pooled to ensure that the garbage collector doesn't become overloaded.
  */
 public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> {
+
+    private final Random random = new LocalRandom(42L);
+
     private final RenderSection render;
     private final ChunkRenderContext renderContext;
 
@@ -70,6 +78,8 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         int maxY = minY + 16;
         int maxZ = minZ + 16;
 
+        Map<BlockPos, ModelData> modelDataMap = slice.world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
+
         // Initialise with minX/minY/minZ so initial getBlockState crash context is correct
         BlockPos.Mutable blockPos = new BlockPos.Mutable(minX, minY, minZ);
         BlockPos.Mutable modelOffset = new BlockPos.Mutable();
@@ -96,12 +106,15 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         if (blockState.getRenderType() == BlockRenderType.MODEL) {
                             BakedModel model = cache.getBlockModels()
                                 .getModel(blockState);
+                            ModelData modelData = model.getModelData(slice.world, blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
 
                             long seed = blockState.getRenderingSeed(blockPos);
 
-                            context.update(blockPos, modelOffset, blockState, model, seed);
-                            cache.getBlockRenderer()
-                                .renderModel(context, buffers);
+                            for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
+                                context.update(blockPos, modelOffset, blockState, model, seed, modelData, layer);
+                                cache.getBlockRenderer()
+                                        .renderModel(context, buffers);
+                            }
                         }
 
                         FluidState fluidState = blockState.getFluidState();

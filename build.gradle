@@ -22,8 +22,12 @@ version = "${project.mod_version}${getVersionMetadata()}"
 group = project.maven_group
 
 loom {
-    mixin.defaultRefmapName = "mixins.sodium.refmap.json"
-    accessWidenerPath = file("src/main/resources/sodium.accesswidener")
+    mixin.defaultRefmapName = "mixins.rubidium.refmap.json"
+    forge {
+        mixinConfigs = [
+                "rubidium.mixins.json"
+        ]
+    }
 }
 
 configurations {

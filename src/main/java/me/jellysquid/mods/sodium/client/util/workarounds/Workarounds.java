@@ -11,8 +11,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 public class Workarounds {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-Workarounds");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-Workarounds");
 
     private static final AtomicReference<Set<Reference>> ACTIVE_WORKAROUNDS = new AtomicReference<>(EnumSet.noneOf(Reference.class));
 

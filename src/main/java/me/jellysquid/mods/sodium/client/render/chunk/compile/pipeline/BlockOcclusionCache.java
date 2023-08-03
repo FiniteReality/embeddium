@@ -35,7 +35,7 @@ public class BlockOcclusionCache {
 
         BlockState adjState = view.getBlockState(adjPos);
 
-        if (selfState.isSideInvisible(adjState, facing)) {
+        if (selfState.isSideInvisible(adjState, facing) || (adjState.hidesNeighborFace(view, pos, selfState, facing.getOpposite()) && selfState.supportsExternalFaceHiding())) {
             return false;
         } else if (adjState.isOpaque()) {
             VoxelShape selfShape = selfState.getCullingFace(view, pos, facing);
@@ -49,7 +49,7 @@ public class BlockOcclusionCache {
                 if (adjShape.isEmpty()){
                     return true; //example: top face of potted plants if top slab is placed above
                 }
-                else if (!adjState.isSideSolid(view,pos,facing.getOpposite(), SideShapeType.FULL)){
+                else if (!adjState.isSideSolid(view,adjPos,facing.getOpposite(), SideShapeType.FULL)){
                     return true; //example: face of potted plants rendered if top stair placed above
                 }
             }

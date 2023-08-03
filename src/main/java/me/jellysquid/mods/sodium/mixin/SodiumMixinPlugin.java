@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin;
 
+import me.jellysquid.mods.sodium.client.SodiumPreLaunch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.ClassNode;
@@ -10,22 +11,27 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODID;
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 @SuppressWarnings("unused")
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
     private static final String MIXIN_PACKAGE_ROOT = "me.jellysquid.mods.sodium.mixin.";
 
-    private final Logger logger = LogManager.getLogger("Sodium");
+    private final Logger logger = LogManager.getLogger(MODNAME);
     private MixinConfig config;
 
     @Override
     public void onLoad(String mixinPackage) {
+        SodiumPreLaunch.onPreLaunch();
+
         try {
-            this.config = MixinConfig.load(new File("./config/sodium-mixins.properties"));
+            this.config = MixinConfig.load(new File("./config/" + MODID + "-mixins.properties"));
         } catch (Exception e) {
-            throw new RuntimeException("Could not load configuration file for Sodium", e);
+            throw new RuntimeException("Could not load configuration file for " + MODNAME, e);
         }
 
-        this.logger.info("Loaded configuration file for Sodium: {} options available, {} override(s) found",
+        this.logger.info("Loaded configuration file for " + MODNAME + ": {} options available, {} override(s) found",
                 this.config.getOptionCount(), this.config.getOptionOverrideCount());
     }
 
