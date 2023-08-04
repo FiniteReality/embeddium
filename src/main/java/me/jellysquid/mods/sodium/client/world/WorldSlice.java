@@ -23,7 +23,6 @@ import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
-import net.minecraftforge.client.model.data.ModelDataManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -61,7 +60,7 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
     private static final int LOCAL_XYZ_BITS = 4;
 
     // The world this slice has copied data from
-    private final ClientWorld world;
+    public final ClientWorld world;
 
     // The accessor used for fetching biome data from the slice
     private final BiomeSlice biomeSlice;
@@ -80,8 +79,6 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
 
     // The starting point from which this slice captures blocks
     private int originX, originY, originZ;
-
-    private final RubidiumModelDataManager modelDataManager = new RubidiumModelDataManager(this);
 
     public static ChunkRenderContext prepare(World world, ChunkSectionPos origin, ClonedChunkSectionCache sectionCache) {
         WorldChunk chunk = world.getChunk(origin.getX(), origin.getZ());
@@ -321,9 +318,5 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
 
     public static int getLocalSectionIndex(int x, int y, int z) {
         return (y * SECTION_ARRAY_LENGTH * SECTION_ARRAY_LENGTH) + (z * SECTION_ARRAY_LENGTH) + x;
-    }
-
-    public RubidiumModelDataManager getCustomModelDataManager() {
-        return this.modelDataManager;
     }
 }
