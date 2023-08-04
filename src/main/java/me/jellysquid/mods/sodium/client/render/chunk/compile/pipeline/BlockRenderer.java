@@ -148,9 +148,6 @@ public class BlockRenderer {
         var vertices = this.vertices;
 
         ModelQuadFacing normalFace = quad.getNormalFace();
-        // TODO WHY null is possible here? Maybe Forge specific
-        if(normalFace == null)
-            normalFace = ModelQuadFacing.UNASSIGNED;
 
         for (int dstIndex = 0; dstIndex < 4; dstIndex++) {
             int srcIndex = orientation.getVertexIndex(dstIndex);

@@ -48,8 +48,9 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     @Unique
     private ModelQuadFacing normalFace;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(int[] vertexData, int colorIndex, Direction face, Sprite sprite, boolean shade, CallbackInfo ci) {
+    // TODO Implement Forge hasAmbientOcclusion
+    @Inject(method = "<init>([IILnet/minecraft/util/math/Direction;Lnet/minecraft/client/texture/Sprite;ZZ)V", at = @At("RETURN"))
+    private void init(int[] vertexData, int colorIndex, Direction face, Sprite sprite, boolean shade, boolean hasAmbientOcclusion, CallbackInfo ci) {
         this.normal = ModelQuadUtil.calculateNormal(this);
         this.normalFace = ModelQuadUtil.findNormalFace(this.normal);
 
