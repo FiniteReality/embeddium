@@ -8,15 +8,13 @@ import me.jellysquid.mods.sodium.client.world.biome.BiomeSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
-import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
-import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
+import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.util.collection.PackedIntegerArray;
 import net.minecraft.util.math.*;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
@@ -41,7 +39,7 @@ import java.util.Objects;
  *
  * <p>Object pooling should be used to avoid huge allocations as this class contains many large arrays.</p>
  */
-public final class WorldSlice implements BlockRenderView, BiomeColorView {
+public final class WorldSlice implements BlockRenderView, RenderAttachedBlockView, BiomeColorView {
     private static final LightType[] LIGHT_TYPES = LightType.values();
 
     // The number of blocks in a section.
@@ -63,8 +61,7 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
     private static final int LOCAL_XYZ_BITS = 4;
 
     // The world this slice has copied data from
-    // TODO That's NOT how this should work. We should write our own getModelDataManager implementation for WorldSlice
-    public final ClientWorld world;
+    private final ClientWorld world;
 
     // The accessor used for fetching biome data from the slice
     private final BiomeSlice biomeSlice;
@@ -80,6 +77,9 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
 
     // (Local Section -> Block Entity) table.
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
+
+    // (Local Section -> Block Entity Attachment) table.
+    private final @Nullable Int2ReferenceMap<Object>[] blockEntityAttachmentArrays;
 
     // The starting point from which this slice captures blocks
     private int originX, originY, originZ;
@@ -133,6 +133,7 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
         this.lightArrays = new ChunkNibbleArray[SECTION_ARRAY_SIZE][LIGHT_TYPES.length];
 
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
+        this.blockEntityAttachmentArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, MinecraftClient.getInstance().options.getBiomeBlendRadius().getValue());
@@ -166,61 +167,37 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
         this.lightArrays[sectionIndex][LightType.SKY.ordinal()] = section.getLightArray(LightType.SKY);
 
         this.blockEntityArrays[sectionIndex] = section.getBlockEntityMap();
+        this.blockEntityAttachmentArrays[sectionIndex] = section.getBlockEntityAttachmentMap();
     }
 
     private void unpackBlockData(BlockState[] blockArray, ChunkRenderContext context, ClonedChunkSection section) {
         if (section.getBlockData() == null) {
-            this.unpackBlockDataEmpty(blockArray);
-        } else if (context.getOrigin().equals(section.getPosition()))  {
-            this.unpackBlockDataWhole(blockArray, section);
-        } else {
-            this.unpackBlockDataPartial(blockArray, section, context.getVolume());
+            Arrays.fill(blockArray, Blocks.AIR.getDefaultState());
+            return;
         }
-    }
 
-    private void unpackBlockDataEmpty(BlockState[] blockArray) {
-        Arrays.fill(blockArray, Blocks.AIR.getDefaultState());
-    }
+        var container = ReadableContainerExtended.of(section.getBlockData());
 
-    private void unpackBlockDataPartial(BlockState[] states, ClonedChunkSection section, BlockBox box) {
-        PackedIntegerArray array = section.getBlockData();
-        Objects.requireNonNull(array);
-
-        ClonedPalette<BlockState> palette = section.getBlockPalette();
-        Objects.requireNonNull(palette);
-
+        ChunkSectionPos origin = context.getOrigin();
         ChunkSectionPos pos = section.getPosition();
 
-        int minBlockX = Math.max(box.getMinX(), pos.getMinX());
-        int maxBlockX = Math.min(box.getMaxX(), pos.getMaxX());
+        if (origin.equals(pos))  {
+            container.sodium$unpack(blockArray);
+        } else {
+            var bounds = context.getVolume();
 
-        int minBlockY = Math.max(box.getMinY(), pos.getMinY());
-        int maxBlockY = Math.min(box.getMaxY(), pos.getMaxY());
+            int minBlockX = Math.max(bounds.getMinX(), pos.getMinX());
+            int maxBlockX = Math.min(bounds.getMaxX(), pos.getMaxX());
 
-        int minBlockZ = Math.max(box.getMinZ(), pos.getMinZ());
-        int maxBlockZ = Math.min(box.getMaxZ(), pos.getMaxZ());
+            int minBlockY = Math.max(bounds.getMinY(), pos.getMinY());
+            int maxBlockY = Math.min(bounds.getMaxY(), pos.getMaxY());
 
-        for (int y = minBlockY; y <= maxBlockY; y++) {
-            for (int z = minBlockZ; z <= maxBlockZ; z++) {
-                for (int x = minBlockX; x <= maxBlockX; x++) {
-                    int localBlockIndex = getLocalBlockIndex(x & 15, y & 15, z & 15);
+            int minBlockZ = Math.max(bounds.getMinZ(), pos.getMinZ());
+            int maxBlockZ = Math.min(bounds.getMaxZ(), pos.getMaxZ());
 
-                    int paletteIndex = array.get(localBlockIndex);
-                    var paletteValue =  palette.get(paletteIndex);
-
-                    if (paletteValue == null) {
-                        throw new IllegalStateException("Palette does not contain entry: " + paletteIndex);
-                    }
-
-                    states[localBlockIndex] = paletteValue;
-                }
-            }
+            container.sodium$unpack(blockArray, minBlockX & 15, minBlockY & 15, minBlockZ & 15,
+                    maxBlockX & 15, maxBlockY & 15, maxBlockZ & 15);
         }
-    }
-
-    private void unpackBlockDataWhole(BlockState[] states, ClonedChunkSection section) {
-        ((PackedIntegerArrayExtended) section.getBlockData())
-                .sodium$unpack(states, section.getBlockPalette());
     }
 
     public void reset() {
@@ -231,6 +208,7 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
             Arrays.fill(this.lightArrays[sectionIndex], null);
 
             this.blockEntityArrays[sectionIndex] = null;
+            this.blockEntityAttachmentArrays[sectionIndex] = null;
         }
     }
 
@@ -244,8 +222,8 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
         int relY = y - this.originY;
         int relZ = z - this.originZ;
 
-        return Objects.requireNonNullElseGet(this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)], Blocks.AIR::getDefaultState);
+        return this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
     }
 
     @Override
@@ -334,6 +312,21 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
     @Override
     public int getBottomY() {
         return this.world.getBottomY();
+    }
+
+    @Override
+    public @Nullable Object getBlockEntityRenderAttachment(BlockPos pos) {
+        int relX = pos.getX() - this.originX;
+        int relY = pos.getY() - this.originY;
+        int relZ = pos.getZ() - this.originZ;
+
+        var blockEntityAttachments = this.blockEntityAttachmentArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
+
+        if (blockEntityAttachments == null) {
+            return null;
+        }
+
+        return blockEntityAttachments.get(getLocalBlockIndex(relX & 15, relY & 15, relZ & 15));
     }
 
     @Override

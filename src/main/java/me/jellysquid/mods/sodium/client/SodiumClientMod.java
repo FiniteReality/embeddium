@@ -1,38 +1,36 @@
 package me.jellysquid.mods.sodium.client;
 
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import me.jellysquid.mods.sodium.client.gui.console.Console;
-import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
+import me.jellysquid.mods.sodium.client.util.FlawlessFrames;
 import me.jellysquid.mods.sodium.client.util.workarounds.PostLaunchChecks;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkConstants;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-@Mod(SodiumClientMod.MODID)
-public class SodiumClientMod {
-
-    public static final String MODID = "rubidium";
-    public static final String MODNAME = "Rubidium";
-
-    private static SodiumGameOptions CONFIG = loadConfig();
-    private static Logger LOGGER = LoggerFactory.getLogger(MODNAME);
+public class SodiumClientMod implements ClientModInitializer {
+    private static SodiumGameOptions CONFIG;
+    private static Logger LOGGER;
 
     private static String MOD_VERSION;
 
-    public SodiumClientMod() {
-        MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+    @Override
+    public void onInitializeClient() {
+        ModContainer mod = FabricLoader.getInstance()
+                .getModContainer("sodium")
+                .orElseThrow(NullPointerException::new);
 
-        logStartupMessages();
+        MOD_VERSION = mod.getMetadata()
+                .getVersion()
+                .getFriendlyString();
+
+        LOGGER = LoggerFactory.getLogger("Sodium");
+        CONFIG = loadConfig();
+
+        FlawlessFrames.onClientInitialization();
 
         PostLaunchChecks.checkDrivers();
     }
@@ -83,22 +81,5 @@ public class SodiumClientMod {
         }
 
         return MOD_VERSION;
-    }
-
-    private static void logStartupMessages() {
-        var name = Text.literal(MODNAME + " Renderer")
-                .setStyle(Style.EMPTY.withFormatting(Formatting.GREEN));
-
-        var version = Text.literal(" (version %s) loaded...".formatted(SodiumClientMod.getVersion()))
-                .setStyle(Style.EMPTY.withFormatting(Formatting.WHITE));
-
-        Console.instance()
-                .logMessage(MessageLevel.INFO, name.append(version), 9.0);
-
-        {
-            Console.instance()
-                    .logMessage(MessageLevel.INFO, Text.literal("* Help support development: ").append(Text.literal("https://caffeinemc.net/donate")
-                            .setStyle(Style.EMPTY.withFormatting(Formatting.AQUA))), 9.0);
-        }
     }
 }
