@@ -12,12 +12,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Users should not be instantiating or using this themselves unless they know what they're doing.
  */
 @ApiStatus.Internal
-@EventBusSubscriber(modid = "forge", bus = Bus.FORGE, value = Dist.CLIENT)
 public class RubidiumModelDataManager
 {
     private final BlockRenderView level;
@@ -43,6 +40,8 @@ public class RubidiumModelDataManager
     public RubidiumModelDataManager(BlockRenderView level)
     {
         this.level = level;
+
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     public void requestRefresh(@NotNull BlockEntity blockEntity)
@@ -86,7 +85,7 @@ public class RubidiumModelDataManager
     }
 
     @SubscribeEvent
-    public static void onChunkUnload(ChunkEvent.Unload event)
+    public void onChunkUnload(ChunkEvent.Unload event)
     {
         var level = event.getChunk().getWorldForge();
         if (!(level instanceof ClientWorld))
