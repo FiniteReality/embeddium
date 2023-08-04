@@ -1,11 +1,9 @@
 package me.jellysquid.mods.sodium.client.world.cloned;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import it.unimi.dsi.fastutil.ints.Int2ReferenceMaps;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -31,7 +29,6 @@ public class ClonedChunkSection {
     private final ChunkSectionPos pos;
 
     private final @Nullable Int2ReferenceMap<BlockEntity> blockEntityMap;
-    private final @Nullable Int2ReferenceMap<Object> blockEntityAttachmentMap;
 
     private final @Nullable ChunkNibbleArray[] lightDataArrays;
 
@@ -48,16 +45,11 @@ public class ClonedChunkSection {
         ReadableContainer<RegistryEntry<Biome>> biomeData = null;
 
         Int2ReferenceMap<BlockEntity> blockEntityMap = null;
-        Int2ReferenceMap<Object> blockEntityAttachmentMap = null;
 
         if (section != null) {
             if (!section.isEmpty()) {
                 blockData = ReadableContainerExtended.clone(section.getBlockStateContainer());
                 blockEntityMap = copyBlockEntities(chunk, pos);
-
-                if (blockEntityMap != null) {
-                    blockEntityAttachmentMap = copyBlockEntityAttachments(blockEntityMap);
-                }
             }
 
             biomeData = ReadableContainerExtended.clone(section.getBiomeContainer());
@@ -67,7 +59,6 @@ public class ClonedChunkSection {
         this.biomeData = biomeData;
 
         this.blockEntityMap = blockEntityMap;
-        this.blockEntityAttachmentMap = blockEntityAttachmentMap;
 
         this.lightDataArrays = copyLightData(world, pos);
     }
@@ -129,27 +120,6 @@ public class ClonedChunkSection {
         return blockEntities;
     }
 
-    @Nullable
-    private static Int2ReferenceMap<Object> copyBlockEntityAttachments(Int2ReferenceMap<BlockEntity> blockEntities) {
-        Int2ReferenceOpenHashMap<Object> blockEntityAttachments = null;
-
-        // Retrieve any render attachments after we have copied all block entities, as this will call into the code of
-        // other mods. This could potentially result in the chunk being modified, which would cause problems if we
-        // were iterating over any data in that chunk.
-        // See https://github.com/CaffeineMC/sodium-fabric/issues/942 for more info.
-        for (var entry : Int2ReferenceMaps.fastIterable(blockEntities)) {
-            if (entry.getValue() instanceof RenderAttachmentBlockEntity holder) {
-                if (blockEntityAttachments == null) {
-                    blockEntityAttachments = new Int2ReferenceOpenHashMap<>();
-                }
-
-                blockEntityAttachments.put(entry.getIntKey(), holder.getRenderAttachmentData());
-            }
-        }
-
-        return blockEntityAttachments;
-    }
-
     public ChunkSectionPos getPosition() {
         return this.pos;
     }
@@ -164,10 +134,6 @@ public class ClonedChunkSection {
 
     public @Nullable Int2ReferenceMap<BlockEntity> getBlockEntityMap() {
         return this.blockEntityMap;
-    }
-
-    public @Nullable Int2ReferenceMap<Object> getBlockEntityAttachmentMap() {
-        return this.blockEntityAttachmentMap;
     }
 
     public @Nullable ChunkNibbleArray getLightArray(LightType lightType) {
