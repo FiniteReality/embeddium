@@ -23,16 +23,17 @@ import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
+import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
 
 @Mixin(Window.class)
 public class MixinWindow {
 
     @Unique
-    private static final Logger sodium$LOGGER = LoggerFactory.getLogger("Sodium-EarlySetup");
+    private static final Logger sodium$LOGGER = LoggerFactory.getLogger(MODNAME + "-EarlySetup");
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/loading/ImmediateWindowHandler;setupMinecraftWindow(Ljava/util/function/IntSupplier;Ljava/util/function/IntSupplier;Ljava/util/function/Supplier;Ljava/util/function/LongSupplier;)J"))
     private long wrapGlfwCreateWindow(IntSupplier width, IntSupplier height, Supplier<String> title, LongSupplier monitor) {
->>>>>>> upstream/dev
         if (Workarounds.isWorkaroundEnabled(Workarounds.Reference.NVIDIA_THREADED_OPTIMIZATIONS)) {
             NvidiaWorkarounds.install();
         }
