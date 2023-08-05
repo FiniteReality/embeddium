@@ -35,7 +35,7 @@ public class PreLaunchChecks {
             LOGGER.error("  * NOTE: We will not provide support for any issues caused by using this option. You are on your own!");
             LOGGER.error("------------------------------------------------------------------------------------------------------------");
 
-            throw new RuntimeException("The currently installed Intel Graphics Driver is not compatible with Sodium, please " +
+            throw new RuntimeException("The currently installed Intel Graphics Driver is not compatible with " + MODNAME + ", please " +
                     "see this issue for more details: https://github.com/CaffeineMC/sodium-fabric/issues/899");
         }
     }
