@@ -23,8 +23,6 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
-        SodiumPreLaunch.onPreLaunch();
-
         try {
             this.config = MixinConfig.load(new File("./config/" + MODID + "-mixins.properties"));
         } catch (Exception e) {
