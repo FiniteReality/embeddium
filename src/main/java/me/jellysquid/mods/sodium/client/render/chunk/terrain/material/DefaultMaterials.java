@@ -13,10 +13,6 @@ public class DefaultMaterials {
     public static final Material CUTOUT_MIPPED = new Material(DefaultTerrainRenderPasses.CUTOUT, AlphaCutoffParameter.ONE_TENTH, true);
     public static final Material TRANSLUCENT = new Material(DefaultTerrainRenderPasses.TRANSLUCENT, AlphaCutoffParameter.ZERO, true);
 
-    public static Material forBlockState(BlockState state) {
-        return forRenderLayer(RenderLayers.getBlockLayer(state));
-    }
-
     public static Material forFluidState(FluidState state) {
         return forRenderLayer(RenderLayers.getFluidLayer(state));
     }

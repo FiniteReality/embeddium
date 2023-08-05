@@ -56,7 +56,7 @@ public class BlockRenderer {
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
-        var material = DefaultMaterials.forBlockState(ctx.state());
+        var material = DefaultMaterials.forRenderLayer(ctx.renderLayer());
         var meshBuilder = buffers.get(material);
 
         ColorProvider<BlockState> colorizer = this.colorProviderRegistry.getColorProvider(ctx.state().getBlock());

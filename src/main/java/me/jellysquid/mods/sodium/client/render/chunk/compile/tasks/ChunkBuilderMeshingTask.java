@@ -109,6 +109,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                             ModelData modelData = model.getModelData(slice.world, blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
 
                             long seed = blockState.getRenderingSeed(blockPos);
+                            random.setSeed(seed);
 
                             for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
                                 context.update(blockPos, modelOffset, blockState, model, seed, modelData, layer);
