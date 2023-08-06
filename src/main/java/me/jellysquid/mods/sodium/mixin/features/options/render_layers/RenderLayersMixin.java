@@ -16,7 +16,7 @@ public class RenderLayersMixin {
     private static boolean leavesFancy;
 
     @Redirect(
-            method = { "getBlockLayer", "getMovingBlockLayer" },
+            method = { "getBlockLayer", "getMovingBlockLayer", "getRenderLayers" },
             at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/RenderLayers;fancyGraphicsOrBetter:Z"))
     private static boolean redirectLeavesShouldBeFancy() {
         return leavesFancy;
