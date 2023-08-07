@@ -9,12 +9,17 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public class VertexFormatDescriptionImpl implements VertexFormatDescription {
+    // legacy use only
+    @Deprecated
+    private final VertexFormat format;
+
     private final int id;
     private final int stride;
 
     private final int[] offsets;
 
     public VertexFormatDescriptionImpl(VertexFormat format, int id) {
+        this.format = format;
         this.id = id;
         this.stride = format.getVertexSizeByte();
 
@@ -65,5 +70,10 @@ public class VertexFormatDescriptionImpl implements VertexFormatDescription {
     @Override
     public int stride() {
         return this.stride;
+    }
+
+    @Deprecated
+    public VertexFormat format() {
+        return this.format;
     }
 }
