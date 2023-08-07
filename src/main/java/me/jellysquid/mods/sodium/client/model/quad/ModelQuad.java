@@ -16,6 +16,8 @@ public class ModelQuad implements ModelQuadViewMutable {
     private int colorIdx;
     private int normal;
 
+    private boolean hasAmbientOcclusion = true;
+
     @Override
     public void setX(int idx, float x) {
         this.data[vertexOffset(idx) + POSITION_INDEX] = Float.floatToRawIntBits(x);
@@ -72,6 +74,11 @@ public class ModelQuad implements ModelQuadViewMutable {
     }
 
     @Override
+    public void setHasAmbientOcclusion(boolean hasAmbientOcclusion) {
+        this.hasAmbientOcclusion = hasAmbientOcclusion;
+    }
+
+    @Override
     public int getColorIndex() {
         return this.colorIdx;
     }
@@ -119,5 +126,10 @@ public class ModelQuad implements ModelQuadViewMutable {
     @Override
     public int getNormal() {
         return this.normal;
+    }
+
+    @Override
+    public boolean hasAmbientOcclusion() {
+        return this.hasAmbientOcclusion;
     }
 }

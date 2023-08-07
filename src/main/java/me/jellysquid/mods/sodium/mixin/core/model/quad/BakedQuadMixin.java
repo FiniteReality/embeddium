@@ -39,6 +39,10 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     @Final
     private boolean shade;
 
+    @Shadow
+    @Final
+    private boolean hasAmbientOcclusion;
+
     @Unique
     private int flags;
 
@@ -48,7 +52,6 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     @Unique
     private ModelQuadFacing normalFace;
 
-    // TODO Implement Forge hasAmbientOcclusion
     @Inject(method = "<init>([IILnet/minecraft/util/math/Direction;Lnet/minecraft/client/texture/Sprite;ZZ)V", at = @At("RETURN"))
     private void init(int[] vertexData, int colorIndex, Direction face, Sprite sprite, boolean shade, boolean hasAmbientOcclusion, CallbackInfo ci) {
         this.normal = ModelQuadUtil.calculateNormal(this);
@@ -121,5 +124,10 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     @Unique(silent = true) // The target class has a function with the same name in a remapped environment
     public boolean hasShade() {
         return this.shade;
+    }
+
+    @Override
+    public boolean hasAmbientOcclusion() {
+        return this.hasAmbientOcclusion;
     }
 }

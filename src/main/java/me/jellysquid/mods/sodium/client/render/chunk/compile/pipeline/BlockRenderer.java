@@ -18,6 +18,7 @@ import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
@@ -61,7 +62,7 @@ public class BlockRenderer {
 
         ColorProvider<BlockState> colorizer = this.colorProviderRegistry.getColorProvider(ctx.state().getBlock());
 
-        LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(ctx.state(), ctx.model(), ctx.world(), ctx.pos()));
+        LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(ctx.state(), ctx.model(), ctx.world(), ctx.pos(), ctx.renderLayer()));
         Vec3d renderOffset;
         
         if (ctx.state().hasModelOffset()) {
@@ -103,6 +104,9 @@ public class BlockRenderer {
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
             BakedQuadView quad = (BakedQuadView) quads.get(i);
+
+            if(!quad.hasAmbientOcclusion())
+                lighter = this.lighters.getLighter(LightMode.FLAT);
 
             final var lightData = this.getVertexLight(ctx, lighter, cullFace, quad);
             final var vertexColors = this.getVertexColors(ctx, colorizer, quad);
@@ -169,8 +173,8 @@ public class BlockRenderer {
         vertexBuffer.push(vertices, material);
     }
 
-    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos) {
-        if (this.useAmbientOcclusion && model.useAmbientOcclusion() && state.getLightEmission(world, pos) == 0) {
+    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos, RenderLayer renderLayer) {
+        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, renderLayer) && state.getLightEmission(world, pos) == 0) {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;

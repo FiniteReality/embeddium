@@ -60,4 +60,6 @@ public interface ModelQuadView {
     default boolean hasColor() {
         return this.getColorIndex() != -1;
     }
+
+    boolean hasAmbientOcclusion();
 }

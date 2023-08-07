@@ -61,4 +61,6 @@ public interface ModelQuadViewMutable extends ModelQuadView {
      * Sets the 3-byte packed normal for this quad
      */
     void setNormal(int norm);
+
+    void setHasAmbientOcclusion(boolean hasAmbientOcclusion);
 }
