@@ -9,6 +9,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderMatrices;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSectionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.SortedRenderLists;
+import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkStatus;
 import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTracker;
 import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTrackerHolder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
@@ -458,5 +459,24 @@ public class SodiumWorldRenderer {
 
     public boolean isSectionReady(int x, int y, int z) {
         return this.renderSectionManager.isSectionBuilt(x, y, z);
+    }
+
+    // Legacy compatibility
+    @Deprecated
+    public void onChunkAdded(int x, int z) {
+        var tracker = ChunkTrackerHolder.get(this.world);
+        tracker.onChunkStatusAdded(x, z, ChunkStatus.FLAG_HAS_BLOCK_DATA);
+    }
+
+    @Deprecated
+    public void onChunkLightAdded(int x, int z) {
+        var tracker = ChunkTrackerHolder.get(this.world);
+        tracker.onChunkStatusAdded(x, z, ChunkStatus.FLAG_HAS_LIGHT_DATA);
+    }
+
+    @Deprecated
+    public void onChunkRemoved(int x, int z) {
+        var tracker = ChunkTrackerHolder.get(this.world);
+        tracker.onChunkStatusRemoved(x, z, ChunkStatus.FLAG_ALL);
     }
 }
