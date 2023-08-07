@@ -39,6 +39,7 @@
     "features.model.MultipartBakedModelMixin",
     "features.model.WeightedBakedModelMixin",
     "features.options.overlays.InGameHudMixin",
+    "features.options.overlays.VanillaGuiOverlayMixin",
     "features.options.render_layers.LeavesBlockMixin",
     "features.options.render_layers.RenderLayersMixin",
     "features.options.weather.WorldRendererMixin",
