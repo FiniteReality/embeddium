@@ -97,7 +97,7 @@ public class BlockRenderer {
 
             final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
             builder.reset();
-            rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, builder, random, seed, modelData, cull, this.occlusionCache);
+            rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, builder, random, seed, modelData, cull, this.occlusionCache, buffers.getRenderData());
             builder.flush(buffers);
             return rendered;
         }

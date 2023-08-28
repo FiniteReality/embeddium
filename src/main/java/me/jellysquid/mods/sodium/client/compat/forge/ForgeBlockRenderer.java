@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.client.compat.forge;
 
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
+import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.block.BlockState;
@@ -9,6 +11,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -31,8 +34,18 @@ public class ForgeBlockRenderer {
     private final ThreadLocal<VertexBufferConsumer> consumerFlat = ThreadLocal.withInitial(VertexBufferConsumer::new);
     private final ThreadLocal<VertexBufferConsumer> consumerSmooth = ThreadLocal.withInitial(VertexBufferConsumer::new);
 
+    private void processQuad(ChunkRenderData.Builder renderData, BakedQuad quad) {
+        ModelQuadView src = (ModelQuadView)quad;
+        Sprite sprite = src.rubidium$getSprite();
+
+        if (sprite != null) {
+            renderData.addSprite(sprite);
+        }
+    }
+
     public boolean renderBlock(LightMode mode, BlockState state, BlockPos pos, BlockRenderView world, BakedModel model, MatrixStack stack,
-                               VertexConsumer buffer, Random random, long seed, IModelData data, boolean checkSides, BlockOcclusionCache sideCache) {
+                               VertexConsumer buffer, Random random, long seed, IModelData data, boolean checkSides, BlockOcclusionCache sideCache,
+                               ChunkRenderData.Builder renderData) {
         VertexBufferConsumer consumer = mode == LightMode.FLAT ? this.consumerFlat.get() : this.consumerSmooth.get();
         consumer.setBuffer(buffer);
         VertexLighterFlat lighter = mode == LightMode.FLAT ? this.lighterFlat.get() : this.lighterSmooth.get();
@@ -52,7 +65,9 @@ public class ForgeBlockRenderer {
             empty = false;
             // noinspection ForLoopReplaceableByForEach
             for(int i = 0; i < quads.size(); i++) {
-                quads.get(i).pipe(lighter);
+                BakedQuad quad = quads.get(i);
+                quad.pipe(lighter);
+                processQuad(renderData, quad);
             }
         }
 
@@ -68,7 +83,9 @@ public class ForgeBlockRenderer {
                     empty = false;
                     // noinspection ForLoopReplaceableByForEach
                     for(int i = 0; i < quads.size(); i++) {
-                        quads.get(i).pipe(lighter);
+                        BakedQuad quad = quads.get(i);
+                        quad.pipe(lighter);
+                        processQuad(renderData, quad);
                     }
                 }
             }
