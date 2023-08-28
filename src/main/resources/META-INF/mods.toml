@@ -4,10 +4,10 @@ license="LGPL-3.0-only"
 [[mods]]
 modId="rubidium"
 version="${version}"
-displayName="Rubidium"
+displayName="Embeddium"
 logoFile="icon.png"
 description='''
-Rubidium is a Unofficial Fork of the Sodium maked to work on FML.
+Embeddium is a fork of Rubidium, a fork of Sodium modified to run on Forge
 '''
-credits="NanoLive, CaffeineMC"
-authors="NanoLive"
+credits="embeddedt, NanoLive, CaffeineMC"
+authors="embeddedt"

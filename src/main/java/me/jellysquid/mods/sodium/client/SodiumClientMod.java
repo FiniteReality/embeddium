@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
     private static SodiumGameOptions CONFIG;
-    public static Logger LOGGER = LogManager.getLogger("Rubidium");
+    public static Logger LOGGER = LogManager.getLogger("Embeddium");
 
     private static String MOD_VERSION;
 
@@ -55,7 +55,7 @@ public class SodiumClientMod {
 
     public static Logger logger() {
         if (LOGGER == null) {
-            LOGGER = LogManager.getLogger("Rubidium");
+            LOGGER = LogManager.getLogger("Embeddium");
         }
 
         return LOGGER;

@@ -4,7 +4,7 @@
   "minVersion": "0.0.0",
   "compatibilityLevel": "JAVA_8",
   "plugin": "me.jellysquid.mods.sodium.mixin.SodiumMixinPlugin",
-  "refmap": "rubidium-refmap.json",
+  "refmap": "embeddium-refmap.json",
   "injectors": {
     "defaultRequire": 1
   },
