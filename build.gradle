@@ -35,6 +35,22 @@ repositories {
   	}
 }
 
+def extraModsDir = "extra-mods-${project.minecraft_version}"
+
+repositories {
+	exclusiveContent {
+		forRepository {
+			flatDir {
+				name "extra-mods"
+				dir file(extraModsDir)
+			}
+		}
+		filter {
+			includeGroup "extra-mods"
+		}
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -45,6 +61,16 @@ dependencies {
 	modCompileOnly "maven.modrinth:oculus:1.16.5-1.4.5"
 
 	modRuntimeOnly "curse.maven:lazydfu-460819:3249059"
+
+	// runtime remapping at home
+	for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
+		def basename = extraModJar.name.substring(0, extraModJar.name.length() - ".jar".length())
+		def versionSep = basename.lastIndexOf('-')
+		assert versionSep != -1
+		def artifactId = basename.substring(0, versionSep)
+		def version = basename.substring(versionSep + 1)
+		modRuntimeOnly("extra-mods:$artifactId:$version")
+	}
 }
 
 processResources {
