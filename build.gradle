@@ -35,6 +35,12 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+	maven {
+		url "https://cursemaven.com"
+		content {
+			includeGroup "curse.maven"
+		}
+	}
 }
 
 dependencies {
@@ -45,6 +51,9 @@ dependencies {
 	modCompileOnly "com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53"
 	modCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149"
 	modCompileOnly "maven.modrinth:oculus:1.18.2-1.4.3a"
+
+	modRuntimeOnly "curse.maven:framedblocks-441647:4567924"
+	modRuntimeOnly "curse.maven:lazydfu-460819:3544496"
 }
 
 processResources {
