@@ -1,6 +1,6 @@
 {
   "package": "me.jellysquid.mods.sodium.mixin",
-  "refmap": "rubidium-refmap.json",
+  "refmap": "embeddium-refmap.json",
   "required": true,
   "minVersion": "0.0.0",
   "compatibilityLevel": "JAVA_17",

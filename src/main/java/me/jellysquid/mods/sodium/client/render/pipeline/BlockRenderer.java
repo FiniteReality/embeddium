@@ -75,7 +75,8 @@ public class BlockRenderer {
 
         if(this.useForgeExperimentalLightingPipeline) {
             final MatrixStack mStack = new MatrixStack();
-            mStack.isEmpty();
+            if(offset != Vec3d.ZERO)
+                mStack.translate(offset.x, offset.y, offset.z);
 
             final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
             builder.reset();

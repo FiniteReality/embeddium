@@ -25,7 +25,7 @@ public abstract class MixinDebugHud {
     private ArrayList<String> redirectRightTextEarly(Object[] elements) {
         ArrayList<String> strings = Lists.newArrayList((String[]) elements);
         strings.add("");
-        strings.add("Rubidium Renderer");
+        strings.add("Embeddium Renderer");
         strings.add(Formatting.UNDERLINE + getFormattedVersionText());
 
         var renderer = SodiumWorldRenderer.instanceNullable();

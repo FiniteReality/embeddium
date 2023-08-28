@@ -16,7 +16,7 @@ import java.util.Set;
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
     private static final String MIXIN_PACKAGE_ROOT = "me.jellysquid.mods.sodium.mixin.";
 
-    private final Logger logger = LogManager.getLogger("Rubidium");
+    private final Logger logger = LogManager.getLogger("Embeddium");
     private SodiumConfig config;
 
     @Override
@@ -25,10 +25,10 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
         	SodiumPreLaunch.onPreLaunch();
             this.config = SodiumConfig.load(new File("./config/rubidium-mixins.properties"));
         } catch (Exception e) {
-            throw new RuntimeException("Could not load configuration file for Rubidium", e);
+            throw new RuntimeException("Could not load configuration file for Embeddium", e);
         }
 
-        this.logger.info("Loaded configuration file for Rubidium: {} options available, {} override(s) found",
+        this.logger.info("Loaded configuration file for Embeddium: {} options available, {} override(s) found",
                 this.config.getOptionCount(), this.config.getOptionOverrideCount());
     }
 

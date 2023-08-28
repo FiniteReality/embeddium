@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
     private static SodiumGameOptions CONFIG;
-    private static Logger LOGGER = LoggerFactory.getLogger("Rubidium");
+    private static Logger LOGGER = LoggerFactory.getLogger("Embeddium");
 
     private static String MOD_VERSION;
 
