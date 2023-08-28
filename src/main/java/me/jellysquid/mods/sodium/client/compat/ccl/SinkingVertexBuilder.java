@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.compat.ccl;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.util.math.Direction;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,7 +23,7 @@ import java.util.Arrays;
 @OnlyIn(Dist.CLIENT)
 public final class SinkingVertexBuilder implements VertexConsumer {
     private final ByteBuffer buffer = ByteBuffer.allocateDirect(2097152).order(ByteOrder.nativeOrder());
-    private final int[] sideCount = new int[ModelQuadFacing.values().length];
+    private final int[] sideCount = new int[ModelQuadFacing.VALUES.length];
     private int currentVertex;
 
     private float x;
@@ -118,17 +119,16 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     public void flush(@Nonnull ChunkModelBuffers buffers) {
-        final ModelQuadFacing[] facings = ModelQuadFacing.values();
         final int numQuads = currentVertex >> 2;
 
         for (int quadIdx = 0; quadIdx < numQuads; quadIdx++) {
             final int normal = buffer.getInt((quadIdx << 2) << 5);
-            final Direction dir = normal != -1 ? Direction.values()[normal] : null;
+            final Direction dir = normal != -1 ? DirectionUtil.ALL_DIRECTIONS[normal] : null;
             final ModelQuadFacing facing = dir != null ? ModelQuadFacing.fromDirection(dir) : ModelQuadFacing.UNASSIGNED;
             sideCount[facing.ordinal()]++;
         }
 
-        for (final ModelQuadFacing facing : facings) {
+        for (final ModelQuadFacing facing : ModelQuadFacing.VALUES) {
             final int count = sideCount[facing.ordinal()];
             if (count == 0) {
                 continue;
@@ -143,7 +143,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
         while (buffer.position() < byteSize) {
             final int normal = buffer.getInt(); // Fetch first normal for pre-selecting the vertex sink
-            final Direction dir = normal != -1 ? Direction.values()[normal] : null;
+            final Direction dir = normal != -1 ? DirectionUtil.ALL_DIRECTIONS[normal] : null;
             final ModelQuadFacing facing = dir != null ? ModelQuadFacing.fromDirection(dir) : ModelQuadFacing.UNASSIGNED;
             final int facingIdx = facing.ordinal();
 
@@ -160,7 +160,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
             sideMask |= 1 << facingIdx;
         }
 
-        for (final ModelQuadFacing facing : facings) {
+        for (final ModelQuadFacing facing : ModelQuadFacing.VALUES) {
             if (((sideMask >> facing.ordinal()) & 1) == 0) {
                 continue;
             }
