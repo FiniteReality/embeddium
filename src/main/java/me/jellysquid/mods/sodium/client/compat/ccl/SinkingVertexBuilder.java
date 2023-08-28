@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadWinding;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -25,7 +26,7 @@ import java.util.Arrays;
 @OnlyIn(Dist.CLIENT)
 public final class SinkingVertexBuilder implements VertexConsumer {
     private final ByteBuffer buffer = ByteBuffer.allocateDirect(2097152).order(ByteOrder.nativeOrder());
-    private final int[] sideCount = new int[ModelQuadFacing.values().length];
+    private final int[] sideCount = new int[ModelQuadFacing.VALUES.length];
     private int currentVertex;
 
     private float x;
@@ -135,12 +136,11 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     public void flush(@Nonnull ChunkModelBuilder buffers, BlockPos origin) {
-        final ModelQuadFacing[] facings = ModelQuadFacing.values();
         final int numQuads = currentVertex >> 2;
 
         for (int quadIdx = 0; quadIdx < numQuads; quadIdx++) {
             final int normal = buffer.getInt((quadIdx << 2) << 5);
-            final Direction dir = normal != -1 ? Direction.values()[normal] : null;
+            final Direction dir = normal != -1 ? DirectionUtil.ALL_DIRECTIONS[normal] : null;
             final ModelQuadFacing facing = dir != null ? ModelQuadFacing.fromDirection(dir) : ModelQuadFacing.UNASSIGNED;
             sideCount[facing.ordinal()]++;
         }
@@ -155,17 +155,17 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
         final int chunkId = buffers.getChunkId();
 
-        IndexBufferBuilder[] builders = new IndexBufferBuilder[facings.length];
+        IndexBufferBuilder[] builders = new IndexBufferBuilder[ModelQuadFacing.VALUES.length];
 
-        for(int i = 0; i < facings.length; i++) {
-            builders[i] = buffers.getIndexBufferBuilder(facings[i]);
+        for(int i = 0; i < ModelQuadFacing.VALUES.length; i++) {
+            builders[i] = buffers.getIndexBufferBuilder(ModelQuadFacing.VALUES[i]);
         }
 
         while (buffer.position() < byteSize) {
             int vertexStart = vertices.getVertexCount();
 
             final int normal = buffer.getInt(); // Fetch first normal for pre-selecting the vertex sink
-            final Direction dir = normal != -1 ? Direction.values()[normal] : null;
+            final Direction dir = normal != -1 ? DirectionUtil.ALL_DIRECTIONS[normal] : null;
             final ModelQuadFacing facing = dir != null ? ModelQuadFacing.fromDirection(dir) : ModelQuadFacing.UNASSIGNED;
             final int facingIdx = facing.ordinal();
 
