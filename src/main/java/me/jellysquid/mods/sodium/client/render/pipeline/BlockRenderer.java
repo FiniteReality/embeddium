@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.pipeline;
 
 import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
+import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
+import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.light.LightPipelineProvider;
@@ -23,6 +25,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -31,6 +34,8 @@ import net.minecraftforge.client.model.data.IModelData;
 
 import java.util.List;
 import java.util.Random;
+
+import net.minecraftforge.common.ForgeConfig;
 
 public class BlockRenderer {
     private final Random random = new XoRoShiRoRandom();
@@ -41,9 +46,12 @@ public class BlockRenderer {
     private final QuadLightData cachedQuadLightData = new QuadLightData();
 
     private final ColorBlender colorBlender;
+    private final ForgeBlockRenderer forgeBlockRenderer = new ForgeBlockRenderer();
+
     private final LightPipelineProvider lighters;
 
     private final boolean useAmbientOcclusion;
+    private final boolean useForgeExperimentalLightingPipeline;
 
     public BlockRenderer(MinecraftClient client, LightPipelineProvider lighters, ColorBlender colorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
@@ -53,15 +61,28 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
+        this.useForgeExperimentalLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
     }
 
     public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, IModelData modelData) {
-        LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(state, model, world, pos));
+        LightMode mode = this.getLightingMode(state, model, world, pos);
+        LightPipeline lighter = this.lighters.getLighter(mode);
         Vec3d offset = state.getModelOffset(world, pos);
 
         modelData = model.getModelData(world, pos, state, modelData);
 
         boolean rendered = false;
+
+        if(this.useForgeExperimentalLightingPipeline) {
+            final MatrixStack mStack = new MatrixStack();
+            mStack.isEmpty();
+
+            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
+            builder.reset();
+            rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, builder, random, seed, modelData, cull, this.occlusionCache);
+            builder.flush(buffers, origin);
+            return rendered;
+        }
 
         for (Direction dir : DirectionUtil.ALL_DIRECTIONS) {
             this.random.setSeed(seed);

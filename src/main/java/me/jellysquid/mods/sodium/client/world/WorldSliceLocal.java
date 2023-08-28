@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.world;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -9,16 +10,14 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.LightType;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.chunk.light.LightingProvider;
 import net.minecraft.world.level.ColorResolver;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -72,6 +71,11 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
+    public <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos pos, BlockEntityType<T> type) {
+        return view.getBlockEntity(pos, type);
+    }
+
+    @Override
     public BlockState getBlockState(BlockPos pos) {
         return view.getBlockState(pos);
     }
@@ -92,13 +96,13 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
-    public int getHeight() {
-        return view.getHeight();
+    public Stream<BlockState> getStatesInBox(Box box) {
+        return view.getStatesInBox(box);
     }
 
     @Override
-    public Stream<BlockState> method_29546(Box arg) {
-        return view.method_29546(arg);
+    public BlockHitResult raycast(BlockStateRaycastContext context) {
+        return view.raycast(context);
     }
 
     @Override
@@ -122,7 +126,72 @@ public class WorldSliceLocal implements BlockRenderView {
         return view.getDismountHeight(pos);
     }
 
-    public static <T> T raycast(RaycastContext arg, BiFunction<RaycastContext, BlockPos, T> context, Function<RaycastContext, T> blockRaycaster) {
-        return BlockView.raycast(arg, context, blockRaycaster);
+    public static <T, C> T raycast(Vec3d start, Vec3d end, C context, BiFunction<C, BlockPos, T> blockHitFactory, Function<C, T> missFactory) {
+        return BlockView.raycast(start, end, context, blockHitFactory, missFactory);
+    }
+
+    @Override
+    public int getHeight() {
+        return view.getHeight();
+    }
+
+    @Override
+    public int getBottomY() {
+        return view.getBottomY();
+    }
+
+    @Override
+    public int getTopY() {
+        return view.getTopY();
+    }
+
+    @Override
+    public int countVerticalSections() {
+        return view.countVerticalSections();
+    }
+
+    @Override
+    public int getBottomSectionCoord() {
+        return view.getBottomSectionCoord();
+    }
+
+    @Override
+    public int getTopSectionCoord() {
+        return view.getTopSectionCoord();
+    }
+
+    @Override
+    public boolean isOutOfHeightLimit(BlockPos pos) {
+        return view.isOutOfHeightLimit(pos);
+    }
+
+    @Override
+    public boolean isOutOfHeightLimit(int y) {
+        return view.isOutOfHeightLimit(y);
+    }
+
+    @Override
+    public int getSectionIndex(int y) {
+        return view.getSectionIndex(y);
+    }
+
+    @Override
+    public int sectionCoordToIndex(int coord) {
+        return view.sectionCoordToIndex(coord);
+    }
+
+    @Override
+    public int sectionIndexToCoord(int index) {
+        return view.sectionIndexToCoord(index);
+    }
+
+    public static HeightLimitView create(int bottomY, int height) {
+        return HeightLimitView.create(bottomY, height);
+    }
+
+    @Override
+    @org.jetbrains.annotations.Nullable
+    public BlockEntity getExistingBlockEntity(BlockPos pos) {
+        return view.getExistingBlockEntity(pos);
     }
 }
