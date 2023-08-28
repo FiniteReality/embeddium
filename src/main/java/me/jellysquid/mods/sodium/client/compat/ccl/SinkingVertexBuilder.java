@@ -151,7 +151,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         buffer.rewind();
 
         ModelVertexSink vertices = buffers.getVertexSink();
-        vertices.ensureCapacity(numQuads);
+        vertices.ensureCapacity(currentVertex);
 
         final int chunkId = buffers.getChunkId();
 
