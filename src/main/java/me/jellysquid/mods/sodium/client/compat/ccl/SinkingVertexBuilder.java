@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.compat.ccl;
 
-import codechicken.lib.colour.Colour;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
@@ -56,7 +55,8 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     @Nonnull
     @Override
     public VertexConsumer color(int r, int g, int b, int a) {
-        color = Colour.flipABGR(Colour.packRGBA(r, g, b, a)); // We need ABGR so we compose it on the fly
+        color = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
+        // Colour.flipABGR(Colour.packRGBA(r, g, b, a)); // We need ABGR so we compose it on the fly
         return this;
     }
 
