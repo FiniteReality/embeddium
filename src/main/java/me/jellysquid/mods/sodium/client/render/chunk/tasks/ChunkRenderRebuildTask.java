@@ -14,6 +14,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
+import me.jellysquid.mods.sodium.client.world.WorldSliceLocal;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import net.coderbot.iris.compat.sodium.impl.block_context.ChunkBuildBuffersExt;
 import net.minecraft.block.BlockRenderType;
@@ -66,6 +67,8 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         cache.init(this.context);
 
         WorldSlice slice = cache.getWorldSlice();
+        // passed into mod code, since some depend on the provided BlockRenderView object being unique each time
+        WorldSliceLocal localSlice = new WorldSliceLocal(slice);
 
         int baseX = this.render.getOriginX();
         int baseY = this.render.getOriginY();
@@ -112,7 +115,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 	
 	                        long seed = blockState.getRenderingSeed(pos);
 	
-	                        if (cache.getBlockRenderer().renderModel(slice, blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
+	                        if (cache.getBlockRenderer().renderModel(localSlice, blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
 	                            bounds.addBlock(relX, relY, relZ);
 	                        }
 	                        
@@ -134,7 +137,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                             
                             ForgeHooksClient.setRenderLayer(layer);
 
-	                        if (cache.getFluidRenderer().render(slice, fluidState, pos, buffers.get(layer))) {
+	                        if (cache.getFluidRenderer().render(localSlice, fluidState, pos, buffers.get(layer))) {
 	                            bounds.addBlock(relX, relY, relZ);
 	                        }
                         }
