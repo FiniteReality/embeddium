@@ -1,5 +1,5 @@
 plugins {
-	id 'dev.architectury.loom' version '0.11.0-SNAPSHOT'
+	id 'dev.architectury.loom' version '1.3-SNAPSHOT'
 	id 'maven-publish'
 }
 
