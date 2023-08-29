@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client;
 
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import me.jellysquid.mods.sodium.client.util.workarounds.PostLaunchChecks;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -35,7 +34,8 @@ public class SodiumClientMod {
     }
 
     public void onClientSetup(final FMLClientSetupEvent event) {
-        PostLaunchChecks.checkDrivers();
+        LOGGER = LoggerFactory.getLogger("Sodium");
+        CONFIG = loadConfig();
     }
 
     public static SodiumGameOptions options() {
