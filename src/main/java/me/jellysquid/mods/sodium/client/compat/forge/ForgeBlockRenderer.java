@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.compat.forge;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
-import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.block.BlockState;
@@ -21,6 +20,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.pipeline.VertexBufferConsumer;
 import net.minecraftforge.client.model.pipeline.VertexLighterFlat;
 import net.minecraftforge.client.model.pipeline.VertexLighterSmoothAo;
+import net.minecraftforge.common.ForgeConfig;
 
 import java.util.List;
 import java.util.Random;
@@ -34,6 +34,16 @@ public class ForgeBlockRenderer {
     private final ThreadLocal<VertexLighterSmoothAo> lighterSmooth = ThreadLocal.withInitial(() -> new VertexLighterSmoothAo(colors));
     private final ThreadLocal<VertexBufferConsumer> consumerFlat = ThreadLocal.withInitial(VertexBufferConsumer::new);
     private final ThreadLocal<VertexBufferConsumer> consumerSmooth = ThreadLocal.withInitial(VertexBufferConsumer::new);
+
+    private static boolean useForgeLightingPipeline = false;
+
+    public static void init() {
+        useForgeLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+    }
+
+    public static boolean useForgeLightingPipeline() {
+        return useForgeLightingPipeline;
+    }
 
     private void processQuad(ChunkModelBuilder renderData, BakedQuad quad) {
         ModelQuadView src = (ModelQuadView)quad;
