@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.compat.forge;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
-import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.block.BlockState;
@@ -24,6 +23,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.lighting.FlatQuadLighter;
 import net.minecraftforge.client.model.lighting.QuadLighter;
 import net.minecraftforge.client.model.lighting.SmoothQuadLighter;
+import net.minecraftforge.common.ForgeConfig;
 
 import java.util.List;
 
@@ -34,6 +34,16 @@ public class ForgeBlockRenderer {
     private final BlockColors colors = MinecraftClient.getInstance().getBlockColors();
     private final ThreadLocal<QuadLighter> lighterFlat = ThreadLocal.withInitial(() -> new FlatQuadLighter(colors));
     private final ThreadLocal<QuadLighter> lighterSmooth = ThreadLocal.withInitial(() -> new SmoothQuadLighter(colors));
+
+    private static boolean useForgeLightingPipeline = false;
+
+    public static void init() {
+        useForgeLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+    }
+
+    public static boolean useForgeLightingPipeline() {
+        return useForgeLightingPipeline;
+    }
 
     private void processQuad(ChunkModelBuilder renderData, BakedQuad quad) {
         ModelQuadView src = (ModelQuadView)quad;

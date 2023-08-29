@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.debug;
 
 import com.google.common.collect.Lists;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import net.minecraft.client.gui.hud.DebugHud;
@@ -27,6 +28,7 @@ public abstract class MixinDebugHud {
         strings.add("");
         strings.add("Embeddium Renderer");
         strings.add(Formatting.UNDERLINE + getFormattedVersionText());
+        strings.add("Block renderer: " + (ForgeBlockRenderer.useForgeLightingPipeline() ? "Forge" : "Sodium"));
 
         var renderer = SodiumWorldRenderer.instanceNullable();
 

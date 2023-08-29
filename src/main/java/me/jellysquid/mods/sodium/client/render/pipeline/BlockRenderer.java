@@ -35,8 +35,6 @@ import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.List;
 
-import net.minecraftforge.common.ForgeConfig;
-
 public class BlockRenderer {
 
     private final BlockColorsExtended blockColors;
@@ -50,7 +48,6 @@ public class BlockRenderer {
     private final LightPipelineProvider lighters;
 
     private final boolean useAmbientOcclusion;
-    private final boolean useForgeExperimentalLightingPipeline;
 
     public BlockRenderer(MinecraftClient client, LightPipelineProvider lighters, ColorBlender colorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
@@ -60,7 +57,6 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
-        this.useForgeExperimentalLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
     }
 
     public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, ModelData modelData, RenderLayer layer, Random random) {
@@ -72,7 +68,7 @@ public class BlockRenderer {
 
         boolean rendered = false;
 
-        if(this.useForgeExperimentalLightingPipeline) {
+        if(ForgeBlockRenderer.useForgeLightingPipeline()) {
             final MatrixStack mStack = new MatrixStack();
             if(offset != Vec3d.ZERO)
                 mStack.translate(offset.x, offset.y, offset.z);

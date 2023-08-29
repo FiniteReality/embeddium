@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
@@ -176,6 +177,8 @@ public class ChunkBuilder {
 
         this.world = world;
         this.renderPassManager = renderPassManager;
+
+        ForgeBlockRenderer.init();
 
         this.startWorkers();
     }
