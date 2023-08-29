@@ -59,6 +59,19 @@ sourceSets {
     }
 }
 
+loom {
+    runs {
+        client {
+            mods {
+                embeddium {
+                    sourceSet sourceSets.main
+                    sourceSet sourceSets.api
+                }
+            }
+        }
+    }
+}
+
 tasks.register('apiJar', Jar) {
     archiveClassifier.set "api-dev"
 
