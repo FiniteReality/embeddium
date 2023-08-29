@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.executor;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.tasks.ChunkBuilderTask;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
@@ -29,6 +30,8 @@ public class ChunkBuilder {
     private final ChunkBuildContext localContext;
 
     public ChunkBuilder(ClientWorld world, ChunkVertexType vertexType) {
+        ForgeBlockRenderer.init();
+
         int count = getThreadCount();
 
         for (int i = 0; i < count; i++) {
