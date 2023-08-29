@@ -74,6 +74,22 @@ jar {
     from sourceSets.api.output.resourcesDir
 }
 
+def extraModsDir = "extra-mods-${project.minecraft_version}"
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            flatDir {
+                name "extra-mods"
+                dir file(extraModsDir)
+            }
+        }
+        filter {
+            includeGroup "extra-mods"
+        }
+    }
+}
+
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -81,6 +97,16 @@ dependencies {
 
     // Forge API
     forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // runtime remapping at home
+    for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
+        def basename = extraModJar.name.substring(0, extraModJar.name.length() - ".jar".length())
+        def versionSep = basename.lastIndexOf('-')
+        assert versionSep != -1
+        def artifactId = basename.substring(0, versionSep)
+        def version = basename.substring(versionSep + 1)
+        modRuntimeOnly("extra-mods:$artifactId:$version")
+    }
 }
 
 def getVersionMetadata() {

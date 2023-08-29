@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
+import me.jellysquid.mods.sodium.client.world.WorldSliceLocal;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.model.BakedModel;
@@ -11,6 +12,7 @@ import org.joml.Vector3fc;
 
 public class BlockRenderContext {
     private final WorldSlice world;
+    private final WorldSliceLocal localSlice;
 
     private final BlockPos.Mutable pos = new BlockPos.Mutable();
 
@@ -27,6 +29,7 @@ public class BlockRenderContext {
 
     public BlockRenderContext(WorldSlice world) {
         this.world = world;
+        this.localSlice = new WorldSliceLocal(world);
     }
 
     public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, ModelData modelData, RenderLayer renderLayer) {
@@ -54,6 +57,13 @@ public class BlockRenderContext {
      */
     public WorldSlice world() {
         return this.world;
+    }
+
+    /**
+     * @return The world which the block is being rendered from. Guaranteed to be a new object for each subchunk.
+     */
+    public WorldSliceLocal localSlice() {
+        return this.localSlice;
     }
 
     /**

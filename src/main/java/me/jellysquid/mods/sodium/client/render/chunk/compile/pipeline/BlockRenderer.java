@@ -1,5 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
+import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
+import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.model.color.ColorProvider;
 import me.jellysquid.mods.sodium.client.model.color.ColorProviderRegistry;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
@@ -22,12 +24,14 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.LocalRandom;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
+import net.minecraftforge.common.ForgeConfig;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +49,9 @@ public class BlockRenderer {
     private final ChunkVertexEncoder.Vertex[] vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
 
     private final boolean useAmbientOcclusion;
+    private final boolean useForgeExperimentalLightingPipeline;
+
+    private final ForgeBlockRenderer forgeBlockRenderer = new ForgeBlockRenderer();
 
     private final int[] quadColors = new int[4];
 
@@ -54,6 +61,7 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
+        this.useForgeExperimentalLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -62,13 +70,26 @@ public class BlockRenderer {
 
         ColorProvider<BlockState> colorizer = this.colorProviderRegistry.getColorProvider(ctx.state().getBlock());
 
-        LightPipeline lighter = this.lighters.getLighter(this.getLightingMode(ctx.state(), ctx.model(), ctx.world(), ctx.pos(), ctx.renderLayer()));
+        LightMode mode = this.getLightingMode(ctx.state(), ctx.model(), ctx.localSlice(), ctx.pos(), ctx.renderLayer());
+        LightPipeline lighter = this.lighters.getLighter(mode);
         Vec3d renderOffset;
         
         if (ctx.state().hasModelOffset()) {
-            renderOffset = ctx.state().getModelOffset(ctx.world(), ctx.pos());
+            renderOffset = ctx.state().getModelOffset(ctx.localSlice(), ctx.pos());
         } else {
             renderOffset = Vec3d.ZERO;
+        }
+
+        if(this.useForgeExperimentalLightingPipeline) {
+            final MatrixStack mStack = new MatrixStack();
+            if(renderOffset != Vec3d.ZERO)
+                mStack.translate(renderOffset.x, renderOffset.y, renderOffset.z);
+
+            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
+            builder.reset();
+            forgeBlockRenderer.renderBlock(mode, ctx, builder, mStack, this.random, this.occlusionCache, meshBuilder);
+            builder.flush(meshBuilder, material, ctx.origin());
+            return;
         }
 
         for (Direction face : DirectionUtil.ALL_DIRECTIONS) {
@@ -94,7 +115,7 @@ public class BlockRenderer {
     }
 
     private boolean isFaceVisible(BlockRenderContext ctx, Direction face) {
-        return this.occlusionCache.shouldDrawSide(ctx.state(), ctx.world(), ctx.pos(), face);
+        return this.occlusionCache.shouldDrawSide(ctx.state(), ctx.localSlice(), ctx.pos(), face);
     }
 
     private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3d offset,
