@@ -13,6 +13,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
+import me.jellysquid.mods.sodium.client.world.WorldSliceLocal;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import net.coderbot.iris.compat.sodium.impl.block_context.ChunkBuildBuffersExt;
 import net.minecraft.block.BlockRenderType;
@@ -67,6 +68,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         cache.init(this.renderContext);
 
         WorldSlice slice = cache.getWorldSlice();
+        // passed into mod code, since some depend on the provided BlockRenderView object being unique each time
+        WorldSliceLocal localSlice = new WorldSliceLocal(slice);
 
         int minX = this.render.getOriginX();
         int minY = this.render.getOriginY();
@@ -111,7 +114,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
                             long seed = blockState.getRenderingSeed(blockPos);
 
-                            if (cache.getBlockRenderer().renderModel(slice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData, layer, random)) {
+                            if (cache.getBlockRenderer().renderModel(localSlice, blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData, layer, random)) {
                                 rendered = true;
                             }
                     	}
@@ -127,7 +130,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                             ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
                         }
                         
-                        if (cache.getFluidRenderer().render(slice, fluidState, blockPos, offset, buffers.get(layer))) {
+                        if (cache.getFluidRenderer().render(localSlice, fluidState, blockPos, offset, buffers.get(layer))) {
                             rendered = true;
                         }
                     }
