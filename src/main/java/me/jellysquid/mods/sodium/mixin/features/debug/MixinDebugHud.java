@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.debug;
 
 import com.google.common.collect.Lists;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderBackend;
 import net.minecraft.client.gui.hud.DebugHud;
@@ -66,8 +67,9 @@ public abstract class MixinDebugHud {
     private static List<String> getChunkRendererDebugStrings() {
         ChunkRenderBackend<?> backend = SodiumWorldRenderer.getInstance().getChunkRenderer();
 
-        List<String> strings = new ArrayList<>(4);
+        List<String> strings = new ArrayList<>(5);
         strings.add("Chunk Renderer: " + backend.getRendererName());
+        strings.add("Block Renderer: " + (ForgeBlockRenderer.useForgeLightingPipeline() ? "Forge" : "Sodium"));
         strings.addAll(backend.getDebugStrings());
 
         return strings;

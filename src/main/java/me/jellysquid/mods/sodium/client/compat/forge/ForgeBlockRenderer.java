@@ -20,6 +20,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.client.model.pipeline.VertexBufferConsumer;
 import net.minecraftforge.client.model.pipeline.VertexLighterFlat;
 import net.minecraftforge.client.model.pipeline.VertexLighterSmoothAo;
+import net.minecraftforge.common.ForgeConfig;
 
 import java.util.List;
 import java.util.Random;
@@ -33,6 +34,17 @@ public class ForgeBlockRenderer {
     private final ThreadLocal<VertexLighterSmoothAo> lighterSmooth = ThreadLocal.withInitial(() -> new VertexLighterSmoothAo(colors));
     private final ThreadLocal<VertexBufferConsumer> consumerFlat = ThreadLocal.withInitial(VertexBufferConsumer::new);
     private final ThreadLocal<VertexBufferConsumer> consumerSmooth = ThreadLocal.withInitial(VertexBufferConsumer::new);
+
+
+    private static boolean useForgeLightingPipeline = false;
+
+    public static void init() {
+        useForgeLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+    }
+
+    public static boolean useForgeLightingPipeline() {
+        return useForgeLightingPipeline;
+    }
 
     private void processQuad(ChunkRenderData.Builder renderData, BakedQuad quad) {
         ModelQuadView src = (ModelQuadView)quad;

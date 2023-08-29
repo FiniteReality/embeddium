@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Random;
 
 import codechicken.lib.render.block.ICCBlockRenderer;
-import net.minecraftforge.common.ForgeConfig;
 
 public class BlockRenderer {
     private final Random random = new XoRoShiRoRandom();
@@ -53,7 +52,6 @@ public class BlockRenderer {
     private final LightPipelineProvider lighters;
 
     private final boolean useAmbientOcclusion;
-    private final boolean useForgeExperimentalLightingPipeline;
 
     public BlockRenderer(MinecraftClient client, LightPipelineProvider lighters, BiomeColorBlender biomeColorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
@@ -63,7 +61,6 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
-        this.useForgeExperimentalLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
     }
 
     public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BakedModel model, ChunkModelBuffers buffers, boolean cull, long seed, IModelData modelData) {
@@ -91,7 +88,7 @@ public class BlockRenderer {
 	        }
         }
 
-        if(this.useForgeExperimentalLightingPipeline) {
+        if(ForgeBlockRenderer.useForgeLightingPipeline()) {
             final MatrixStack mStack = new MatrixStack();
             if(offset != Vec3d.ZERO)
                 mStack.translate(offset.x, offset.y, offset.z);
