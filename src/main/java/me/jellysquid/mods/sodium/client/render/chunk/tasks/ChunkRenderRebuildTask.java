@@ -58,6 +58,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 
     @Override
     public ChunkBuildResult<T> performBuild(ChunkRenderCacheLocal cache, ChunkBuildBuffers buffers, CancellationSource cancellationSource) {
+        // COMPATIBLITY NOTE: Oculus relies on the LVT of this method being unchanged, at least in 16.5
         ChunkRenderData.Builder renderData = new ChunkRenderData.Builder();
         ChunkOcclusionDataBuilder occluder = new ChunkOcclusionDataBuilder();
         ChunkRenderBounds.Builder bounds = new ChunkRenderBounds.Builder();
@@ -67,8 +68,6 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         cache.init(this.context);
 
         WorldSlice slice = cache.getWorldSlice();
-        // passed into mod code, since some depend on the provided BlockRenderView object being unique each time
-        WorldSliceLocal localSlice = new WorldSliceLocal(slice);
 
         int baseX = this.render.getOriginX();
         int baseY = this.render.getOriginY();
@@ -115,7 +114,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 	
 	                        long seed = blockState.getRenderingSeed(pos);
 	
-	                        if (cache.getBlockRenderer().renderModel(localSlice, blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
+	                        if (cache.getBlockRenderer().renderModel(cache.getLocalSlice(), blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
 	                            bounds.addBlock(relX, relY, relZ);
 	                        }
 	                        
@@ -137,7 +136,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                             
                             ForgeHooksClient.setRenderLayer(layer);
 
-	                        if (cache.getFluidRenderer().render(localSlice, fluidState, pos, buffers.get(layer))) {
+	                        if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, pos, buffers.get(layer))) {
 	                            bounds.addBlock(relX, relY, relZ);
 	                        }
                         }
