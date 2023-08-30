@@ -51,10 +51,14 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
     private final int buildTime;
 
+    private final Map<BlockPos, ModelData> modelDataMap;
+
     public ChunkBuilderMeshingTask(RenderSection render, ChunkRenderContext renderContext, int time) {
         this.render = render;
         this.renderContext = renderContext;
         this.buildTime = time;
+
+        this.modelDataMap = MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
     }
 
     @Override
@@ -78,7 +82,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         int maxY = minY + 16;
         int maxZ = minZ + 16;
 
-        Map<BlockPos, ModelData> modelDataMap = slice.world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
+        Map<BlockPos, ModelData> modelDataMap = this.modelDataMap;
 
         // Initialise with minX/minY/minZ so initial getBlockState crash context is correct
         BlockPos.Mutable blockPos = new BlockPos.Mutable(minX, minY, minZ);
