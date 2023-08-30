@@ -47,11 +47,14 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
     private final RenderSection render;
     private final ChunkRenderContext renderContext;
     private final int frame;
+    private final Map<BlockPos, IModelData> modelDataMap;
 
     public ChunkRenderRebuildTask(RenderSection render, ChunkRenderContext renderContext, int frame) {
         this.render = render;
         this.renderContext = renderContext;
         this.frame = frame;
+
+        this.modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
     }
 
     @Override
@@ -77,7 +80,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         int maxY = minY + 16;
         int maxZ = minZ + 16;
 
-        Map<BlockPos, IModelData> modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(minX), ChunkSectionPos.getSectionCoord(minZ)));
+        Map<BlockPos, IModelData> modelDataMap = this.modelDataMap;
 
         BlockPos.Mutable blockPos = new BlockPos.Mutable();
         BlockPos.Mutable offset = new BlockPos.Mutable();
