@@ -98,6 +98,18 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     @Nonnull
     @Override
     public VertexConsumer light(int u, int v) {
+        // The Forge pipeline produces light values with the lower 4 bits populated. We need to round, as Sodium
+        // now expects only the top 4 bits to be used.
+        if((u & 0xf) >= 0x8)
+            u = (u & ~0xf) + 0x10; // round up
+        else
+            u &= ~0xf;
+
+        if((v & 0xf) >= 0x8)
+            v = (v & ~0xf) + 0x10; // round up
+        else
+            v &= ~0xf;
+
         light = (v << 16) | u; // Compose lightmap coords into raw light value 0xVVVV_UUUU
         return this;
     }
