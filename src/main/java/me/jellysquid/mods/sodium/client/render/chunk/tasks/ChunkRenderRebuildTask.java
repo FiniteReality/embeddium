@@ -50,10 +50,15 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 
     private final ChunkRenderContext context;
 
+    private final Map<BlockPos, IModelData> modelDataMap;
+
+
     public ChunkRenderRebuildTask(ChunkRenderContainer<T> render, ChunkRenderContext context, BlockPos offset) {
         this.render = render;
         this.offset = offset;
         this.context = context;
+
+        this.modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
     }
 
     @Override
@@ -73,8 +78,8 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         int baseY = this.render.getOriginY();
         int baseZ = this.render.getOriginZ();
 
-        Map<BlockPos, IModelData> modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(baseX), ChunkSectionPos.getSectionCoord(baseZ)));
-        
+        Map<BlockPos, IModelData> modelDataMap = this.modelDataMap;
+
         BlockPos.Mutable pos = new BlockPos.Mutable();
         BlockPos renderOffset = this.offset;
 
