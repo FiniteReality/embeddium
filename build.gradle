@@ -66,6 +66,7 @@ dependencies {
     modCompileOnly "curse.maven:flywheel-486392:${flywheel_fileid}"
     modCompileOnly "curse.maven:immersive-engineering-231951:${ie_fileid}"
     modCompileOnly "curse.maven:oculus-581495:${oculus_fileid}"
+	modCompileOnly "curse.maven:codechickenlib-242818:${codechicken_fileid}"
 
 	modRuntimeOnly "curse.maven:lazydfu-460819:3544496"
 
@@ -101,6 +102,24 @@ jar {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
 }
+
+def copyJarNameConsistent = tasks.register('copyJarNameConsistent', Copy) {
+	from remapJar // shortcut for createJar.outputs.files
+	into project.file("build/libs")
+	rename { name -> "embeddium-latest.jar" }
+}
+
+def copyJarToBin = tasks.register('copyJarToBin', Copy) {
+	from remapJar // shortcut for createJar.outputs.files
+	into rootProject.file("bin")
+	mustRunAfter "copyJarNameConsistent"
+}
+
+tasks.named("remapSourcesJar") {
+	mustRunAfter "copyJarNameConsistent"
+}
+
+tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 
 publishing {
 	publications {

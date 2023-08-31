@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client;
 
+import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,6 +29,7 @@ public class SodiumClientMod {
     public static final String MODID = "rubidium";
     
     public static boolean oculusLoaded = false;
+    public static boolean cclLoaded = false;
     public static boolean immersiveLoaded = FMLLoader.getLoadingModList().getModFileById("immersiveengineering") != null;
     
     public SodiumClientMod() {
@@ -41,6 +43,11 @@ public class SodiumClientMod {
     public void setup(final FMLClientSetupEvent event) {
         CONFIG = loadConfig();
         oculusLoaded = ModList.get().isLoaded("oculus");
+        cclLoaded = ModList.get().isLoaded("codechickenlib");
+
+        if(cclLoaded) {
+            CCLCompat.init();
+        }
     }
     
     public void registerReloadListener(AddReloadListenerEvent ev) {
