@@ -1,5 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.pipeline;
 
+import codechicken.lib.render.block.ICCBlockRenderer;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
@@ -68,6 +71,22 @@ public class BlockRenderer {
         modelData = model.getModelData(world, pos, state, modelData);
 
         boolean rendered = false;
+
+        if(SodiumClientMod.cclLoaded) {
+            final MatrixStack mStack = new MatrixStack();
+            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
+            for (final ICCBlockRenderer renderer : CCLCompat.getCustomRenderers(world, pos)) {
+                if (renderer.canHandleBlock(world, pos, state)) {
+                    mStack.isEmpty();
+
+                    builder.reset();
+                    rendered = renderer.renderBlock(state, pos, world, mStack, builder, random, modelData);
+                    builder.flush(buffers, origin);
+
+                    return rendered;
+                }
+            }
+        }
 
         if(ForgeBlockRenderer.useForgeLightingPipeline()) {
             final MatrixStack mStack = new MatrixStack();

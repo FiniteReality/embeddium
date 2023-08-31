@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client;
 
+import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import net.minecraftforge.common.MinecraftForge;
@@ -26,8 +27,9 @@ public class SodiumClientMod {
     private static String MOD_VERSION;
 
     public static final String MODID = "rubidium";
-    
+
     public static boolean flywheelLoaded = false;
+    public static boolean cclLoaded = false;
     public static boolean immersiveLoaded = FMLLoader.getLoadingModList().getModFileById("immersiveengineering") != null;
     
     public SodiumClientMod() {
@@ -41,6 +43,11 @@ public class SodiumClientMod {
     public void setup(final FMLClientSetupEvent event) {
         CONFIG = loadConfig();
         flywheelLoaded = ModList.get().isLoaded("flywheel");
+        cclLoaded = ModList.get().isLoaded("codechickenlib");
+
+        if(cclLoaded) {
+            CCLCompat.init();
+        }
     }
     
     public void registerReloadListener(AddReloadListenerEvent ev) {

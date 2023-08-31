@@ -67,6 +67,7 @@ dependencies {
 	modCompileOnly "com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53"
 	modCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149"
 	modCompileOnly "maven.modrinth:oculus:1.18.2-1.4.3a"
+	modCompileOnly "curse.maven:codechickenlib-242818:4607274"
 
 	modRuntimeOnly "curse.maven:lazydfu-460819:3544496"
 
