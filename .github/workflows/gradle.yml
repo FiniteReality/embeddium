@@ -22,5 +22,5 @@ jobs:
         run: ./gradlew --no-daemon build
       - uses: actions/upload-artifact@v2
         with:
-          name: Rubidium-Artifacts
-          path: build/libs
+          name: Embeddium
+          path: bin
