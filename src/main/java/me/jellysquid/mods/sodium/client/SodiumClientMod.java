@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client;
 
+import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
@@ -24,6 +25,8 @@ public class SodiumClientMod {
 
     private static String MOD_VERSION;
 
+    public static boolean cclLoaded = false;
+
     public SodiumClientMod() {
         SodiumPreLaunch.onPreLaunch();
 
@@ -36,6 +39,12 @@ public class SodiumClientMod {
     public void onClientSetup(final FMLClientSetupEvent event) {
         LOGGER = LoggerFactory.getLogger("Sodium");
         CONFIG = loadConfig();
+
+        cclLoaded = ModList.get().isLoaded("codechickenlib");
+
+        if(cclLoaded) {
+            CCLCompat.init();
+        }
     }
 
     public static SodiumGameOptions options() {

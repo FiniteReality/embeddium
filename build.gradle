@@ -110,6 +110,13 @@ repositories {
             includeGroup "extra-mods"
         }
     }
+    maven {
+        // curseforge
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
@@ -119,6 +126,10 @@ dependencies {
 
     // Forge API
     forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // Mods
+    modCompileOnly "curse.maven:codechickenlib-242818:${codechicken_fileid}"
+
 
     // runtime remapping at home
     for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
@@ -152,3 +163,21 @@ def getVersionMetadata() {
     // No tracking information could be found about the build
     return "+unknown"
 }
+
+def copyJarNameConsistent = tasks.register('copyJarNameConsistent', Copy) {
+    from remapJar // shortcut for createJar.outputs.files
+    into project.file("build/libs")
+    rename { name -> "embeddium-latest.jar" }
+}
+
+def copyJarToBin = tasks.register('copyJarToBin', Copy) {
+    from remapJar // shortcut for createJar.outputs.files
+    into rootProject.file("bin")
+    mustRunAfter "copyJarNameConsistent"
+}
+
+tasks.named("remapApiJar") {
+    mustRunAfter "copyJarNameConsistent"
+}
+
+tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)

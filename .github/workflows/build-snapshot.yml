@@ -36,5 +36,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: rubidium-artifacts-${{ steps.ref.outputs.branch }}
-          path: build/libs/*.jar
+          name: Embeddium
+          path: bin
