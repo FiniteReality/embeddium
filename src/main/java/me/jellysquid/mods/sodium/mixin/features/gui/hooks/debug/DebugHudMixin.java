@@ -51,7 +51,7 @@ public abstract class DebugHudMixin {
         String version = SodiumClientMod.getVersion();
         Formatting color;
 
-        if (version.contains("+git.")) {
+        if (version.contains("git.")) {
             color = Formatting.RED;
         } else {
             color = Formatting.GREEN;

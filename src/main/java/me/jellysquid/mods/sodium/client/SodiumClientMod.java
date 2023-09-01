@@ -17,7 +17,7 @@ import java.io.IOException;
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
 
-    public static final String MODID = "rubidium";
+    public static final String MODID = "embeddium";
     public static final String MODNAME = "Embeddium";
 
     private static SodiumGameOptions CONFIG = loadConfig();
