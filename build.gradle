@@ -16,6 +16,7 @@ loom {
 			"rubidium.mixins.json"
 		]
 	}
+	mixin.defaultRefmapName = "embeddium-refmap.json"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
