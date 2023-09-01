@@ -4,6 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlMutableBuffer;
 import me.jellysquid.mods.sodium.client.gl.shader.uniform.*;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
+import me.jellysquid.mods.sodium.client.quirks.QuirkManager;
+import org.lwjgl.opengl.GL13;
 import repack.joml.Matrix4f;
 
 import org.lwjgl.opengl.GL32C;
@@ -43,6 +45,15 @@ public class ChunkShaderInterface {
 
         RenderSystem.activeTexture(GL32C.GL_TEXTURE2);
         RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
+
+        if(QuirkManager.REBIND_LIGHTMAP_TEXTURE) {
+            // Some mods inject their own rendering logic, and do not use the RenderSystem methods, which causes
+            // the cache to become outdated.
+            // In this case we unconditionally rebind our texture. We just told the cache about it above, so we
+            // can never cause the same issue we complain about. ;)
+            GL13.glActiveTexture(GL32C.GL_TEXTURE2);
+            GL32C.glBindTexture(GL32C.GL_TEXTURE_2D, RenderSystem.getShaderTexture(2));
+        }
 
         this.uniformBlockTex.setInt(0);
         this.uniformLightTex.setInt(2);

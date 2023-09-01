@@ -26,7 +26,7 @@ public class SodiumClientMod {
 
     private static String MOD_VERSION;
 
-    public static final String MODID = "rubidium";
+    public static final String MODID = "embeddium";
     
     public static boolean oculusLoaded = false;
     public static boolean cclLoaded = false;
