@@ -22,8 +22,8 @@ loom {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-archivesBaseName = "${project.archives_base_name}-mc${project.minecraft_version.replaceFirst("^1\\.", "")}"
-version = "${project.mod_version}${getVersionMetadata()}"
+archivesBaseName = project.archives_base_name
+version = "${project.mod_version}${getVersionMetadata()}+mc${project.minecraft_version.replaceFirst("^1\\.", "")}"
 group = project.maven_group
 
 repositories {
@@ -180,12 +180,12 @@ def getVersionMetadata() {
 
 		// Flag the build if the build tree is not clean
 		if (!grgit.status().clean) {
-			id += "-dirty"
+			id += ".dirty"
 		}
 
-		return "+git.${id}"
+		return "-git.${id}"
 	}
 
 	// No tracking information could be found about the build
-	return "+unknown"
+	return "-unknown"
 }
