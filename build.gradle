@@ -1,6 +1,12 @@
 plugins {
 	id 'dev.architectury.loom' version '1.3-SNAPSHOT'
 	id 'maven-publish'
+
+	// This dependency is only used to determine the state of the Git working tree so that build artifacts can be
+	// more easily identified. TODO: Lazily load GrGit via a service only when builds are performed.
+	id 'org.ajoberstar.grgit' version '5.0.0'
+
+	id "me.modmuss50.mod-publish-plugin" version "0.3.4"
 }
 
 loom {
@@ -15,8 +21,8 @@ loom {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-archivesBaseName = project.archives_base_name
-version = project.mod_version
+archivesBaseName = "${project.archives_base_name}-mc${project.minecraft_version.replaceFirst("^1\\.", "")}"
+version = "${project.mod_version}${getVersionMetadata()}"
 group = project.maven_group
 
 repositories {
@@ -133,4 +139,52 @@ publishing {
 
 	repositories {
 	}
+}
+
+publishMods {
+	file = remapJar.archiveFile
+	changelog = "[Changelog not implemented yet.]"
+	type = STABLE
+	modLoaders.add("forge")
+
+	curseforge {
+		projectId = "908741"
+		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+		minecraftVersions.add(project.minecraft_version)
+
+		incompatible {
+			slug = "rubidium"
+		}
+	}
+	modrinth {
+		projectId = "embeddium"
+		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+		minecraftVersions.add(project.minecraft_version)
+
+		incompatible {
+			slug = "rubidium"
+		}
+	}
+}
+
+def getVersionMetadata() {
+	// CI builds only
+	if (project.hasProperty("build.release")) {
+		return "" // no tag whatsoever
+	}
+
+	if (grgit != null) {
+		def head = grgit.head()
+		def id = head.abbreviatedId
+
+		// Flag the build if the build tree is not clean
+		if (!grgit.status().clean) {
+			id += "-dirty"
+		}
+
+		return "+git.${id}"
+	}
+
+	// No tracking information could be found about the build
+	return "+unknown"
 }
