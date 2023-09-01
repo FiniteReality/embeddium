@@ -95,7 +95,7 @@ public abstract class MixinClientWorld extends World {
         }
     }
 
-    private void performFluidDisplayTick(BlockState blockState, FluidState fluidState, BlockPos pos, Random random) {
+    private void performFluidDisplayTick(BlockState blockState, FluidState fluidState, BlockPos.Mutable pos, Random random) {
         fluidState.randomDisplayTick(this, pos, random);
 
         ParticleEffect particleEffect = fluidState.getParticle();
@@ -103,9 +103,9 @@ public abstract class MixinClientWorld extends World {
         if (particleEffect != null && random.nextInt(10) == 0) {
             boolean solid = blockState.isSideSolidFullSquare(this, pos, Direction.DOWN);
 
-            // FIXME: don't allocate here
-            BlockPos blockPos = pos.down();
-            this.addParticle(blockPos, this.getBlockState(blockPos), particleEffect, solid);
+            pos.setY(pos.getY() - 1);
+
+            this.addParticle(pos, this.getBlockState(pos), particleEffect, solid);
         }
     }
 }

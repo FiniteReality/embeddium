@@ -1,7 +1,6 @@
 {
     "pack": {
         "description": "Rubidium resources",
-        "pack_format": 5,
-        "_comment": "Useless file needed for mod work"
+        "pack_format": 6
     }
 }
