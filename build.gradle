@@ -1,5 +1,5 @@
 plugins {
-	id 'dev.architectury.loom' version '0.10.0-SNAPSHOT'
+	id 'dev.architectury.loom' version '1.3-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -94,9 +94,11 @@ tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17
 }
 
+/*
 java {
 	withSourcesJar()
 }
+ */
 
 jar {
 	from("LICENSE") {
@@ -116,9 +118,11 @@ def copyJarToBin = tasks.register('copyJarToBin', Copy) {
 	mustRunAfter "copyJarNameConsistent"
 }
 
+/*
 tasks.named("remapSourcesJar") {
 	mustRunAfter "copyJarNameConsistent"
 }
+*/
 
 tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 
