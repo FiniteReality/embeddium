@@ -158,7 +158,7 @@ publishMods {
 		}
 	}
 	modrinth {
-		projectId = "embeddium"
+		projectId = "sk9rgfiA"
 		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
 		minecraftVersions.add(project.minecraft_version)
 
@@ -166,6 +166,8 @@ publishMods {
 			slug = "rubidium"
 		}
 	}
+
+	displayName = "Embeddium ${project.mod_version}"
 }
 
 def getVersionMetadata() {
