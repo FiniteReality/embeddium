@@ -187,7 +187,7 @@ publishMods {
 		}
 	}
 
-	displayName = "Embeddium ${project.mod_version}"
+	displayName = "[${project.minecraft_version}] Embeddium ${project.mod_version}"
 }
 
 def getVersionMetadata() {

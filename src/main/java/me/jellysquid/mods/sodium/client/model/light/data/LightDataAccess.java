@@ -68,7 +68,7 @@ public abstract class LightDataAccess {
         boolean fo = state.isOpaqueFullCube(world, pos);
         boolean fc = state.isFullCube(world, pos);
 
-        int lu = state.getLuminance();
+        int lu = state.getLightEmission(world, pos);
 
         // OPTIMIZE: Do not calculate light data if the block is full and opaque and does not emit light.
         int bl;
