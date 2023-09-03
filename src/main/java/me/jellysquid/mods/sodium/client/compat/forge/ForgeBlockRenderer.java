@@ -29,6 +29,9 @@ import java.util.List;
 
 /**
  * Utility class for BlockRenderer, that uses the Forge lighting pipeline.
+ *
+ * This class is derived from Forge's renderer, and is licensed under LGPL-2.1. As the class is a standalone class file,
+ * it may be replaced in an existing copy of Embeddium with an alternate LGPL-2.1 implementation.
  */
 public class ForgeBlockRenderer {
     private final BlockColors colors = MinecraftClient.getInstance().getBlockColors();
