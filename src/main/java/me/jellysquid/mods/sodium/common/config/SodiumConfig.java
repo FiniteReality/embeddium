@@ -187,7 +187,7 @@ public class SodiumConfig {
             }
 
             SodiumConfig config = new SodiumConfig();
-            //config.applyModOverrides();
+            config.applyModOverrides();
 
             return config;
         }
@@ -202,7 +202,7 @@ public class SodiumConfig {
 
         SodiumConfig config = new SodiumConfig();
         config.readProperties(props);
-        //config.applyModOverrides();
+        config.applyModOverrides();
 
         return config;
     }
