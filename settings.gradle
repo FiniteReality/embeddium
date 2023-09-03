@@ -9,3 +9,5 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+rootProject.name = "embeddium-${getProperty("minecraft_version")}"
