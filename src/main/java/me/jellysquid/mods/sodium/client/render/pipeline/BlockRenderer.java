@@ -197,7 +197,7 @@ public class BlockRenderer {
     }
 
     private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos) {
-        if (this.useAmbientOcclusion && model.useAmbientOcclusion() && state.getLightEmission(world, pos) == 0) {
+        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state) && state.getLightEmission(world, pos) == 0) {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;
