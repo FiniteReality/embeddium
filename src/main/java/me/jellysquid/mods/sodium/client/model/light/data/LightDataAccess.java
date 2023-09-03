@@ -2,8 +2,6 @@ package me.jellysquid.mods.sodium.client.model.light.data;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockRenderView;
@@ -62,7 +60,7 @@ public abstract class LightDataAccess {
         float ao;
         boolean em;
 
-        if (state.getLuminance() == 0) {
+        if (state.getLightValue(world, pos) == 0) {
             ao = state.getAmbientOcclusionLightLevel(world, pos);
             em = state.hasEmissiveLighting(world, pos);
         } else {
