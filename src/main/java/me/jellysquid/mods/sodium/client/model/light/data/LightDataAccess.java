@@ -61,7 +61,7 @@ public abstract class LightDataAccess {
         float ao;
         boolean em;
 
-        if (state.getLuminance() == 0) {
+        if (state.getLightEmission(world, pos) == 0) {
             ao = state.getAmbientOcclusionLightLevel(world, pos);
             em = state.hasEmissiveLighting(world, pos);
         } else {
