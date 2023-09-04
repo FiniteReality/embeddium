@@ -4,6 +4,7 @@ import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Rect2i;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.Validate;
 
@@ -83,10 +84,10 @@ public class SliderControl implements Control<Integer> {
             int sliderWidth = this.sliderBounds.getWidth();
             int sliderHeight = this.sliderBounds.getHeight();
 
-            String label = this.formatter.format(this.option.getValue());
+            Text label = this.formatter.format(this.option.getValue());
             int labelWidth = this.font.getWidth(label);
 
-            this.drawString(matrixStack, label, sliderX + sliderWidth - labelWidth, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
+            this.drawText(matrixStack, label, sliderX + sliderWidth - labelWidth, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
         }
 
         private void renderSlider(MatrixStack matrixStack) {

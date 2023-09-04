@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.client.option.GraphicsMode;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
 import java.io.FileReader;
@@ -57,18 +58,18 @@ public class SodiumGameOptions {
     }
 
     public enum GraphicsQuality implements TextProvider {
-        DEFAULT(new TranslatableText("generator.default").getString()),
-        FANCY(new TranslatableText("options.clouds.fancy").getString()),
-        FAST(new TranslatableText("options.clouds.fast").getString());
+        DEFAULT(new TranslatableText("generator.default")),
+        FANCY(new TranslatableText("options.clouds.fancy")),
+        FAST(new TranslatableText("options.clouds.fast"));
 
-        private final String name;
+        private final Text name;
 
-        GraphicsQuality(String name) {
+        GraphicsQuality(Text name) {
             this.name = name;
         }
 
         @Override
-        public String getLocalizedName() {
+        public Text getLocalizedName() {
             return this.name;
         }
 
@@ -78,18 +79,18 @@ public class SodiumGameOptions {
     }
 
     public enum LightingQuality implements TextProvider {
-        HIGH("High"),
-        LOW("Low"),
-        OFF("Off");
+        HIGH(new TranslatableText("options.ao.max")),
+        LOW(new TranslatableText("options.ao.min")),
+        OFF(new TranslatableText("options.ao.off"));
 
-        private final String name;
+        private final Text name;
 
-        LightingQuality(String name) {
+        LightingQuality(Text name) {
             this.name = name;
         }
 
         @Override
-        public String getLocalizedName() {
+        public Text getLocalizedName() {
             return this.name;
         }
     }

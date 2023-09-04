@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Language;
@@ -46,7 +47,7 @@ public class SodiumOptionsGUI extends Screen {
     private ControlElement<?> hoveredElement;
 
     public SodiumOptionsGUI(Screen prevScreen) {
-        super(new TranslatableText("Sodium Options"));
+        super(new TranslatableText("Rubidium Options"));
 
         this.prevScreen = prevScreen;
 
