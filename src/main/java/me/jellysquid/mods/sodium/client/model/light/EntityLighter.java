@@ -62,7 +62,7 @@ public class EntityLighter {
                     BlockState blockState = entity.world.getBlockState(pos);
 
                     // Do not consider light-blocking volumes
-                    if (blockState.isOpaqueFullCube(entity.world, pos) && blockState.getLuminance() <= 0) {
+                    if (blockState.isOpaqueFullCube(entity.world, pos) && blockState.getLightValue(entity.world, pos) <= 0) {
                         continue;
                     }
 
