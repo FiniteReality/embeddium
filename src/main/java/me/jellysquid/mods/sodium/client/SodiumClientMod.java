@@ -3,8 +3,8 @@ package me.jellysquid.mods.sodium.client;
 import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -50,9 +50,9 @@ public class SodiumClientMod {
         }
     }
     
-    public void registerReloadListener(AddReloadListenerEvent ev) {
+    public void registerReloadListener(RegisterClientReloadListenersEvent ev) {
     	if(immersiveLoaded)
-    		ev.addListener(new ImmersiveConnectionRenderer());
+            ev.registerReloadListener(new ImmersiveConnectionRenderer());
     }
 
     public static SodiumGameOptions options() {
