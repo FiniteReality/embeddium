@@ -82,11 +82,11 @@ public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
          * @throws IllegalStateException If an attribute is already bound to the generic type
          */
         private Builder<T> addElement(T type, GlVertexAttribute attribute) {
-            if ((attribute.getPointer() >= this.stride) && !SodiumClientMod.oculusLoaded) {
+            if ((attribute.getPointer() >= this.stride)) {
                 throw new IllegalArgumentException("Element starts outside vertex format");
             }
 
-            if ((attribute.getPointer() + attribute.getSize() > this.stride) && !SodiumClientMod.oculusLoaded) {
+            if ((attribute.getPointer() + attribute.getSize() > this.stride)) {
                 throw new IllegalArgumentException("Element extends outside vertex format");
             }
 
@@ -115,7 +115,7 @@ public class GlVertexFormat<T extends Enum<T>> implements BufferVertexFormat {
 
             // The stride must be large enough to cover all attributes. This still allows for additional padding
             // to be added to the end of the vertex to accommodate alignment restrictions.
-            if (this.stride < size && !SodiumClientMod.oculusLoaded) {
+            if (this.stride < size) {
                 throw new IllegalArgumentException("Stride is too small");
             }
 

@@ -25,7 +25,6 @@ public class SodiumClientMod {
     public static final String MODID = "embeddium";
     
     public static boolean flywheelLoaded;
-    public static boolean oculusLoaded;
     public static boolean cclLoaded;
     
     public SodiumClientMod() {
@@ -36,7 +35,6 @@ public class SodiumClientMod {
     
     public void onInitializeClient(final FMLClientSetupEvent event) {
     	flywheelLoaded = ModList.get().isLoaded("flywheel");
-    	oculusLoaded = ModList.get().isLoaded("oculus");
     	cclLoaded = ModList.get().isLoaded("codechickenlib");
     	MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
     	

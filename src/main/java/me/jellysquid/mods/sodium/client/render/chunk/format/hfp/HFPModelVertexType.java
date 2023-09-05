@@ -18,17 +18,7 @@ import net.minecraft.client.render.VertexConsumer;
  * their centering offset), as the
  */
 public class HFPModelVertexType implements ChunkVertexType {
-    public static final GlVertexFormat<ChunkMeshAttribute> VERTEX_FORMAT = SodiumClientMod.oculusLoaded ? GlVertexFormat.builder(ChunkMeshAttribute.class, 20)
-            .addElement(ChunkMeshAttribute.POSITION, 0, GlVertexAttributeFormat.UNSIGNED_SHORT, 3, false)
-            .addElement(ChunkMeshAttribute.COLOR, 8, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true)
-            .addElement(ChunkMeshAttribute.TEXTURE, 12, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, false)
-            .addElement(ChunkMeshAttribute.LIGHT, 16, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, true)
-			.addElement(IrisChunkMeshAttributes.MID_TEX_COORD, 20, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, true)
-			.addElement(IrisChunkMeshAttributes.TANGENT, 24, IrisGlVertexAttributeFormat.BYTE, 4, true)
-			.addElement(IrisChunkMeshAttributes.NORMAL, 28, IrisGlVertexAttributeFormat.BYTE, 3, true)
-			.addElement(IrisChunkMeshAttributes.BLOCK_ID, 32, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, false)
-			.build()
-			:
+    public static final GlVertexFormat<ChunkMeshAttribute> VERTEX_FORMAT =
 			GlVertexFormat.builder(ChunkMeshAttribute.class, 20)
 	        .addElement(ChunkMeshAttribute.POSITION, 0, GlVertexAttributeFormat.UNSIGNED_SHORT, 3, false)
 	        .addElement(ChunkMeshAttribute.COLOR, 8, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true)
