@@ -107,11 +107,6 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 	                        ForgeHooksClient.setRenderLayer(layer);
                             IModelData modelData = modelDataMap.getOrDefault(pos, EmptyModelData.INSTANCE);
 	                        
-	                        // Oculus Compat
-	                        if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
-	                            ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(blockState, (short) -1);
-	                        }
-	
 	                        BakedModel model = cache.getBlockModels()
 	                                .getModel(blockState);
 	
@@ -132,11 +127,6 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                                 continue;
                             }
 
-                            if (SodiumClientMod.oculusLoaded && buffers instanceof ChunkBuildBuffersExt) {
-                                // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
-                                ((ChunkBuildBuffersExt) buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
-                            }
-                            
                             ForgeHooksClient.setRenderLayer(layer);
 
 	                        if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, pos, buffers.get(layer))) {
