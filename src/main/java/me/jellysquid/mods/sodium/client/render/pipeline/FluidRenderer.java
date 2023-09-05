@@ -308,7 +308,7 @@ public class FluidRenderer {
                 	BlockPos adjPos = this.scratchPos.set(adjX, adjY, adjZ);
                     BlockState adjBlock = world.getBlockState(adjPos);
 
-                    if (!adjBlock.isOpaque() && adjBlock.getRenderType() != BlockRenderType.INVISIBLE) {
+                    if (adjBlock.shouldDisplayFluidOverlay(world, adjPos, fluidState)) {
                     	// should ignore invisible blocks, barriers, light blocks
                         // use static water when adjacent block is ice, glass, stained glass, tinted glass
                         sprite = oSprite;
