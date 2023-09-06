@@ -31,4 +31,8 @@ public interface VertexBufferWriter extends net.caffeinemc.mods.sodium.api.verte
     default void push(MemoryStack stack, long ptr, int count, net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription format) {
         push(stack, ptr, count, VertexFormatDescription.translateModern(format));
     }
+
+    default boolean isFullWriter() {
+        return true;
+    }
 }
