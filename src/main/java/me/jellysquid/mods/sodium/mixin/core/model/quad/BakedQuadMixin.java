@@ -101,6 +101,11 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     }
 
     @Override
+    public int getLight(int idx) {
+        return this.vertexData[vertexOffset(idx) + LIGHT_INDEX];
+    }
+
+    @Override
     public int getFlags() {
         return this.flags;
     }

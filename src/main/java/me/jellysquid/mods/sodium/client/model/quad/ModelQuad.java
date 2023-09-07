@@ -114,6 +114,11 @@ public class ModelQuad implements ModelQuadViewMutable {
     }
 
     @Override
+    public int getLight(int idx) {
+        return this.data[vertexOffset(idx) + LIGHT_INDEX];
+    }
+
+    @Override
     public int getFlags() {
         return this.flags;
     }

@@ -38,6 +38,12 @@ public interface ModelQuadView {
     float getTexV(int idx);
 
     /**
+     * @return The packed lightmap coordinates for the vertex at index {@param idx},
+     * or zero if regular lighting should be used.
+     */
+    int getLight(int idx);
+
+    /**
      * @return The integer bit flags containing the {@link ModelQuadFlags} for this quad
      */
     int getFlags();
