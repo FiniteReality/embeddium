@@ -51,4 +51,18 @@ public class ModelQuadUtil {
     public static int vertexOffset(int vertexIndex) {
         return vertexIndex * VERTEX_SIZE;
     }
+
+    public static int mergeBakedLight(int packedLight, int calcLight) {
+        // bail early in most cases
+        if (packedLight == 0)
+            return calcLight;
+
+        int psl = (packedLight >> 16) & 0xFF;
+        int csl = (calcLight >> 16) & 0xFF;
+        int pbl = (packedLight) & 0xFF;
+        int cbl = (calcLight) & 0xFF;
+        int bl = Math.max(pbl, cbl);
+        int sl = Math.max(psl, csl);
+        return (sl << 16) | bl;
+    }
 }
