@@ -16,6 +16,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelB
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
+import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import me.jellysquid.mods.sodium.client.world.biome.BlockColorsExtended;
@@ -181,7 +182,7 @@ public class BlockRenderer {
             float u = src.getTexU(srcIndex);
             float v = src.getTexV(srcIndex);
 
-            int lm = light.lm[srcIndex];
+            int lm = ModelQuadUtil.mergeBakedLight(src.getLight(srcIndex), light.lm[srcIndex]);
 
             sink.writeQuad(x, y, z, color, u, v, lm);
         }
