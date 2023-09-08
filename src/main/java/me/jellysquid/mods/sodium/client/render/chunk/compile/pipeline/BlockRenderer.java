@@ -176,6 +176,7 @@ public class BlockRenderer {
             colorProvider.getColors(ctx.world(), ctx.pos(), ctx.state(), quad, vertexColors);
         } else {
             Arrays.fill(vertexColors, 0xFFFFFFFF);
+            return null; // force use of the packed color data instead of ours
         }
 
         return vertexColors;
