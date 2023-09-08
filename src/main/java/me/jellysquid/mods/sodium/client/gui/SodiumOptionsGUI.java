@@ -133,9 +133,9 @@ public class SodiumOptionsGUI extends Screen {
         int y = 6;
 
         for (OptionPage page : this.pages) {
-            int width = 12 + this.textRenderer.getWidth(page.getName());
+            int width = 12 + this.textRenderer.getWidth(page.getNewName());
 
-            FlatButtonWidget button = new FlatButtonWidget(new Dim2i(x, y, width, 18), page.getName(), () -> this.setPage(page));
+            FlatButtonWidget button = new FlatButtonWidget(new Dim2i(x, y, width, 18), page.getNewName(), () -> this.setPage(page));
             button.setSelected(this.currentPage == page);
 
             x += width + 6;

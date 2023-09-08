@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.gui;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.jellysquid.mods.sodium.client.gui.options.FormattedTextProvider;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.text.Text;
@@ -57,7 +58,7 @@ public class SodiumGameOptions {
         public boolean hideDonationButton = false;
     }
 
-    public enum GraphicsQuality implements TextProvider {
+    public enum GraphicsQuality implements FormattedTextProvider {
         DEFAULT(new TranslatableText("generator.default")),
         FANCY(new TranslatableText("options.clouds.fancy")),
         FAST(new TranslatableText("options.clouds.fast"));
@@ -78,7 +79,7 @@ public class SodiumGameOptions {
         }
     }
 
-    public enum LightingQuality implements TextProvider {
+    public enum LightingQuality implements FormattedTextProvider {
         HIGH(new TranslatableText("options.ao.max")),
         LOW(new TranslatableText("options.ao.min")),
         OFF(new TranslatableText("options.ao.off"));

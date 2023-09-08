@@ -84,10 +84,10 @@ public class SliderControl implements Control<Integer> {
             int sliderWidth = this.sliderBounds.getWidth();
             int sliderHeight = this.sliderBounds.getHeight();
 
-            Text label = this.formatter.format(this.option.getValue());
+            String label = this.formatter.format(this.option.getValue());
             int labelWidth = this.font.getWidth(label);
 
-            this.drawText(matrixStack, label, sliderX + sliderWidth - labelWidth, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
+            this.drawString(matrixStack, label, sliderX + sliderWidth - labelWidth, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
         }
 
         private void renderSlider(MatrixStack matrixStack) {

@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.gui.options.control;
 
+import me.jellysquid.mods.sodium.client.gui.options.FormattedTextProvider;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
@@ -40,7 +41,9 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
             T value = universe[i];
 
             if (value instanceof TextProvider) {
-                name = ((TextProvider) value).getLocalizedName();
+                name = new LiteralText(((TextProvider)value).getLocalizedName());
+            } else if(value instanceof FormattedTextProvider) {
+                name = ((FormattedTextProvider)value).getLocalizedName();
             } else {
                 name = new LiteralText(value.name());
             }

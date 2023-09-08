@@ -53,8 +53,13 @@ public class OptionImpl<S, T> implements Option<T> {
     }
 
     @Override
-    public Text getName() {
+    public Text getNewName() {
         return this.name;
+    }
+
+    @Override
+    public String getName() {
+        return this.getNewName().getString();
     }
 
     @Override
@@ -140,12 +145,20 @@ public class OptionImpl<S, T> implements Option<T> {
             return this;
         }
 
+        public Builder<S, T> setName(String name) {
+            return setName(new LiteralText(name));
+        }
+
         public Builder<S, T> setTooltip(Text tooltip) {
             Validate.notNull(tooltip, "Argument must not be null");
 
             this.tooltip = tooltip;
 
             return this;
+        }
+
+        public Builder<S, T> setTooltip(String tooltip) {
+            return setTooltip(new LiteralText(tooltip));
         }
 
         public Builder<S, T> setBinding(BiConsumer<S, T> setter, Function<S, T> getter) {

@@ -7,7 +7,9 @@ import net.minecraft.text.Text;
 import java.util.Collection;
 
 public interface Option<T> {
-    Text getName();
+    Text getNewName();
+
+    String getName();
 
     Text getTooltip();
 
