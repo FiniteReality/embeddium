@@ -71,10 +71,10 @@ void _vert_init() {
     _vert_position = in_Pos;
 
     // Vertex Material
-    _vert_material = (in_DrawParams >> 16) & 0xFFu;
+    _vert_material = (in_DrawParams) & 0xFFu;
 
     // Vertex Mesh ID
-    _vert_mesh_id  = (in_DrawParams >> 24) & 0xFFu;
+    _vert_mesh_id  = (in_DrawParams >> 8) & 0xFFu;
 
     // Vertex Color
     uvec3 packed_color = (uvec3(in_ColorLight) >> uvec3(0, 8, 16)) & uvec3(0xFFu);
