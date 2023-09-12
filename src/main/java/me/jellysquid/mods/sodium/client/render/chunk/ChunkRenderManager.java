@@ -436,7 +436,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
             }
             
             // Do not allow distant chunks to block rendering
-            if (!this.isChunkPrioritized(render)) {
+            if (this.alwaysDeferChunkUpdates || !this.isChunkPrioritized(render)) {
                 this.builder.deferRebuild(render);
             } else {
                 futures.add(this.builder.scheduleRebuildTaskAsync(render));
