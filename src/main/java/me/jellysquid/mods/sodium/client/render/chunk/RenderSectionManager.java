@@ -356,7 +356,7 @@ public class RenderSectionManager {
             ChunkRenderBuildTask task = this.createRebuildTask(section);
             CompletableFuture<?> future;
 
-            if (filterType.isImportant()) {
+            if (!this.alwaysDeferChunkUpdates && filterType.isImportant()) {
                 CompletableFuture<ChunkBuildResult> immediateFuture = this.builder.schedule(task);
                 immediateFutures.add(immediateFuture);
 
@@ -439,7 +439,7 @@ public class RenderSectionManager {
         RenderSection section = this.sections.get(ChunkSectionPos.asLong(x, y, z));
 
         if (section != null && section.isBuilt()) {
-            if (!this.alwaysDeferChunkUpdates && (important || this.isChunkPrioritized(section))) {
+            if (important || this.isChunkPrioritized(section)) {
                 section.markForUpdate(ChunkUpdateType.IMPORTANT_REBUILD);
             } else {
                 section.markForUpdate(ChunkUpdateType.REBUILD);
