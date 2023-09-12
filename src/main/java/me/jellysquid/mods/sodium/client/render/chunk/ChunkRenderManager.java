@@ -444,6 +444,9 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
 
             this.dirty = true;
             submitted++;
+            // Limit quantity of updates submitted if we are deferring all important builds
+            if (this.alwaysDeferChunkUpdates && submitted >= budget)
+                break;
         }
 
         while (submitted < budget && !this.rebuildQueue.isEmpty()) {
