@@ -18,6 +18,19 @@ public class BoxBlur {
         blurImpl(tmp.data, buf.data, buf.width, buf.height, radius); // Y-axis
     }
 
+    /**
+     * @deprecated Used by the biome color fallback ported from older Sodium, avoid using in new code.
+     */
+    @Deprecated
+    public static void blur(int[] data, int[] tmp, int width, int height, int radius) {
+        if (isHomogenous(data)) {
+            return;
+        }
+
+        blurImpl(data, tmp, width, height, radius); // X-axis
+        blurImpl(tmp, data, width, height, radius); // Y-axis
+    }
+
     private static void blurImpl(int[] src, int[] dst, int width, int height, int radius) {
         int multiplier = getAveragingMultiplier((radius * 2) + 1);
 

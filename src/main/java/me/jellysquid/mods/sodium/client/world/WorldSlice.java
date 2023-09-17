@@ -1,10 +1,7 @@
 package me.jellysquid.mods.sodium.client.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import me.jellysquid.mods.sodium.client.world.biome.BiomeColorCache;
-import me.jellysquid.mods.sodium.client.world.biome.BiomeColorSource;
-import me.jellysquid.mods.sodium.client.world.biome.BiomeColorView;
-import me.jellysquid.mods.sodium.client.world.biome.BiomeSlice;
+import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
@@ -67,6 +64,9 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
 
     // The biome blend cache
     private final BiomeColorCache biomeColors;
+
+    // The biome blend cache for custom ColorResolvers
+    private final ColorResolverCache biomeColorsLegacy;
 
     // (Local Section -> Block States) table.
     private final BlockState[][] blockArrays;
@@ -132,6 +132,7 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, MinecraftClient.getInstance().options.getBiomeBlendRadius().getValue());
+        this.biomeColorsLegacy = new ColorResolverCache(this.biomeSlice, MinecraftClient.getInstance().options.getBiomeBlendRadius().getValue());
     }
 
     public void copyData(ChunkRenderContext context) {
@@ -149,6 +150,7 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
 
         this.biomeSlice.update(this.world, context);
         this.biomeColors.update(context);
+        this.biomeColorsLegacy.update(context);
     }
 
     private void copySectionData(ChunkRenderContext context, int sectionIndex) {
@@ -294,7 +296,12 @@ public final class WorldSlice implements BlockRenderView, BiomeColorView {
 
     @Override
     public int getColor(BlockPos pos, ColorResolver resolver) {
-        return this.biomeColors.getColor(BiomeColorSource.from(resolver), pos.getX(), pos.getY(), pos.getZ());
+        BiomeColorSource source = BiomeColorSource.from(resolver);
+        if(source != null)
+            return this.biomeColors.getColor(source, pos.getX(), pos.getY(), pos.getZ());
+
+        // fallback
+        return this.biomeColorsLegacy.getColor(resolver, pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
