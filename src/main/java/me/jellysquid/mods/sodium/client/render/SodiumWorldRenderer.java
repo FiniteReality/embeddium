@@ -346,6 +346,11 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         this.chunkRenderManager.onChunkRenderUpdates(x, y, z, meshAfter);
     }
 
+    private static boolean isInfiniteExtentsBox(Box box) {
+        return Double.isInfinite(box.minX) || Double.isInfinite(box.minY) || Double.isInfinite(box.minZ)
+            || Double.isInfinite(box.maxX) || Double.isInfinite(box.maxY) || Double.isInfinite(box.maxZ);
+    }
+
     /**
      * Returns whether or not the entity intersects with any visible chunks in the graph.
      * @return True if the entity is visible, otherwise false
@@ -360,6 +365,10 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         // Entities outside the valid world height will never map to a rendered chunk
         // Always render these entities or they'll be culled incorrectly!
         if (box.maxY < 0.5D || box.minY > 255.5D) {
+            return true;
+        }
+
+        if (isInfiniteExtentsBox(box)) {
             return true;
         }
         
