@@ -64,7 +64,7 @@ public class BlockRenderer {
     }
 
     public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, ModelData modelData, RenderLayer layer, Random random) {
-        LightMode mode = this.getLightingMode(state, model, world, pos);
+        LightMode mode = this.getLightingMode(state, model, world, pos, layer);
         LightPipeline lighter = this.lighters.getLighter(mode);
         Vec3d offset = state.getModelOffset(world, pos);
 
@@ -145,8 +145,9 @@ public class BlockRenderer {
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
             BakedQuad quad = quads.get(i);
 
+            LightPipeline quadLighter = !quad.hasAmbientOcclusion() ? this.lighters.getLighter(LightMode.FLAT) : lighter;
             QuadLightData light = this.cachedQuadLightData;
-            lighter.calculate((ModelQuadView) quad, pos, light, cullFace, quad.getFace(), quad.hasShade());
+            quadLighter.calculate((ModelQuadView) quad, pos, light, cullFace, quad.getFace(), quad.hasShade());
 
             if (quad.hasColor() && colorizer == null) {
                 colorizer = this.blockColors.getColorProvider(state);
@@ -197,8 +198,8 @@ public class BlockRenderer {
         }
     }
 
-    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos) {
-        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state) && state.getLightEmission(world, pos) == 0) {
+    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos, RenderLayer layer) {
+        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, layer) && state.getLightEmission(world, pos) == 0) {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;
