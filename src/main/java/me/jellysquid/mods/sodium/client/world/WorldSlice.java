@@ -35,7 +35,7 @@ import java.util.Objects;
  *
  * <p>Object pooling should be used to avoid huge allocations as this class contains many large arrays.</p>
  */
-public final class WorldSlice implements BlockRenderView, BiomeColorView {
+public class WorldSlice implements BlockRenderView, BiomeColorView {
     private static final LightType[] LIGHT_TYPES = LightType.values();
 
     // The number of blocks in a section.
