@@ -164,7 +164,7 @@ tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 
 publishMods {
 	file = remapJar.archiveFile
-	changelog = "[Changelog not implemented yet.]"
+	changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
 	type = STABLE
 	modLoaders.add("forge")
 
