@@ -78,8 +78,6 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         int baseY = this.render.getOriginY();
         int baseZ = this.render.getOriginZ();
 
-        Map<BlockPos, IModelData> modelDataMap = this.modelDataMap;
-
         BlockPos.Mutable pos = new BlockPos.Mutable();
         BlockPos renderOffset = this.offset;
 
