@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WorldRenderer.class)
+@Mixin(value = WorldRenderer.class, priority = 990)
 public class WorldRendererMixin {
     @Shadow
     private @Nullable ClientWorld world;
@@ -33,11 +33,13 @@ public class WorldRendererMixin {
      */
     @Overwrite
     public void renderClouds(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, double x, double y, double z) {
-        if (this.cloudRenderer == null) {
-            this.cloudRenderer = new CloudRenderer(this.client.getResourceManager());
-        }
+        if (!this.world.getDimensionEffects().renderClouds(this.world, this.ticks, tickDelta, matrices, x, y, z, projectionMatrix)) {
+            if (this.cloudRenderer == null) {
+                this.cloudRenderer = new CloudRenderer(this.client.getResourceManager());
+            }
 
-        this.cloudRenderer.render(this.world, this.client.player, matrices, projectionMatrix, this.ticks, tickDelta, x, y, z);
+            this.cloudRenderer.render(this.world, this.client.player, matrices, projectionMatrix, this.ticks, tickDelta, x, y, z);
+        }
     }
 
     @Inject(method = "reload(Lnet/minecraft/resource/ResourceManager;)V", at = @At("RETURN"))
