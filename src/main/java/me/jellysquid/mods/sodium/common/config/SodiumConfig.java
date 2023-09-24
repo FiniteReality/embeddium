@@ -9,14 +9,22 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Documentation of these options: https://github.com/jellysquid3/sodium-fabric/wiki/Configuration-File
  */
 public class SodiumConfig {
-    private static final Logger LOGGER = LogManager.getLogger("RubidiumConfig");
+    private static final Logger LOGGER = LogManager.getLogger("EmbeddiumConfig");
 
     private static final String JSON_KEY_SODIUM_OPTIONS = "sodium:options";
+
+    private static final Set<String> SYSTEM_OPTIONS = Stream.of(
+            "core",
+            "features.chunk_rendering"
+    ).map(SodiumConfig::getMixinRuleName).collect(Collectors.toSet());
 
     private final Map<String, Option> options = new HashMap<>();
 
@@ -88,6 +96,11 @@ public class SodiumConfig {
                 enabled = false;
             } else {
                 LOGGER.warn("Invalid value '{}' encountered for configuration key '{}', ignoring", value, key);
+                continue;
+            }
+
+            if(!enabled && SYSTEM_OPTIONS.contains(key)) {
+                LOGGER.warn("Configuration key '{}' is a required option and cannot be disabled", key);
                 continue;
             }
 
