@@ -82,8 +82,6 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         int maxY = minY + 16;
         int maxZ = minZ + 16;
 
-        Map<BlockPos, ModelData> modelDataMap = this.modelDataMap;
-
         // Initialise with minX/minY/minZ so initial getBlockState crash context is correct
         BlockPos.Mutable blockPos = new BlockPos.Mutable(minX, minY, minZ);
         BlockPos.Mutable modelOffset = new BlockPos.Mutable();
