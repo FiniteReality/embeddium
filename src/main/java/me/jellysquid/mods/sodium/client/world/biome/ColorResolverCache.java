@@ -94,7 +94,7 @@ public class ColorResolverCache {
 
         for (int x = 0; x < this.sizeHorizontal; x++) {
             for (int z = 0; z < this.sizeHorizontal; z++) {
-                biomeData[this.indexXZ(x, z)] = biomeAccess.getBiome(x + this.baseX, level + this.baseY, z + this.baseZ);
+                biomeData[this.indexXZ(x, z)] = biomeAccess.getBiome(x + this.baseX, level + this.baseY, z + this.baseZ).value();
             }
         }
 
