@@ -9,6 +9,8 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.Validate;
 
+import java.util.Arrays;
+
 public class CyclingControl<T extends Enum<T>> implements Control<T> {
     private final Option<T> option;
     private final T[] allowedValues;
@@ -27,6 +29,11 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
         this.option = option;
         this.allowedValues = universe;
         this.names = names;
+    }
+
+    @Deprecated
+    public CyclingControl(Option<T> option, Class<T> enumType, String[] names) {
+        this(option, enumType, Arrays.stream(names).map(LiteralText::new).toArray(Text[]::new));
     }
 
     public CyclingControl(Option<T> option, Class<T> enumType, T[] allowedValues) {
