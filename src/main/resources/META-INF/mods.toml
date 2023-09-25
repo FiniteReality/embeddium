@@ -14,7 +14,7 @@ authors="embeddedt"
 
 [[mods]]
 modId = "rubidium"
-version = "0.7.0a"
+version = "0.7.1"
 displayName = "Rubidium (Embeddium)"
 description = '''
 Stub, to allow mods detecting Rubidium to function as expected.
