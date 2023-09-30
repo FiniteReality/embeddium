@@ -119,6 +119,11 @@ public class ModelQuad implements ModelQuadViewMutable {
     }
 
     @Override
+    public int getForgeNormal(int idx) {
+        return this.data[vertexOffset(idx) + NORMAL_INDEX];
+    }
+
+    @Override
     public int getFlags() {
         return this.flags;
     }

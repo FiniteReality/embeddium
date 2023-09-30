@@ -35,7 +35,7 @@ public class BakedModelEncoder {
                 float yt = MatrixHelper.transformPositionY(matPosition, x, y, z);
                 float zt = MatrixHelper.transformPositionZ(matPosition, x, y, z);
 
-                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), normal);
+                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), ModelQuadUtil.mergeNormal(quad.getForgeNormal(i), normal));
                 ptr += ModelVertex.STRIDE;
             }
 
@@ -89,7 +89,7 @@ public class BakedModelEncoder {
 
                 int color = ColorABGR.pack(fR, fG, fB, 1.0F);
 
-                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light[i]), normal);
+                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light[i]), ModelQuadUtil.mergeNormal(quad.getForgeNormal(i), normal));
                 ptr += ModelVertex.STRIDE;
             }
 
