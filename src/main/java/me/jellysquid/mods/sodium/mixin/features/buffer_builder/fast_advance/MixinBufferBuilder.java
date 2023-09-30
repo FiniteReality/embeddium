@@ -27,7 +27,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer implem
     @Unique
     private int advance$formatElementCount = 0;
 
-    @Inject(method = "method_23918",
+    @Inject(method = "setFormat",
             at = @At(
                     value = "FIELD",
                     target = "Lnet/minecraft/client/render/BufferBuilder;format:Lnet/minecraft/client/render/VertexFormat;",
