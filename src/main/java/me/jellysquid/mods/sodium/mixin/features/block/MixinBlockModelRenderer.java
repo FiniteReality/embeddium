@@ -92,7 +92,7 @@ public class MixinBlockModelRenderer {
 
             for (int i = 0; i < 4; i++) {
                 drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), color, quad.getTexU(i), quad.getTexV(i),
-                        light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
+                        light, overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace(), quad.getNormal(i)));
             }
 
             SpriteUtil.markSpriteActive(quad.getSprite());
