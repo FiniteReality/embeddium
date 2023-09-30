@@ -45,6 +45,16 @@ public class ModelQuadUtil {
         return NORMALS[facing.ordinal()];
     }
 
+    public static int getFacingNormal(Direction facing, int bakedNormal) {
+        if(!hasNormal(bakedNormal))
+            return NORMALS[facing.ordinal()];
+        return bakedNormal;
+    }
+
+    public static boolean hasNormal(int n) {
+        return (n & 0xFFFFFF) != 0;
+    }
+
     /**
      * @param vertexIndex The index of the vertex to access
      * @return The starting offset of the vertex's attributes

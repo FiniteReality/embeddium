@@ -97,7 +97,7 @@ public class MixinItemRenderer {
             	int fColor = multARGBInts(quad.getColor(i), color);
             	
                 drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
-                        ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace()));
+                        ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace(), quad.getNormal(i)));
             }
 
             SpriteUtil.markSpriteActive(quad.rubidium$getSprite());
