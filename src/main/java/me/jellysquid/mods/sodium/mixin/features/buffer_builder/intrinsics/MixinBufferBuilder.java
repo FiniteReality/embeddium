@@ -87,7 +87,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
                 norm = MatrixUtil.transformPackedNormal(bakedNorm, normalMatrix);
             }
 
-            drain.writeQuad(pos.getX(), pos.getY(), pos.getZ(), color, u, v, light[i], overlay, norm);
+            drain.writeQuad(pos.getX(), pos.getY(), pos.getZ(), color, u, v, ModelQuadUtil.mergeBakedLight(quadView.getLight(i), light[i]), overlay, norm);
         }
 
         drain.flush();
