@@ -13,6 +13,15 @@ import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 
 public class BakedModelEncoder {
+    /**
+     * Use the packed normal and transform it if set, otherwise use the precalculated and multiplied normal.
+     */
+    private static int mergeNormalAndMult(int packed, int calc, Matrix3f matNormal) {
+        if((packed & 0xFFFFFF) == 0)
+            return calc;
+        return MatrixHelper.transformNormal(matNormal, packed);
+    }
+
     public static void writeQuadVertices(VertexBufferWriter writer, MatrixStack.Entry matrices, ModelQuadView quad, int color, int light, int overlay) {
         Matrix3f matNormal = matrices.getNormalMatrix();
         Matrix4f matPosition = matrices.getPositionMatrix();
@@ -35,7 +44,7 @@ public class BakedModelEncoder {
                 float yt = MatrixHelper.transformPositionY(matPosition, x, y, z);
                 float zt = MatrixHelper.transformPositionZ(matPosition, x, y, z);
 
-                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), ModelQuadUtil.mergeNormal(quad.getForgeNormal(i), normal));
+                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), mergeNormalAndMult(quad.getForgeNormal(i), normal, matNormal));
                 ptr += ModelVertex.STRIDE;
             }
 
@@ -89,7 +98,7 @@ public class BakedModelEncoder {
 
                 int color = ColorABGR.pack(fR, fG, fB, 1.0F);
 
-                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light[i]), ModelQuadUtil.mergeNormal(quad.getForgeNormal(i), normal));
+                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light[i]), mergeNormalAndMult(quad.getForgeNormal(i), normal, matNormal));
                 ptr += ModelVertex.STRIDE;
             }
 
