@@ -109,6 +109,12 @@ public class ModelQuadUtil {
         return NormI8.pack(normX, normY, normZ);
     }
 
+    public static int mergeNormal(int packedNormal, int calcNormal) {
+        if((packedNormal & 0xFFFFFF) == 0)
+            return calcNormal;
+        return packedNormal;
+    }
+
     public static int mergeBakedLight(int packedLight, int calcLight) {
         // bail early in most cases
         if (packedLight == 0)

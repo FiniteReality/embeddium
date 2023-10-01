@@ -63,6 +63,8 @@ public interface ModelQuadView {
      */
     int getNormal();
 
+    int getForgeNormal(int idx);
+
     default boolean hasColor() {
         return this.getColorIndex() != -1;
     }
