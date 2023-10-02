@@ -26,6 +26,9 @@ public class MixinVertexFormat implements ExtendedVertexFormat {
     private void embeddium$createElementArray(ImmutableList<VertexFormatElement> immutableList, CallbackInfo ci) {
         this.embeddium$extendedElements = new ExtendedVertexFormat.Element[this.elements.size()];
 
+        if (this.elements.size() == 0)
+            return; // prevent crash with mods that create empty VertexFormats
+
         VertexFormatElement currentElement = elements.get(0);
         int id = 0;
         for (VertexFormatElement element : this.elements) {
