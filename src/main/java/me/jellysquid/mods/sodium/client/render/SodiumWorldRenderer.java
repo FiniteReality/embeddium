@@ -253,6 +253,11 @@ public class SodiumWorldRenderer {
 
         var tracker = ChunkTrackerHolder.get(this.world);
         ChunkTracker.forEachChunk(tracker.getReadyChunks(), this.renderSectionManager::onChunkAdded);
+
+        // Forge workaround - reset VSync flag
+        var window = MinecraftClient.getInstance().getWindow();
+        if(window != null)
+            window.setVsync(MinecraftClient.getInstance().options.getEnableVsync().getValue());
     }
 
     public void renderBlockEntities(MatrixStack matrices,
