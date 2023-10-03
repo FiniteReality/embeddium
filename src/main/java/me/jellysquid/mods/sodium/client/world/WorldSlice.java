@@ -207,6 +207,8 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         }
     }
 
+    private static final BlockState AIR_BLOCK_STATE = Blocks.AIR.getDefaultState();
+
     @Override
     public BlockState getBlockState(BlockPos pos) {
         return this.getBlockState(pos.getX(), pos.getY(), pos.getZ());
@@ -217,8 +219,8 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         int relY = y - this.originY;
         int relZ = z - this.originZ;
 
-        return this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
+        return Objects.requireNonNullElse(this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)], AIR_BLOCK_STATE);
     }
 
     @Override
