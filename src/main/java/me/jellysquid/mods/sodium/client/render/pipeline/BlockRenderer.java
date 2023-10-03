@@ -198,6 +198,12 @@ public class BlockRenderer {
         }
     }
 
+    @Deprecated
+    @SuppressWarnings("unused")
+    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos) {
+        return getLightingMode(state, model, world, pos, RenderLayer.getSolid());
+    }
+
     private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos, RenderLayer layer) {
         if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, layer) && state.getLightEmission(world, pos) == 0) {
             return LightMode.SMOOTH;
