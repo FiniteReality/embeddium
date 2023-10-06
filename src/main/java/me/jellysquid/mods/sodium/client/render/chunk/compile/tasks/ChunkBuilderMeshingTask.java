@@ -108,7 +108,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         if (blockState.getRenderType() == BlockRenderType.MODEL) {
                             BakedModel model = cache.getBlockModels()
                                 .getModel(blockState);
-                            ModelData modelData = model.getModelData(slice.world, blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
+                            ModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
 
                             long seed = blockState.getRenderingSeed(blockPos);
                             random.setSeed(seed);
