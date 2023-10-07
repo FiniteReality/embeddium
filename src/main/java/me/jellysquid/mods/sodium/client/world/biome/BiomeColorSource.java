@@ -20,6 +20,6 @@ public enum BiomeColorSource {
             return WATER;
         }
 
-        throw new UnsupportedOperationException();
+        return null;
     }
 }

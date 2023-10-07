@@ -68,7 +68,7 @@ public abstract class LightDataAccess {
         boolean fo = state.isOpaqueFullCube(world, pos);
         boolean fc = state.isFullCube(world, pos);
 
-        int lu = state.getLuminance();
+        int lu = state.getLightEmission(world, pos);
 
         // OPTIMIZE: Do not calculate light data if the block is full and opaque and does not emit light.
         int bl;
@@ -77,8 +77,16 @@ public abstract class LightDataAccess {
             bl = 0;
             sl = 0;
         } else {
-            bl = world.getLightLevel(LightType.BLOCK, pos);
-            sl = world.getLightLevel(LightType.SKY, pos);
+            // calculate light data using custom approach for emissive blocks, and vanilla otherwise
+            if (em) {
+                bl = world.getLightLevel(LightType.BLOCK, pos);
+                sl = world.getLightLevel(LightType.SKY, pos);
+            } else {
+                // call the vanilla method so mods using custom lightmap logic work correctly
+                int packedCoords = WorldRenderer.getLightmapCoordinates(world, state, pos);
+                bl = LightmapTextureManager.getBlockLightCoordinates(packedCoords);
+                sl = LightmapTextureManager.getSkyLightCoordinates(packedCoords);
+            }
         }
 
         // FIX: Do not apply AO from blocks that emit light

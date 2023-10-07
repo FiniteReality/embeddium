@@ -82,8 +82,6 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         int maxY = minY + 16;
         int maxZ = minZ + 16;
 
-        Map<BlockPos, ModelData> modelDataMap = this.modelDataMap;
-
         // Initialise with minX/minY/minZ so initial getBlockState crash context is correct
         BlockPos.Mutable blockPos = new BlockPos.Mutable(minX, minY, minZ);
         BlockPos.Mutable modelOffset = new BlockPos.Mutable();
@@ -110,7 +108,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         if (blockState.getRenderType() == BlockRenderType.MODEL) {
                             BakedModel model = cache.getBlockModels()
                                 .getModel(blockState);
-                            ModelData modelData = model.getModelData(slice.world, blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
+                            ModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
 
                             long seed = blockState.getRenderingSeed(blockPos);
                             random.setSeed(seed);

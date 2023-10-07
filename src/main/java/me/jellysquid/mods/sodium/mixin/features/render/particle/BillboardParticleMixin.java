@@ -13,9 +13,11 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BillboardParticle.class)
 public abstract class BillboardParticleMixin extends Particle {
@@ -42,8 +44,16 @@ public abstract class BillboardParticleMixin extends Particle {
      * @reason Optimize function
      * @author JellySquid
      */
-    @Overwrite
-    public void buildGeometry(VertexConsumer vertexConsumer, Camera camera, float tickDelta) {
+    @Inject(method = "buildGeometry", at = @At("HEAD"), cancellable = true)
+    private void buildGeometryFast(VertexConsumer vertexConsumer, Camera camera, float tickDelta, CallbackInfo ci) {
+        var writer = VertexBufferWriter.tryOf(vertexConsumer);
+
+        if (writer == null) {
+            return;
+        }
+
+        ci.cancel();
+
         Vec3d vec3d = camera.getPos();
 
         float x = (float) (MathHelper.lerp(tickDelta, this.prevPosX, this.x) - vec3d.getX());
@@ -70,8 +80,6 @@ public abstract class BillboardParticleMixin extends Particle {
         float maxV = this.getMaxV();
 
         int color = ColorABGR.pack(this.red , this.green, this.blue, this.alpha);
-
-        var writer = VertexBufferWriter.of(vertexConsumer);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             long buffer = stack.nmalloc(4 * ParticleVertex.STRIDE);

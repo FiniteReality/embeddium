@@ -108,4 +108,24 @@ public class ModelQuadUtil {
 
         return NormI8.pack(normX, normY, normZ);
     }
+
+    public static int mergeNormal(int packedNormal, int calcNormal) {
+        if((packedNormal & 0xFFFFFF) == 0)
+            return calcNormal;
+        return packedNormal;
+    }
+
+    public static int mergeBakedLight(int packedLight, int calcLight) {
+        // bail early in most cases
+        if (packedLight == 0)
+            return calcLight;
+
+        int psl = (packedLight >> 16) & 0xFF;
+        int csl = (calcLight >> 16) & 0xFF;
+        int pbl = (packedLight) & 0xFF;
+        int cbl = (calcLight) & 0xFF;
+        int bl = Math.max(pbl, cbl);
+        int sl = Math.max(psl, csl);
+        return (sl << 16) | bl;
+    }
 }

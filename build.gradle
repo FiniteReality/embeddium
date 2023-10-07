@@ -16,12 +16,12 @@ plugins {
 	id "me.modmuss50.mod-publish-plugin" version "0.3.4"
 }
 
-apply from: "${rootProject.projectDir}/gradle/forge.gradle"
-apply from: "${rootProject.projectDir}/gradle/java.gradle"
-
 archivesBaseName = project.archives_base_name
 version = "${project.mod_version}${getVersionMetadata()}+mc${project.minecraft_version}"
 group = project.maven_group
+
+apply from: "${rootProject.projectDir}/gradle/forge.gradle"
+apply from: "${rootProject.projectDir}/gradle/java.gradle"
 
 loom {
     mixin.defaultRefmapName = "mixins.rubidium.refmap.json"
@@ -164,7 +164,7 @@ tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 
 publishMods {
 	file = remapJar.archiveFile
-	changelog = "[Changelog not implemented yet.]"
+	changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
 	type = STABLE
 	modLoaders.add("forge")
 
@@ -187,7 +187,7 @@ publishMods {
 		}
 	}
 
-	displayName = "Embeddium ${project.mod_version}"
+	displayName = "[${project.minecraft_version}] Embeddium ${project.mod_version}"
 }
 
 def getVersionMetadata() {

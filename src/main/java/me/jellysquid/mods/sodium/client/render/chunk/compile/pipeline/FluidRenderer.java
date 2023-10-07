@@ -328,12 +328,9 @@ public class FluidRenderer {
                     BlockPos adjPos = this.scratchPos.set(adjX, adjY, adjZ);
                     BlockState adjBlock = world.getBlockState(adjPos);
 
-                    if (!adjBlock.isOpaque() && !adjBlock.isAir()) {
+                    if (sprites[2] != null && adjBlock.shouldDisplayFluidOverlay(world, adjPos, fluidState)) {
                         sprite = sprites[2];
-                        if(sprite != null)
-                            isOverlay = true;
-                        else
-                            sprite = sprites[1];
+                        isOverlay = true;
                     }
                 }
 

@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.world.cloned;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.ints.Int2ReferenceMaps;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
@@ -115,6 +116,10 @@ public class ClonedChunkSection {
 
                 blockEntities.put(WorldSlice.getLocalBlockIndex(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15), entity);
             }
+        }
+
+        if (blockEntities != null) {
+            blockEntities.trim();
         }
 
         return blockEntities;

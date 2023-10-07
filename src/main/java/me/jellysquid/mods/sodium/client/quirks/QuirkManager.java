@@ -27,7 +27,8 @@ public class QuirkManager {
                         enabledQuirks.add(f.getName());
                 }
             }
-            SodiumClientMod.logger().warn("Enabled the following quirks in QuirkManager: [{}]", String.join(", ", enabledQuirks));
+            if(enabledQuirks.size() > 0)
+                SodiumClientMod.logger().warn("Enabled the following quirks in QuirkManager: [{}]", String.join(", ", enabledQuirks));
         } catch(ReflectiveOperationException e) {
             e.printStackTrace();
         }

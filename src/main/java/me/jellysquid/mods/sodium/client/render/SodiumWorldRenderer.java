@@ -253,6 +253,11 @@ public class SodiumWorldRenderer {
 
         var tracker = ChunkTrackerHolder.get(this.world);
         ChunkTracker.forEachChunk(tracker.getReadyChunks(), this.renderSectionManager::onChunkAdded);
+
+        // Forge workaround - reset VSync flag
+        var window = MinecraftClient.getInstance().getWindow();
+        if(window != null)
+            window.setVsync(MinecraftClient.getInstance().options.getEnableVsync().getValue());
     }
 
     public void renderBlockEntities(MatrixStack matrices,
@@ -373,6 +378,11 @@ public class SodiumWorldRenderer {
     }
 
 
+    private static boolean isInfiniteExtentsBox(Box box) {
+        return Double.isInfinite(box.minX) || Double.isInfinite(box.minY) || Double.isInfinite(box.minZ)
+            || Double.isInfinite(box.maxX) || Double.isInfinite(box.maxY) || Double.isInfinite(box.maxZ);
+    }
+
     /**
      * Returns whether or not the entity intersects with any visible chunks in the graph.
      * @return True if the entity is visible, otherwise false
@@ -388,6 +398,10 @@ public class SodiumWorldRenderer {
         }
 
         Box box = entity.getVisibilityBoundingBox();
+
+        if (isInfiniteExtentsBox(box)) {
+            return true;
+        }
 
         return this.isBoxVisible(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
     }
