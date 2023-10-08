@@ -3,7 +3,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.vertex.format.impl;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeFormat;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.CompactChunkMeshAttribute;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
@@ -11,8 +11,8 @@ import net.caffeinemc.mods.sodium.api.util.ColorU8;
 import org.lwjgl.system.MemoryUtil;
 
 public class CompactChunkVertex implements ChunkVertexType {
-    public static final GlVertexFormat<CompactChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(CompactChunkMeshAttribute.class, 16)
-            .addElement(CompactChunkMeshAttribute.VERTEX_DATA, 0, GlVertexAttributeFormat.UNSIGNED_INT, 4, false, true)
+    public static final GlVertexFormat<ChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(ChunkMeshAttribute.class, 16)
+            .addElement(ChunkMeshAttribute.VERTEX_DATA, 0, GlVertexAttributeFormat.UNSIGNED_INT, 4, false, true)
             .build();
 
     public static final int STRIDE = 16;
@@ -24,7 +24,7 @@ public class CompactChunkVertex implements ChunkVertexType {
     private static final float MODEL_SCALE = 32.0f;
 
     @Override
-    public GlVertexFormat<CompactChunkMeshAttribute> getVertexFormat() {
+    public GlVertexFormat<ChunkMeshAttribute> getVertexFormat() {
         return VERTEX_FORMAT;
     }
 

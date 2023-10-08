@@ -20,7 +20,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderBindingPoints;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderInterface;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.CompactChunkMeshAttribute;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.VanillaLikeChunkMeshAttribute;
@@ -226,10 +226,10 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
 
     private GlVertexAttributeBinding[] getBindingsForType() {
         if(this.vertexType == ChunkMeshFormats.COMPACT) {
-            GlVertexFormat<CompactChunkMeshAttribute> compactFormat = (GlVertexFormat<CompactChunkMeshAttribute>)this.vertexFormat;
+            GlVertexFormat<ChunkMeshAttribute> compactFormat = (GlVertexFormat<ChunkMeshAttribute>)this.vertexFormat;
             return new GlVertexAttributeBinding[] {
                     new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_PACKED_DATA,
-                            compactFormat.getAttribute(CompactChunkMeshAttribute.VERTEX_DATA))
+                            compactFormat.getAttribute(ChunkMeshAttribute.VERTEX_DATA))
             };
         } else if(this.vertexType == ChunkMeshFormats.VANILLA_LIKE) {
             GlVertexFormat<VanillaLikeChunkMeshAttribute> vanillaFormat = (GlVertexFormat<VanillaLikeChunkMeshAttribute>)this.vertexFormat;
@@ -244,7 +244,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
                             vanillaFormat.getAttribute(VanillaLikeChunkMeshAttribute.DRAW_PARAMS)),
             };
         } else
-            throw new IllegalArgumentException("Unexpected vertex type");
+            return null; // assume Oculus/Iris will take over
     }
 
     private GlTessellation createRegionTessellation(CommandList commandList, RenderRegion.DeviceResources resources) {

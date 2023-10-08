@@ -71,6 +71,8 @@ public class RenderSectionManager {
 
     private final int renderDistance;
 
+    private final ChunkVertexType vertexType;
+
     @NotNull
     private SortedRenderLists renderLists;
 
@@ -84,9 +86,11 @@ public class RenderSectionManager {
     private @Nullable BlockPos lastCameraPosition;
 
     public RenderSectionManager(ClientWorld world, int renderDistance, CommandList commandList) {
-        ChunkVertexType vertexType = ChunkMeshFormats.VANILLA_LIKE;
+        ChunkVertexType vertexType = SodiumClientMod.canUseVanillaVertices() ? ChunkMeshFormats.VANILLA_LIKE : ChunkMeshFormats.COMPACT;
 
         this.chunkRenderer = new DefaultChunkRenderer(RenderDevice.INSTANCE, vertexType);
+
+        this.vertexType = vertexType;
 
         this.world = world;
         this.builder = new ChunkBuilder(world, vertexType);
@@ -584,5 +588,9 @@ public class RenderSectionManager {
 
     public Collection<RenderSection> getSectionsWithGlobalEntities() {
         return ReferenceSets.unmodifiable(this.sectionsWithGlobalEntities);
+    }
+
+    public ChunkVertexType getVertexType() {
+        return this.vertexType;
     }
 }

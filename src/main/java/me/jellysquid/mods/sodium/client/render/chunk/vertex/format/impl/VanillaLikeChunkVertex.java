@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.vertex.format.impl;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeFormat;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.CompactChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.VanillaLikeChunkMeshAttribute;
@@ -22,9 +21,9 @@ public class VanillaLikeChunkVertex implements ChunkVertexType {
 
     public static final GlVertexFormat<VanillaLikeChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(VanillaLikeChunkMeshAttribute.class, STRIDE)
             .addElement(VanillaLikeChunkMeshAttribute.POSITION, 0, GlVertexAttributeFormat.FLOAT, 3, false, false)
-            .addElement(VanillaLikeChunkMeshAttribute.COLOR_LIGHT, 12, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, false)
-            .addElement(VanillaLikeChunkMeshAttribute.TEXTURE_UV, 16, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, false)
-            .addElement(VanillaLikeChunkMeshAttribute.DRAW_PARAMS, 20, GlVertexAttributeFormat.UNSIGNED_SHORT, 1, false, false)
+            .addElement(VanillaLikeChunkMeshAttribute.COLOR_LIGHT, 12, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
+            .addElement(VanillaLikeChunkMeshAttribute.TEXTURE_UV, 16, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
+            .addElement(VanillaLikeChunkMeshAttribute.DRAW_PARAMS, 20, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
             .build();
 
     @Override
