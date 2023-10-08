@@ -37,7 +37,19 @@ void _vert_init() {
 }
 
 #else
-#error "Vertex compression must be enabled"
+in vec3 a_PosId;
+in vec4 a_Color;
+in vec4 a_TexCoord;
+in ivec2 a_LightCoord;
+
+void _vert_init() {
+    _vert_position = a_PosId;
+    _vert_tex_diffuse_coord = (a_TexCoord.xy * VERT_TEX_SCALE);
+    _vert_tex_light_coord = a_LightCoord;
+    _vert_color = a_Color;
+
+    _draw_id = uint(a_TexCoord.z);
+}
 #endif
 
 // The translation vector of the current draw command

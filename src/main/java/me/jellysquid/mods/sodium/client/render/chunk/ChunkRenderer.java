@@ -27,5 +27,5 @@ public interface ChunkRenderer {
     /**
      * Returns the vertex format used by this chunk render backend for rendering meshes.
      */
-    ChunkVertexType getVertexType();
+    ChunkVertexType<?> getVertexType();
 }

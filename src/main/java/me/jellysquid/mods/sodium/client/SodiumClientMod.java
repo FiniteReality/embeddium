@@ -36,13 +36,14 @@ public class SodiumClientMod {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         MinecraftForge.EVENT_BUS.addListener(this::registerReloadListener);
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
-        
+
+        oculusLoaded = ModList.get().isLoaded("oculus");
+
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
     }
     
     public void setup(final FMLClientSetupEvent event) {
         CONFIG = loadConfig();
-        oculusLoaded = ModList.get().isLoaded("oculus");
         cclLoaded = ModList.get().isLoaded("codechickenlib");
 
         if(cclLoaded) {
@@ -105,5 +106,9 @@ public class SodiumClientMod {
 
     public static boolean isDirectMemoryAccessEnabled() {
         return options().advanced.allowDirectMemoryAccess;
+    }
+
+    public static boolean canUseVanillaVertices() {
+        return !SodiumClientMod.options().performance.useCompactVertexFormat && !oculusLoaded;
     }
 }

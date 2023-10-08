@@ -18,14 +18,14 @@ import java.util.Map;
 public abstract class ShaderChunkRenderer implements ChunkRenderer {
     private final Map<ChunkShaderOptions, GlProgram<ChunkShaderInterface>> programs = new Object2ObjectOpenHashMap<>();
 
-    protected final ChunkVertexType vertexType;
-    protected final GlVertexFormat<ChunkMeshAttribute> vertexFormat;
+    protected final ChunkVertexType<?> vertexType;
+    protected final GlVertexFormat<?> vertexFormat;
 
     protected final RenderDevice device;
 
     protected GlProgram<ChunkShaderInterface> activeProgram;
 
-    public ShaderChunkRenderer(RenderDevice device, ChunkVertexType vertexType) {
+    public ShaderChunkRenderer(RenderDevice device, ChunkVertexType<?> vertexType) {
         this.device = device;
         this.vertexType = vertexType;
         this.vertexFormat = vertexType.getCustomVertexFormat();
@@ -88,7 +88,7 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
     }
 
     @Override
-    public ChunkVertexType getVertexType() {
+    public ChunkVertexType<?> getVertexType() {
         return this.vertexType;
     }
 }

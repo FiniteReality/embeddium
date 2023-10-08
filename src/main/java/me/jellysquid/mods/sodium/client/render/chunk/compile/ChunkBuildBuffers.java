@@ -32,11 +32,11 @@ public class ChunkBuildBuffers {
     private final VertexBufferBuilder[] vertexBuffers;
     private final IndexBufferBuilder[][] indexBuffers;
 
-    private final ChunkVertexType vertexType;
+    private final ChunkVertexType<?> vertexType;
 
     private final BlockRenderPassManager renderPassManager;
 
-    public ChunkBuildBuffers(ChunkVertexType vertexType, BlockRenderPassManager renderPassManager) {
+    public ChunkBuildBuffers(ChunkVertexType<?> vertexType, BlockRenderPassManager renderPassManager) {
         this.vertexType = vertexType;
         this.renderPassManager = renderPassManager;
 

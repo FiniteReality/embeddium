@@ -13,7 +13,7 @@ import net.minecraft.client.render.VertexConsumer;
  * Simple vertex format which uses single-precision floating point numbers to represent position and texture
  * coordinates.
  */
-public class ModelVertexType implements ChunkVertexType {
+public class ModelVertexType implements ChunkVertexType<ChunkMeshAttribute> {
     public static final GlVertexFormat<ChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(ChunkMeshAttribute.class, 20)
             .addElement(ChunkMeshAttribute.POSITION_ID, 0, GlVertexAttributeFormat.UNSIGNED_SHORT, 4, false, false)
             .addElement(ChunkMeshAttribute.COLOR, 8, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true, false)
