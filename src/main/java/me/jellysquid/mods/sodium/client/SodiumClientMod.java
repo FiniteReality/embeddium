@@ -26,9 +26,12 @@ public class SodiumClientMod {
     private static String MOD_VERSION;
 
     public static boolean cclLoaded = false;
+    public static boolean oculusLoaded = false;
 
     public SodiumClientMod() {
         SodiumPreLaunch.onPreLaunch();
+
+        oculusLoaded = ModList.get().isLoaded("oculus");
 
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
@@ -93,5 +96,9 @@ public class SodiumClientMod {
         }
 
         return MOD_VERSION;
+    }
+
+    public static boolean canUseVanillaVertices() {
+        return !SodiumClientMod.options().performance.useCompactVertexFormat && !oculusLoaded;
     }
 }
