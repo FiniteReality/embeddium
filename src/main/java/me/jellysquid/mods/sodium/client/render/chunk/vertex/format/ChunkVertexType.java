@@ -7,5 +7,7 @@ public interface ChunkVertexType {
 
     ChunkVertexEncoder getEncoder();
 
-    String getDefine();
+    default String getDefine() {
+        return "VERTEX_FORMAT_COMPACT"; // as in original Sodium all vertex formats would use this mode
+    }
 }
