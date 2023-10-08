@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.render.chunk;
 import com.google.common.collect.Lists;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeBinding;
+import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBufferUsage;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlMutableBuffer;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
@@ -18,6 +19,8 @@ import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderBounds;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkMeshAttribute;
+import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelVertexFormats;
+import me.jellysquid.mods.sodium.client.render.chunk.format.VanillaLikeChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderBindingPoints;
@@ -37,19 +40,38 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
     private final GlMutableBuffer chunkInfoBuffer;
     private final boolean isBlockFaceCullingEnabled = SodiumClientMod.options().performance.useBlockFaceCulling;
 
-    public RegionChunkRenderer(RenderDevice device, ChunkVertexType vertexType) {
+    private GlVertexAttributeBinding[] getBindingsForType() {
+        if(this.vertexType != ChunkModelVertexFormats.VANILLA_LIKE) {
+            GlVertexFormat<ChunkMeshAttribute> compactFormat = (GlVertexFormat<ChunkMeshAttribute>)this.vertexFormat;
+            return new GlVertexAttributeBinding[] {
+                    new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_POSITION_ID,
+                            compactFormat.getAttribute(ChunkMeshAttribute.POSITION_ID)),
+                    new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_COLOR,
+                            compactFormat.getAttribute(ChunkMeshAttribute.COLOR)),
+                    new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_BLOCK_TEXTURE,
+                            compactFormat.getAttribute(ChunkMeshAttribute.BLOCK_TEXTURE)),
+                    new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_LIGHT_TEXTURE,
+                            compactFormat.getAttribute(ChunkMeshAttribute.LIGHT_TEXTURE))
+            };
+        } else {
+            GlVertexFormat<VanillaLikeChunkMeshAttribute> vanillaFormat = (GlVertexFormat<VanillaLikeChunkMeshAttribute>)this.vertexFormat;
+            return new GlVertexAttributeBinding[] {
+                    new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_POSITION_ID,
+                            vanillaFormat.getAttribute(VanillaLikeChunkMeshAttribute.POSITION)),
+                    new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_COLOR,
+                            vanillaFormat.getAttribute(VanillaLikeChunkMeshAttribute.COLOR)),
+                    new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_BLOCK_TEXTURE,
+                            vanillaFormat.getAttribute(VanillaLikeChunkMeshAttribute.BLOCK_TEX_ID)),
+                    new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_LIGHT_TEXTURE,
+                            vanillaFormat.getAttribute(VanillaLikeChunkMeshAttribute.LIGHT)),
+            };
+        }
+    }
+
+    public RegionChunkRenderer(RenderDevice device, ChunkVertexType<?> vertexType) {
         super(device, vertexType);
 
-        this.vertexAttributeBindings = new GlVertexAttributeBinding[] {
-                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_POSITION_ID,
-                        this.vertexFormat.getAttribute(ChunkMeshAttribute.POSITION_ID)),
-                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_COLOR,
-                        this.vertexFormat.getAttribute(ChunkMeshAttribute.COLOR)),
-                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_BLOCK_TEXTURE,
-                        this.vertexFormat.getAttribute(ChunkMeshAttribute.BLOCK_TEXTURE)),
-                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_LIGHT_TEXTURE,
-                        this.vertexFormat.getAttribute(ChunkMeshAttribute.LIGHT_TEXTURE))
-        };
+        this.vertexAttributeBindings = getBindingsForType();
 
         try (CommandList commandList = device.createCommandList()) {
             this.chunkInfoBuffer = commandList.createMutableBuffer();

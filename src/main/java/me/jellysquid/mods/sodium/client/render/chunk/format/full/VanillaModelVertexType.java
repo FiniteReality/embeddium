@@ -1,4 +1,4 @@
-package me.jellysquid.mods.sodium.client.render.chunk.format.sfp;
+package me.jellysquid.mods.sodium.client.render.chunk.format.full;
 
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeFormat;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
@@ -7,28 +7,22 @@ import me.jellysquid.mods.sodium.client.model.vertex.type.BlittableVertexType;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import me.jellysquid.mods.sodium.client.render.chunk.format.VanillaLikeChunkMeshAttribute;
 import net.minecraft.client.render.VertexConsumer;
 
 /**
  * Simple vertex format which uses single-precision floating point numbers to represent position and texture
  * coordinates.
  */
-public class ModelVertexType implements ChunkVertexType<ChunkMeshAttribute> {
-    public static final GlVertexFormat<ChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(ChunkMeshAttribute.class, 20)
-            .addElement(ChunkMeshAttribute.POSITION_ID, 0, GlVertexAttributeFormat.UNSIGNED_SHORT, 4, false)
-            .addElement(ChunkMeshAttribute.COLOR, 8, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true)
-            .addElement(ChunkMeshAttribute.BLOCK_TEXTURE, 12, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, false)
-            .addElement(ChunkMeshAttribute.LIGHT_TEXTURE, 16, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, true)
+public class VanillaModelVertexType implements ChunkVertexType<VanillaLikeChunkMeshAttribute> {
+    public static final GlVertexFormat<VanillaLikeChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(VanillaLikeChunkMeshAttribute.class, 28)
+            .addElement(VanillaLikeChunkMeshAttribute.POSITION, 0, GlVertexAttributeFormat.FLOAT, 3, false)
+            .addElement(VanillaLikeChunkMeshAttribute.COLOR, 12, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true)
+            .addElement(VanillaLikeChunkMeshAttribute.BLOCK_TEX_ID, 16, GlVertexAttributeFormat.UNSIGNED_SHORT, 4, false)
+            .addElement(VanillaLikeChunkMeshAttribute.LIGHT, 24, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, true)
             .build();
 
-    private static final int POSITION_MAX_VALUE = 65536;
     private static final int TEXTURE_MAX_VALUE = 65536;
-
-    private static final float MODEL_ORIGIN = 8.0f;
-    private static final float MODEL_RANGE = 32.0f;
-    private static final float MODEL_SCALE = MODEL_RANGE / POSITION_MAX_VALUE;
-
-    private static final float MODEL_SCALE_INV = POSITION_MAX_VALUE / MODEL_RANGE;
 
     private static final float TEXTURE_SCALE = (1.0f / TEXTURE_MAX_VALUE);
 
@@ -39,7 +33,7 @@ public class ModelVertexType implements ChunkVertexType<ChunkMeshAttribute> {
 
     @Override
     public ModelVertexSink createBufferWriter(VertexBufferView buffer, boolean direct) {
-        return direct ? new ModelVertexBufferWriterUnsafe(buffer) : new ModelVertexBufferWriterNio(buffer);
+        return direct ? new VanillaModelVertexBufferWriterUnsafe(buffer) : new VanillaModelVertexBufferWriterNio(buffer);
     }
 
     @Override
@@ -48,7 +42,7 @@ public class ModelVertexType implements ChunkVertexType<ChunkMeshAttribute> {
     }
 
     @Override
-    public GlVertexFormat<ChunkMeshAttribute> getCustomVertexFormat() {
+    public GlVertexFormat<VanillaLikeChunkMeshAttribute> getCustomVertexFormat() {
         return VERTEX_FORMAT;
     }
 
@@ -57,22 +51,18 @@ public class ModelVertexType implements ChunkVertexType<ChunkMeshAttribute> {
         return TEXTURE_SCALE;
     }
 
-    @Override
-    public float getPositionScale() {
-        return MODEL_SCALE;
-    }
-
-    @Override
-    public float getPositionOffset() {
-        return -MODEL_ORIGIN;
-    }
-
     static short encodeBlockTexture(float value) {
         return (short) (Math.min(0.99999997F, value) * TEXTURE_MAX_VALUE);
     }
 
-    static short encodePosition(float v) {
-        return (short) ((MODEL_ORIGIN + v) * MODEL_SCALE_INV);
+    @Override
+    public float getPositionOffset() {
+        return 0;
+    }
+
+    @Override
+    public float getPositionScale() {
+        return 1;
     }
 
     static int encodeLightMapTexCoord(int light) {
