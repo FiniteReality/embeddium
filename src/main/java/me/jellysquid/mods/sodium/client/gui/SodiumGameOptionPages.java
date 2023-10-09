@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.gui;
 
 import com.google.common.collect.ImmutableList;
+import me.jellysquid.mods.sodium.client.compat.modernui.MuiGuiScaleHook;
 import me.jellysquid.mods.sodium.client.gui.options.*;
 import me.jellysquid.mods.sodium.client.gui.options.binding.compat.VanillaBooleanOptionBinding;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
@@ -67,7 +68,7 @@ public class SodiumGameOptionPages {
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
                         .setName(new TranslatableText("options.guiScale"))
                         .setTooltip(new TranslatableText("sodium.options.gui_scale.tooltip"))
-                        .setControl(option -> new SliderControl(option, 0, MinecraftClient.getInstance().getWindow().calculateScaleFactor(0, MinecraftClient.getInstance().forcesUnicodeFont()), 1, ControlValueFormatter.guiScale()))
+                        .setControl(option -> new SliderControl(option, 0, MuiGuiScaleHook.getMaxGuiScale(), 1, ControlValueFormatter.guiScale()))
                         .setBinding((opts, value) -> {
                             opts.guiScale = value;
 
