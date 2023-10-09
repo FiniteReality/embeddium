@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.gui;
 
 import com.google.common.collect.ImmutableList;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.modernui.MuiGuiScaleHook;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.MappedStagingBuffer;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
@@ -280,6 +281,7 @@ public class SodiumGameOptionPages {
                         .setName(new TranslatableText("sodium.options.use_compact_vertex_format.name"))
                         .setTooltip(new TranslatableText("sodium.options.use_compact_vertex_format.tooltip"))
                         .setControl(TickBoxControl::new)
+                        .setEnabled(!SodiumClientMod.oculusLoaded)
                         .setImpact(OptionImpact.MEDIUM)
                         .setBinding((opts, value) -> {
                             opts.performance.useCompactVertexFormat = value;
