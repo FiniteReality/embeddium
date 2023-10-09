@@ -24,11 +24,21 @@ struct DrawParameters {
 
 //Define packed vertex data
 struct Packed {
+#if defined(USE_VERTEX_COMPRESSION)
     uint a_Pos1; //ushort[2] //x,y //The position of the vertex around the model origin
     uint a_Pos2; //ushort[2] //z,w
     uint a_Color; //The color of the vertex
     uint a_TexCoord; // The block texture coordinate of the vertex
     uint a_LightCoord; // The light texture coordinate of the vertex
+#else
+    float a_PosX;
+    float a_PosY;
+    float a_PosZ;
+    uint a_Color;
+    uint a_TexCoord;
+    uint a_ChunkId;
+    uint a_LightCoord;
+#endif
 };
 
 struct IndexGroup {
@@ -117,11 +127,15 @@ ChunkMultiDrawRange getSubInfo() {
 }
 
 vec4 unpackPos(Packed p) {
+#if defined(USE_VERTEX_COMPRESSION)
     uint x = p.a_Pos1 & uint(0xFFFF);
     uint y = (p.a_Pos1 >> 16);
     uint z = p.a_Pos2 & uint(0xFFFF);
     uint w = (p.a_Pos2 >> 16);
     return vec4(x,y,z,w);
+#else
+    return vec4(p.a_PosX, p.a_PosY, p.a_PosZ, (p.a_ChunkId & 0xFFFFu));
+#endif
 }
 
 float getAverageDistance(IndexGroup indexGroup) {
