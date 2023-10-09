@@ -33,11 +33,7 @@ public class IndexBufferBuilder {
     }
 
     private static GlIndexType getOptimalIndexType(int count) {
-        if (count < 65536) {
-            return GlIndexType.UNSIGNED_SHORT;
-        } else {
-            return GlIndexType.UNSIGNED_INT;
-        }
+        return GlIndexType.UNSIGNED_INT;
     }
 
     public int getCount() {
@@ -65,8 +61,8 @@ public class IndexBufferBuilder {
                 maxIndex = Math.max(maxIndex, i);
             }
 
-            this.minIndex = minIndex;
-            this.maxIndex = maxIndex;
+            this.minIndex = 0;
+            this.maxIndex = this.indices.size();
 
             this.format = getOptimalIndexType(this.maxIndex - this.minIndex);
         }
@@ -78,13 +74,7 @@ public class IndexBufferBuilder {
             int pointer = offset;
 
             while (it.hasNext()) {
-                int value = it.nextInt() - this.minIndex;
-
-                switch (this.format) {
-                    case UNSIGNED_BYTE -> buffer.put(pointer, (byte) value);
-                    case UNSIGNED_SHORT -> buffer.putShort(pointer, (short) value);
-                    case UNSIGNED_INT -> buffer.putInt(pointer, value);
-                }
+                buffer.putInt(pointer, it.nextInt());
 
                 pointer += stride;
             }
@@ -101,7 +91,7 @@ public class IndexBufferBuilder {
         }
 
         public int getBaseVertex() {
-            return this.minIndex;
+            return 0;
         }
 
         public GlIndexType getFormat() {

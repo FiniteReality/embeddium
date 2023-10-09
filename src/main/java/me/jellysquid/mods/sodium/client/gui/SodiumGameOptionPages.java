@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.gui;
 
 import com.google.common.collect.ImmutableList;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.modernui.MuiGuiScaleHook;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.MappedStagingBuffer;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
@@ -12,6 +13,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.SliderControl;
 import me.jellysquid.mods.sodium.client.gui.options.control.TickBoxControl;
 import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
+import me.jellysquid.mods.sodium.client.render.chunk.shader.ComputeShaderInterface;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.option.AoMode;
@@ -278,10 +280,21 @@ public class SodiumGameOptionPages {
                         .setName(Text.translatable("sodium.options.use_compact_vertex_format.name"))
                         .setTooltip(Text.translatable("sodium.options.use_compact_vertex_format.tooltip"))
                         .setControl(TickBoxControl::new)
+                        .setEnabled(!SodiumClientMod.oculusLoaded)
                         .setImpact(OptionImpact.MEDIUM)
                         .setBinding((opts, value) -> {
                             opts.performance.useCompactVertexFormat = value;
                         }, opts -> opts.performance.useCompactVertexFormat)
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build()
+                )
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setName(Text.translatable("sodium.options.translucent_face_sorting.name"))
+                        .setTooltip(Text.translatable("sodium.options.translucent_face_sorting.tooltip"))
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.VARIES)
+                        .setEnabled(ComputeShaderInterface.isSupported(RenderDevice.INSTANCE))
+                        .setBinding((opts, value) -> opts.performance.useTranslucentFaceSorting = value, opts -> opts.performance.useTranslucentFaceSorting)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build()
                 )
