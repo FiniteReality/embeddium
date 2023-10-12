@@ -46,12 +46,21 @@ public class BlockOcclusionCache {
             }
 
             if (selfShape.isEmpty()) {
+                // Upstream Sodium only returns true under stricter conditions than this, in order to cull faces in
+                // unusual block arrangements like a potted cacti under a solid block.
+                // However, that fix has the side effect of causing block models with improperly specified cullfaces
+                // to not render sometimes, and also breaks powder snow culling on 1.17+.
+                // It's not clear that the stricter check provides a significant performance uplift, so we err
+                // on the side of compatibility and use the same weaker check as vanilla.
+                return true;
+                /*
                 if (adjShape.isEmpty()){
                     return true; //example: top face of potted plants if top slab is placed above
                 }
                 else if (!adjState.isSideSolid(view,adjPos,facing.getOpposite(), SideShapeType.FULL)){
                     return true; //example: face of potted plants rendered if top stair placed above
                 }
+                */
             }
             
             return this.calculate(selfShape, adjShape);
