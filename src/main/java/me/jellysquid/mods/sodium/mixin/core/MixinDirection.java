@@ -23,6 +23,10 @@ public class MixinDirection {
      */
     @Overwrite
     public static Direction getFacing(float x, float y, float z) {
+        // Vanilla quirk: return NORTH if all entries are zero
+        if (x == 0 && y == 0 && z == 0)
+            return Direction.NORTH;
+
         // First choice in ties: negative, positive; Y, Z, X
         float yM = Math.abs(y);
         float zM = Math.abs(z);
