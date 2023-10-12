@@ -25,6 +25,9 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -85,79 +88,87 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         BlockPos.Mutable blockPos = new BlockPos.Mutable();
         BlockPos.Mutable offset = new BlockPos.Mutable();
 
-        for (int y = minY; y < maxY; y++) {
-            if (cancellationSource.isCancelled()) {
-                return null;
-            }
+        try {
+            for (int y = minY; y < maxY; y++) {
+                if (cancellationSource.isCancelled()) {
+                    return null;
+                }
 
-            for (int z = minZ; z < maxZ; z++) {
-                for (int x = minX; x < maxX; x++) {
-                    BlockState blockState = slice.getBlockState(x, y, z);
+                for (int z = minZ; z < maxZ; z++) {
+                    for (int x = minX; x < maxX; x++) {
+                        BlockState blockState = slice.getBlockState(x, y, z);
 
-                    if (blockState.isAir()) {
-                        continue;
-                    }
+                        if (blockState.isAir()) {
+                            continue;
+                        }
 
-                    blockPos.set(x, y, z);
-                    offset.set(x & 15, y & 15, z & 15);
+                        blockPos.set(x, y, z);
+                        offset.set(x & 15, y & 15, z & 15);
 
-                    boolean rendered = false;
+                        boolean rendered = false;
 
-                    if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                    	BakedModel model = cache.getBlockModels()
-                                .getModel(blockState);
-                    	ModelData modelData = modelDataMap.getOrDefault(blockPos, ModelData.EMPTY);
-                    	random.setSeed(blockState.getRenderingSeed(blockPos));
-                        for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
+                        if (blockState.getRenderType() == BlockRenderType.MODEL) {
+                            BakedModel model = cache.getBlockModels()
+                                    .getModel(blockState);
+                            ModelData modelData = modelDataMap.getOrDefault(blockPos, ModelData.EMPTY);
+                            random.setSeed(blockState.getRenderingSeed(blockPos));
+                            for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
+                                if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
+                                    ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(blockState, (short) -1);
+                                }
+
+                                long seed = blockState.getRenderingSeed(blockPos);
+
+                                if (cache.getBlockRenderer().renderModel(cache.getLocalSlice(), blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData, layer, random)) {
+                                    rendered = true;
+                                }
+                            }
+                        }
+
+                        FluidState fluidState = blockState.getFluidState();
+
+                        if (!fluidState.isEmpty()) {
+                            RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
+
                             if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
-                                ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(blockState, (short) -1);
+                                // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
+                                ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
                             }
 
-                            long seed = blockState.getRenderingSeed(blockPos);
-
-                            if (cache.getBlockRenderer().renderModel(cache.getLocalSlice(), blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData, layer, random)) {
-                                rendered = true;
-                            }
-                    	}
-                    }
-
-                    FluidState fluidState = blockState.getFluidState();
-                    
-                    if (!fluidState.isEmpty()) {
-                        RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
-
-                        if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
-                            // All fluids have a ShadersMod render type of 1, to match behavior of Minecraft 1.7 and earlier.
-                            ((ChunkBuildBuffersExt) buildContext.buffers).iris$setMaterialId(fluidState.getBlockState(), (short) 1);
-                        }
-                        
-                        if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, blockPos, offset, buffers.get(layer))) {
-                            rendered = true;
-                        }
-                    }
-
-                    if (blockState.hasBlockEntity()) {
-                        BlockEntity entity = slice.getBlockEntity(blockPos);
-
-                        if (entity != null) {
-                            BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(entity);
-
-                            if (renderer != null) {
-                                renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
+                            if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, blockPos, offset, buffers.get(layer))) {
                                 rendered = true;
                             }
                         }
-                    }
 
-                    if (blockState.isOpaqueFullCube(slice, blockPos)) {
-                        occluder.markClosed(blockPos);
-                    }
+                        if (blockState.hasBlockEntity()) {
+                            BlockEntity entity = slice.getBlockEntity(blockPos);
 
-                    if (rendered) {
-                        bounds.addBlock(x & 15, y & 15, z & 15);
+                            if (entity != null) {
+                                BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(entity);
+
+                                if (renderer != null) {
+                                    renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
+                                    rendered = true;
+                                }
+                            }
+                        }
+
+                        if (blockState.isOpaqueFullCube(slice, blockPos)) {
+                            occluder.markClosed(blockPos);
+                        }
+
+                        if (rendered) {
+                            bounds.addBlock(x & 15, y & 15, z & 15);
+                        }
                     }
                 }
             }
+        } catch (CrashException ex) {
+            // Propagate existing crashes (add context)
+            throw fillCrashInfo(ex.getReport(), slice, blockPos);
+        } catch (Exception ex) {
+            // Create a new crash report for other exceptions (e.g. thrown in getQuads)
+            throw fillCrashInfo(CrashReport.create(ex, "Encountered exception while building chunk meshes"), slice, blockPos);
         }
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
@@ -179,6 +190,23 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         renderData.setBounds(bounds.build(this.render.getChunkPos()));
 
         return new ChunkBuildResult(this.render, renderData.build(), meshes, this.frame);
+    }
+
+    private CrashException fillCrashInfo(CrashReport report, WorldSlice slice, BlockPos pos) {
+        CrashReportSection crashReportSection = report.addElement("Block being rendered", 1);
+
+        BlockState state = null;
+        try {
+            state = slice.getBlockState(pos);
+        } catch (Exception ignored) {}
+        CrashReportSection.addBlockInfo(crashReportSection, slice, pos, state);
+
+        crashReportSection.add("Chunk section", render);
+        if (renderContext != null) {
+            crashReportSection.add("Render context volume", renderContext.getVolume());
+        }
+
+        return new CrashException(report);
     }
     
     @Override
