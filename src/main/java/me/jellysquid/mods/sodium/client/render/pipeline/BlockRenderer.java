@@ -40,6 +40,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import java.util.List;
 
 public class BlockRenderer {
+    private static final MatrixStack EMPTY_STACK = new MatrixStack();
 
     private final BlockColorsExtended blockColors;
     private final BlockOcclusionCache occlusionCache;
@@ -90,10 +91,12 @@ public class BlockRenderer {
         }
 
         if(ForgeBlockRenderer.useForgeLightingPipeline()) {
-            final MatrixStack mStack = new MatrixStack();
-            if(offset != Vec3d.ZERO)
+            MatrixStack mStack;
+            if(offset != Vec3d.ZERO) {
+                mStack = new MatrixStack();
                 mStack.translate(offset.x, offset.y, offset.z);
-
+            } else
+                mStack = EMPTY_STACK;
             final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
             builder.reset();
             rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, builder, random, seed, modelData, cull, this.occlusionCache, buffers, layer);
