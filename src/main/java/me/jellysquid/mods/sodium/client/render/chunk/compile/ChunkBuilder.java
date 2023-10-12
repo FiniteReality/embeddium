@@ -36,6 +36,7 @@ public class ChunkBuilder {
     private final ChunkVertexType vertexType;
 
     private final Queue<ChunkBuildResult> deferredResultQueue = new ConcurrentLinkedDeque<>();
+    private final Queue<Throwable> deferredFailureQueue = new ConcurrentLinkedDeque<>();
     private final ThreadLocal<ChunkBuildContext> localContexts = new ThreadLocal<>();
 
     public ChunkBuilder(ChunkVertexType vertexType) {
@@ -122,6 +123,8 @@ public class ChunkBuilder {
                     .delete();
         }
 
+        this.deferredFailureQueue.clear();
+
         this.buildQueue.clear();
 
         this.world = null;
@@ -200,13 +203,23 @@ public class ChunkBuilder {
         return Runtime.getRuntime().availableProcessors();
     }
 
-    public CompletableFuture<Void> scheduleDeferred(ChunkRenderBuildTask task) {
+    public CompletableFuture<ChunkBuildResult> scheduleDeferred(ChunkRenderBuildTask task) {
         return this.schedule(task)
-                .thenAccept(this.deferredResultQueue::add);
+                .whenComplete((res, ex) -> {
+                    if (ex != null) {
+                        this.deferredFailureQueue.add(ex);
+                    } else {
+                        this.deferredResultQueue.add(res);
+                    }
+                });
     }
 
     public Iterator<ChunkBuildResult> createDeferredBuildResultDrain() {
         return new QueueDrainingIterator<>(this.deferredResultQueue);
+    }
+
+    public Iterator<Throwable> createDeferredBuildFailureDrain() {
+        return new QueueDrainingIterator<>(this.deferredFailureQueue);
     }
 
     /**
@@ -271,7 +284,7 @@ public class ChunkBuilder {
         } catch (Exception e) {
             // Propagate any exception from chunk building
             job.future.completeExceptionally(e);
-            e.printStackTrace();
+            SodiumClientMod.logger().error("Chunk build failed", e);
             return;
         } finally {
             job.task.releaseResources();

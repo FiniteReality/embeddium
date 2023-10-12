@@ -1,12 +1,14 @@
 package me.jellysquid.mods.sodium.common.util.collections;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import net.minecraft.util.crash.CrashException;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.BooleanSupplier;
 
 public class WorkStealingFutureDrain<T> implements Iterator<T> {
@@ -48,6 +50,13 @@ public class WorkStealingFutureDrain<T> implements Iterator<T> {
                 } catch (CancellationException e) {
                     SodiumClientMod.logger()
                             .warn("Future was cancelled: {}", future);
+                } catch (CompletionException e) {
+                    if (e.getCause() instanceof CrashException) {
+                        // Propagate CrashExceptions directly to provide extra information
+                        throw (CrashException) e.getCause();
+                    } else {
+                        throw e;
+                    }
                 }
             }
 

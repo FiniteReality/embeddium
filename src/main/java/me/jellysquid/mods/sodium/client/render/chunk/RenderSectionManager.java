@@ -37,6 +37,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.math.*;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
@@ -329,6 +330,9 @@ public class RenderSectionManager {
         // Try to complete some other work on the main thread while we wait for rebuilds to complete
         this.needsUpdate |= this.performPendingUploads();
 
+        // See if there are any failed builds
+        this.handlePendingFailures();
+
         if (!blockingFutures.isEmpty()) {
             this.needsUpdate = true;
             this.regions.upload(RenderDevice.INSTANCE.createCommandList(), new WorkStealingFutureDrain<>(blockingFutures, this.builder::stealTask));
@@ -386,6 +390,22 @@ public class RenderSectionManager {
         this.regions.upload(RenderDevice.INSTANCE.createCommandList(), it);
 
         return true;
+    }
+
+    private void handlePendingFailures() {
+        Iterator<Throwable> it = this.builder.createDeferredBuildFailureDrain();
+
+        if (it.hasNext()) {
+            // If there is any exception from the build failure queue, throw it
+            Throwable ex = it.next();
+
+            if (ex instanceof CrashException) {
+                // Propagate CrashExceptions directly to provide extra information
+                throw (CrashException)ex;
+            } else {
+                throw new RuntimeException("Chunk build failed", it.next());
+            }
+        }
     }
 
     public ChunkRenderBuildTask createRebuildTask(RenderSection render) {
