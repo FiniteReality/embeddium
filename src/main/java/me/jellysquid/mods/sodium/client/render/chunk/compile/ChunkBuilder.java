@@ -11,6 +11,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManag
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderBuildTask;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderEmptyBuildTask;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderRebuildTask;
+import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderTranslucencySortTask;
 import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
@@ -18,8 +19,10 @@ import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.common.util.collections.DequeDrain;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.Vector3d;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,6 +53,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
     private ClonedChunkSectionCache sectionCache;
 
     private World world;
+    private Vec3d cameraPosition = Vec3d.ZERO;
     private BlockRenderPassManager renderPassManager;
 
     private final int limitThreads;
@@ -176,6 +180,20 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
     }
 
     /**
+     * Sets the current camera position of the player used for task prioritization.
+     */
+    public void setCameraPosition(double x, double y, double z) {
+        this.cameraPosition = new Vec3d(x, y, z);
+    }
+
+    /**
+     * Returns the current camera position of the player used for task prioritization.
+     */
+    public Vec3d getCameraPosition() {
+        return this.cameraPosition;
+    }
+
+    /**
      * @return True if the build queue is empty
      */
     public boolean isBuildQueueEmpty() {
@@ -233,6 +251,17 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
                 .thenAccept(this::enqueueUpload);
     }
 
+    /**
+     * Creates a rebuild task and defers it to the work queue. When the task is completed, it will be moved onto the
+     * completed uploads queued which will then be drained during the next available synchronization point with the
+     * main thread.
+     * @param render The render to rebuild
+     */
+    public void deferSort(ChunkRenderContainer<T> render) {
+        this.scheduleSortTaskAsync(render)
+                .thenAccept(this::enqueueUpload);
+    }
+
 
     /**
      * Enqueues the build task result to the pending result queue to be later processed during the next available
@@ -252,6 +281,14 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
     }
 
     /**
+     * Schedules the rebuild task asynchronously on the worker pool, returning a future wrapping the task.
+     * @param render The render to rebuild
+     */
+    public CompletableFuture<ChunkBuildResult<T>> scheduleSortTaskAsync(ChunkRenderContainer<T> render) {
+        return this.schedule(this.createSortTask(render));
+    }
+
+    /**
      * Creates a task to rebuild the geometry of a {@link ChunkRenderContainer}.
      * @param render The render to rebuild
      */
@@ -263,8 +300,14 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
         if (context == null) {
             return new ChunkRenderEmptyBuildTask<>(render);
         } else {
-            return new ChunkRenderRebuildTask<>(render, context, render.getRenderOrigin());
+            return new ChunkRenderRebuildTask<>(render, context, render.getRenderOrigin()).withCameraPosition(this.cameraPosition);
         }
+    }
+
+    private ChunkRenderBuildTask<T> createSortTask(ChunkRenderContainer<T> render) {
+        render.cancelRebuildTask();
+
+        return new ChunkRenderTranslucencySortTask<>(render, render.getRenderOrigin(), this.cameraPosition);
     }
 
     public void onChunkDataChanged(int x, int y, int z) {

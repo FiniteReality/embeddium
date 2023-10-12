@@ -29,6 +29,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.EmptyModelData;
@@ -50,13 +51,23 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 
     private final Map<BlockPos, IModelData> modelDataMap;
 
+    private Vec3d camera;
+
+    private final boolean translucencySorting;
 
     public ChunkRenderRebuildTask(ChunkRenderContainer<T> render, ChunkRenderContext context, BlockPos offset) {
         this.render = render;
         this.offset = offset;
         this.context = context;
+        this.camera = Vec3d.ZERO;
+        this.translucencySorting = SodiumClientMod.options().advanced.translucencySorting;
 
         this.modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
+    }
+
+    public ChunkRenderRebuildTask<T> withCameraPosition(Vec3d camera) {
+        this.camera = camera;
+        return this;
     }
 
     @Override
@@ -156,11 +167,14 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         
         ForgeHooksClient.setRenderLayer(null);
 
+        render.setRebuildForTranslucents(false);
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
-            ChunkMeshData mesh = buffers.createMesh(pass);
+            ChunkMeshData mesh = buffers.createMesh(pass, (float)camera.x - offset.getX(), (float)camera.y - offset.getY(), (float)camera.z - offset.getZ(), this.translucencySorting);
 
             if (mesh != null) {
                 renderData.setMesh(pass, mesh);
+                if(this.translucencySorting && pass.isTranslucent())
+                    render.setRebuildForTranslucents(true);
             }
         }
 

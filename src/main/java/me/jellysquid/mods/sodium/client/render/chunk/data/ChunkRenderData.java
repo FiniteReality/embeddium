@@ -76,12 +76,45 @@ public class ChunkRenderData {
         return this.meshes.get(pass);
     }
 
+    public void setMesh(BlockRenderPass pass, ChunkMeshData data) {
+        if (this.meshes.get(pass) == null)
+            throw new IllegalStateException("No mesh found");
+        this.meshes.put(pass, data);
+    }
+
     public int getMeshSize() {
         return this.meshByteSize;
     }
 
     public int getFacesWithData() {
         return this.facesWithData;
+    }
+
+    public ChunkRenderData copyAndReplaceMesh(Map<BlockRenderPass, ChunkMeshData> replacements) {
+        ChunkRenderData data = new ChunkRenderData();
+        data.globalBlockEntities = this.globalBlockEntities;
+        data.blockEntities = this.blockEntities;
+        data.occlusionData = this.occlusionData;
+        data.meshes = new EnumMap<>(this.meshes);
+        data.bounds = this.bounds;
+        data.animatedSprites = new ObjectArrayList<>(this.animatedSprites);
+        data.meshes.putAll(replacements);
+
+        int facesWithData = 0;
+        int size = 0;
+
+        for (ChunkMeshData meshData : this.meshes.values()) {
+            size += meshData.getVertexDataSize();
+
+            for (Map.Entry<ModelQuadFacing, BufferSlice> entry : meshData.getSlices()) {
+                facesWithData |= 1 << entry.getKey().ordinal();
+            }
+        }
+
+        data.isEmpty = this.globalBlockEntities.isEmpty() && this.blockEntities.isEmpty() && facesWithData == 0;
+        data.meshByteSize = size;
+        data.facesWithData = facesWithData;
+        return data;
     }
 
     public static class Builder {

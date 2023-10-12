@@ -81,5 +81,9 @@ public class ChunkOneshotGraphicsState extends ChunkGraphicsState {
         });
 
         this.setupModelParts(meshData, vertexData.format);
+
+        vertexData.buffer.limit(vertexData.buffer.capacity());
+        vertexData.buffer.position(0);
+        this.setTranslucencyData(vertexData.buffer);
     }
 }

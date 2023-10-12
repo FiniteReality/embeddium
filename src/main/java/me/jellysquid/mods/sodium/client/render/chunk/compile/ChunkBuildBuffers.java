@@ -12,6 +12,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelV
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelOffset;
+import me.jellysquid.mods.sodium.client.render.chunk.format.sfp.SFPModelVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
 import net.minecraft.client.render.RenderLayer;
@@ -77,7 +78,7 @@ public class ChunkBuildBuffers {
      * Creates immutable baked chunk meshes from all non-empty scratch buffers and resets the state of all mesh
      * builders. This is used after all blocks have been rendered to pass the finished meshes over to the graphics card.
      */
-    public ChunkMeshData createMesh(BlockRenderPass pass) {
+    public ChunkMeshData createMesh(BlockRenderPass pass, float x, float y, float z, boolean sortTranslucent) {
         VertexBufferBuilder[] builders = this.buffersByLayer[pass.ordinal()];
 
         ChunkMeshData meshData = new ChunkMeshData();
@@ -114,6 +115,10 @@ public class ChunkBuildBuffers {
 
         buffer.flip();
 
+        if (sortTranslucent && pass.isTranslucent()) {
+            ChunkBufferSorter.sortStandardFormat(vertexType, buffer, bufferLen, x, y, z);
+        }
+
         meshData.setVertexData(new VertexData(buffer, this.vertexType.getCustomVertexFormat()));
 
         return meshData;
@@ -121,5 +126,9 @@ public class ChunkBuildBuffers {
 
     public void setRenderOffset(int x, int y, int z) {
         this.offset.set(x, y, z);
+    }
+
+    public ChunkVertexType getVertexType() {
+        return this.vertexType;
     }
 }

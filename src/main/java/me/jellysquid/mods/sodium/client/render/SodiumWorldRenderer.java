@@ -180,6 +180,9 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         }
 
         Vec3d pos = camera.getPos();
+
+        this.chunkRenderManager.setCameraPosition(pos.x, pos.y, pos.z);
+
         float pitch = camera.getPitch();
         float yaw = camera.getYaw();
 

@@ -31,8 +31,12 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
     private boolean needsRebuild;
     private boolean needsImportantRebuild;
 
+    private boolean needsSort;
+
     private boolean tickable;
     private int id;
+
+    private boolean rebuildableForTranslucents;
 
     public ChunkRenderContainer(ChunkRenderBackend<T> backend, SodiumWorldRenderer worldRenderer, int chunkX, int chunkY, int chunkZ, ChunkRenderColumn<T> column) {
         this.worldRenderer = worldRenderer;
@@ -43,6 +47,7 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
 
         //noinspection unchecked
         this.graphicsStates = (T[]) Array.newInstance(backend.getGraphicsStateType(), BlockRenderPass.COUNT);
+        this.rebuildableForTranslucents = false;
         this.column = column;
     }
 
@@ -53,6 +58,7 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
     public void cancelRebuildTask() {
         this.needsRebuild = false;
         this.needsImportantRebuild = false;
+        this.needsSort = false;
 
         if (this.rebuildTask != null) {
             this.rebuildTask.cancel(false);
@@ -76,6 +82,10 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
      */
     public boolean needsImportantRebuild() {
         return this.needsImportantRebuild;
+    }
+
+    public boolean needsSort() {
+        return this.needsSort;
     }
 
     /**
@@ -102,6 +112,15 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
         }
     }
 
+    public boolean shouldRebuildForTranslucents() {
+        return this.rebuildableForTranslucents;
+    }
+
+    public void setRebuildForTranslucents(boolean flag) {
+        this.rebuildableForTranslucents = flag;
+    }
+
+
     public void setData(ChunkRenderData info) {
         if (info == null) {
             throw new NullPointerException("Mesh information must not be null");
@@ -123,6 +142,17 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
 
         this.needsImportantRebuild = important;
         this.needsRebuild = true;
+        this.needsSort = false;
+
+        return changed;
+    }
+
+    public boolean scheduleSort(boolean important) {
+        if (this.needsRebuild)
+            return false;
+
+        boolean changed = !this.needsSort;
+        this.needsSort = true;
 
         return changed;
     }

@@ -37,7 +37,7 @@ public class ChunkRenderBackendOneshot extends ChunkRenderShaderBackend<ChunkOne
             ChunkRenderContainer<ChunkOneshotGraphicsState> render = result.render;
             ChunkRenderData data = result.data;
 
-            for (BlockRenderPass pass : BlockRenderPass.VALUES) {
+            for (BlockRenderPass pass : result.passesToUpload) {
                 ChunkOneshotGraphicsState state = render.getGraphicsState(pass);
                 ChunkMeshData mesh = data.getMesh(pass);
 
@@ -47,6 +47,11 @@ public class ChunkRenderBackendOneshot extends ChunkRenderShaderBackend<ChunkOne
                     }
 
                     state.upload(commandList, mesh);
+                    // For code simplicity, ChunkOneshotGraphicsState stores the buffer unconditionally
+                    // Reset it here if the pass isn't translucent, as we don't want to store useless
+                    // buffers
+                    if(!pass.isTranslucent())
+                        state.setTranslucencyData(null);
                 } else {
                     if (state != null) {
                         state.delete(commandList);

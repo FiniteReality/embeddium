@@ -42,7 +42,7 @@ public class ChunkRegionManager<T extends ChunkGraphicsState> {
         ChunkRegion<T> region = this.regions.get(key);
 
         if (region == null) {
-            this.regions.put(key, region = new ChunkRegion<>(this.device, BUFFER_SIZE));
+            this.regions.put(key, region = new ChunkRegion<>(this.device, BUFFER_SIZE, x, y, z));
         }
 
         return region;

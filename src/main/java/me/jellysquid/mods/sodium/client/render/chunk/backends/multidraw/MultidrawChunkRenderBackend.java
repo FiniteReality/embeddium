@@ -36,10 +36,7 @@ import org.lwjgl.opengl.GL20C;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -129,7 +126,7 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
                 ChunkRenderContainer<MultidrawGraphicsState> render = result.render;
                 ChunkRenderData data = result.data;
 
-                for (BlockRenderPass pass : BlockRenderPass.VALUES) {
+                for (BlockRenderPass pass : result.passesToUpload) {
                     MultidrawGraphicsState graphics = render.getGraphicsState(pass);
 
                     // De-allocate the existing buffer arena for this render
@@ -147,7 +144,14 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
 
                         GlBufferSegment segment = arena.uploadBuffer(commandList, this.uploadBuffer, 0, upload.buffer.capacity());
 
-                        render.setGraphicsState(pass, new MultidrawGraphicsState(render, region, segment, meshData, this.vertexFormat));
+                        MultidrawGraphicsState graphicsState = new MultidrawGraphicsState(render, region, segment, meshData, this.vertexFormat);
+                        if(pass.isTranslucent()) {
+                            upload.buffer.limit(upload.buffer.capacity());
+                            upload.buffer.position(0);
+
+                            graphicsState.setTranslucencyData(upload.buffer);
+                        }
+                        render.setGraphicsState(pass, graphicsState);
                     } else {
                         render.setGraphicsState(pass, null);
                     }
@@ -191,6 +195,16 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
         });
     }
 
+    private boolean reverseRegions = false;
+    private ChunkCameraContext regionCamera;
+
+    /**
+     * Sets whether to reverse the order in which regions are drawn (fixes
+     */
+    public void setReverseRegions(boolean flag) {
+        this.reverseRegions = flag;
+    }
+
     @Override
     public void render(CommandList commandList, ChunkRenderListIterator<MultidrawGraphicsState> renders, ChunkCameraContext camera) {
         this.bufferManager.cleanup();
@@ -220,8 +234,22 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
         this.pendingBatches.clear();
     }
 
+    private static final Comparator<ChunkRegion<?>> REGION_REVERSER = Comparator.<ChunkRegion<?>>comparingDouble(r -> r.camDistance).reversed();
+
     private void buildCommandBuffer() {
         this.commandClientBufferBuilder.begin();
+
+        if(this.reverseRegions) {
+            ChunkCameraContext camera = this.regionCamera;
+            for (ChunkRegion<?> region : this.pendingBatches) {
+                float x = camera.getChunkModelOffset(region.x * 16, camera.blockOriginX, camera.originX);
+                float y = camera.getChunkModelOffset(region.y * 16, camera.blockOriginY, camera.originY);
+                float z = camera.getChunkModelOffset(region.z * 16, camera.blockOriginZ, camera.originZ);
+                region.camDistance = x * x + y * y + z * z;
+            }
+
+            this.pendingBatches.sort(REGION_REVERSER);
+        }
 
         for (ChunkRegion<?> region : this.pendingBatches) {
             ChunkDrawCallBatcher batcher = region.getDrawBatcher();
@@ -266,6 +294,7 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
 
     private void setupDrawBatches(CommandList commandList, ChunkRenderListIterator<MultidrawGraphicsState> it, ChunkCameraContext camera) {
         this.uniformBufferBuilder.reset();
+        this.regionCamera = camera;
 
         int drawCount = 0;
 

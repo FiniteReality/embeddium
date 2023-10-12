@@ -21,7 +21,11 @@ public class ChunkRegion<T extends ChunkGraphicsState> {
 
     private GlTessellation tessellation;
 
-    public ChunkRegion(RenderDevice device, int size) {
+    public final int x, y, z;
+
+    public float camDistance;
+
+    public ChunkRegion(RenderDevice device, int size, int x, int y, int z) {
         int arenaSize = EXPECTED_CHUNK_SIZE * size;
 
         this.device = device;
@@ -29,6 +33,10 @@ public class ChunkRegion<T extends ChunkGraphicsState> {
         this.uploadQueue = new ObjectArrayList<>();
 
         this.batch = ChunkDrawCallBatcher.create(size * ModelQuadFacing.COUNT);
+
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     public GlBufferArena getBufferArena() {
