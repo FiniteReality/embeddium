@@ -40,6 +40,8 @@ import java.util.Random;
 import codechicken.lib.render.block.ICCBlockRenderer;
 
 public class BlockRenderer {
+    private static final MatrixStack EMPTY_STACK = new MatrixStack();
+
     private final Random random = new XoRoShiRoRandom();
 
     private final BlockColorsExtended blockColors;
@@ -90,10 +92,12 @@ public class BlockRenderer {
         }
 
         if(ForgeBlockRenderer.useForgeLightingPipeline()) {
-            final MatrixStack mStack = new MatrixStack();
-            if(offset != Vec3d.ZERO)
+            MatrixStack mStack;
+            if(offset != Vec3d.ZERO) {
+                mStack = new MatrixStack();
                 mStack.translate(offset.x, offset.y, offset.z);
-
+            } else
+                mStack = EMPTY_STACK;
             final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
             builder.reset();
             rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, builder, random, seed, modelData, cull, this.occlusionCache, buffers.getRenderData());
