@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSets;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveEmptyChunkChecker;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
@@ -185,7 +186,16 @@ public class RenderSectionManager {
         Chunk chunk = this.world.getChunk(x, z);
         ChunkSection section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
 
-        if (section.isEmpty()) {
+        boolean isEmpty;
+        if (!section.isEmpty()) {
+            isEmpty = false;
+        } else if (!SodiumClientMod.immersiveLoaded) {
+            isEmpty = true;
+        } else {
+            isEmpty = !ImmersiveEmptyChunkChecker.hasWires(ChunkSectionPos.from(x, y, z));
+        }
+
+        if (isEmpty) {
             this.updateSectionInfo(renderSection, BuiltSectionInfo.EMPTY);
         } else {
             renderSection.setPendingUpdate(ChunkUpdateType.INITIAL_BUILD);

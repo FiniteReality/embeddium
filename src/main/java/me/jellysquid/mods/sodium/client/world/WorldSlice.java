@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.client.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveEmptyChunkChecker;
 import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
@@ -87,7 +89,11 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         // If the chunk section is absent or empty, simply terminate now. There will never be anything in this chunk
         // section to render, so we need to signal that a chunk render task shouldn't created. This saves a considerable
         // amount of time in queueing instant build tasks and greatly accelerates how quickly the world can be loaded.
-        if (section == null || section.isEmpty()) {
+        boolean isEmpty = section == null || section.isEmpty();
+        if (isEmpty && section != null && SodiumClientMod.immersiveLoaded) {
+            isEmpty = !ImmersiveEmptyChunkChecker.hasWires(origin);
+        }
+        if (isEmpty) {
             return null;
         }
 
