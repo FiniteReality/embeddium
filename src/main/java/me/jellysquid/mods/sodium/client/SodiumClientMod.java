@@ -35,7 +35,7 @@ public class SodiumClientMod {
     
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        MinecraftForge.EVENT_BUS.addListener(this::registerReloadListener);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerReloadListener);
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
 
         oculusLoaded = ModList.get().isLoaded("oculus");
