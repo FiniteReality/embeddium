@@ -85,7 +85,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
         Map<BlockPos, IModelData> modelDataMap = this.modelDataMap;
 
-        BlockPos.Mutable blockPos = new BlockPos.Mutable();
+        // Initialise with minX/minY/minZ so initial getBlockState crash context is correct
+        BlockPos.Mutable blockPos = new BlockPos.Mutable(minX, minY, minZ);
         BlockPos.Mutable offset = new BlockPos.Mutable();
 
         try {
