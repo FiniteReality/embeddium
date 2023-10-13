@@ -21,4 +21,12 @@ public class FlywheelCompat {
         }
     }
 
+    public static boolean isSkipped(BlockEntity be) {
+        if(!SodiumClientMod.flywheelLoaded)
+            return false;
+        if(!Backend.getInstance().canUseInstancing())
+            return false;
+        return InstancedRenderRegistry.getInstance().shouldSkipRender(be);
+    }
+
 }

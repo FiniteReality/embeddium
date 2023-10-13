@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 import java.util.Map;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -151,7 +152,8 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                             BlockEntityRenderer<BlockEntity> renderer = BlockEntityRenderDispatcher.INSTANCE.get(entity);
 
                             if (renderer != null) {
-                                renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
+                                if (!FlywheelCompat.isSkipped(entity))
+                                    renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
 
                                 bounds.addBlock(relX, relY, relZ);
                             }

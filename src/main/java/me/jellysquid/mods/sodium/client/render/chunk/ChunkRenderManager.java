@@ -292,7 +292,6 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
 
         if (!blockEntities.isEmpty()) {
             this.visibleBlockEntities.addAll(blockEntities);
-            FlywheelCompat.filterBlockEntityList(this.visibleBlockEntities);
         }
     }
 
