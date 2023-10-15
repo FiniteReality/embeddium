@@ -30,6 +30,7 @@ import org.lwjgl.system.MemoryUtil;
 import repack.joml.Matrix4f;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -122,6 +123,7 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
     }
 
     private final Matrix4f cachedModelViewMatrix = new Matrix4f();
+    private final List<RenderSection> sectionsToCompute = new ArrayList<>();
 
     private void computeTranslucency(ChunkRenderMatrices matrices, CommandList commandList,
                                      ChunkRenderList list, BlockRenderPass pass,
@@ -154,6 +156,7 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
 
             boolean runCompute = true;
             int regionsComputed = 0;
+
             //We want compute to run beginning with the closest chunks
             for (Map.Entry<RenderRegion, List<RenderSection>> entry : sortedRegions(list, false)) {
                 RenderRegion region = entry.getKey();
@@ -167,7 +170,16 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
                 }
 
                 if (region.getNeedsTranslucencyCompute() && !regionSections.isEmpty()) {
-                    if (!buildDrawBatches(regionSections, pass, camera)) {
+                    sectionsToCompute.clear();
+
+                    for(RenderSection section : regionSections) {
+                        if(section.getGraphicsState(pass) != null
+                                && section.getSquaredDistance(camera.blockX, camera.blockY, camera.blockZ) < 96*96) {
+                            sectionsToCompute.add(section);
+                        }
+                    }
+
+                    if (sectionsToCompute.isEmpty() || !buildDrawBatches(sectionsToCompute, pass, camera)) {
                         continue;
                     }
                     float x = getCameraTranslation(region.getOriginX(), camera.blockX, camera.deltaX);
@@ -184,12 +196,7 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
                     runCompute = compute.execute(commandList, batches[0], arenas);
                     region.setNeedsTranslucencyCompute(false);
                     if(runCompute) {
-                        // Count the number of sorted sections
-                        //noinspection ForLoopReplaceableByForEach
-                        for(int i = 0; i < regionSections.size(); i++) {
-                            if(regionSections.get(i).getGraphicsState(BlockRenderPass.TRANSLUCENT) != null)
-                                regionsComputed++;
-                        }
+                        regionsComputed += sectionsToCompute.size();
                         if(regionsComputed >= 15)
                             runCompute = false; // do not continue sorting for the rest of the frame
                     }
