@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.shader;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBufferTarget;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBufferUsage;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlMutableBuffer;
@@ -44,8 +45,8 @@ public class ComputeShaderInterface {
     private final GlUniformFloat uniformModelOffset;
     private final GlUniformInt uniformExecutionType;
     private final GlUniformInt uniformSortHeight;
-    private final ArrayList<Integer> pointerList = new ArrayList<>();
-    private final ArrayList<Integer> subDataList = new ArrayList<>();
+    private final IntArrayList pointerList = new IntArrayList();
+    private final IntArrayList subDataList = new IntArrayList();
 
     public ComputeShaderInterface(ShaderBindingContext context) {
         this.uniformModelViewMatrix = context.bindUniform("u_ModelViewMatrix", GlUniformMatrix4f::new);
@@ -121,11 +122,11 @@ public class ComputeShaderInterface {
         GlMutableBuffer shaderBuffer;
 
         shaderBuffer = commandList.createMutableBuffer();
-        commandList.bufferData(GlBufferTarget.SHADER_STORAGE_BUFFER, shaderBuffer, subDataList.stream().mapToInt(i -> i).toArray(), GlBufferUsage.DYNAMIC_DRAW);
+        commandList.bufferData(GlBufferTarget.SHADER_STORAGE_BUFFER, shaderBuffer, subDataList.toIntArray(), GlBufferUsage.DYNAMIC_DRAW);
         commandList.bindBufferBase(GlBufferTarget.SHADER_STORAGE_BUFFER, 3, shaderBuffer);
 
         shaderBuffer = commandList.createMutableBuffer();
-        commandList.bufferData(GlBufferTarget.SHADER_STORAGE_BUFFER, shaderBuffer, pointerList.stream().mapToInt(i -> i).toArray(), GlBufferUsage.DYNAMIC_DRAW);
+        commandList.bufferData(GlBufferTarget.SHADER_STORAGE_BUFFER, shaderBuffer, pointerList.toIntArray(), GlBufferUsage.DYNAMIC_DRAW);
         commandList.bindBufferBase(GlBufferTarget.SHADER_STORAGE_BUFFER, 4, shaderBuffer);
 
         shaderBuffer = commandList.createMutableBuffer();
