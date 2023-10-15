@@ -8,7 +8,6 @@ import java.util.Arrays;
 public class ChunkGraphIterationQueue {
     private int[] positions;
     private ChunkGraphNode[] nodes;
-    private Direction[] directions;
 
     private int pos;
     private int capacity;
@@ -20,12 +19,11 @@ public class ChunkGraphIterationQueue {
     public ChunkGraphIterationQueue(int capacity) {
         this.positions = new int[capacity];
         this.nodes = new ChunkGraphNode[capacity];
-        this.directions = new Direction[capacity];
 
         this.capacity = capacity;
     }
 
-    public void add(ChunkGraphNode node, Direction direction) {
+    public void add(ChunkGraphNode node) {
         int i = this.pos++;
 
         if (i == this.capacity) {
@@ -34,7 +32,6 @@ public class ChunkGraphIterationQueue {
 
         this.positions[i] = node.getId();
         this.nodes[i] = node;
-        this.directions[i] = direction;
     }
 
     private void resize() {
@@ -42,15 +39,10 @@ public class ChunkGraphIterationQueue {
 
         this.positions = Arrays.copyOf(this.positions, this.capacity);
         this.nodes = Arrays.copyOf(this.nodes, this.capacity);
-        this.directions = Arrays.copyOf(this.directions, this.capacity);
     }
 
     public ChunkGraphNode getNode(int i) {
         return this.nodes[i];
-    }
-
-    public Direction getDirection(int i) {
-        return this.directions[i];
     }
 
     public void clear() {

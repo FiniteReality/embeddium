@@ -45,17 +45,17 @@ public class ChunkGraphCuller implements ChunkCuller {
 
         for (int i = 0; i < queue.size(); i++) {
             ChunkGraphNode node = queue.getNode(i);
-            Direction flow = queue.getDirection(i);
+            short cullData = node.computeQueuePop();
 
             for (Direction dir : DirectionUtil.ALL_DIRECTIONS) {
-                if (this.isCulled(node, flow, dir)) {
+                if (useOcclusionCulling && (cullData & (1 << dir.ordinal())) == 0) {
                     continue;
                 }
 
                 ChunkGraphNode adj = node.getConnectedNode(dir);
 
                 if (adj != null && this.isWithinRenderDistance(adj)) {
-                    this.bfsEnqueue(node, adj, dir.getOpposite());
+                    this.bfsEnqueue(node, adj, dir.getOpposite(), cullData);
                 }
             }
         }
@@ -68,14 +68,6 @@ public class ChunkGraphCuller implements ChunkCuller {
         int z = Math.abs(adj.getChunkZ() - this.centerChunkZ);
 
         return x <= this.renderDistance && z <= this.renderDistance;
-    }
-
-    private boolean isCulled(ChunkGraphNode node, Direction from, Direction to) {
-        if (node.canCull(to)) {
-            return true;
-        }
-
-        return this.useOcclusionCulling && from != null && !node.isVisibleThrough(from, to);
     }
 
     private void initSearch(Camera camera, FrustumExtended frustum, int frame, boolean spectator) {
@@ -105,7 +97,7 @@ public class ChunkGraphCuller implements ChunkCuller {
                 this.useOcclusionCulling = false;
             }
 
-            this.visible.add(rootNode, null);
+            this.visible.add(rootNode);
         } else {
             chunkY = MathHelper.clamp(origin.getY() >> 4, 0, 15);
 
@@ -129,25 +121,27 @@ public class ChunkGraphCuller implements ChunkCuller {
             bestNodes.sort(Comparator.comparingDouble(node -> node.getSquaredDistance(origin)));
 
             for (ChunkGraphNode node : bestNodes) {
-                this.visible.add(node, null);
+                this.visible.add(node);
             }
         }
     }
 
 
-    private void bfsEnqueue(ChunkGraphNode parent, ChunkGraphNode node, Direction flow) {
+    private void bfsEnqueue(ChunkGraphNode parent, ChunkGraphNode node, Direction flow, short parentalData) {
         if (node.getLastVisibleFrame() == this.activeFrame) {
+            node.updateCullingState(flow, parentalData);
             return;
         }
+        node.setLastVisibleFrame(this.activeFrame);
 
         if (node.isCulledByFrustum(this.frustum)) {
             return;
         }
 
-        node.setLastVisibleFrame(this.activeFrame);
-        node.setCullingState(parent.getCullingState(), flow);
+        node.setCullingState(parentalData);
+        node.updateCullingState(flow, parentalData);
 
-        this.visible.add(node, flow);
+        this.visible.add(node);
     }
 
     private void connectNeighborNodes(ChunkGraphNode node) {
