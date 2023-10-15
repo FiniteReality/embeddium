@@ -517,7 +517,7 @@ public class RenderSectionManager {
                 this.useOcclusionCulling = false;
             }
 
-            this.addVisible(rootRender);
+            this.addVisible(rootRender, null);
         } else {
             chunkY = MathHelper.clamp(origin.getY() >> 4, this.world.getBottomSectionCoord(), this.world.getTopSectionCoord() - 1);
 
@@ -547,7 +547,7 @@ public class RenderSectionManager {
             sorted.sort(Comparator.comparingDouble(node -> node.getSquaredDistance(origin)));
 
             for (RenderSection render : sorted) {
-                this.addVisible(render);
+                this.addVisible(render, null);
             }
         }
     }
@@ -573,11 +573,11 @@ public class RenderSectionManager {
         info.setCullingState(parentalData);
         info.updateCullingState(flow, parentalData);
 
-        this.addVisible(render);
+        this.addVisible(render, flow);
     }
 
-    private void addVisible(RenderSection render) {
-        this.iterationQueue.add(render);
+    private void addVisible(RenderSection render, Direction flow) {
+        this.iterationQueue.add(render, flow);
 
         if (this.useFogCulling && render.getSquaredDistanceXZ(this.cameraX, this.cameraZ) >= this.fogRenderCutoff) {
             return;

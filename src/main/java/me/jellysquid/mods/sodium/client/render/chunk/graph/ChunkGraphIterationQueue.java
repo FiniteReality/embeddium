@@ -21,6 +21,10 @@ public class ChunkGraphIterationQueue {
         this.capacity = capacity;
     }
 
+    public void add(RenderSection render, @SuppressWarnings("unused") Direction dir) {
+        add(render);
+    }
+
     public void add(RenderSection render) {
         int i = this.pos++;
 
