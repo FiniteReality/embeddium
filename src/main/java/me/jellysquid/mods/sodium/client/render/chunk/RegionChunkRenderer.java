@@ -183,13 +183,16 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
                     RenderRegion.RenderRegionArenas arenas = region.getArenas();
                     runCompute = compute.execute(commandList, batches[0], arenas);
                     region.setNeedsTranslucencyCompute(false);
-                    //noinspection ForLoopReplaceableByForEach
-                    for(int i = 0; i < regionSections.size(); i++) {
-                        if(regionSections.get(i).getGraphicsState(BlockRenderPass.TRANSLUCENT) != null)
-                            regionsComputed++;
+                    if(runCompute) {
+                        // Count the number of sorted sections
+                        //noinspection ForLoopReplaceableByForEach
+                        for(int i = 0; i < regionSections.size(); i++) {
+                            if(regionSections.get(i).getGraphicsState(BlockRenderPass.TRANSLUCENT) != null)
+                                regionsComputed++;
+                        }
+                        if(regionsComputed >= 15)
+                            runCompute = false; // do not continue sorting for the rest of the frame
                     }
-                    if(regionsComputed >= 15)
-                        runCompute = false; // do not continue sorting for the rest of the frame
                 }
                 if(!runCompute && !fullRebuild) {
                     break;
