@@ -11,6 +11,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.MultipartModelData;
 
+import net.minecraftforge.client.model.data.MultipartModelData;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
