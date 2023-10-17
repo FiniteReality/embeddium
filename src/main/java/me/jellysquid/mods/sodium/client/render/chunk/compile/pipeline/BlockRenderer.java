@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BlockRenderer {
+    private static final MatrixStack EMPTY_STACK = new MatrixStack();
     private final Random random = new LocalRandom(42L);
 
     private final ColorProviderRegistry colorProviderRegistry;
@@ -101,9 +102,12 @@ public class BlockRenderer {
         }
 
         if(this.useForgeExperimentalLightingPipeline) {
-            final MatrixStack mStack = new MatrixStack();
-            if(renderOffset != Vec3d.ZERO)
+            final MatrixStack mStack;
+            if(renderOffset != Vec3d.ZERO) {
+                mStack = new MatrixStack();
                 mStack.translate(renderOffset.x, renderOffset.y, renderOffset.z);
+            } else
+                mStack = EMPTY_STACK;
 
             final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
             builder.reset();

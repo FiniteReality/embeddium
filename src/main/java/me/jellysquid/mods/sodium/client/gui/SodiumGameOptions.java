@@ -4,6 +4,8 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.JsonSyntaxException;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.text.Text;
@@ -46,6 +48,7 @@ public class SodiumGameOptions {
         public boolean useEntityCulling = true;
         public boolean useFogOcclusion = true;
         public boolean useBlockFaceCulling = true;
+        public boolean useCompactVertexFormat = true;
         public boolean useNoErrorGLContext = true;
     }
 
@@ -101,12 +104,17 @@ public class SodiumGameOptions {
     public static SodiumGameOptions load(String name) {
         Path path = getConfigPath(name);
         SodiumGameOptions config;
+        boolean resaveConfig = true;
 
         if (Files.exists(path)) {
             try (FileReader reader = new FileReader(path.toFile())) {
                 config = GSON.fromJson(reader, SodiumGameOptions.class);
             } catch (IOException e) {
                 throw new RuntimeException("Could not parse config", e);
+            } catch (JsonSyntaxException e) {
+                SodiumClientMod.logger().error("Could not parse config, will fallback to default settings", e);
+                config = new SodiumGameOptions();
+                resaveConfig = false;
             }
         } else {
             config = new SodiumGameOptions();
@@ -115,7 +123,8 @@ public class SodiumGameOptions {
         config.configPath = path;
 
         try {
-            config.writeChanges();
+            if(resaveConfig)
+                config.writeChanges();
         } catch (IOException e) {
             throw new RuntimeException("Couldn't update config file", e);
         }

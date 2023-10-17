@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.client.gui;
 
 import com.google.common.collect.ImmutableList;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.modernui.MuiGuiScaleHook;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.MappedStagingBuffer;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.gui.options.*;
@@ -60,7 +62,7 @@ public class SodiumGameOptionPages {
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
                         .setName(Text.translatable("options.guiScale"))
                         .setTooltip(Text.translatable("sodium.options.gui_scale.tooltip"))
-                        .setControl(option -> new SliderControl(option, 0, MinecraftClient.getInstance().getWindow().calculateScaleFactor(0, MinecraftClient.getInstance().forcesUnicodeFont()), 1, ControlValueFormatter.guiScale()))
+                        .setControl(option -> new SliderControl(option, 0, MuiGuiScaleHook.getMaxGuiScale(), 1, ControlValueFormatter.guiScale()))
                         .setBinding((opts, value) -> {
                             opts.getGuiScale().setValue(value);
 
@@ -270,6 +272,18 @@ public class SodiumGameOptionPages {
                         .setControl(TickBoxControl::new)
                         .setImpact(OptionImpact.MEDIUM)
                         .setBinding((opts, value) -> opts.performance.useBlockFaceCulling = value, opts -> opts.performance.useBlockFaceCulling)
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build()
+                )
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setName(Text.translatable("sodium.options.use_compact_vertex_format.name"))
+                        .setTooltip(Text.translatable("sodium.options.use_compact_vertex_format.tooltip"))
+                        .setControl(TickBoxControl::new)
+                        .setEnabled(!SodiumClientMod.oculusLoaded)
+                        .setImpact(OptionImpact.MEDIUM)
+                        .setBinding((opts, value) -> {
+                            opts.performance.useCompactVertexFormat = value;
+                        }, opts -> opts.performance.useCompactVertexFormat)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build()
                 )

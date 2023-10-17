@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.tasks;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildContext;
@@ -108,7 +110,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         if (blockState.getRenderType() == BlockRenderType.MODEL) {
                             BakedModel model = cache.getBlockModels()
                                 .getModel(blockState);
-                            ModelData modelData = model.getModelData(slice.world, blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
+                            ModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
 
                             long seed = blockState.getRenderingSeed(blockPos);
                             random.setSeed(seed);
@@ -153,6 +155,12 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         }
 
         Map<TerrainRenderPass, BuiltSectionMeshParts> meshes = new Reference2ReferenceOpenHashMap<>();
+
+        if (SodiumClientMod.immersiveLoaded) {
+            ImmersiveConnectionRenderer.renderConnectionsInSection(
+                    buildContext.buffers, buildContext.cache.getWorldSlice(), render.getPosition()
+            );
+        }
 
         for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
             BuiltSectionMeshParts mesh = buffers.createMesh(pass);

@@ -131,6 +131,7 @@ dependencies {
 
     // Mods
     modCompileOnly "curse.maven:codechickenlib-242818:${codechicken_fileid}"
+    modCompileOnly "curse.maven:immersiveengineering-231951:${ie_fileid}"
 
 
     // runtime remapping at home

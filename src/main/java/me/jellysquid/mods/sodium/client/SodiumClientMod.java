@@ -1,7 +1,10 @@
 package me.jellysquid.mods.sodium.client;
 
 import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -25,9 +28,16 @@ public class SodiumClientMod {
     private static String MOD_VERSION;
 
     public static boolean cclLoaded = false;
+    public static boolean oculusLoaded = false;
+    public static boolean immersiveLoaded = false;
 
     public SodiumClientMod() {
         SodiumPreLaunch.onPreLaunch();
+
+        oculusLoaded = ModList.get().isLoaded("oculus");
+        immersiveLoaded = ModList.get().isLoaded("immersiveengineering");
+
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerReloadListener);
 
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "embeddium", (a, b) -> true));
@@ -45,6 +55,13 @@ public class SodiumClientMod {
             CCLCompat.init();
         }
     }
+
+    public void registerReloadListener(RegisterClientReloadListenersEvent ev) {
+        if(immersiveLoaded) {
+            ev.registerReloadListener(new ImmersiveConnectionRenderer());
+        }
+    }
+
 
     public static SodiumGameOptions options() {
         if (CONFIG == null) {
@@ -92,5 +109,9 @@ public class SodiumClientMod {
         }
 
         return MOD_VERSION;
+    }
+
+    public static boolean canUseVanillaVertices() {
+        return !SodiumClientMod.options().performance.useCompactVertexFormat && !oculusLoaded;
     }
 }

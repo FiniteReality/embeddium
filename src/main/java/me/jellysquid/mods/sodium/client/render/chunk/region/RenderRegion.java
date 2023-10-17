@@ -1,11 +1,13 @@
 package me.jellysquid.mods.sodium.client.render.chunk.region;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.arena.GlBufferArena;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.StagingBuffer;
 import me.jellysquid.mods.sodium.client.gl.buffer.GlBuffer;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.tessellation.GlTessellation;
+import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.data.SectionRenderDataStorage;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList;
@@ -192,7 +194,13 @@ public class RenderRegion {
         private GlTessellation tessellation;
 
         public DeviceResources(CommandList commandList, StagingBuffer stagingBuffer) {
-            int stride = ChunkMeshFormats.COMPACT.getVertexFormat().getStride();
+            int stride;
+            if(!SodiumClientMod.canUseVanillaVertices()) {
+                // this line must be left unchanged for the Oculus mixin to apply
+                stride = ChunkMeshFormats.COMPACT.getVertexFormat().getStride();
+            } else {
+                stride = ChunkMeshFormats.VANILLA_LIKE.getVertexFormat().getStride();
+            }
             this.geometryArena = new GlBufferArena(commandList, REGION_SIZE * 756, stride, stagingBuffer);
         }
 

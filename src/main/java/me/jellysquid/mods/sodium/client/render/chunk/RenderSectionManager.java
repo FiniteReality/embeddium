@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSets;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveEmptyChunkChecker;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
@@ -26,6 +27,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshFormats;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import me.jellysquid.mods.sodium.client.render.viewport.CameraTransform;
 import me.jellysquid.mods.sodium.client.render.viewport.Viewport;
@@ -70,6 +72,8 @@ public class RenderSectionManager {
 
     private final int renderDistance;
 
+    private final ChunkVertexType vertexType;
+
     @NotNull
     private SortedRenderLists renderLists;
 
@@ -83,10 +87,14 @@ public class RenderSectionManager {
     private @Nullable BlockPos lastCameraPosition;
 
     public RenderSectionManager(ClientWorld world, int renderDistance, CommandList commandList) {
-        this.chunkRenderer = new DefaultChunkRenderer(RenderDevice.INSTANCE, ChunkMeshFormats.COMPACT);
+        ChunkVertexType vertexType = SodiumClientMod.canUseVanillaVertices() ? ChunkMeshFormats.VANILLA_LIKE : ChunkMeshFormats.COMPACT;
+
+        this.chunkRenderer = new DefaultChunkRenderer(RenderDevice.INSTANCE, vertexType);
+
+        this.vertexType = vertexType;
 
         this.world = world;
-        this.builder = new ChunkBuilder(world, ChunkMeshFormats.COMPACT);
+        this.builder = new ChunkBuilder(world, vertexType);
 
         this.needsUpdate = true;
         this.renderDistance = renderDistance;
@@ -178,7 +186,16 @@ public class RenderSectionManager {
         Chunk chunk = this.world.getChunk(x, z);
         ChunkSection section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
 
-        if (section.isEmpty()) {
+        boolean isEmpty;
+        if (!section.isEmpty()) {
+            isEmpty = false;
+        } else if (!SodiumClientMod.immersiveLoaded) {
+            isEmpty = true;
+        } else {
+            isEmpty = !ImmersiveEmptyChunkChecker.hasWires(ChunkSectionPos.from(x, y, z));
+        }
+
+        if (isEmpty) {
             this.updateSectionInfo(renderSection, BuiltSectionInfo.EMPTY);
         } else {
             renderSection.setPendingUpdate(ChunkUpdateType.INITIAL_BUILD);
@@ -581,5 +598,9 @@ public class RenderSectionManager {
 
     public Collection<RenderSection> getSectionsWithGlobalEntities() {
         return ReferenceSets.unmodifiable(this.sectionsWithGlobalEntities);
+    }
+
+    public ChunkVertexType getVertexType() {
+        return this.vertexType;
     }
 }

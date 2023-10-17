@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.client.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveEmptyChunkChecker;
 import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
@@ -87,7 +89,11 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         // If the chunk section is absent or empty, simply terminate now. There will never be anything in this chunk
         // section to render, so we need to signal that a chunk render task shouldn't created. This saves a considerable
         // amount of time in queueing instant build tasks and greatly accelerates how quickly the world can be loaded.
-        if (section == null || section.isEmpty()) {
+        boolean isEmpty = section == null || section.isEmpty();
+        if (isEmpty && section != null && SodiumClientMod.immersiveLoaded) {
+            isEmpty = !ImmersiveEmptyChunkChecker.hasWires(origin);
+        }
+        if (isEmpty) {
             return null;
         }
 
@@ -207,6 +213,8 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         }
     }
 
+    private static final BlockState AIR_BLOCK_STATE = Blocks.AIR.getDefaultState();
+
     @Override
     public BlockState getBlockState(BlockPos pos) {
         return this.getBlockState(pos.getX(), pos.getY(), pos.getZ());
@@ -217,8 +225,8 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         int relY = y - this.originY;
         int relZ = z - this.originZ;
 
-        return this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
+        return Objects.requireNonNullElse(this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)], AIR_BLOCK_STATE);
     }
 
     @Override
