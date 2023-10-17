@@ -8,6 +8,7 @@ import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.math.Direction;
 import net.minecraftforge.client.model.data.IModelData;
 
+import net.minecraftforge.client.model.data.MultipartModelData;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -69,7 +70,7 @@ public class MixinMultipartBakedModel {
 
         for (BakedModel model : models) {
             random.setSeed(seed);
-            quads.addAll(model.getQuads(state, face, random, modelData));
+            quads.addAll(model.getQuads(state, face, random, MultipartModelData.resolve(model, modelData)));
         }
 
         return quads;
