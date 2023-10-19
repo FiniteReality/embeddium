@@ -13,4 +13,10 @@ public record IndexedVertexData(GlVertexFormat<?> vertexFormat,
         this.vertexBuffer.free();
         this.indexBuffer.free();
     }
+
+    public IndexedVertexData copy() {
+        return new IndexedVertexData(this.vertexFormat,
+                NativeBuffer.copy(this.vertexBuffer.getDirectBuffer()),
+                NativeBuffer.copy(this.indexBuffer.getDirectBuffer()));
+    }
 }

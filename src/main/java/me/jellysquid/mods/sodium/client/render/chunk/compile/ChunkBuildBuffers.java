@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.buffer.IndexedVertexData;
+import me.jellysquid.mods.sodium.client.gl.tessellation.GlIndexType;
 import me.jellysquid.mods.sodium.client.gl.util.ElementRange;
 import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
@@ -109,6 +111,9 @@ public class ChunkBuildBuffers {
 
         Map<ModelQuadFacing, ElementRange> ranges = new EnumMap<>(ModelQuadFacing.class);
 
+        boolean singleElementRange = (pass.isTranslucent() && SodiumClientMod.options().performance.useTranslucentFaceSorting);
+        int numElements = 0;
+
         for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
             IndexBufferBuilder.Result indices = indexBuffers[facing.ordinal()];
 
@@ -116,11 +121,16 @@ public class ChunkBuildBuffers {
                 continue;
             }
 
-            ranges.put(facing,
-                    new ElementRange(indexPointer, indices.getCount(), indices.getFormat(), indices.getBaseVertex()));
+            if(!singleElementRange)
+                ranges.put(facing,
+                        new ElementRange(indexPointer, indices.getCount(), indices.getFormat(), indices.getBaseVertex()));
 
             indexPointer = indices.writeTo(indexPointer, indexBuffer.getDirectBuffer());
+            numElements += indices.getCount();
         }
+
+        if(singleElementRange)
+            ranges.put(ModelQuadFacing.UNASSIGNED, new ElementRange(0, numElements, GlIndexType.UNSIGNED_INT, 0));
 
         IndexedVertexData vertexData = new IndexedVertexData(this.vertexType.getCustomVertexFormat(),
                 vertexBuffer, indexBuffer);

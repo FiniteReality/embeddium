@@ -75,6 +75,10 @@ public class RenderRegionManager {
 
         for (ChunkBuildResult result : results) {
             for (BlockRenderPass pass : BlockRenderPass.VALUES) {
+                // For partial uploads, skip uploading passes that don't contain data
+                if(result.isPartialUpload() && result.getMesh(pass) == null)
+                    continue;
+
                 ChunkGraphicsState graphics = result.render.setGraphicsState(pass, null);
 
                 // De-allocate all storage for data we're about to replace
@@ -113,7 +117,11 @@ public class RenderRegionManager {
 
         // Collect the upload results
         for (PendingSectionUpload upload : sectionUploads) {
-            upload.section.setGraphicsState(upload.pass, new ChunkGraphicsState(upload.vertexUpload.getResult(), upload.indicesUpload.getResult(), upload.meshData));
+            ChunkGraphicsState state = new ChunkGraphicsState(upload.vertexUpload.getResult(), upload.indicesUpload.getResult(), upload.meshData);
+            if(upload.pass.isTranslucent()) {
+                state.setTranslucencyData(upload.meshData.copy());
+            }
+            upload.section.setGraphicsState(upload.pass, state);
         }
     }
 

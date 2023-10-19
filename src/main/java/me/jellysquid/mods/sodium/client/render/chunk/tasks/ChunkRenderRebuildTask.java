@@ -4,6 +4,7 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
@@ -31,6 +32,7 @@ import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import net.minecraftforge.client.model.data.ModelData;
 
@@ -50,15 +52,26 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
     private final int frame;
     private final Map<BlockPos, ModelData> modelDataMap;
 
+    private Vec3d camera;
+
+    private final boolean translucencySorting;
+
     public ChunkRenderRebuildTask(RenderSection render, ChunkRenderContext renderContext, int frame) {
         this.render = render;
         this.renderContext = renderContext;
         this.frame = frame;
+        this.camera = Vec3d.ZERO;
+        this.translucencySorting = SodiumClientMod.options().performance.useTranslucentFaceSorting;
 
         this.modelDataMap = MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
     }
     
     private final Xoroshiro128PlusPlusRandom random = new Xoroshiro128PlusPlusRandom(42L);
+
+    public ChunkRenderRebuildTask withCameraPosition(Vec3d camera) {
+        this.camera = camera;
+        return this;
+    }
 
     @Override
     public ChunkBuildResult performBuild(ChunkBuildContext buildContext, CancellationSource cancellationSource) {
@@ -183,6 +196,9 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
             ChunkMeshData mesh = buffers.createMesh(pass);
 
             if (mesh != null) {
+                if (this.translucencySorting && pass.isTranslucent())
+                    ChunkBufferSorter.sort(mesh, (float)camera.x - minX, (float)camera.y - minY, (float)camera.z - minZ);
+
                 meshes.put(pass, mesh);
             }
         }
