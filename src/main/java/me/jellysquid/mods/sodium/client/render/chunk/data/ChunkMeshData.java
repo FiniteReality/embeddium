@@ -22,8 +22,4 @@ public class ChunkMeshData {
     public IndexedVertexData getVertexData() {
         return this.vertexData;
     }
-
-    public ChunkMeshData copy() {
-        return new ChunkMeshData(this.vertexData.copy(), this.getParts());
-    }
 }

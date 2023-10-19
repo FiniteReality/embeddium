@@ -197,7 +197,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
             if (mesh != null) {
                 if (this.translucencySorting && pass.isTranslucent())
-                    ChunkBufferSorter.sort(mesh, (float)camera.x - minX, (float)camera.y - minY, (float)camera.z - minZ);
+                    ChunkBufferSorter.sort(ChunkBufferSorter.SortBuffer.wrap(mesh), (float)camera.x - minX, (float)camera.y - minY, (float)camera.z - minZ);
 
                 meshes.put(pass, mesh);
             }

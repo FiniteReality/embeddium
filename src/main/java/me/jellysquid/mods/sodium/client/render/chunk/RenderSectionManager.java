@@ -14,8 +14,10 @@ import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
+import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphInfo;
@@ -198,7 +200,7 @@ public class RenderSectionManager {
                 boolean hasTranslucentData = section.getGraphicsState(BlockRenderPass.TRANSLUCENT) != null ||
                         section.getGraphicsState(BlockRenderPass.TRIPWIRE) != null;
                 if(hasTranslucentData && section.getSquaredDistance(cameraX, cameraY, cameraZ) < translucencyBlockRenderDistance) {
-                    section.markForUpdate(ChunkUpdateType.SORT);
+                    section.markForUpdate(this.isChunkPrioritized(section) ? ChunkUpdateType.IMPORTANT_SORT : ChunkUpdateType.SORT);
                 }
             }
         }
@@ -359,6 +361,7 @@ public class RenderSectionManager {
 
     public void updateChunks() {
         var blockingFutures = this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_REBUILD);
+        blockingFutures.addAll(this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_SORT));
 
         this.submitRebuildTasks(ChunkUpdateType.INITIAL_BUILD);
         this.submitRebuildTasks(ChunkUpdateType.REBUILD);
@@ -381,6 +384,9 @@ public class RenderSectionManager {
     private LinkedList<CompletableFuture<ChunkBuildResult>> submitRebuildTasks(ChunkUpdateType filterType) {
         int budget = filterType.isImportant() ? Integer.MAX_VALUE : this.builder.getSchedulingBudget();
 
+        if (filterType == ChunkUpdateType.SORT)
+            budget = Math.max(budget, 1); // always sort at least one section
+
         LinkedList<CompletableFuture<ChunkBuildResult>> immediateFutures = new LinkedList<>();
         PriorityQueue<RenderSection> queue = this.rebuildQueues.get(filterType);
 
@@ -397,7 +403,11 @@ public class RenderSectionManager {
                 continue;
             }
 
-            ChunkRenderBuildTask task = section.getPendingUpdate() == ChunkUpdateType.SORT ? this.createSortTask(section) : this.createRebuildTask(section);
+            ChunkRenderBuildTask task = ChunkUpdateType.isSort(section.getPendingUpdate()) ? this.createSortTask(section) : this.createRebuildTask(section);
+
+            if (task == null)
+                continue;
+
             CompletableFuture<?> future;
 
             if (!this.alwaysDeferChunkUpdates && filterType.isImportant()) {
@@ -446,7 +456,20 @@ public class RenderSectionManager {
     }
 
     public ChunkRenderBuildTask createSortTask(RenderSection render) {
-        return new ChunkRenderSortTask(render, cameraX, cameraY, cameraZ, this.currentFrame);
+        Map<BlockRenderPass, ChunkBufferSorter.SortBuffer> meshes = new EnumMap<>(BlockRenderPass.class);
+        for(BlockRenderPass pass : BlockRenderPass.VALUES) {
+            if(!pass.isTranslucent())
+                continue;
+            var state = render.getGraphicsState(pass);
+            if(state == null)
+                continue;
+            var mesh = state.getTranslucencyData();
+            if(mesh != null)
+                meshes.put(pass, mesh.duplicate());
+        }
+        if(meshes.isEmpty())
+            return null;
+        return new ChunkRenderSortTask(render, cameraX, cameraY, cameraZ, this.currentFrame, meshes);
     }
 
     public ChunkRenderBuildTask createRebuildTask(RenderSection render) {

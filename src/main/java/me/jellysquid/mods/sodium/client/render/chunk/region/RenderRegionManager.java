@@ -10,6 +10,7 @@ import me.jellysquid.mods.sodium.client.gl.arena.staging.StagingBuffer;
 import me.jellysquid.mods.sodium.client.gl.buffer.IndexedVertexData;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.util.frustum.Frustum;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
@@ -118,8 +119,9 @@ public class RenderRegionManager {
         // Collect the upload results
         for (PendingSectionUpload upload : sectionUploads) {
             ChunkGraphicsState state = new ChunkGraphicsState(upload.vertexUpload.getResult(), upload.indicesUpload.getResult(), upload.meshData);
-            if(upload.pass.isTranslucent()) {
-                state.setTranslucencyData(upload.meshData.copy());
+            if(upload.pass.isTranslucent() && SodiumClientMod.options().performance.useTranslucentFaceSorting) {
+                // FIXME: sometimes a NativeBuffer leak message is printed pointing to this line
+                state.setTranslucencyData(ChunkBufferSorter.SortBuffer.copyFrom(upload.meshData));
             }
             upload.section.setGraphicsState(upload.pass, state);
         }
