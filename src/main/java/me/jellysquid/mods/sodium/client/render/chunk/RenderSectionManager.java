@@ -16,6 +16,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
+import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphInfo;
@@ -398,6 +399,10 @@ public class RenderSectionManager {
             }
 
             ChunkRenderBuildTask task = section.getPendingUpdate() == ChunkUpdateType.SORT ? this.createSortTask(section) : this.createRebuildTask(section);
+
+            if (task == null)
+                continue;
+
             CompletableFuture<?> future;
 
             if (!this.alwaysDeferChunkUpdates && filterType.isImportant()) {
@@ -446,7 +451,20 @@ public class RenderSectionManager {
     }
 
     public ChunkRenderBuildTask createSortTask(RenderSection render) {
-        return new ChunkRenderSortTask(render, cameraX, cameraY, cameraZ, this.currentFrame);
+        Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
+        for(BlockRenderPass pass : BlockRenderPass.VALUES) {
+            if(!pass.isTranslucent())
+                continue;
+            var state = render.getGraphicsState(pass);
+            if(state == null)
+                continue;
+            var meshCopy = state.getAndCopyTranslucencyData();
+            if(meshCopy != null)
+                meshes.put(pass, meshCopy);
+        }
+        if(meshes.isEmpty())
+            return null;
+        return new ChunkRenderSortTask(render, cameraX, cameraY, cameraZ, this.currentFrame, meshes);
     }
 
     public ChunkRenderBuildTask createRebuildTask(RenderSection render) {

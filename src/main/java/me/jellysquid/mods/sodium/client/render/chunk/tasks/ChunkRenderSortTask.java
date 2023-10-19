@@ -16,36 +16,23 @@ public class ChunkRenderSortTask extends ChunkRenderBuildTask {
     private final RenderSection render;
     private final float cameraX, cameraY, cameraZ;
     private final int frame;
+    private final Map<BlockRenderPass, ChunkMeshData> translucentMeshes;
 
-    public ChunkRenderSortTask(RenderSection render, float cameraX, float cameraY, float cameraZ, int frame) {
+    public ChunkRenderSortTask(RenderSection render, float cameraX, float cameraY, float cameraZ, int frame, Map<BlockRenderPass, ChunkMeshData> translucentMeshes) {
         this.render = render;
         this.cameraX = cameraX;
         this.cameraY = cameraY;
         this.cameraZ = cameraZ;
         this.frame = frame;
+        this.translucentMeshes = translucentMeshes;
     }
 
     @Override
     public ChunkBuildResult performBuild(ChunkBuildContext context, CancellationSource cancellationSource) {
-        Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
-        for(BlockRenderPass pass : BlockRenderPass.VALUES) {
-            if(!pass.isTranslucent())
-                continue;
-            ChunkGraphicsState state = render.getGraphicsState(pass);
-            if(state == null)
-                continue;
-            ChunkMeshData dataToSort = state.getTranslucencyData();
-            if(dataToSort == null)
-                continue;
-            // Work on a copy of that mesh in case a second sort task arrives
-            // The original data will be deallocated at upload time
-            dataToSort = dataToSort.copy();
-            ChunkBufferSorter.sort(dataToSort, cameraX - this.render.getOriginX(), cameraY - this.render.getOriginY(), cameraZ - this.render.getOriginZ());
-            meshes.put(pass, dataToSort);
+        for(Map.Entry<BlockRenderPass, ChunkMeshData> entry : translucentMeshes.entrySet()) {
+            ChunkBufferSorter.sort(entry.getValue(), cameraX - this.render.getOriginX(), cameraY - this.render.getOriginY(), cameraZ - this.render.getOriginZ());
         }
-        if(meshes.isEmpty())
-            return null;
-        ChunkBuildResult result = new ChunkBuildResult(render, null, meshes, this.frame);
+        ChunkBuildResult result = new ChunkBuildResult(render, null, translucentMeshes, this.frame);
         result.setPartialUpload(true);
         return result;
     }

@@ -12,7 +12,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.format.sfp.ModelVertexType;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 

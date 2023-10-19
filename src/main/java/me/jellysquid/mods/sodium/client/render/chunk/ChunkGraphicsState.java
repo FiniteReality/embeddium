@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
 import me.jellysquid.mods.sodium.client.gl.arena.GlBufferSegment;
-import me.jellysquid.mods.sodium.client.gl.buffer.IndexedVertexData;
 import me.jellysquid.mods.sodium.client.gl.util.ElementRange;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
@@ -47,8 +46,8 @@ public class ChunkGraphicsState {
         this.translucencyData = translucencyData;
     }
 
-    public ChunkMeshData getTranslucencyData() {
-        return this.translucencyData;
+    public ChunkMeshData getAndCopyTranslucencyData() {
+        return this.translucencyData != null ? this.translucencyData.copy() : null;
     }
 
     public ElementRange getModelPart(ModelQuadFacing facing) {
