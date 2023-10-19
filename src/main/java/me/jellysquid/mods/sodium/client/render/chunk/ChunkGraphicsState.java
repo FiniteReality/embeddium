@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
 import me.jellysquid.mods.sodium.client.gl.arena.GlBufferSegment;
+import me.jellysquid.mods.sodium.client.gl.buffer.IndexedVertexData;
 import me.jellysquid.mods.sodium.client.gl.util.ElementRange;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
@@ -13,6 +14,7 @@ public class ChunkGraphicsState {
     private final GlBufferSegment indexSegment;
 
     private final ElementRange[] parts;
+    private IndexedVertexData translucencyData;
 
     public ChunkGraphicsState(GlBufferSegment vertexSegment, GlBufferSegment indexSegment, ChunkMeshData data) {
         Validate.notNull(vertexSegment);
@@ -20,6 +22,7 @@ public class ChunkGraphicsState {
 
         this.vertexSegment = vertexSegment;
         this.indexSegment = indexSegment;
+        this.translucencyData = null;
 
         this.parts = new ElementRange[ModelQuadFacing.COUNT];
 
@@ -31,6 +34,17 @@ public class ChunkGraphicsState {
     public void delete() {
         this.vertexSegment.delete();
         this.indexSegment.delete();
+        if (this.translucencyData != null) {
+            this.translucencyData.delete();
+            this.translucencyData = null;
+        }
+    }
+
+    public void setTranslucencyData(IndexedVertexData translucencyData) {
+        if (this.translucencyData != null) {
+            this.translucencyData.delete();
+        }
+        this.translucencyData = translucencyData;
     }
 
     public ElementRange getModelPart(ModelQuadFacing facing) {

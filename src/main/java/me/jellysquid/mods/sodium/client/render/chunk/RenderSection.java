@@ -309,7 +309,6 @@ public class RenderSection {
     public void onBuildFinished(ChunkBuildResult result) {
         this.setData(result.data);
         this.lastAcceptedBuildTime = result.buildTime;
-        region.setNeedsTranslucencyCompute(true);
     }
 
     public int getChunkId() {

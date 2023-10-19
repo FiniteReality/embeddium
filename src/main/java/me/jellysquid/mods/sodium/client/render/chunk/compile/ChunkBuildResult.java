@@ -18,11 +18,14 @@ public class ChunkBuildResult {
     public final Map<BlockRenderPass, ChunkMeshData> meshes;
     public final int buildTime;
 
+    private boolean partialUpload;
+
     public ChunkBuildResult(RenderSection render, ChunkRenderData data, Map<BlockRenderPass, ChunkMeshData> meshes, int buildTime) {
         this.render = render;
         this.data = data;
         this.meshes = meshes;
         this.buildTime = buildTime;
+        this.partialUpload = false;
     }
 
     public ChunkMeshData getMesh(BlockRenderPass pass) {
@@ -34,5 +37,13 @@ public class ChunkBuildResult {
             data.getVertexData()
                     .delete();
         }
+    }
+
+    public boolean isPartialUpload() {
+        return partialUpload;
+    }
+
+    public void setPartialUpload(boolean partialUpload) {
+        this.partialUpload = partialUpload;
     }
 }
