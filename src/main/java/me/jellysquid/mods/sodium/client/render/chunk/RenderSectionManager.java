@@ -199,7 +199,7 @@ public class RenderSectionManager {
                 boolean hasTranslucentData = section.getGraphicsState(BlockRenderPass.TRANSLUCENT) != null ||
                         section.getGraphicsState(BlockRenderPass.TRIPWIRE) != null;
                 if(hasTranslucentData && section.getSquaredDistance(cameraX, cameraY, cameraZ) < translucencyBlockRenderDistance) {
-                    section.markForUpdate(ChunkUpdateType.SORT);
+                    section.markForUpdate(this.isChunkPrioritized(section) ? ChunkUpdateType.IMPORTANT_SORT : ChunkUpdateType.SORT);
                 }
             }
         }
@@ -360,6 +360,7 @@ public class RenderSectionManager {
 
     public void updateChunks() {
         var blockingFutures = this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_REBUILD);
+        blockingFutures.addAll(this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_SORT));
 
         this.submitRebuildTasks(ChunkUpdateType.INITIAL_BUILD);
         this.submitRebuildTasks(ChunkUpdateType.REBUILD);
@@ -382,6 +383,9 @@ public class RenderSectionManager {
     private LinkedList<CompletableFuture<ChunkBuildResult>> submitRebuildTasks(ChunkUpdateType filterType) {
         int budget = filterType.isImportant() ? Integer.MAX_VALUE : this.builder.getSchedulingBudget();
 
+        if (filterType == ChunkUpdateType.SORT)
+            budget = Math.max(budget, 1); // always sort at least one section
+
         LinkedList<CompletableFuture<ChunkBuildResult>> immediateFutures = new LinkedList<>();
         PriorityQueue<RenderSection> queue = this.rebuildQueues.get(filterType);
 
@@ -398,7 +402,7 @@ public class RenderSectionManager {
                 continue;
             }
 
-            ChunkRenderBuildTask task = section.getPendingUpdate() == ChunkUpdateType.SORT ? this.createSortTask(section) : this.createRebuildTask(section);
+            ChunkRenderBuildTask task = ChunkUpdateType.isSort(section.getPendingUpdate()) ? this.createSortTask(section) : this.createRebuildTask(section);
 
             if (task == null)
                 continue;

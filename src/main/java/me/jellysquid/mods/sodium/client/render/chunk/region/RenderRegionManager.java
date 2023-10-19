@@ -119,6 +119,7 @@ public class RenderRegionManager {
         for (PendingSectionUpload upload : sectionUploads) {
             ChunkGraphicsState state = new ChunkGraphicsState(upload.vertexUpload.getResult(), upload.indicesUpload.getResult(), upload.meshData);
             if(upload.pass.isTranslucent() && SodiumClientMod.options().performance.useTranslucentFaceSorting) {
+                // FIXME: sometimes a NativeBuffer leak message is printed pointing to this line
                 state.setTranslucencyData(upload.meshData.copy());
             }
             upload.section.setGraphicsState(upload.pass, state);

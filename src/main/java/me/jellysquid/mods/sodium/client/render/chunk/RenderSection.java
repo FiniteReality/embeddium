@@ -284,8 +284,18 @@ public class RenderSection {
 
     public void markForUpdate(ChunkUpdateType type) {
         if (this.pendingUpdate == null || type.ordinal() > this.pendingUpdate.ordinal()) {
-            this.pendingUpdate = type;
+            this.pendingUpdate = getNewPendingUpdate(type);
         }
+    }
+
+    /**
+     * Promote important sorts to important rebuilds, not unimportant ones. All other types
+     * are passed through as-is.
+     */
+    private ChunkUpdateType getNewPendingUpdate(ChunkUpdateType type) {
+        if(type == ChunkUpdateType.REBUILD && this.pendingUpdate == ChunkUpdateType.IMPORTANT_SORT)
+            return ChunkUpdateType.IMPORTANT_REBUILD;
+        return type;
     }
 
     public void onBuildSubmitted(CompletableFuture<?> task) {
