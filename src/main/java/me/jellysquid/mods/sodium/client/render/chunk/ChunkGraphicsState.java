@@ -47,6 +47,10 @@ public class ChunkGraphicsState {
         this.translucencyData = translucencyData;
     }
 
+    public ChunkMeshData getTranslucencyData() {
+        return this.translucencyData;
+    }
+
     public ElementRange getModelPart(ModelQuadFacing facing) {
         return this.parts[facing.ordinal()];
     }

@@ -307,7 +307,8 @@ public class RenderSection {
     }
 
     public void onBuildFinished(ChunkBuildResult result) {
-        this.setData(result.data);
+        if(!result.isPartialUpload())
+            this.setData(result.data);
         this.lastAcceptedBuildTime = result.buildTime;
     }
 

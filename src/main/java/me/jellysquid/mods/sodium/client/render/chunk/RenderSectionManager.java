@@ -27,6 +27,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderBuildTask;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderEmptyBuildTask;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderRebuildTask;
+import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderSortTask;
 import me.jellysquid.mods.sodium.client.util.MathUtil;
 import me.jellysquid.mods.sodium.client.util.frustum.Frustum;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
@@ -147,7 +148,7 @@ public class RenderSectionManager {
         this.regions.updateVisibility(frustum);
 
         this.setup(camera);
-        //this.scheduleTranslucencyUpdates();
+        this.scheduleTranslucencyUpdates();
         this.iterateChunks(camera, frustum, frame, spectator);
 
         this.needsUpdate = false;
@@ -361,6 +362,7 @@ public class RenderSectionManager {
 
         this.submitRebuildTasks(ChunkUpdateType.INITIAL_BUILD);
         this.submitRebuildTasks(ChunkUpdateType.REBUILD);
+        this.submitRebuildTasks(ChunkUpdateType.SORT);
 
         // Try to complete some other work on the main thread while we wait for rebuilds to complete
         this.needsUpdate |= this.performPendingUploads();
@@ -395,7 +397,7 @@ public class RenderSectionManager {
                 continue;
             }
 
-            ChunkRenderBuildTask task = this.createRebuildTask(section);
+            ChunkRenderBuildTask task = section.getPendingUpdate() == ChunkUpdateType.SORT ? this.createSortTask(section) : this.createRebuildTask(section);
             CompletableFuture<?> future;
 
             if (!this.alwaysDeferChunkUpdates && filterType.isImportant()) {
@@ -441,6 +443,10 @@ public class RenderSectionManager {
                 throw new RuntimeException("Chunk build failed", it.next());
             }
         }
+    }
+
+    public ChunkRenderBuildTask createSortTask(RenderSection render) {
+        return new ChunkRenderSortTask(render, cameraX, cameraY, cameraZ, this.currentFrame);
     }
 
     public ChunkRenderBuildTask createRebuildTask(RenderSection render) {
