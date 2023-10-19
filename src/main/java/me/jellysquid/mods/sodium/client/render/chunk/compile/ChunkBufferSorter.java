@@ -61,6 +61,14 @@ public class ChunkBufferSorter {
         }
     }
 
+    private static float square(float f) {
+        return f * f;
+    }
+
+    private static float distance(float x1, float x2, float y1, float y2, float z1, float z2) {
+        return square(x2 - x1) + square(y2 - y1) + square(z2 - z1);
+    }
+
     private static float getDistanceSqSFP(FloatBuffer buffer, float xCenter, float yCenter, float zCenter, int stride, int v0, int v1, int v2) {
         stride /= 4;
 
@@ -79,9 +87,38 @@ public class ChunkBufferSorter {
         float y3 = buffer.get(vertexBase + 1);
         float z3 = buffer.get(vertexBase + 2);
 
-        float xDist = ((x1 + x2 + x3) / 3F) - xCenter;
-        float yDist = ((y1 + y2 + y3) / 3F) - yCenter;
-        float zDist = ((z1 + z2 + z3) / 3F) - zCenter;
+        float quadX, quadY, quadZ;
+
+        float d12 = distance(x1, x2, y1, y2, z1, z2);
+        float d23 = distance(x2, x3, y2, y3, z2, z3);
+        float d31 = distance(x3, x1, y3, y1, z3, z1);
+
+        // decide the center of the quad based on the longest side
+        if(d12 > d23) {
+            if(d12 > d31) {
+                quadX = (x1 + x2) / 2;
+                quadY = (y1 + y2) / 2;
+                quadZ = (z1 + z2) / 2;
+            } else {
+                quadX = (x3 + x1) / 2;
+                quadY = (y3 + y1) / 2;
+                quadZ = (z3 + z1) / 2;
+            }
+        } else {
+            if(d23 > d31) {
+                quadX = (x2 + x3) / 2;
+                quadY = (y2 + y3) / 2;
+                quadZ = (z2 + z3) / 2;
+            } else {
+                quadX = (x3 + x1) / 2;
+                quadY = (y3 + y1) / 2;
+                quadZ = (z3 + z1) / 2;
+            }
+        }
+
+        float xDist = quadX - xCenter;
+        float yDist = quadY - yCenter;
+        float zDist = quadZ - zCenter;
 
         return (xDist * xDist) + (yDist * yDist) + (zDist * zDist);
     }
