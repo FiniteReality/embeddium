@@ -45,13 +45,13 @@ public class ChunkBufferSorter {
         ByteBuffer vertexBuffer = chunkData.getVertexData().vertexBuffer().getDirectBuffer();
         // Vertex stride by Float size
         int vertexStride = chunkData.getVertexData().vertexFormat().getStride();
-        int vertexCount = vertexBuffer.capacity() / vertexStride;
-        int vertexGroupCount = (vertexCount / 4) * 2; // each quad has 2 index groups (0, 1, 2 and 2, 3, 0)
+
+        IntBuffer indexBuffer = chunkData.getVertexData().indexBuffer().getDirectBuffer().asIntBuffer();
+        int vertexGroupCount = indexBuffer.capacity() / 3;
 
         float[] distanceArray = new float[vertexGroupCount];
         int[] indicesArray = new int[vertexGroupCount];
 
-        IntBuffer indexBuffer = chunkData.getVertexData().indexBuffer().getDirectBuffer().asIntBuffer();
 
         int groupPtr = 0;
 
