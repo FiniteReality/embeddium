@@ -14,7 +14,7 @@ public class ChunkGraphicsState {
     private final GlBufferSegment indexSegment;
 
     private final ElementRange[] parts;
-    private IndexedVertexData translucencyData;
+    private ChunkMeshData translucencyData;
 
     public ChunkGraphicsState(GlBufferSegment vertexSegment, GlBufferSegment indexSegment, ChunkMeshData data) {
         Validate.notNull(vertexSegment);
@@ -35,14 +35,14 @@ public class ChunkGraphicsState {
         this.vertexSegment.delete();
         this.indexSegment.delete();
         if (this.translucencyData != null) {
-            this.translucencyData.delete();
+            this.translucencyData.getVertexData().delete();
             this.translucencyData = null;
         }
     }
 
-    public void setTranslucencyData(IndexedVertexData translucencyData) {
+    public void setTranslucencyData(ChunkMeshData translucencyData) {
         if (this.translucencyData != null) {
-            this.translucencyData.delete();
+            this.translucencyData.getVertexData().delete();
         }
         this.translucencyData = translucencyData;
     }

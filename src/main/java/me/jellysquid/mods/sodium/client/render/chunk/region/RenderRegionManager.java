@@ -119,7 +119,7 @@ public class RenderRegionManager {
         for (PendingSectionUpload upload : sectionUploads) {
             ChunkGraphicsState state = new ChunkGraphicsState(upload.vertexUpload.getResult(), upload.indicesUpload.getResult(), upload.meshData);
             if(upload.pass.isTranslucent()) {
-                state.setTranslucencyData(upload.meshData.getVertexData().copy());
+                state.setTranslucencyData(upload.meshData.copy());
             }
             upload.section.setGraphicsState(upload.pass, state);
         }

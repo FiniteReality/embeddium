@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.render.chunk;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceMap;
+import it.unimi.dsi.fastutil.longs.Long2ReferenceMaps;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -104,6 +105,10 @@ public class RenderSectionManager {
 
     private final ChunkTracker tracker;
 
+    private final boolean translucencySorting;
+    private final int translucencyBlockRenderDistance;
+
+
     public RenderSectionManager(SodiumWorldRenderer worldRenderer, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance, CommandList commandList) {
         ChunkVertexType vertexType = SodiumClientMod.canUseVanillaVertices() ? ChunkModelVertexFormats.VANILLA_LIKE : ChunkModelVertexFormats.DEFAULT;
 
@@ -126,6 +131,9 @@ public class RenderSectionManager {
         }
 
         this.tracker = this.worldRenderer.getChunkTracker();
+
+        this.translucencySorting = SodiumClientMod.options().performance.useTranslucentFaceSorting;
+        this.translucencyBlockRenderDistance = Math.min(9216, (renderDistance << 4) * (renderDistance << 4));
     }
 
     public void reloadChunks(ChunkTracker tracker) {
@@ -139,6 +147,7 @@ public class RenderSectionManager {
         this.regions.updateVisibility(frustum);
 
         this.setup(camera);
+        //this.scheduleTranslucencyUpdates();
         this.iterateChunks(camera, frustum, frame, spectator);
 
         this.needsUpdate = false;
@@ -146,6 +155,7 @@ public class RenderSectionManager {
 
     private void setup(Camera camera) {
         Vec3d cameraPos = camera.getPos();
+
 
         this.cameraX = (float) cameraPos.x;
         this.cameraY = (float) cameraPos.y;
@@ -163,6 +173,32 @@ public class RenderSectionManager {
                 this.fogRenderCutoff = Double.POSITIVE_INFINITY;
             } else {
                 this.fogRenderCutoff = Math.max(FOG_PLANE_MIN_DISTANCE, dist * dist);
+            }
+        }
+    }
+
+    private float lastCameraTranslucentX, lastCameraTranslucentY, lastCameraTranslucentZ;
+
+    private void scheduleTranslucencyUpdates() {
+        if(!this.translucencySorting)
+            return;
+
+        float dx = lastCameraTranslucentX - cameraX;
+        float dy = lastCameraTranslucentY - cameraY;
+        float dz = lastCameraTranslucentZ - cameraZ;
+        if((dx * dx + dy * dy + dz * dz) > 1.0) {
+            lastCameraTranslucentX = cameraX;
+            lastCameraTranslucentY = cameraY;
+            lastCameraTranslucentZ = cameraZ;
+            for (Long2ReferenceMap.Entry<RenderSection> entry : Long2ReferenceMaps.fastIterable(this.sections)) {
+                var section = entry.getValue();
+                if(!section.isBuilt())
+                    continue;
+                boolean hasTranslucentData = section.getGraphicsState(BlockRenderPass.TRANSLUCENT) != null ||
+                        section.getGraphicsState(BlockRenderPass.TRIPWIRE) != null;
+                if(hasTranslucentData && section.getSquaredDistance(cameraX, cameraY, cameraZ) < translucencyBlockRenderDistance) {
+                    section.markForUpdate(ChunkUpdateType.SORT);
+                }
             }
         }
     }
@@ -412,7 +448,7 @@ public class RenderSectionManager {
         int frame = this.currentFrame;
 
         if (context != null) {
-            return new ChunkRenderRebuildTask(render, context, frame);
+            return new ChunkRenderRebuildTask(render, context, frame).withCameraPosition(new Vec3d(cameraX, cameraY, cameraZ));
         } else {
             return new ChunkRenderEmptyBuildTask(render, frame);
         }
