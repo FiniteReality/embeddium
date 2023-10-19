@@ -118,7 +118,7 @@ public class RenderRegionManager {
         // Collect the upload results
         for (PendingSectionUpload upload : sectionUploads) {
             ChunkGraphicsState state = new ChunkGraphicsState(upload.vertexUpload.getResult(), upload.indicesUpload.getResult(), upload.meshData);
-            if(upload.pass.isTranslucent()) {
+            if(upload.pass.isTranslucent() && SodiumClientMod.options().performance.useTranslucentFaceSorting) {
                 state.setTranslucencyData(upload.meshData.copy());
             }
             upload.section.setGraphicsState(upload.pass, state);
