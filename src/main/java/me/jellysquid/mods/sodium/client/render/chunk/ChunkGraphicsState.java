@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.render.chunk;
 import me.jellysquid.mods.sodium.client.gl.arena.GlBufferSegment;
 import me.jellysquid.mods.sodium.client.gl.util.ElementRange;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import org.apache.commons.lang3.Validate;
 
@@ -13,7 +14,7 @@ public class ChunkGraphicsState {
     private final GlBufferSegment indexSegment;
 
     private final ElementRange[] parts;
-    private ChunkMeshData translucencyData;
+    private ChunkBufferSorter.SortBuffer translucencyData;
 
     public ChunkGraphicsState(GlBufferSegment vertexSegment, GlBufferSegment indexSegment, ChunkMeshData data) {
         Validate.notNull(vertexSegment);
@@ -33,21 +34,14 @@ public class ChunkGraphicsState {
     public void delete() {
         this.vertexSegment.delete();
         this.indexSegment.delete();
-        if (this.translucencyData != null) {
-            this.translucencyData.getVertexData().delete();
-            this.translucencyData = null;
-        }
     }
 
-    public void setTranslucencyData(ChunkMeshData translucencyData) {
-        if (this.translucencyData != null) {
-            this.translucencyData.getVertexData().delete();
-        }
+    public void setTranslucencyData(ChunkBufferSorter.SortBuffer translucencyData) {
         this.translucencyData = translucencyData;
     }
 
-    public ChunkMeshData getAndCopyTranslucencyData() {
-        return this.translucencyData != null ? this.translucencyData.copy() : null;
+    public ChunkBufferSorter.SortBuffer getTranslucencyData() {
+        return this.translucencyData;
     }
 
     public ElementRange getModelPart(ModelQuadFacing facing) {

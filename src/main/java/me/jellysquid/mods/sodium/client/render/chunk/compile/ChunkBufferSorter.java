@@ -1,21 +1,58 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
 import com.google.common.primitives.Floats;
+import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
+import me.jellysquid.mods.sodium.client.gl.util.ElementRange;
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.format.VanillaLikeChunkMeshAttribute;
-import me.jellysquid.mods.sodium.client.render.chunk.format.full.VanillaModelVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.format.sfp.ModelVertexType;
-import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkBufferSorter {
+    public record SortBuffer(ByteBuffer vertexBuffer, ByteBuffer indexBuffer, GlVertexFormat<?> vertexFormat,
+                             Map<ModelQuadFacing, ElementRange> parts) {
+        public static SortBuffer copyFrom(ChunkMeshData mesh) {
+            ByteBuffer vBuffer = ByteBuffer.allocate(mesh.getVertexData().vertexBuffer().getLength()).order(ByteOrder.nativeOrder());
+            vBuffer.put(mesh.getVertexData().vertexBuffer().getDirectBuffer());
+            vBuffer.flip();
+            ByteBuffer iBuffer = ByteBuffer.allocate(mesh.getVertexData().indexBuffer().getLength()).order(ByteOrder.nativeOrder());
+            iBuffer.put(mesh.getVertexData().indexBuffer().getDirectBuffer());
+            iBuffer.flip();
+            return new SortBuffer(vBuffer, iBuffer, mesh.getVertexData().vertexFormat(), mesh.getParts());
+        }
+
+        public static SortBuffer wrap(ChunkMeshData mesh) {
+            return new SortBuffer(mesh.getVertexData().vertexBuffer().getDirectBuffer(),
+                    mesh.getVertexData().indexBuffer().getDirectBuffer(),
+                    mesh.getVertexData().vertexFormat(),
+                    mesh.getParts());
+        }
+
+        private static ByteBuffer cloneBuf(ByteBuffer b) {
+            ByteBuffer clone = ByteBuffer.allocate(b.capacity()).order(b.order());
+            b.rewind();//copy from the beginning
+            clone.put(b);
+            b.rewind();
+            clone.flip();
+            return clone;
+        }
+
+        public SortBuffer duplicate() {
+            if(vertexBuffer.isDirect())
+                throw new IllegalStateException("Cannot duplicate direct SortBuffer");
+            return new SortBuffer(cloneBuf(vertexBuffer), cloneBuf(indexBuffer), vertexFormat, parts);
+        }
+    }
     enum PositionType {
         COMPACT_POSITION,
         FLOAT_POSITION,
@@ -24,8 +61,8 @@ public class ChunkBufferSorter {
 
     private static final ConcurrentHashMap<GlVertexFormat, PositionType> POSITIONS_BY_FORMAT = new ConcurrentHashMap<>();
 
-    public static void sort(ChunkMeshData chunkData, float x, float y, float z) {
-        PositionType type = POSITIONS_BY_FORMAT.computeIfAbsent(chunkData.getVertexData().vertexFormat(), format -> {
+    public static void sort(SortBuffer chunkData, float x, float y, float z) {
+        PositionType type = POSITIONS_BY_FORMAT.computeIfAbsent(chunkData.vertexFormat(), format -> {
             try {
                 format.getAttribute(VanillaLikeChunkMeshAttribute.POSITION);
                 return PositionType.FLOAT_POSITION;
@@ -41,11 +78,11 @@ public class ChunkBufferSorter {
         if(type == PositionType.UNKNOWN_POSITION)
             return;
 
-        ByteBuffer vertexBuffer = chunkData.getVertexData().vertexBuffer().getDirectBuffer();
+        ByteBuffer vertexBuffer = chunkData.vertexBuffer();
         // Vertex stride by Float size
-        int vertexStride = chunkData.getVertexData().vertexFormat().getStride();
+        int vertexStride = chunkData.vertexFormat().getStride();
 
-        IntBuffer indexBuffer = chunkData.getVertexData().indexBuffer().getDirectBuffer().asIntBuffer();
+        IntBuffer indexBuffer = chunkData.indexBuffer().asIntBuffer();
         int vertexGroupCount = indexBuffer.capacity() / 3;
 
         float[] distanceArray = new float[vertexGroupCount];
@@ -67,22 +104,19 @@ public class ChunkBufferSorter {
 
         IntArrays.mergeSort(indicesArray, (a, b) -> Floats.compare(distanceArray[b], distanceArray[a]));
 
-        IntBuffer tmpBuffer = MemoryUtil.memAllocInt(indexBuffer.capacity());
-        try {
-            // Copy the vertices into the buffer in order
-            for(int i = 0; i < vertexGroupCount; i++) {
-                int idxBase = indicesArray[i] * 3;
-                tmpBuffer.put(indexBuffer.get(idxBase + 0));
-                tmpBuffer.put(indexBuffer.get(idxBase + 1));
-                tmpBuffer.put(indexBuffer.get(idxBase + 2));
-            }
-            tmpBuffer.rewind();
-            indexBuffer.rewind();
-            // Copy this buffer to the original buffer
-            MemoryUtil.memCopy(tmpBuffer, indexBuffer);
-        } finally {
-            MemoryUtil.memFree(tmpBuffer);
+        IntBuffer tmpBuffer = IntBuffer.allocate(indexBuffer.capacity());
+        // Copy the vertices into the buffer in order
+        for(int i = 0; i < vertexGroupCount; i++) {
+            int idxBase = indicesArray[i] * 3;
+            tmpBuffer.put(indexBuffer.get(idxBase + 0));
+            tmpBuffer.put(indexBuffer.get(idxBase + 1));
+            tmpBuffer.put(indexBuffer.get(idxBase + 2));
         }
+        tmpBuffer.rewind();
+        indexBuffer.rewind();
+        // Copy this buffer to the original buffer
+        indexBuffer.put(tmpBuffer);
+        indexBuffer.rewind();
     }
 
     private static float square(float f) {

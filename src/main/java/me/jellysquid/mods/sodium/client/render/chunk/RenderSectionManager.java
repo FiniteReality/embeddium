@@ -14,6 +14,7 @@ import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
@@ -455,16 +456,16 @@ public class RenderSectionManager {
     }
 
     public ChunkRenderBuildTask createSortTask(RenderSection render) {
-        Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
+        Map<BlockRenderPass, ChunkBufferSorter.SortBuffer> meshes = new EnumMap<>(BlockRenderPass.class);
         for(BlockRenderPass pass : BlockRenderPass.VALUES) {
             if(!pass.isTranslucent())
                 continue;
             var state = render.getGraphicsState(pass);
             if(state == null)
                 continue;
-            var meshCopy = state.getAndCopyTranslucencyData();
-            if(meshCopy != null)
-                meshes.put(pass, meshCopy);
+            var mesh = state.getTranslucencyData();
+            if(mesh != null)
+                meshes.put(pass, mesh.duplicate());
         }
         if(meshes.isEmpty())
             return null;
