@@ -75,6 +75,10 @@ public class ModelVertexType implements ChunkVertexType<ChunkMeshAttribute> {
         return (short) ((MODEL_ORIGIN + v) * MODEL_SCALE_INV);
     }
 
+    public static float decodePosition(short s) {
+        return (((float)Short.toUnsignedInt(s)) / MODEL_SCALE_INV) - MODEL_ORIGIN;
+    }
+
     static int encodeLightMapTexCoord(int light) {
         int r = light;
 

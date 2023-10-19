@@ -2,19 +2,45 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
 import com.google.common.primitives.Floats;
 import it.unimi.dsi.fastutil.ints.IntArrays;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkMeshData;
+import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkMeshAttribute;
+import me.jellysquid.mods.sodium.client.render.chunk.format.VanillaLikeChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.format.full.VanillaModelVertexType;
+import me.jellysquid.mods.sodium.client.render.chunk.format.sfp.ModelVertexType;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkBufferSorter {
+    enum PositionType {
+        COMPACT_POSITION,
+        FLOAT_POSITION,
+        UNKNOWN_POSITION
+    }
+
+    private static final ConcurrentHashMap<GlVertexFormat, PositionType> POSITIONS_BY_FORMAT = new ConcurrentHashMap<>();
+
     public static void sort(ChunkMeshData chunkData, float x, float y, float z) {
-        if(chunkData.getVertexData().vertexFormat() != VanillaModelVertexType.VERTEX_FORMAT) {
+        PositionType type = POSITIONS_BY_FORMAT.computeIfAbsent(chunkData.getVertexData().vertexFormat(), format -> {
+            try {
+                format.getAttribute(VanillaLikeChunkMeshAttribute.POSITION);
+                return PositionType.FLOAT_POSITION;
+            } catch(NullPointerException e) {}
+            try {
+                format.getAttribute(ChunkMeshAttribute.POSITION_ID);
+                return PositionType.COMPACT_POSITION;
+            } catch(NullPointerException e) {}
+            SodiumClientMod.logger().warn("Don't know how to sort {}", format.toString());
+            return PositionType.UNKNOWN_POSITION;
+        });
+
+        if(type == PositionType.UNKNOWN_POSITION)
             return;
-        }
 
         ByteBuffer vertexBuffer = chunkData.getVertexData().vertexBuffer().getDirectBuffer();
         // Vertex stride by Float size
@@ -28,14 +54,13 @@ public class ChunkBufferSorter {
         IntBuffer indexBuffer = chunkData.getVertexData().indexBuffer().getDirectBuffer().asIntBuffer();
 
         int groupPtr = 0;
-        FloatBuffer floatBuffer = vertexBuffer.asFloatBuffer();
 
         while(indexBuffer.hasRemaining()) {
             int v0 = indexBuffer.get();
             int v1 = indexBuffer.get();
             int v2 = indexBuffer.get();
 
-            float groupDistance = getDistanceSqSFP(floatBuffer, x, y, z, vertexStride, v0, v1, v2);
+            float groupDistance = getDistanceSqSFP(vertexBuffer, type, x, y, z, vertexStride, v0, v1, v2);
             distanceArray[groupPtr] = groupDistance;
             indicesArray[groupPtr] = groupPtr;
             groupPtr++;
@@ -69,23 +94,39 @@ public class ChunkBufferSorter {
         return square(x2 - x1) + square(y2 - y1) + square(z2 - z1);
     }
 
-    private static float getDistanceSqSFP(FloatBuffer buffer, float xCenter, float yCenter, float zCenter, int stride, int v0, int v1, int v2) {
-        stride /= 4;
+    private static float getX(ByteBuffer buffer, int vertexBaseBytes, PositionType type) {
+        if(type == PositionType.FLOAT_POSITION)
+            return buffer.getFloat(vertexBaseBytes);
+        return ModelVertexType.decodePosition(buffer.getShort(vertexBaseBytes));
+    }
 
+    private static float getY(ByteBuffer buffer, int vertexBaseBytes, PositionType type) {
+        if(type == PositionType.FLOAT_POSITION)
+            return buffer.getFloat(vertexBaseBytes + 4);
+        return ModelVertexType.decodePosition(buffer.getShort(vertexBaseBytes + 2));
+    }
+
+    private static float getZ(ByteBuffer buffer, int vertexBaseBytes, PositionType type) {
+        if(type == PositionType.FLOAT_POSITION)
+            return buffer.getFloat(vertexBaseBytes + 8);
+        return ModelVertexType.decodePosition(buffer.getShort(vertexBaseBytes + 4));
+    }
+
+    private static float getDistanceSqSFP(ByteBuffer buffer, PositionType type, float xCenter, float yCenter, float zCenter, int stride, int v0, int v1, int v2) {
         int vertexBase = v0 * stride;
-        float x1 = buffer.get(vertexBase);
-        float y1 = buffer.get(vertexBase + 1);
-        float z1 = buffer.get(vertexBase + 2);
+        float x1 = getX(buffer, vertexBase, type);
+        float y1 = getY(buffer, vertexBase, type);
+        float z1 = getZ(buffer, vertexBase, type);
 
         vertexBase = v1 * stride;
-        float x2 = buffer.get(vertexBase);
-        float y2 = buffer.get(vertexBase + 1);
-        float z2 = buffer.get(vertexBase + 2);
+        float x2 = getX(buffer, vertexBase, type);
+        float y2 = getY(buffer, vertexBase, type);
+        float z2 = getZ(buffer, vertexBase, type);
 
         vertexBase = v2 * stride;
-        float x3 = buffer.get(vertexBase);
-        float y3 = buffer.get(vertexBase + 1);
-        float z3 = buffer.get(vertexBase + 2);
+        float x3 = getX(buffer, vertexBase, type);
+        float y3 = getY(buffer, vertexBase, type);
+        float z3 = getZ(buffer, vertexBase, type);
 
         float quadX, quadY, quadZ;
 
