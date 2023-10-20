@@ -49,6 +49,7 @@ public class SodiumGameOptions {
         public boolean useFogOcclusion = true;
         public boolean useBlockFaceCulling = true;
         public boolean useCompactVertexFormat = true;
+        public boolean useTranslucentFaceSorting = false;
         public boolean useNoErrorGLContext = true;
     }
 

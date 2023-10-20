@@ -59,6 +59,9 @@ public class RenderRegionManager {
 
         for (ChunkBuildOutput result : results) {
             for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
+                if(result.isPartialUpload() && result.getMesh(pass) == null)
+                    continue;
+
                 var storage = region.getStorage(pass);
 
                 if (storage != null) {
