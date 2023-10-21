@@ -284,6 +284,10 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         }
     }
 
+    private boolean checkBEVisibility(BlockEntity entity) {
+        return frustum.isVisible(entity.getRenderBoundingBox());
+    }
+
     public void renderTileEntities(MatrixStack matrices, BufferBuilderStorage bufferBuilders, Long2ObjectMap<SortedSet<BlockBreakingInfo>> blockBreakingProgressions,
                                    Camera camera, float tickDelta) {
         VertexConsumerProvider.Immediate immediate = bufferBuilders.getEntityVertexConsumers();
@@ -294,6 +298,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         double z = cameraPos.getZ();
 
         for (BlockEntity blockEntity : this.chunkRenderManager.getVisibleBlockEntities()) {
+            if(!checkBEVisibility(blockEntity))
+                continue;
             BlockPos pos = blockEntity.getPos();
 
             matrices.push();
@@ -318,6 +324,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         }
 
         for (BlockEntity blockEntity : this.globalBlockEntities) {
+            if(!checkBEVisibility(blockEntity))
+                continue;
             BlockPos pos = blockEntity.getPos();
 
             matrices.push();
