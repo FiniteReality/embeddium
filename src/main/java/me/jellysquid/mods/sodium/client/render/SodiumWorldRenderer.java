@@ -29,6 +29,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.Profiler;
+import net.minecraftforge.common.extensions.IForgeBlockEntity;
 
 import java.util.Collection;
 import java.util.Set;
@@ -48,6 +49,8 @@ public class SodiumWorldRenderer {
     private float lastFogDistance;
 
     private boolean useEntityCulling;
+
+    private Frustum frustum;
 
     private final Set<BlockEntity> globalBlockEntities = new ObjectOpenHashSet<>();
 
@@ -157,6 +160,8 @@ public class SodiumWorldRenderer {
     public void updateChunks(Camera camera, Frustum frustum, @Deprecated(forRemoval = true) int frame, boolean spectator) {
         NativeBuffer.reclaim(false);
 
+        this.frustum = frustum;
+
         this.useEntityCulling = SodiumClientMod.options().performance.useEntityCulling;
 
         if (this.client.options.getViewDistance() != this.renderDistance) {
@@ -247,6 +252,13 @@ public class SodiumWorldRenderer {
         this.renderSectionManager.reloadChunks(this.chunkTracker);
     }
 
+    private boolean checkBEVisibility(BlockEntity entity) {
+        Box box = entity.getRenderBoundingBox();
+        if(box.equals(IForgeBlockEntity.INFINITE_EXTENT_AABB))
+            return true;
+        return frustum.isBoxVisible((float)box.minX, (float)box.minY, (float)box.minZ, (float)box.maxX, (float)box.maxY, (float)box.maxZ);
+    }
+
     public void renderTileEntities(MatrixStack matrices, BufferBuilderStorage bufferBuilders, Long2ObjectMap<SortedSet<BlockBreakingInfo>> blockBreakingProgressions,
                                    Camera camera, float tickDelta) {
         VertexConsumerProvider.Immediate immediate = bufferBuilders.getEntityVertexConsumers();
@@ -259,6 +271,8 @@ public class SodiumWorldRenderer {
         BlockEntityRenderDispatcher blockEntityRenderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher();
 
         for (BlockEntity blockEntity : this.renderSectionManager.getVisibleBlockEntities()) {
+            if(!checkBEVisibility(blockEntity))
+                continue;
             BlockPos pos = blockEntity.getPos();
 
             matrices.push();
@@ -284,6 +298,8 @@ public class SodiumWorldRenderer {
         }
 
         for (BlockEntity blockEntity : this.globalBlockEntities) {
+            if(!checkBEVisibility(blockEntity))
+                continue;
             BlockPos pos = blockEntity.getPos();
 
             matrices.push();
