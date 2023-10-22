@@ -83,7 +83,7 @@ public class DefaultColorProviders {
                 return;
             }
 
-            Arrays.fill(output, IClientFluidTypeExtensions.of(state).getTintColor(state, view, pos));
+            Arrays.fill(output, ColorARGB.toABGR(IClientFluidTypeExtensions.of(state).getTintColor(state, view, pos)));
         }
     }
 }
