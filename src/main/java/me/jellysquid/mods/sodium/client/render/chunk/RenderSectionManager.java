@@ -334,7 +334,10 @@ public class RenderSectionManager {
         this.submitRebuildTasks(blockingRebuilds, ChunkUpdateType.IMPORTANT_SORT);
         this.submitRebuildTasks(updateImmediately ? blockingRebuilds : deferredRebuilds, ChunkUpdateType.REBUILD);
         this.submitRebuildTasks(updateImmediately ? blockingRebuilds : deferredRebuilds, ChunkUpdateType.INITIAL_BUILD);
-        this.submitRebuildTasks(updateImmediately ? blockingRebuilds : deferredRebuilds, ChunkUpdateType.SORT);
+
+        // Always allow at least one sort task to be scheduled
+        var deferredSorts = new ChunkJobCollector(Math.max(1, this.builder.getSchedulingBudget()), this.buildResults::add);
+        this.submitRebuildTasks(updateImmediately ? blockingRebuilds : deferredSorts, ChunkUpdateType.SORT);
 
         blockingRebuilds.awaitCompletion(this.builder);
     }
