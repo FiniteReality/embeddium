@@ -32,6 +32,7 @@ Oculus if you do not need shaders.
 * Asek3, for the initial port to Forge
 * XFactHD, for providing a list of gamebreaking Rubidium issues to start this work off, and for testing early builds
 * Pepper, for their invaluable assistance with getting Forge lighting to work on Sodium 0.5
+* @CelestialAbyss and @input-Here for making the new logo design
 
 ## License
 
