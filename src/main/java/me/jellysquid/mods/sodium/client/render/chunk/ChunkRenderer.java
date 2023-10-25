@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.render.chunk;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderListIterable;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.viewport.CameraTransform;
 
 /**
@@ -25,4 +26,9 @@ public interface ChunkRenderer {
      * Deletes this render backend and any resources attached to it.
      */
     void delete(CommandList commandList);
+
+    /**
+     * Get the vertex type used by this renderer.
+     */
+    ChunkVertexType getVertexType();
 }

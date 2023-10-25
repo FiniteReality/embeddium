@@ -97,4 +97,8 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
                 .forEach(GlProgram::delete);
     }
 
+    @Override
+    public ChunkVertexType getVertexType() {
+        return this.vertexType;
+    }
 }

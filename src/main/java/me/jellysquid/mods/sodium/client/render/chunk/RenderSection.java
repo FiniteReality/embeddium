@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirection;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirectionSet;
@@ -47,6 +48,8 @@ public class RenderSection {
     private BlockEntity @Nullable[] globalBlockEntities;
     private BlockEntity @Nullable[] culledBlockEntities;
     private Sprite @Nullable[] animatedSprites;
+
+    private ChunkBufferSorter.SortBuffer translucencyData;
 
 
     // Pending Update State
@@ -309,6 +312,14 @@ public class RenderSection {
      */
     public BlockEntity @Nullable[] getGlobalBlockEntities() {
         return this.globalBlockEntities;
+    }
+
+    public ChunkBufferSorter.SortBuffer getTranslucencyData() {
+        return this.translucencyData;
+    }
+
+    public void setTranslucencyData(ChunkBufferSorter.SortBuffer data) {
+        this.translucencyData = data;
     }
 
     public @Nullable CancellationToken getBuildCancellationToken() {

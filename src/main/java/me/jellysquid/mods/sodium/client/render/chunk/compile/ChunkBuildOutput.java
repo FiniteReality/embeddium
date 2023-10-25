@@ -20,6 +20,8 @@ public class ChunkBuildOutput {
 
     public final int buildTime;
 
+    private boolean partialUpload;
+
     public ChunkBuildOutput(RenderSection render, BuiltSectionInfo info, Map<TerrainRenderPass, BuiltSectionMeshParts> meshes, int buildTime) {
         this.render = render;
         this.info = info;
@@ -37,5 +39,13 @@ public class ChunkBuildOutput {
             data.getVertexData()
                     .free();
         }
+    }
+
+    public boolean isPartialUpload() {
+        return partialUpload;
+    }
+
+    public void setPartialUpload(boolean flag) {
+        partialUpload = flag;
     }
 }

@@ -47,6 +47,8 @@ public class SodiumWorldRenderer {
 
     private boolean useEntityCulling;
 
+    private Frustum vanillaFrustum;
+
     private RenderSectionManager renderSectionManager;
 
     /**
@@ -175,6 +177,8 @@ public class SodiumWorldRenderer {
         if (dirty) {
             this.renderSectionManager.markGraphDirty();
         }
+
+        this.vanillaFrustum = MinecraftClient.getInstance().worldRenderer.getFrustum();
 
         this.lastCameraX = pos.x;
         this.lastCameraY = pos.y;
@@ -311,6 +315,8 @@ public class SodiumWorldRenderer {
                 }
 
                 for (BlockEntity blockEntity : blockEntities) {
+                    if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
+                        continue;
                     renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
                 }
             }
@@ -334,6 +340,8 @@ public class SodiumWorldRenderer {
             }
 
             for (var blockEntity : blockEntities) {
+                if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
+                    continue;
                 renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
             }
         }

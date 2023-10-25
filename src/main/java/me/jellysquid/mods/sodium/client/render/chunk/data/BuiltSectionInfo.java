@@ -1,8 +1,10 @@
 package me.jellysquid.mods.sodium.client.render.chunk.data;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSectionFlags;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.VisibilityEncoding;
+import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import net.minecraft.block.entity.BlockEntity;
@@ -42,6 +44,8 @@ public class BuiltSectionInfo {
 
         if (!blockRenderPasses.isEmpty()) {
             flags |= 1 << RenderSectionFlags.HAS_BLOCK_GEOMETRY;
+            if(blockRenderPasses.contains(DefaultTerrainRenderPasses.TRANSLUCENT))
+                flags |= 1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA;
         }
 
         if (!culledBlockEntities.isEmpty()) {

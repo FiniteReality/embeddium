@@ -49,6 +49,10 @@ public class CompactChunkVertex implements ChunkVertexType {
         return (int) ((MODEL_ORIGIN + value) * (POSITION_MAX_VALUE / MODEL_SCALE));
     }
 
+    public static float decodePosition(short value) {
+        return (((float)Short.toUnsignedInt(value)) / (POSITION_MAX_VALUE / MODEL_SCALE)) - MODEL_ORIGIN;
+    }
+
     private static int encodeDrawParameters(Material material, int sectionIndex) {
         return (((sectionIndex & 0xFF) << 8) | ((material.bits() & 0xFF) << 0));
     }

@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.BakedChunkModelBuilder;
@@ -65,6 +66,8 @@ public class ChunkBuildBuffers {
 
         int vertexCount = 0;
 
+        boolean singleRange = pass.isReverseOrder() && SodiumClientMod.options().performance.useTranslucentFaceSorting;
+
         for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
             var buffer = builder.getVertexBuffer(facing);
 
@@ -98,5 +101,9 @@ public class ChunkBuildBuffers {
         for (var builder : this.builders.values()) {
             builder.destroy();
         }
+    }
+
+    public ChunkVertexType getVertexType() {
+        return vertexType;
     }
 }
