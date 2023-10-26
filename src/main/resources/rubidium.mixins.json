@@ -60,7 +60,6 @@
     "features.options.MixinMinecraftClient",
     "features.options.MixinOptionsScreen",
     "features.options.MixinWorldRenderer",
-    "features.particle.cull.MixinParticleManager",
     "features.particle.fast_render.MixinBillboardParticle",
     "features.render_layer.leaves.MixinRenderLayers",
 	"features.render_layer.leaves.MixinLeavesBlock",
