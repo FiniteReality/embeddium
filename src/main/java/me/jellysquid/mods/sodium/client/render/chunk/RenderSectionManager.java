@@ -60,6 +60,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class RenderSectionManager {
     private final ChunkBuilder builder;
 
+    private final Thread renderThread = Thread.currentThread();
+
     private final RenderRegionManager regions;
     private final ClonedChunkSectionCache sectionCache;
 
@@ -523,7 +525,16 @@ public class RenderSectionManager {
         return sections;
     }
 
+    private void scheduleRebuildOffThread(int x, int y, int z, boolean important) {
+        MinecraftClient.getInstance().submit(() -> this.scheduleRebuild(x, y, z, important));
+    }
+
     public void scheduleRebuild(int x, int y, int z, boolean important) {
+        if (Thread.currentThread() != renderThread) {
+            this.scheduleRebuildOffThread(x, y, z, important);
+            return;
+        }
+
         this.sectionCache.invalidate(x, y, z);
 
         RenderSection section = this.sectionByPosition.get(ChunkSectionPos.asLong(x, y, z));
