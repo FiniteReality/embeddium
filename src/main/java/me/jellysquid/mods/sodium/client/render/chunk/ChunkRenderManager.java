@@ -32,6 +32,7 @@ import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import me.jellysquid.mods.sodium.common.util.IdTable;
 import me.jellysquid.mods.sodium.common.util.collections.FutureDequeDrain;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
@@ -67,6 +68,8 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
 
     private final ChunkBuilder<T> builder;
     private final ChunkRenderBackend<T> backend;
+
+    private final Thread renderThread = Thread.currentThread();
 
     private final Long2ObjectOpenHashMap<ChunkRenderColumn<T>> columns = new Long2ObjectOpenHashMap<>();
     private final IdTable<ChunkRenderContainer<T>> renders = new IdTable<>(16384);
@@ -567,7 +570,20 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         return this.columns.size() * 16;
     }
 
+    private void scheduleRebuildOffThread(int x, int y, int z, boolean important) {
+        MinecraftClient.getInstance().submit(() -> this.scheduleRebuild(x, y, z, important));
+    }
+
     public void scheduleRebuild(int x, int y, int z, boolean important) {
+        // Some mods try to schedule rebuilds off the main thread. This is dangerous,
+        // but the vanilla renderer seems to tolerate it. Our hashmaps are not thread-safe
+        // so the best solution is to do what the server chunk system does and handle this
+        // on the main thread.
+        if (Thread.currentThread() != renderThread) {
+            this.scheduleRebuildOffThread(x, y, z, important);
+            return;
+        }
+
         ChunkRenderContainer<T> render = this.getRender(x, y, z);
 
         if (render != null) {
