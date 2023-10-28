@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(ForgeIngameGui.class)
 public class MixinInGameHud {
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;isFancyGraphicsOrBetter()Z"))
-    private boolean redirectFancyGraphicsVignette() {
+    @Redirect(method = "lambda$static$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;isFancyGraphicsOrBetter()Z"))
+    private static boolean redirectFancyGraphicsVignette() {
         return SodiumClientMod.options().quality.enableVignette;
     }
 }
