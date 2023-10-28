@@ -59,6 +59,7 @@
     "features.particle.fast_render.MixinBillboardParticle",
     "features.render_layer.leaves.MixinLeavesBlock",
     "features.render_layer.leaves.MixinRenderLayers",
+    "features.shader.uniform.MixinShader",
     "features.sky.MixinWorldRenderer",
     "features.texture_tracking.MixinSprite",
     "features.texture_tracking.MixinSpriteAnimation",

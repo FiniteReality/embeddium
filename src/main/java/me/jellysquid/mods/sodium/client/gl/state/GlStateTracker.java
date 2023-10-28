@@ -13,10 +13,8 @@ public class GlStateTracker {
     private static final int UNASSIGNED_HANDLE = -1;
 
     private final int[] bufferState = new int[GlBufferTarget.COUNT];
-    private final int[] bufferRestoreState = new int[GlBufferTarget.COUNT];
 
     private int vertexArrayState;
-    private int vertexArrayRestoreState;
 
     public GlStateTracker() {
         this.reset();
@@ -47,10 +45,6 @@ public class GlStateTracker {
     }
 
     public boolean makeVertexArrayActive(GlVertexArray array) {
-        if (this.vertexArrayRestoreState == UNASSIGNED_HANDLE) {
-        	this.vertexArrayRestoreState = GlStateManager._getInteger(GL30C.GL_VERTEX_ARRAY_BINDING);
-        }
-
         int handle = array == null ? GlVertexArray.NULL_ARRAY_ID : array.handle();
         boolean changed = this.vertexArrayState != handle;
 
@@ -64,30 +58,16 @@ public class GlStateTracker {
     }
 
     public void pop() {
-        if (this.vertexArrayRestoreState != UNASSIGNED_HANDLE && this.vertexArrayState != this.vertexArrayRestoreState) {
-        	GlStateManager._glBindVertexArray(this.vertexArrayRestoreState);
-        }
 
-        for (int i = 0; i < GlBufferTarget.COUNT; i++) {
-            if (this.bufferRestoreState[i] != UNASSIGNED_HANDLE && this.bufferRestoreState[i] != this.bufferState[i]) {
-            	GlStateManager._glBindBuffer(GlBufferTarget.VALUES[i].getTargetParameter(), this.bufferRestoreState[i]);
-            }
-        }
-
-        this.reset();
     }
 
     public void reset() {
         Arrays.fill(this.bufferState, UNASSIGNED_HANDLE);
-        Arrays.fill(this.bufferRestoreState, UNASSIGNED_HANDLE);
 
         this.vertexArrayState = UNASSIGNED_HANDLE;
-        this.vertexArrayRestoreState = UNASSIGNED_HANDLE;
     }
 
     public void push() {
-        for (GlBufferTarget target : GlBufferTarget.VALUES) {
-        	this.bufferRestoreState[target.ordinal()] = GlStateManager._getInteger(target.getBindingParameter());
-        }
+
     }
 }
