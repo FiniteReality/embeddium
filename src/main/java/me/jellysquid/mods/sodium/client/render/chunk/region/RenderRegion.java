@@ -53,8 +53,6 @@ public class RenderRegion {
 
     private Frustum.Visibility visibility;
 
-    public double distanceSquaredFromCamera;
-
     public RenderRegion(RenderRegionManager manager, int x, int y, int z) {
         this.manager = manager;
 
@@ -92,18 +90,6 @@ public class RenderRegion {
 
     public int getOriginZ() {
         return this.z << REGION_LENGTH_SH << 4;
-    }
-
-    public int getCenterX() {
-        return ((this.x << REGION_WIDTH_SH) + REGION_WIDTH / 2) << 4;
-    }
-
-    public int getCenterY() {
-        return ((this.y << REGION_HEIGHT_SH) + REGION_HEIGHT / 2) << 4;
-    }
-
-    public int getCenterZ() {
-        return ((this.z << REGION_LENGTH_SH) + REGION_LENGTH / 2) << 4;
     }
 
     public RenderRegionArenas getOrCreateArenas(CommandList commandList) {
