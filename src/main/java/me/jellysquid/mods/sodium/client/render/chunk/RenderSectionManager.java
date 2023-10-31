@@ -154,7 +154,6 @@ public class RenderSectionManager {
         this.setup(camera);
         this.scheduleTranslucencyUpdates();
         this.iterateChunks(camera, frustum, frame, spectator);
-        this.chunkRenderList.finalize(camera.getPos());
 
         this.needsUpdate = false;
     }
