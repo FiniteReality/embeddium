@@ -271,7 +271,7 @@ public class SodiumWorldRenderer {
         BlockEntityRenderDispatcher blockEntityRenderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher();
 
         for (BlockEntity blockEntity : this.renderSectionManager.getVisibleBlockEntities()) {
-            if(!checkBEVisibility(blockEntity))
+            if(blockEntity.isRemoved() || !checkBEVisibility(blockEntity))
                 continue;
             BlockPos pos = blockEntity.getPos();
 
