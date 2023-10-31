@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.common.config;
 
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -106,7 +107,7 @@ public class SodiumConfig {
                 continue;
             }
 
-            if(!enabled && SYSTEM_OPTIONS.contains(key)) {
+            if(!enabled && FMLEnvironment.production && SYSTEM_OPTIONS.contains(key)) {
                 LOGGER.warn("Configuration key '{}' is a required option and cannot be disabled", key);
                 continue;
             }
