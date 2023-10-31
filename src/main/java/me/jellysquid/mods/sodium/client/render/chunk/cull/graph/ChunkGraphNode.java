@@ -9,6 +9,7 @@ import net.minecraft.util.math.Direction;
 
 public class ChunkGraphNode {
     private static final long DEFAULT_VISIBILITY_DATA = calculateVisibilityData(ChunkRenderData.EMPTY.getOcclusionData());
+    private static final float FRUSTUM_EPSILON = 1.0f /* block model margin */ + 0.125f /* epsilon */;
 
     private final ChunkGraphNode[] nodes = new ChunkGraphNode[DirectionUtil.ALL_DIRECTIONS.length];
 
@@ -116,7 +117,8 @@ public class ChunkGraphNode {
         float y = this.getOriginY();
         float z = this.getOriginZ();
 
-        return !frustum.fastAabbTest(x, y, z, x + 16.0f, y + 16.0f, z + 16.0f);
+        return !frustum.fastAabbTest(x - FRUSTUM_EPSILON, y - FRUSTUM_EPSILON, z - FRUSTUM_EPSILON,
+                x + 16.0f + FRUSTUM_EPSILON, y + 16.0f + FRUSTUM_EPSILON, z + 16.0f + FRUSTUM_EPSILON);
     }
 
     /**
