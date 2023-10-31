@@ -298,7 +298,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
         double z = cameraPos.getZ();
 
         for (BlockEntity blockEntity : this.chunkRenderManager.getVisibleBlockEntities()) {
-            if(!checkBEVisibility(blockEntity))
+            if(blockEntity.isRemoved() || !checkBEVisibility(blockEntity))
                 continue;
             BlockPos pos = blockEntity.getPos();
 
