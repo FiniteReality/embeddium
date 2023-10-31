@@ -12,6 +12,13 @@ Embeddium is a fork of Rubidium, a fork of Sodium with patches for Forge
 credits="embeddedt, NanoLive, CaffeineMC"
 authors="embeddedt"
 
+[[dependencies.embeddium]] #optional
+modId = "forge" #mandatory
+mandatory = true #mandatory
+versionRange = "[48.0.33,)" #mandatory
+ordering = "NONE"
+side = "CLIENT"
+
 [[mods]]
 modId = "rubidium"
 version = "0.7.1"
