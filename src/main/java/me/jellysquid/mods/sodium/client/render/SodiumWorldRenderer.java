@@ -315,7 +315,7 @@ public class SodiumWorldRenderer {
                 }
 
                 for (BlockEntity blockEntity : blockEntities) {
-                    if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
+                    if(blockEntity.isRemoved() || !vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
                         continue;
                     renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
                 }
@@ -340,7 +340,7 @@ public class SodiumWorldRenderer {
             }
 
             for (var blockEntity : blockEntities) {
-                if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
+                if(blockEntity.isRemoved() || !vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
                     continue;
                 renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
             }

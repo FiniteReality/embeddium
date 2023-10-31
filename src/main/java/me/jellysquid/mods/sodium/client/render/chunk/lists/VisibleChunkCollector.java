@@ -44,8 +44,8 @@ public class VisibleChunkCollector implements Consumer<RenderSection> {
         }
     }
 
-    public SortedRenderLists createRenderLists(Vec3d cameraPos) {
-        return this.sortedRenderLists.build(cameraPos);
+    public SortedRenderLists createRenderLists() {
+        return this.sortedRenderLists.build();
     }
 
     public Map<ChunkUpdateType, ArrayDeque<RenderSection>> getRebuildLists() {
