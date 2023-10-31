@@ -25,7 +25,7 @@ public class ClonedChunkSectionCache {
         this.time = getMonotonicTimeSource();
     }
 
-    public void cleanup() {
+    public synchronized void cleanup() {
         this.time = getMonotonicTimeSource();
         this.positionToEntry.values()
                 .removeIf(entry -> this.time > (entry.getLastUsedTimestamp() + MAX_CACHE_DURATION));
