@@ -475,6 +475,8 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     }
 
     public void updateChunks() {
+        this.builder.cleanupSectionCache();
+
         Deque<CompletableFuture<ChunkBuildResult<T>>> futures = new ArrayDeque<>();
 
         int budget = this.builder.getSchedulingBudget();

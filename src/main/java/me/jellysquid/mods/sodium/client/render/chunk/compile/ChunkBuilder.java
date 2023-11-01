@@ -149,6 +149,10 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
         this.sectionCache = null;
     }
 
+    public void cleanupSectionCache() {
+        this.sectionCache.cleanup();
+    }
+
     /**
      * Processes all pending build task uploads using the chunk render backend.
      */

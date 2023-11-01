@@ -39,6 +39,8 @@ public class ClonedChunkSection {
 
     private BiomeArray biomeData;
 
+    private long lastUsedTimestamp = Long.MAX_VALUE;
+
     ClonedChunkSection(ClonedChunkSectionCache backingCache, World world) {
         this.backingCache = backingCache;
         this.world = world;
@@ -165,6 +167,14 @@ public class ClonedChunkSection {
 
     public boolean releaseReference() {
         return this.referenceCount.decrementAndGet() <= 0;
+    }
+
+    public long getLastUsedTimestamp() {
+        return this.lastUsedTimestamp;
+    }
+
+    public void setLastUsedTimestamp(long timestamp) {
+        this.lastUsedTimestamp = timestamp;
     }
 
     public ClonedChunkSectionCache getBackingCache() {
