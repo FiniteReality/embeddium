@@ -38,6 +38,8 @@ public class ClonedChunkSectionCache {
             section = this.createSection(x, y, z);
         }
 
+        section.setLastUsedTimestamp(this.time);
+
         return section;
     }
 
