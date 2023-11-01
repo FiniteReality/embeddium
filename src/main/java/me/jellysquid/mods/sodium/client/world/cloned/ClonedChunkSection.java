@@ -42,6 +42,8 @@ public class ClonedChunkSection {
 
     private ReadableContainer<RegistryEntry<Biome>> biomeData;
 
+    private long lastUsedTimestamp;
+
     ClonedChunkSection(ClonedChunkSectionCache backingCache) {
         this.backingCache = backingCache;
         this.blockEntities = new Short2ObjectOpenHashMap<>();
@@ -210,6 +212,14 @@ public class ClonedChunkSection {
 
     public ClonedChunkSectionCache getBackingCache() {
         return this.backingCache;
+    }
+
+    public long getLastUsedTimestamp() {
+        return this.lastUsedTimestamp;
+    }
+
+    public void setLastUsedTimestamp(long timestamp) {
+        this.lastUsedTimestamp = timestamp;
     }
 
     /**

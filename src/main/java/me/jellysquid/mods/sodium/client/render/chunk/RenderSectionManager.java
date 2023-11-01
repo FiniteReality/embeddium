@@ -362,6 +362,8 @@ public class RenderSectionManager {
     }
 
     public void updateChunks() {
+        this.sectionCache.cleanup();
+
         var blockingFutures = this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_REBUILD);
         blockingFutures.addAll(this.submitRebuildTasks(ChunkUpdateType.IMPORTANT_SORT));
 
