@@ -200,10 +200,16 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
         ) {
             var vertexSink = out.getVertexBuffer(ModelQuadFacing.UNASSIGNED);
             int quadStart = vertexSink.count();
+            // clockwise
             v0.write(vertexSink, offX, offY, offZ, lightStart, lightEnd);
             v1.write(vertexSink, offX, offY, offZ, lightStart, lightEnd);
             v2.write(vertexSink, offX, offY, offZ, lightStart, lightEnd);
             v3.write(vertexSink, offX, offY, offZ, lightStart, lightEnd);
+            // counter-clockwise
+            v0.write(vertexSink, offX, offY, offZ, lightStart, lightEnd);
+            v3.write(vertexSink, offX, offY, offZ, lightStart, lightEnd);
+            v2.write(vertexSink, offX, offY, offZ, lightStart, lightEnd);
+            v1.write(vertexSink, offX, offY, offZ, lightStart, lightEnd);
         }
     }
 
