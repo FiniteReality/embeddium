@@ -40,16 +40,15 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
     }
 
     private GlProgram.Builder bindAttributesForType(GlProgram.Builder builder) {
-        if (this.vertexType == ChunkMeshFormats.COMPACT) {
+        if (this.vertexType != ChunkMeshFormats.VANILLA_LIKE) {
             return builder.bindAttribute("in_VertexData", ChunkShaderBindingPoints.ATTRIBUTE_PACKED_DATA);
-        } else if (this.vertexType == ChunkMeshFormats.VANILLA_LIKE) {
+        } else {
             return builder
                     .bindAttribute("in_Pos", ChunkShaderBindingPoints.ATTRIBUTE_POSITION)
                     .bindAttribute("in_Color", ChunkShaderBindingPoints.ATTRIBUTE_COLOR)
                     .bindAttribute("in_TextureUv", ChunkShaderBindingPoints.ATTRIBUTE_TEXTURE_UV)
                     .bindAttribute("in_DrawParamsLight", ChunkShaderBindingPoints.ATTRIBUTE_DRAW_PARAMS_LIGHT);
-        } else
-            throw new IllegalArgumentException("Unexpected vertex type");
+        }
     }
 
     private GlProgram<ChunkShaderInterface> createShader(String path, ChunkShaderOptions options) {
