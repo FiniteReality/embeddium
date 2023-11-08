@@ -24,7 +24,9 @@ public class ColorProviderRegistry {
             this.blocks.put(entry.getKey(), DefaultColorProviders.adapt(entry.getValue()));
         }
 
-        this.installOverrides();
+        // Embeddium: Do not register default implementations, it is redundant since we have already registered
+        // them above and breaks the Forge event.
+        // this.installOverrides();
     }
 
     // TODO: Allow mods to install their own color resolvers here
