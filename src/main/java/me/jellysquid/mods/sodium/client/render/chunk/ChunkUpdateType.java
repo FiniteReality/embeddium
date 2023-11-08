@@ -20,7 +20,10 @@ public enum ChunkUpdateType {
 
     // borrowed from PR #2016
     public static ChunkUpdateType getPromotionUpdateType(ChunkUpdateType prev, ChunkUpdateType next) {
-        if (prev == null || prev == SORT || prev == next) {
+        if (prev == next)
+            return null; // No point submitting the same update twice
+
+        if (prev == null || prev == SORT) {
             return next;
         }
         if (next == IMPORTANT_REBUILD
