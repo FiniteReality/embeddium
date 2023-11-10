@@ -244,6 +244,8 @@ public class SodiumWorldRenderer {
             this.renderSectionManager = null;
         }
 
+        this.globalBlockEntities.clear();
+
         this.renderDistance = this.client.options.getViewDistance();
 
         this.renderPassManager = BlockRenderPassManager.createDefaultMappings();
