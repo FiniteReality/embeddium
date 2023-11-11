@@ -91,7 +91,7 @@ public class ChunkBufferSorter {
 
         int groupPtr = 0;
 
-        while(indexBuffer.hasRemaining()) {
+        while(groupPtr < vertexGroupCount) {
             int v0 = indexBuffer.get();
             int v1 = indexBuffer.get();
             int v2 = indexBuffer.get();
