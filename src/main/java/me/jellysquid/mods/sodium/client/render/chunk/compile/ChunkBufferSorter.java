@@ -146,17 +146,28 @@ public class ChunkBufferSorter {
     }
 
     private static float getDistanceSqSFP(ByteBuffer buffer, PositionType type, float xCenter, float yCenter, float zCenter, int stride, int v0, int v1, int v2) {
+        int bufferLength = buffer.capacity();
+
         int vertexBase = v0 * stride;
+        if(vertexBase >= bufferLength)
+            return Float.MAX_VALUE; // if the vertex doesn't seem to exist, assume it is furthest from the camera
+
         float x1 = getX(buffer, vertexBase, type);
         float y1 = getY(buffer, vertexBase, type);
         float z1 = getZ(buffer, vertexBase, type);
 
         vertexBase = v1 * stride;
+        if(vertexBase >= bufferLength)
+            return Float.MAX_VALUE;
+
         float x2 = getX(buffer, vertexBase, type);
         float y2 = getY(buffer, vertexBase, type);
         float z2 = getZ(buffer, vertexBase, type);
 
         vertexBase = v2 * stride;
+        if(vertexBase >= bufferLength)
+            return Float.MAX_VALUE;
+
         float x3 = getX(buffer, vertexBase, type);
         float y3 = getY(buffer, vertexBase, type);
         float z3 = getZ(buffer, vertexBase, type);
