@@ -664,7 +664,8 @@ public class RenderSectionManager {
         if (!render.isEmpty()) {
             this.addChunkToVisible(render);
             this.addEntitiesToRenderLists(render);
-        }
+        } else
+            this.chunkRenderList.markRegion(render.getRegion());
     }
 
     private void connectNeighborNodes(RenderSection render) {
