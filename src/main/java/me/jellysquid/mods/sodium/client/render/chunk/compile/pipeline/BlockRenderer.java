@@ -150,10 +150,7 @@ public class BlockRenderer {
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
             BakedQuadView quad = (BakedQuadView) quads.get(i);
 
-            if(!quad.hasAmbientOcclusion())
-                lighter = this.lighters.getLighter(LightMode.FLAT);
-
-            final var lightData = this.getVertexLight(ctx, lighter, cullFace, quad);
+            final var lightData = this.getVertexLight(ctx, quad.hasAmbientOcclusion() ? lighter : this.lighters.getLighter(LightMode.FLAT), cullFace, quad);
             final var vertexColors = this.getVertexColors(ctx, colorizer, quad);
 
             this.writeGeometry(ctx, builder, offset, material, quad, vertexColors, lightData);
