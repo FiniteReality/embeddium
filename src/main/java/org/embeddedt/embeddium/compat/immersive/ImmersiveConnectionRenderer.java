@@ -1,4 +1,4 @@
-package me.jellysquid.mods.sodium.client.compat.immersive;
+package org.embeddedt.embeddium.compat.immersive;
 
 import blusunrize.immersiveengineering.api.utils.ResettableLazy;
 import blusunrize.immersiveengineering.api.wires.Connection;
@@ -26,6 +26,7 @@ import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.BlockRenderView;
+import org.embeddedt.embeddium.api.ChunkMeshEvent;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -46,6 +47,12 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
 	{
 		return new Identifier("immersiveengineering", path);
 	}
+
+    public static void meshAppendEvent(ChunkMeshEvent event) {
+        if(ImmersiveEmptyChunkChecker.hasWires(event.getSectionOrigin())) {
+            event.addMeshAppender(ctx -> renderConnectionsInSection(ctx.sodiumBuildBuffers(), ctx.blockRenderView(), ctx.sectionOrigin()));
+        }
+    }
 
     @Override
     public void reload(@Nonnull ResourceManager pResourceManager) {

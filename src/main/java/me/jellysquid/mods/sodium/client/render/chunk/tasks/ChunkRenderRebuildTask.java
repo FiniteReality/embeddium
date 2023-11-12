@@ -5,7 +5,6 @@ import java.util.Map;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
-import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
@@ -40,6 +39,7 @@ import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
+import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -180,6 +180,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     }
                 }
             }
+
+            MeshAppenderRenderer.renderMeshAppenders(renderContext.getMeshAppenders(), cache.getLocalSlice(), render.getChunkPos(), buffers);
         } catch (CrashException ex) {
             // Propagate existing crashes (add context)
             throw fillCrashInfo(ex.getReport(), slice, blockPos);
@@ -191,11 +193,6 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         ForgeHooksClient.setRenderType(null);
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
-        
-        if(SodiumClientMod.immersiveLoaded)
-	        ImmersiveConnectionRenderer.renderConnectionsInSection(
-	                buildContext.buffers, buildContext.cache.getWorldSlice(), render.getChunkPos()
-	        );
 
         for (BlockRenderPass pass : BlockRenderPass.VALUES) {
             ChunkMeshData mesh = buffers.createMesh(pass);
