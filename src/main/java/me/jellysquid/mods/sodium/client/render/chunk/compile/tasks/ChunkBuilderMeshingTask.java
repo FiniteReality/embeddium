@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.tasks;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveConnectionRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -36,6 +35,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.LocalRandom;
 import net.minecraft.util.math.random.Random;
 import net.minecraftforge.client.model.data.ModelData;
+import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 
 import java.util.Map;
 
@@ -155,6 +155,8 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                     }
                 }
             }
+
+            MeshAppenderRenderer.renderMeshAppenders(renderContext.getMeshAppenders(), context.localSlice(), renderContext.getOrigin(), buffers);
         } catch (CrashException ex) {
             // Propagate existing crashes (add context)
             throw fillCrashInfo(ex.getReport(), slice, blockPos);
@@ -164,12 +166,6 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         }
 
         Map<TerrainRenderPass, BuiltSectionMeshParts> meshes = new Reference2ReferenceOpenHashMap<>();
-
-        if (SodiumClientMod.immersiveLoaded) {
-            ImmersiveConnectionRenderer.renderConnectionsInSection(
-                    buildContext.buffers, buildContext.cache.getWorldSlice(), render.getPosition()
-            );
-        }
 
         for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
             BuiltSectionMeshParts mesh = buffers.createMesh(pass);

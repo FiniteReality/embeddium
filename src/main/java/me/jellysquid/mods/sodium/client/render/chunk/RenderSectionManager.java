@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ReferenceMaps;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.*;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveEmptyChunkChecker;
+import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
@@ -232,15 +232,7 @@ public class RenderSectionManager {
         Chunk chunk = this.world.getChunk(x, z);
         ChunkSection section = chunk.getSectionArray()[this.world.sectionCoordToIndex(y)];
 
-        boolean isEmpty;
-        if (!section.isEmpty()) {
-            isEmpty = false;
-        } else if (!SodiumClientMod.immersiveLoaded) {
-            isEmpty = true;
-        } else {
-            isEmpty = !ImmersiveEmptyChunkChecker.hasWires(ChunkSectionPos.from(x, y, z));
-        }
-
+        boolean isEmpty = (section == null || section.isEmpty()) && ChunkMeshEvent.post(this.world, ChunkSectionPos.from(x, y, z)).isEmpty();
         if (isEmpty) {
             this.updateSectionInfo(renderSection, BuiltSectionInfo.EMPTY);
         } else {

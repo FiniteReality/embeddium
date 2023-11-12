@@ -1,4 +1,4 @@
-package me.jellysquid.mods.sodium.client.compat.immersive;
+package org.embeddedt.embeddium.compat.immersive;
 
 import blusunrize.immersiveengineering.api.wires.GlobalWireNetwork;
 import blusunrize.immersiveengineering.api.wires.WireCollisionData.ConnectionSegments;
