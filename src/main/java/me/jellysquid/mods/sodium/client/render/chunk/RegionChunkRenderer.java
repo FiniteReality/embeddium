@@ -113,6 +113,12 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
     }
 
     private boolean buildDrawBatches(List<RenderSection> sections, BlockRenderPass pass, ChunkCameraContext camera) {
+        // Because we store empty lists for empty regions, don't bother setting up a draw batch if there are
+        // no sections
+        if (sections.isEmpty()) {
+            return false;
+        }
+
         for (MultiDrawBatch batch : this.batches) {
             batch.begin();
         }

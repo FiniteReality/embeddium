@@ -222,6 +222,8 @@ public class WorldSlice implements BlockRenderView {
         }
     }
 
+    private static final BlockState DEFAULT_BLOCK_STATE = Blocks.AIR.getDefaultState();
+
     @Override
     public BlockState getBlockState(BlockPos pos) {
         return this.getBlockState(pos.getX(), pos.getY(), pos.getZ());
@@ -232,8 +234,8 @@ public class WorldSlice implements BlockRenderView {
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
 
-        return Objects.requireNonNullElseGet(this.blockStatesArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)], Blocks.AIR::getDefaultState);
+        return Objects.requireNonNullElse(this.blockStatesArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)], DEFAULT_BLOCK_STATE);
     }
 
     @Override

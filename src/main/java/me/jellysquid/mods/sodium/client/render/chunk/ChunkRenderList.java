@@ -56,6 +56,14 @@ public class ChunkRenderList {
         this.entries.clear();
     }
 
+    /**
+     * Add an empty list for the given render region. This ensures it sorts correctly relative to other regions
+     * even if it contains empty chunks.
+     */
+    public void markRegion(RenderRegion region) {
+        this.entries.computeIfAbsent(region, (key) -> new ObjectArrayList<>());
+    }
+
     public void add(RenderSection render) {
         RenderRegion region = render.getRegion();
 
