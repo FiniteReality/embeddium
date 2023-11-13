@@ -113,7 +113,7 @@ public class ChunkBuilder {
 
         // Delete any queued tasks and resources attached to them
         for (WrappedTask job : this.buildQueue) {
-            job.future.cancel(true);
+            job.cancel();
             job.task.releaseResources();
         }
 
@@ -141,7 +141,7 @@ public class ChunkBuilder {
         this.localContexts.remove();
     }
 
-    public CompletableFuture<ChunkBuildResult> schedule(ChunkRenderBuildTask task) {
+    public WrappedTask schedule(ChunkRenderBuildTask task) {
         if (!this.running.get()) {
             throw new IllegalStateException("Executor is stopped");
         }
@@ -154,7 +154,7 @@ public class ChunkBuilder {
             this.jobNotifier.notify();
         }
 
-        return job.future;
+        return job;
     }
 
     /**
@@ -203,15 +203,16 @@ public class ChunkBuilder {
         return Runtime.getRuntime().availableProcessors();
     }
 
-    public CompletableFuture<ChunkBuildResult> scheduleDeferred(ChunkRenderBuildTask task) {
-        return this.schedule(task)
-                .whenComplete((res, ex) -> {
-                    if (ex != null) {
-                        this.deferredFailureQueue.add(ex);
-                    } else {
-                        this.deferredResultQueue.add(res);
-                    }
-                });
+    public WrappedTask scheduleDeferred(ChunkRenderBuildTask task) {
+        var wrappedTask = this.schedule(task);
+        wrappedTask.getFuture().whenComplete((res, ex) -> {
+            if (ex != null) {
+                this.deferredFailureQueue.add(ex);
+            } else if (res != null) {
+                this.deferredResultQueue.add(res);
+            }
+        });
+        return wrappedTask;
     }
 
     public Iterator<ChunkBuildResult> createDeferredBuildResultDrain() {
@@ -330,9 +331,10 @@ public class ChunkBuilder {
         }
     }
 
-    private static class WrappedTask implements CancellationSource {
+    public static class WrappedTask implements CancellationSource {
         private final ChunkRenderBuildTask task;
         private final CompletableFuture<ChunkBuildResult> future;
+        private volatile boolean isCancelled;
 
         private WrappedTask(ChunkRenderBuildTask task) {
             this.task = task;
@@ -341,7 +343,15 @@ public class ChunkBuilder {
 
         @Override
         public boolean isCancelled() {
-            return this.future.isCancelled();
+            return isCancelled;
+        }
+
+        public void cancel() {
+            this.isCancelled = true;
+        }
+
+        public CompletableFuture<ChunkBuildResult> getFuture() {
+            return this.future;
         }
     }
 }

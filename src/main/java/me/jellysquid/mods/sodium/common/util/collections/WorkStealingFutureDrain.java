@@ -46,7 +46,9 @@ public class WorkStealingFutureDrain<T> implements Iterator<T> {
                 iterator.remove();
 
                 try {
-                    return future.join();
+                    var result = future.join();
+                    if (result != null) // null means cancelled
+                        return result;
                 } catch (CancellationException e) {
                     SodiumClientMod.logger()
                             .warn("Future was cancelled: {}", future);
