@@ -446,7 +446,7 @@ public class RenderSectionManager {
                 // Propagate CrashExceptions directly to provide extra information
                 throw (CrashException)ex;
             } else {
-                throw new RuntimeException("Chunk build failed", it.next());
+                throw new RuntimeException("Chunk build failed", ex);
             }
         }
     }
