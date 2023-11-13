@@ -1,9 +1,9 @@
 package org.embeddedt.embeddium.compat;
 
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import org.embeddedt.embeddium.compat.immersive.ImmersiveConnectionRenderer;
 
 public class EmbeddiumCompat {
@@ -13,7 +13,7 @@ public class EmbeddiumCompat {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(EmbeddiumCompat::registerReloadListener);
 
         if(immersiveLoaded) {
-            MinecraftForge.EVENT_BUS.addListener(ImmersiveConnectionRenderer::meshAppendEvent);
+            NeoForge.EVENT_BUS.addListener(ImmersiveConnectionRenderer::meshAppendEvent);
         }
     }
 

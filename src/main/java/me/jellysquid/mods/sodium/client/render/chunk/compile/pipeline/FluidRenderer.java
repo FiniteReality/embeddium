@@ -37,7 +37,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockRenderView;
-import net.minecraftforge.client.ForgeHooksClient;
+import net.neoforged.neoforge.client.textures.FluidSpriteCache;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -127,7 +127,7 @@ public class FluidRenderer {
 
         final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid);
 
-        Sprite[] sprites = ForgeHooksClient.getFluidSprites(world, blockPos, fluidState);
+        Sprite[] sprites = FluidSpriteCache.getFluidSprites(world, blockPos, fluidState);
 
         float fluidHeight = this.fluidHeight(world, fluid, blockPos, Direction.UP);
         float northWestHeight, southWestHeight, southEastHeight, northEastHeight;

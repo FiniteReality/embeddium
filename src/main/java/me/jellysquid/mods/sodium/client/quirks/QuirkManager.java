@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.client.quirks;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

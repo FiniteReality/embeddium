@@ -3,8 +3,8 @@ package org.embeddedt.embeddium.api;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class ChunkMeshEvent extends Event {
     @ApiStatus.Internal
     public static List<MeshAppender> post(World world, ChunkSectionPos origin) {
         ChunkMeshEvent event = new ChunkMeshEvent(world, origin);
-        MinecraftForge.EVENT_BUS.post(event);
+        NeoForge.EVENT_BUS.post(event);
         return Objects.requireNonNullElse(event.meshAppenders, Collections.emptyList());
     }
 }

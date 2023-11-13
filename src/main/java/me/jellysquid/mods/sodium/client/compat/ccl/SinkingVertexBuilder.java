@@ -9,8 +9,8 @@ import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector3fc;
 
 import javax.annotation.Nonnull;

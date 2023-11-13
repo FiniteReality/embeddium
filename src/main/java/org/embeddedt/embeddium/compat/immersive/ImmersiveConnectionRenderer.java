@@ -41,11 +41,16 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
     private static final LoadingCache<SegmentsKey, List<RenderedSegment>> SEGMENT_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(120, TimeUnit.SECONDS)
             .build(CacheLoader.from(ImmersiveConnectionRenderer::renderSegmentForCache));
+
+    // TODO port
+    /*
     private static final ResettableLazy<Sprite> WIRE_TEXTURE = new ResettableLazy<>(
             () -> MinecraftClient.getInstance().getBakedModelManager()
                     .getAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE)
                     .getSprite(rl("block/wire"))
     );
+
+     */
 
     public static Identifier rl(String path)
 	{
@@ -60,7 +65,8 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
 
     @Override
     public void reload(@Nonnull ResourceManager pResourceManager) {
-        WIRE_TEXTURE.reset();
+        if(true) throw new UnsupportedOperationException("TODO port");
+        //WIRE_TEXTURE.reset();
         resetCache();
     }
 
@@ -156,7 +162,8 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
     }
 
     private static Quad renderQuad(Vec3d start, Vec3d end, Vec3d radius, int color) {
-    	Sprite texture = WIRE_TEXTURE.get();
+        if(true) throw new UnsupportedOperationException("TODO port");
+    	Sprite texture = null; //WIRE_TEXTURE.get();
         return new Quad(
                 vertex(start.add(radius), texture.getMinU(), texture.getMinV(), color, true),
                 vertex(end.add(radius), texture.getMaxU(), texture.getMinV(), color, false),

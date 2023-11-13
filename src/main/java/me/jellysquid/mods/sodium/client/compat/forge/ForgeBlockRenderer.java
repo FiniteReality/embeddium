@@ -20,11 +20,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.lighting.FlatQuadLighter;
-import net.minecraftforge.client.model.lighting.QuadLighter;
-import net.minecraftforge.client.model.lighting.SmoothQuadLighter;
-import net.minecraftforge.common.ForgeConfig;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.lighting.FlatQuadLighter;
+import net.neoforged.neoforge.client.model.lighting.QuadLighter;
+import net.neoforged.neoforge.client.model.lighting.SmoothQuadLighter;
+import net.neoforged.neoforge.common.NeoForgeConfig;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class ForgeBlockRenderer {
     private static boolean useForgeLightingPipeline = false;
 
     public static void init() {
-        useForgeLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+        useForgeLightingPipeline = NeoForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
     }
 
     public static boolean useForgeLightingPipeline() {

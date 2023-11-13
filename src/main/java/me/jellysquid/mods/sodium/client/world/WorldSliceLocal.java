@@ -13,7 +13,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.ColorResolver;
 import net.minecraft.world.chunk.light.LightingProvider;
-import net.minecraftforge.client.model.data.ModelDataManager;
+import net.neoforged.neoforge.client.model.data.ModelDataManager;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

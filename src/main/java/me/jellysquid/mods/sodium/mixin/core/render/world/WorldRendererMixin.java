@@ -13,7 +13,7 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.ForgeHooksClient;
+import net.neoforged.neoforge.client.ClientHooks;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -115,7 +115,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
             RenderDevice.exitManagedCode();
         }
 
-        ForgeHooksClient.dispatchRenderStage(renderLayer, ((WorldRenderer)(Object)this), matrices, matrix, this.ticks, this.client.gameRenderer.getCamera(), this.getFrustum());
+        ClientHooks.dispatchRenderStage(renderLayer, ((WorldRenderer)(Object)this), matrices, matrix, this.ticks, this.client.gameRenderer.getCamera(), this.getFrustum());
     }
 
     /**

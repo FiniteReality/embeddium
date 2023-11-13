@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.vertex.transform;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormatElement;
 import net.minecraft.client.render.VertexFormats;

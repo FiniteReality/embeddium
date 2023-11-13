@@ -35,9 +35,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.LocalRandom;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
-import net.minecraftforge.common.ForgeConfig;
+import net.neoforged.neoforge.common.NeoForgeConfig;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class BlockRenderer {
@@ -68,7 +67,7 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
-        this.useForgeExperimentalLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+        this.useForgeExperimentalLightingPipeline = NeoForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -95,7 +94,9 @@ public class BlockRenderer {
                     mStack.isEmpty();
 
                     builder.reset();
-                    renderer.renderBlock(ctx.state(), ctx.pos(), ctx.world(), mStack, builder, random, ctx.modelData(), ctx.renderLayer());
+                    if(true)
+                        throw new UnsupportedOperationException("TODO port");
+                    //renderer.renderBlock(ctx.state(), ctx.pos(), ctx.world(), mStack, builder, random, ctx.modelData(), ctx.renderLayer());
                     builder.flush(meshBuilder, material, ctx.origin());
 
                     return;
