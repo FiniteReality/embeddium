@@ -54,6 +54,8 @@ public class BlockRenderer {
 
     private final boolean useAmbientOcclusion;
 
+    private boolean useReorienting;
+
     public BlockRenderer(MinecraftClient client, LightPipelineProvider lighters, ColorBlender colorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
         this.colorBlender = colorBlender;
@@ -143,6 +145,20 @@ public class BlockRenderer {
 
         IndexBufferBuilder indices = buffers.getIndexBufferBuilder(facing);
 
+        this.useReorienting = true;
+
+        // noinspection ForLoopReplaceableByForEach
+        for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
+            if (!quads.get(i).hasAmbientOcclusion()) {
+                // We disable Sodium's quad orientation detection if a quad opts out of AO. This is
+                // because some mods place non-AO quads below/above AO quads with identical coordinates.
+                // This won't z-fight as-is, but if the AO quad gets reoriented it can be triangulated
+                // differently from the non-AO quad, and that will cause z-fighting.
+                this.useReorienting = false;
+                break;
+            }
+        }
+
         // This is a very hot allocation, iterate over it manually
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
@@ -165,7 +181,7 @@ public class BlockRenderer {
     private void renderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset,
                             ColorSampler<BlockState> colorSampler, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model) {
         ModelQuadView src = (ModelQuadView) bakedQuad;
-        ModelQuadOrientation orientation = ModelQuadOrientation.orientByBrightness(light.br);
+        ModelQuadOrientation orientation = this.useReorienting ? ModelQuadOrientation.orientByBrightness(light.br) : ModelQuadOrientation.NORMAL;
 
         int[] colors = null;
 
