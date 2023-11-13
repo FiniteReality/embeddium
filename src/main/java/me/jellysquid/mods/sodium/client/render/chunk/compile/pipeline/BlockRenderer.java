@@ -60,6 +60,8 @@ public class BlockRenderer {
 
     private final int[] quadColors = new int[4];
 
+    private boolean useReorienting;
+
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
@@ -145,15 +147,26 @@ public class BlockRenderer {
     private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3d offset,
                                 ChunkModelBuilder builder, List<BakedQuad> quads, Direction cullFace) {
 
+        this.useReorienting = true;
+
+        // noinspection ForLoopReplaceableByForEach
+        for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
+            if (!quads.get(i).hasAmbientOcclusion()) {
+                // We disable Sodium's quad orientation detection if a quad opts out of AO. This is
+                // because some mods place non-AO quads below/above AO quads with identical coordinates.
+                // This won't z-fight as-is, but if the AO quad gets reoriented it can be triangulated
+                // differently from the non-AO quad, and that will cause z-fighting.
+                this.useReorienting = false;
+                break;
+            }
+        }
+
         // This is a very hot allocation, iterate over it manually
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
             BakedQuadView quad = (BakedQuadView) quads.get(i);
 
-            if(!quad.hasAmbientOcclusion())
-                lighter = this.lighters.getLighter(LightMode.FLAT);
-
-            final var lightData = this.getVertexLight(ctx, lighter, cullFace, quad);
+            final var lightData = this.getVertexLight(ctx, quad.hasAmbientOcclusion() ? lighter : this.lighters.getLighter(LightMode.FLAT), cullFace, quad);
             final var vertexColors = this.getVertexColors(ctx, colorizer, quad);
 
             this.writeGeometry(ctx, builder, offset, material, quad, vertexColors, lightData);
@@ -193,7 +206,7 @@ public class BlockRenderer {
                                int[] colors,
                                QuadLightData light)
     {
-        ModelQuadOrientation orientation = ModelQuadOrientation.orientByBrightness(light.br, light.lm);
+        ModelQuadOrientation orientation = this.useReorienting ? ModelQuadOrientation.orientByBrightness(light.br, light.lm) : ModelQuadOrientation.NORMAL;
         var vertices = this.vertices;
 
         ModelQuadFacing normalFace = quad.getNormalFace();

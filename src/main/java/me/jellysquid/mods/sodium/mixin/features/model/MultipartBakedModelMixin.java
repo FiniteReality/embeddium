@@ -9,6 +9,7 @@ import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.MultipartModelData;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.*;
 
@@ -71,7 +72,7 @@ public class MultipartBakedModelMixin {
             random.setSeed(seed);
 
             if (renderLayer == null || model.getRenderTypes(state, random, modelData).contains(renderLayer)) // FORGE: Only put quad data if the model is using the render type passed
-                quads.addAll(model.getQuads(state, face, random, modelData, renderLayer));
+                quads.addAll(model.getQuads(state, face, random, MultipartModelData.resolve(modelData, model), renderLayer));
         }
 
         return quads;

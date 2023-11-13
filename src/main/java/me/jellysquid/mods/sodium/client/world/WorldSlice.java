@@ -1,8 +1,6 @@
 package me.jellysquid.mods.sodium.client.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.immersive.ImmersiveEmptyChunkChecker;
 import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
@@ -22,9 +20,12 @@ import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
+import org.embeddedt.embeddium.api.ChunkMeshEvent;
+import org.embeddedt.embeddium.api.MeshAppender;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -89,10 +90,9 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         // If the chunk section is absent or empty, simply terminate now. There will never be anything in this chunk
         // section to render, so we need to signal that a chunk render task shouldn't created. This saves a considerable
         // amount of time in queueing instant build tasks and greatly accelerates how quickly the world can be loaded.
-        boolean isEmpty = section == null || section.isEmpty();
-        if (isEmpty && section != null && SodiumClientMod.immersiveLoaded) {
-            isEmpty = !ImmersiveEmptyChunkChecker.hasWires(origin);
-        }
+        List<MeshAppender> meshAppenders = ChunkMeshEvent.post(world, origin);
+        boolean isEmpty = (section == null || section.isEmpty()) && meshAppenders.isEmpty();
+
         if (isEmpty) {
             return null;
         }
@@ -124,7 +124,7 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
             }
         }
 
-        return new ChunkRenderContext(origin, sections, volume);
+        return new ChunkRenderContext(origin, sections, volume).withMeshAppenders(meshAppenders);
     }
 
     @SuppressWarnings("unchecked")
