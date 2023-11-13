@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.render.chunk;
 
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphInfo;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderBounds;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
@@ -39,7 +40,7 @@ public class RenderSection {
     private final RenderSection[] adjacent = new RenderSection[DirectionUtil.ALL_DIRECTIONS.length];
 
     private ChunkRenderData data = ChunkRenderData.ABSENT;
-    private CompletableFuture<?> rebuildTask = null;
+    private ChunkBuilder.WrappedTask rebuildTask = null;
 
     private ChunkUpdateType pendingUpdate;
 
@@ -86,7 +87,7 @@ public class RenderSection {
      */
     public void cancelRebuildTask() {
         if (this.rebuildTask != null) {
-            this.rebuildTask.cancel(false);
+            this.rebuildTask.cancel();
             this.rebuildTask = null;
         }
     }
@@ -298,9 +299,9 @@ public class RenderSection {
         return type;
     }
 
-    public void onBuildSubmitted(CompletableFuture<?> task) {
+    public void onBuildSubmitted(ChunkBuilder.WrappedTask task) {
         if (this.rebuildTask != null) {
-            this.rebuildTask.cancel(false);
+            this.rebuildTask.cancel();
             this.rebuildTask = null;
         }
 

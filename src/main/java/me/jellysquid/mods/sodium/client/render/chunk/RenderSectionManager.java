@@ -404,11 +404,11 @@ public class RenderSectionManager {
             if (task == null)
                 continue;
 
-            CompletableFuture<?> future;
+            ChunkBuilder.WrappedTask future;
 
             if (!this.alwaysDeferChunkUpdates && filterType.isImportant()) {
-                CompletableFuture<ChunkBuildResult> immediateFuture = this.builder.schedule(task);
-                immediateFutures.add(immediateFuture);
+                ChunkBuilder.WrappedTask immediateFuture = this.builder.schedule(task);
+                immediateFutures.add(immediateFuture.getFuture());
 
                 future = immediateFuture;
             } else {
