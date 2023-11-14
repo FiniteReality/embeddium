@@ -152,7 +152,7 @@ tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 publishMods {
 	file = remapJar.archiveFile
 	changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
-	type = STABLE
+	type = BETA
     modLoaders.add("neoforge")
 
 	curseforge {
