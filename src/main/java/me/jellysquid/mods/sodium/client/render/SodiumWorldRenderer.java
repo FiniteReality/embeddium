@@ -273,7 +273,7 @@ public class SodiumWorldRenderer {
         BlockEntityRenderDispatcher blockEntityRenderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher();
 
         for (BlockEntity blockEntity : this.renderSectionManager.getVisibleBlockEntities()) {
-            if(blockEntity.isRemoved() || !checkBEVisibility(blockEntity))
+            if(!checkBEVisibility(blockEntity))
                 continue;
             BlockPos pos = blockEntity.getPos();
 
@@ -293,8 +293,18 @@ public class SodiumWorldRenderer {
                 }
             }
 
-
-            blockEntityRenderer.render(blockEntity, tickDelta, matrices, consumer);
+            try {
+                blockEntityRenderer.render(blockEntity, tickDelta, matrices, consumer);
+            } catch(RuntimeException e) {
+                // We catch errors from removed block entities here, because we often end up being faster
+                // than vanilla, and rendering them when they wouldn't be rendered by vanilla, which can
+                // cause crashes. However, we do not apply this suppression to regular rendering.
+                if (!blockEntity.isRemoved()) {
+                    throw e;
+                } else {
+                    SodiumClientMod.logger().error("Suppressing crash from removed block entity", e);
+                }
+            }
 
             matrices.pop();
         }
