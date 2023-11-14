@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.model.quad.properties;
 
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.util.math.Direction;
 
 public class ModelQuadFlags {
@@ -40,7 +41,10 @@ public class ModelQuadFlags {
         float maxY = -32.0F;
         float maxZ = -32.0F;
 
-        int numVertices = Math.min(4, bakedQuad.getVertexData().length / 8);
+        int numVertices = 4;
+        if (quad instanceof BakedQuad bakedQuad) {
+            numVertices = Math.min(numVertices, bakedQuad.getVertexData().length / 8);
+        }
         for (int i = 0; i < numVertices; ++i) {
             float x = quad.getX(i);
             float y = quad.getY(i);
