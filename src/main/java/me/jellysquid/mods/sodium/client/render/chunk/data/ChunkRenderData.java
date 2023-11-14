@@ -21,7 +21,8 @@ public class ChunkRenderData {
             .build();
     public static final ChunkRenderData EMPTY = createEmptyData();
 
-    private List<BlockEntity> globalBlockEntities;
+    // This is a Set because we want onChunkRenderUpdated to be able to call .contains quickly
+    private Set<BlockEntity> globalBlockEntities;
     private List<BlockEntity> blockEntities;
 
     private EnumMap<BlockRenderPass, ChunkMeshData> meshes;
@@ -167,7 +168,7 @@ public class ChunkRenderData {
 
         public ChunkRenderData build() {
             ChunkRenderData data = new ChunkRenderData();
-            data.globalBlockEntities = this.globalBlockEntities;
+            data.globalBlockEntities = new ObjectOpenHashSet<>(this.globalBlockEntities);
             data.blockEntities = this.blockEntities;
             data.occlusionData = this.occlusionData;
             data.meshes = this.meshes;
