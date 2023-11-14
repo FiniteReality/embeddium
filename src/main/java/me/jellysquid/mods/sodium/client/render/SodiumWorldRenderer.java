@@ -315,7 +315,7 @@ public class SodiumWorldRenderer {
                 }
 
                 for (BlockEntity blockEntity : blockEntities) {
-                    if(blockEntity.isRemoved() || !vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
+                    if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
                         continue;
                     renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
                 }
@@ -340,7 +340,7 @@ public class SodiumWorldRenderer {
             }
 
             for (var blockEntity : blockEntities) {
-                if(blockEntity.isRemoved() || !vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
+                if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
                     continue;
                 renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
             }
@@ -380,7 +380,18 @@ public class SodiumWorldRenderer {
             }
         }
 
-        dispatcher.render(entity, tickDelta, matrices, consumer);
+        try {
+            dispatcher.render(entity, tickDelta, matrices, consumer);
+        } catch(RuntimeException e) {
+            // We catch errors from removed block entities here, because we often end up being faster
+            // than vanilla, and rendering them when they wouldn't be rendered by vanilla, which can
+            // cause crashes. However, we do not apply this suppression to regular rendering.
+            if (!entity.isRemoved()) {
+                throw e;
+            } else {
+                SodiumClientMod.logger().error("Suppressing crash from removed block entity", e);
+            }
+        }
 
         matrices.pop();
     }
