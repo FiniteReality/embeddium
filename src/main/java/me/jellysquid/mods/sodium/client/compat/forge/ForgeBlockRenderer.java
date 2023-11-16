@@ -7,6 +7,7 @@ import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModelRenderer;
@@ -62,9 +63,9 @@ public class ForgeBlockRenderer {
                                VertexConsumer buffer, Random random, long seed, ModelData data, boolean checkSides, BlockOcclusionCache sideCache,
                                ChunkModelBuilder renderData, RenderLayer layer) {
         if (mode == LightMode.FLAT) {
-            forgeRenderer.tesselateWithoutAO(world, model, state, pos, stack, buffer, checkSides, random, seed, 0, data, layer);
+            forgeRenderer.tesselateWithoutAO(world, model, state, pos, stack, buffer, checkSides, random, seed, OverlayTexture.DEFAULT_UV, data, layer);
         } else {
-            forgeRenderer.tesselateWithAO(world, model, state, pos, stack, buffer, checkSides, random, seed, 0, data, layer);
+            forgeRenderer.tesselateWithAO(world, model, state, pos, stack, buffer, checkSides, random, seed, OverlayTexture.DEFAULT_UV, data, layer);
         }
 
         // Process the quads a second time for marking animated sprites and detecting emptiness
