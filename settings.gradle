@@ -6,7 +6,6 @@ pluginManagement {
         }
         maven { url "https://maven.architectury.dev/" }
         maven { url "https://maven.neoforged.net" }
-        mavenLocal()
         mavenCentral() // backup mirror for JCenter's Bintray, which is ordinarily used to resolve Eclipse's JGit
         gradlePluginPortal()
     }
