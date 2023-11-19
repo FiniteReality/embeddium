@@ -38,7 +38,7 @@ public class CCLCompat {
 
         if(customBlockRenderers != null)
 	        for (final Map.Entry<RegistryEntry<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
-	            final Block entryBlock = entry.getKey().get();
+	            final Block entryBlock = entry.getKey().value();
 	
 	            if (entryBlock == block) {
 	                renderers.add(entry.getValue());
@@ -47,7 +47,7 @@ public class CCLCompat {
 
         if(customFluidRenderers != null)
 	        for (final Map.Entry<RegistryEntry<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
-	            final Fluid entryFluid = entry.getKey().get();
+	            final Fluid entryFluid = entry.getKey().value();
 	
 	            if (entryFluid.matchesType(fluid)) {
 	                renderers.add(entry.getValue());
