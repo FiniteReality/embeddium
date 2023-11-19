@@ -112,7 +112,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                     for (int x = minX; x < maxX; x++) {
                         BlockState blockState = slice.getBlockState(x, y, z);
 
-                        if (blockState.isAir()) {
+                        if (blockState.isAir() && !blockState.hasBlockEntity()) {
                             continue;
                         }
 
