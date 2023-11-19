@@ -71,8 +71,6 @@ public class BlockRenderer {
         LightPipeline lighter = this.lighters.getLighter(mode);
         Vec3d offset = state.getModelOffset(world, pos);
 
-        modelData = model.getModelData(world, pos, state, modelData);
-
         boolean rendered = false;
 
         if(SodiumClientMod.cclLoaded) {

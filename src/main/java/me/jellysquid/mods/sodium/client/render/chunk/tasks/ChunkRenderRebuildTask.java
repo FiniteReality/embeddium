@@ -125,6 +125,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                             BakedModel model = cache.getBlockModels()
                                     .getModel(blockState);
                             ModelData modelData = modelDataMap.getOrDefault(blockPos, ModelData.EMPTY);
+                            modelData = model.getModelData(cache.getLocalSlice(), blockPos, blockState, modelData);
                             random.setSeed(blockState.getRenderingSeed(blockPos));
                             for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
                                 if (SodiumClientMod.oculusLoaded && buildContext.buffers instanceof ChunkBuildBuffersExt) {
