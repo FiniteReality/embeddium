@@ -59,6 +59,9 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
     // The number of bits needed for each local X/Y/Z coordinate.
     private static final int LOCAL_XYZ_BITS = 4;
 
+    // The default block state used for out-of-bounds access
+    private static final BlockState EMPTY_BLOCK_STATE = Blocks.AIR.getDefaultState();
+
     // The world this slice has copied data from
     public final ClientWorld world;
 
@@ -82,6 +85,9 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
 
     // The starting point from which this slice captures blocks
     private int originX, originY, originZ;
+    
+    // The volume that this WorldSlice contains
+    private BlockBox volume;
 
     public static ChunkRenderContext prepare(World world, ChunkSectionPos origin, ClonedChunkSectionCache sectionCache) {
         WorldChunk chunk = world.getChunk(origin.getX(), origin.getZ());
@@ -139,12 +145,17 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, MinecraftClient.getInstance().options.getBiomeBlendRadius().getValue());
         this.biomeColorsLegacy = new ColorResolverCache(this.biomeSlice, MinecraftClient.getInstance().options.getBiomeBlendRadius().getValue());
+
+        for (BlockState[] blockArray : this.blockArrays) {
+            Arrays.fill(blockArray, EMPTY_BLOCK_STATE);
+        }
     }
 
     public void copyData(ChunkRenderContext context) {
         this.originX = (context.getOrigin().getX() - NEIGHBOR_CHUNK_RADIUS) << 4;
         this.originY = (context.getOrigin().getY() - NEIGHBOR_CHUNK_RADIUS) << 4;
         this.originZ = (context.getOrigin().getZ() - NEIGHBOR_CHUNK_RADIUS) << 4;
+        this.volume = context.getVolume();
 
         for (int x = 0; x < SECTION_ARRAY_LENGTH; x++) {
             for (int y = 0; y < SECTION_ARRAY_LENGTH; y++) {
@@ -174,7 +185,7 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
 
     private void unpackBlockData(BlockState[] blockArray, ChunkRenderContext context, ClonedChunkSection section) {
         if (section.getBlockData() == null) {
-            Arrays.fill(blockArray, Blocks.AIR.getDefaultState());
+            Arrays.fill(blockArray, EMPTY_BLOCK_STATE);
             return;
         }
 
@@ -221,6 +232,10 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
     }
 
     public BlockState getBlockState(int x, int y, int z) {
+        if (!this.volume.contains(x, y, z)) {
+            return EMPTY_BLOCK_STATE;
+        }
+
         int relX = x - this.originX;
         int relY = y - this.originY;
         int relZ = z - this.originZ;
@@ -248,6 +263,10 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
 
     @Override
     public int getLightLevel(LightType type, BlockPos pos) {
+        if (!this.volume.contains(pos.getX(), pos.getY(), pos.getZ())) {
+            return 0;
+        }
+
         int relX = pos.getX() - this.originX;
         int relY = pos.getY() - this.originY;
         int relZ = pos.getZ() - this.originZ;
@@ -264,6 +283,10 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
 
     @Override
     public int getBaseLightLevel(BlockPos pos, int ambientDarkness) {
+        if (!this.volume.contains(pos.getX(), pos.getY(), pos.getZ())) {
+            return 0;
+        }
+
         int relX = pos.getX() - this.originX;
         int relY = pos.getY() - this.originY;
         int relZ = pos.getZ() - this.originZ;
@@ -289,6 +312,10 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
     }
 
     public BlockEntity getBlockEntity(int x, int y, int z) {
+        if (!this.volume.contains(x, y, z)) {
+            return null;
+        }
+
         int relX = x - this.originX;
         int relY = y - this.originY;
         int relZ = z - this.originZ;
