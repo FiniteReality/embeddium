@@ -13,11 +13,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.collection.PackedIntegerArray;
 import net.minecraft.util.math.*;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.biome.BuiltinBiomes;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeCoords;
@@ -334,7 +336,7 @@ public class WorldSlice implements BlockRenderView {
         int blockZ = BiomeCoords.toBlock(biomeZ) - this.baseZ;
 
         if (!blockBoxContains(this.volume, blockX, blockY, blockZ)) {
-            return BuiltinBiomes.getDefaultBiome();
+            return this.world.getRegistryManager().get(Registry.BIOME_KEY).entryOf(BiomeKeys.PLAINS);
         }
 
         return this.biomeArrays[getLocalSectionIndex(blockX >> 4, blockY >> 4, blockZ >> 4)]
