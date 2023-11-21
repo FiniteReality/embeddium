@@ -19,11 +19,13 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BuiltinBiomes;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.chunk.*;
 import net.minecraft.world.chunk.light.LightingProvider;
 import net.minecraft.world.level.ColorResolver;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -94,6 +96,9 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
     // The chunk origin of this slice
     private ChunkSectionPos origin;
 
+    // The volume that this slice contains
+    private BlockBox volume;
+
     public static ChunkRenderContext prepare(World world, ChunkSectionPos origin, ClonedChunkSectionCache sectionCache) {
         WorldChunk chunk = world.getChunk(origin.getX(), origin.getZ());
         ChunkSection section = chunk.getSectionArray()[origin.getY()];
@@ -157,6 +162,7 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
     public void copyData(ChunkRenderContext context) {
         this.origin = context.getOrigin();
         this.sections = context.getSections();
+        this.volume = context.getVolume();
 
         this.prevColorCache = null;
         this.prevColorResolver = null;
@@ -189,6 +195,8 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
     }
 
     private void unpackBlockDataR(BlockState[] states, ClonedChunkSection section, BlockBox box) {
+        Arrays.fill(states, Blocks.AIR.getDefaultState());
+
         PackedIntegerArray intArray = section.getBlockData();
         ClonedPalette<BlockState> palette = section.getBlockPalette();
 
@@ -220,15 +228,13 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
                 .copyUsingPalette(states, section.getBlockPalette());
     }
 
-    /**
-     * Helper function to ensure a valid BlockState is always returned (air is returned
-     * in place of null).
-     */
-    private static BlockState nullableState(BlockState state) {
-        if(state != null) {
-            return state;
-        } else
-            return NULL_BLOCK_STATE;
+    private static boolean blockBoxContains(BlockBox box, int x, int y, int z) {
+        return x >= box.minX &&
+                x <= box.maxX &&
+                y >= box.minY &&
+                y <= box.maxY &&
+                z >= box.minZ &&
+                z <= box.maxZ;
     }
 
     @Override
@@ -237,17 +243,22 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
     }
 
     public BlockState getBlockState(int x, int y, int z) {
+        if (!blockBoxContains(this.volume, x, y, z)) {
+            return Blocks.AIR.getDefaultState();
+        }
+
         int relX = x - this.baseX;
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
 
-        return nullableState(this.blockStatesArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)]);
+        return this.blockStatesArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
     }
 
     public BlockState getBlockStateRelative(int x, int y, int z) {
-        return nullableState(this.blockStatesArrays[getLocalSectionIndex(x >> 4, y >> 4, z >> 4)]
-                [getLocalBlockIndex(x & 15, y & 15, z & 15)]);
+        // NOTE: Not bounds checked. We assume ChunkRenderRebuildTask is the only function using this
+        return this.blockStatesArrays[getLocalSectionIndex(x >> 4, y >> 4, z >> 4)]
+                [getLocalBlockIndex(x & 15, y & 15, z & 15)];
     }
 
     @Override
@@ -272,6 +283,10 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
     }
 
     public BlockEntity getBlockEntity(int x, int y, int z) {
+        if (!blockBoxContains(this.volume, x, y, z)) {
+            return null;
+        }
+
         int relX = x - this.baseX;
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
@@ -282,6 +297,10 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
 
     @Override
     public int getColor(BlockPos pos, ColorResolver resolver) {
+        if(!blockBoxContains(this.volume, pos.getX(), pos.getY(), pos.getZ())) {
+            return resolver.getColor(BuiltinBiomes.PLAINS, pos.getX(), pos.getZ());
+        }
+
         BiomeColorCache cache;
 
         if (this.prevColorResolver == resolver) {
@@ -302,6 +321,10 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
 
     @Override
     public int getLightLevel(LightType type, BlockPos pos) {
+        if (!blockBoxContains(this.volume, pos.getX(), pos.getY(), pos.getZ())) {
+            return 0;
+        }
+
         int relX = pos.getX() - this.baseX;
         int relY = pos.getY() - this.baseY;
         int relZ = pos.getZ() - this.baseZ;
@@ -340,17 +363,16 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
      * Gets or computes the biome at the given global coordinates.
      */
     public Biome getBiome(int x, int y, int z) {
+        if (!blockBoxContains(this.volume, x, y, z)) {
+            return BuiltinBiomes.PLAINS;
+        }
+
         int relX = x - this.baseX;
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
 
-        int index = getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4);
-        
-        index = index >= biomeCaches.length ? biomeCaches.length - 1 : index;
-        
-        BiomeCache cache = this.biomeCaches[index];
-        return cache != null ? cache
-                .getBiome(this, x, relY >> 4, z) : MinecraftClient.getInstance().world.getBiome(new BlockPos(x, y, z));
+        return this.biomeCaches[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                .getBiome(this, x, relY >> 4, z);
     }
 
     public ChunkSectionPos getOrigin() {
