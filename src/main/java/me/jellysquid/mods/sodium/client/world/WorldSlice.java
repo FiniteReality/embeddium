@@ -153,6 +153,7 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
                     int i = getLocalSectionIndex(x, y, z);
 
                     this.blockStatesArrays[i] = new BlockState[SECTION_BLOCK_COUNT];
+                    Arrays.fill(this.blockStatesArrays[i], Blocks.AIR.getDefaultState());
                     this.biomeCaches[i] = new BiomeCache(this.world);
                 }
             }
