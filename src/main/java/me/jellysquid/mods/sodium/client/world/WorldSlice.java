@@ -152,6 +152,9 @@ public class WorldSlice implements BlockRenderView {
 
         this.sections = new ClonedChunkSection[SECTION_TABLE_ARRAY_SIZE];
         this.blockStatesArrays = new BlockState[SECTION_TABLE_ARRAY_SIZE][SECTION_BLOCK_COUNT];
+        for (BlockState[] blockStatesArray : this.blockStatesArrays) {
+            Arrays.fill(blockStatesArray, Blocks.AIR.getDefaultState());
+        }
         this.biomeArrays = new RegistryEntry[SECTION_TABLE_ARRAY_SIZE][SECTION_BIOME_COUNT];
 
     }
