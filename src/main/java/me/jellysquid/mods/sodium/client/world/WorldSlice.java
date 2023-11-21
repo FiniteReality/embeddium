@@ -18,6 +18,7 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BuiltinBiomes;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.chunk.ChunkSection;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.ColorResolver;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -96,6 +98,9 @@ public class WorldSlice implements BlockRenderView {
     // The chunk origin of this slice
     private ChunkSectionPos origin;
 
+    // The volume of this slice
+    private BlockBox volume;
+
     public static ChunkRenderContext prepare(World world, ChunkSectionPos origin, ClonedChunkSectionCache sectionCache) {
         WorldChunk chunk = world.getChunk(origin.getX(), origin.getZ());
         ChunkSection section = chunk.getSectionArray()[world.sectionCoordToIndex(origin.getY())];
@@ -154,6 +159,7 @@ public class WorldSlice implements BlockRenderView {
     public void copyData(ChunkRenderContext context) {
         this.origin = context.getOrigin();
         this.sections = context.getSections();
+        this.volume = context.getVolume();
 
         this.baseX = (this.origin.getX() - NEIGHBOR_CHUNK_RADIUS) << 4;
         this.baseY = (this.origin.getY() - NEIGHBOR_CHUNK_RADIUS) << 4;
@@ -181,6 +187,8 @@ public class WorldSlice implements BlockRenderView {
     }
 
     private void unpackBlockDataSlow(BlockState[] states, ClonedChunkSection section, BlockBox box) {
+        Arrays.fill(states, Blocks.AIR.getDefaultState());
+
         PackedIntegerArray intArray = section.getBlockData();
         ClonedPalette<BlockState> palette = section.getBlockPalette();
 
@@ -222,7 +230,14 @@ public class WorldSlice implements BlockRenderView {
         }
     }
 
-    private static final BlockState DEFAULT_BLOCK_STATE = Blocks.AIR.getDefaultState();
+    private static boolean blockBoxContains(BlockBox box, int x, int y, int z) {
+        return x >= box.getMinX() &&
+                x <= box.getMaxX() &&
+                y >= box.getMinY() &&
+                y <= box.getMaxY() &&
+                z >= box.getMinZ() &&
+                z <= box.getMaxZ();
+    }
 
     @Override
     public BlockState getBlockState(BlockPos pos) {
@@ -230,12 +245,16 @@ public class WorldSlice implements BlockRenderView {
     }
 
     public BlockState getBlockState(int x, int y, int z) {
+        if (!blockBoxContains(this.volume, x, y, z)) {
+            return Blocks.AIR.getDefaultState();
+        }
+
         int relX = x - this.baseX;
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
 
-        return Objects.requireNonNullElse(this.blockStatesArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
-                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)], DEFAULT_BLOCK_STATE);
+        return this.blockStatesArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+                [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
     }
 
     @Override
@@ -260,6 +279,10 @@ public class WorldSlice implements BlockRenderView {
     }
 
     public BlockEntity getBlockEntity(int x, int y, int z) {
+        if (!blockBoxContains(this.volume, x, y, z)) {
+            return null;
+        }
+
         int relX = x - this.baseX;
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
@@ -275,6 +298,10 @@ public class WorldSlice implements BlockRenderView {
 
     @Override
     public int getLightLevel(LightType type, BlockPos pos) {
+        if (!blockBoxContains(this.volume, pos.getX(), pos.getY(), pos.getZ())) {
+            return 0;
+        }
+
         int relX = pos.getX() - this.baseX;
         int relY = pos.getY() - this.baseY;
         int relZ = pos.getZ() - this.baseZ;
@@ -299,11 +326,15 @@ public class WorldSlice implements BlockRenderView {
 
     // Coordinates are in biome space!
     private RegistryEntry<Biome> getStoredBiome(int biomeX, int biomeY, int biomeZ) {
-        int chunkX = (BiomeCoords.toBlock(biomeX) - this.baseX) >> 4;
-        int chunkY = (BiomeCoords.toBlock(biomeY) - this.baseY) >> 4;
-        int chunkZ = (BiomeCoords.toBlock(biomeZ) - this.baseZ) >> 4;
+        int blockX = BiomeCoords.toBlock(biomeX) - this.baseX;
+        int blockY = BiomeCoords.toBlock(biomeY) - this.baseY;
+        int blockZ = BiomeCoords.toBlock(biomeZ) - this.baseZ;
 
-        return this.biomeArrays[getLocalSectionIndex(chunkX, chunkY, chunkZ)]
+        if (!blockBoxContains(this.volume, blockX, blockY, blockZ)) {
+            return BuiltinBiomes.getDefaultBiome();
+        }
+
+        return this.biomeArrays[getLocalSectionIndex(blockX >> 4, blockY >> 4, blockZ >> 4)]
                 [getLocalBiomeIndex(biomeX & 3, biomeY & 3, biomeZ & 3)];
     }
 
