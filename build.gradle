@@ -174,7 +174,7 @@ publishMods {
 		}
 	}
 
-	displayName = "[${project.minecraft_version}] Embeddium ${project.mod_version}"
+	displayName = "[NEO-${project.minecraft_version}] Embeddium ${project.mod_version}"
 }
 
 def getVersionMetadata() {
