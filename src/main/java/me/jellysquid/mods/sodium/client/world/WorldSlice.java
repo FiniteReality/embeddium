@@ -13,12 +13,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.collection.PackedIntegerArray;
 import net.minecraft.util.math.*;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BuiltinBiomes;
+import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.chunk.ChunkSection;
@@ -30,7 +31,6 @@ import org.embeddedt.embeddium.api.MeshAppender;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Takes a slice of world state (block states, biome and light data arrays) and copies the data for use in off-thread
@@ -329,15 +329,17 @@ public class WorldSlice implements BlockRenderView {
 
     // Coordinates are in biome space!
     private RegistryEntry<Biome> getStoredBiome(int biomeX, int biomeY, int biomeZ) {
-        int blockX = BiomeCoords.toBlock(biomeX) - this.baseX;
-        int blockY = BiomeCoords.toBlock(biomeY) - this.baseY;
-        int blockZ = BiomeCoords.toBlock(biomeZ) - this.baseZ;
+        int chunkX = (BiomeCoords.toBlock(biomeX) - this.baseX) >> 4;
+        int chunkY = (BiomeCoords.toBlock(biomeY) - this.baseY) >> 4;
+        int chunkZ = (BiomeCoords.toBlock(biomeZ) - this.baseZ) >> 4;
 
-        if (!blockBoxContains(this.volume, blockX, blockY, blockZ)) {
-            return BuiltinBiomes.getDefaultBiome();
+        int sectionIndex = getLocalSectionIndex(chunkX, chunkY, chunkZ);
+
+        if(sectionIndex < 0 || sectionIndex >= this.biomeArrays.length) {
+            return this.world.getRegistryManager().get(Registry.BIOME_KEY).entryOf(BiomeKeys.PLAINS);
         }
 
-        return this.biomeArrays[getLocalSectionIndex(blockX >> 4, blockY >> 4, blockZ >> 4)]
+        return this.biomeArrays[sectionIndex]
                 [getLocalBiomeIndex(biomeX & 3, biomeY & 3, biomeZ & 3)];
     }
 
