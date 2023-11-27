@@ -1,17 +1,15 @@
 package me.jellysquid.mods.sodium.mixin;
 
-import me.jellysquid.mods.sodium.client.SodiumPreLaunch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.embeddedt.embeddium.config.ConfigMigrator;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import java.io.File;
 import java.util.List;
 import java.util.Set;
 
-import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODID;
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
 @SuppressWarnings("unused")
@@ -24,7 +22,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
         try {
-            this.config = MixinConfig.load(new File("./config/" + MODID + "-mixins.properties"));
+            this.config = MixinConfig.load(ConfigMigrator.handleConfigMigration("embeddium-mixins.properties").toFile());
         } catch (Exception e) {
             throw new RuntimeException("Could not load configuration file for " + MODNAME, e);
         }
