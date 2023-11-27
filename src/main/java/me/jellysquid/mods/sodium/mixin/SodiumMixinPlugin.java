@@ -5,11 +5,11 @@ import me.jellysquid.mods.sodium.common.config.Option;
 import me.jellysquid.mods.sodium.common.config.SodiumConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.embeddedt.embeddium.config.ConfigMigrator;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import java.io.File;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +23,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     public void onLoad(String mixinPackage) {
         try {
         	SodiumPreLaunch.onPreLaunch();
-            this.config = SodiumConfig.load(new File("./config/rubidium-mixins.properties"));
+            this.config = SodiumConfig.load(ConfigMigrator.handleConfigMigration("embeddium-mixins.properties").toFile());
         } catch (Exception e) {
             throw new RuntimeException("Could not load configuration file for Embeddium", e);
         }
