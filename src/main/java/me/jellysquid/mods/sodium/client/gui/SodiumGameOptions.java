@@ -10,6 +10,7 @@ import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraftforge.fml.loading.FMLPaths;
+import org.embeddedt.embeddium.config.ConfigMigrator;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 public class SodiumGameOptions {
-    private static final String DEFAULT_FILE_NAME = "rubidium-options.json";
+    private static final String DEFAULT_FILE_NAME = "embeddium-options.json";
 
     public final QualitySettings quality = new QualitySettings();
     public final AdvancedSettings advanced = new AdvancedSettings();
@@ -158,7 +159,7 @@ public class SodiumGameOptions {
     }
 
     private static Path getConfigPath(String name) {
-        return FMLPaths.CONFIGDIR.get().resolve(name);
+        return ConfigMigrator.handleConfigMigration(name);
     }
 
     public void writeChanges() throws IOException {
