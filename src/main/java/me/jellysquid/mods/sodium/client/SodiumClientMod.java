@@ -8,12 +8,12 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.network.FMLNetworkConstants;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.embeddedt.embeddium.config.ConfigMigrator;
 
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
@@ -60,7 +60,7 @@ public class SodiumClientMod {
     }
 
     private static SodiumGameOptions loadConfig() {
-        return SodiumGameOptions.load(FMLPaths.CONFIGDIR.get().resolve("rubidium-options.json"));
+        return SodiumGameOptions.load(ConfigMigrator.handleConfigMigration("embeddium-options.json"));
     }
 
     public static String getVersion() {

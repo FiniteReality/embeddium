@@ -14,7 +14,7 @@ loom {
     silentMojangMappingsLicense()
 	forge {
 		mixinConfigs = [
-			"rubidium.mixins.json"
+			"embeddium.mixins.json"
 		]
 	}
 	mixin.defaultRefmapName = "embeddium-refmap.json"
