@@ -62,21 +62,25 @@ public class MixinSpriteInterpolated {
             NativeImage src = this.parent.images[layer];
             NativeImage dst = this.images[layer];
 
-            // Source pointers
-            long s1p = src.pointer + (curX + ((long) curY * src.getWidth()) * STRIDE);
-            long s2p = src.pointer + (nextX + ((long) nextY * src.getWidth()) * STRIDE);
-
             // Destination pointers
             long dp = dst.pointer;
 
-            int pixelCount = width * height;
+            for (int layerY = 0; layerY < height; layerY++) {
+                // Source pointers
+                long s1p = src.pointer + (curX + ((long) (curY + layerY) * src.getWidth())) * STRIDE;
+                long s2p = src.pointer + (nextX + ((long) (nextY + layerY) * src.getWidth())) * STRIDE;
 
-            for (int i = 0; i < pixelCount; i++) {
-                MemoryUtil.memPutInt(dp, ColorMixer.mixARGB(MemoryUtil.memGetInt(s1p), MemoryUtil.memGetInt(s2p), f1, f2));
+                for (int layerX = 0; layerX < width; layerX++) {
+                    int colorA = MemoryUtil.memGetInt(s1p);
+                    int colorB = MemoryUtil.memGetInt(s2p);
+                    int colorMixed = ColorMixer.mixARGB(colorA, colorB, f1, f2) & 0x00FFFFFF;
+                    // Use alpha from first color as-is, do not blend
+                    MemoryUtil.memPutInt(dp, colorMixed | (colorA & 0xFF000000));
 
-                s1p += STRIDE;
-                s2p += STRIDE;
-                dp += STRIDE;
+                    s1p += STRIDE;
+                    s2p += STRIDE;
+                    dp += STRIDE;
+                }
             }
         }
 
