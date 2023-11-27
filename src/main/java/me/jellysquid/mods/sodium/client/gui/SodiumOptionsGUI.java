@@ -47,7 +47,7 @@ public class SodiumOptionsGUI extends Screen {
     private ControlElement<?> hoveredElement;
 
     public SodiumOptionsGUI(Screen prevScreen) {
-        super(new TranslatableText("Rubidium Options"));
+        super(new TranslatableText("Embeddium Options"));
 
         this.prevScreen = prevScreen;
 
