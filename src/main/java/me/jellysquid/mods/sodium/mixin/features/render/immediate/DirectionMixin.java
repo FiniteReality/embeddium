@@ -30,7 +30,7 @@ public class DirectionMixin {
     @SuppressWarnings({ "StatementWithEmptyBody", "JavadocReference" })
     @Overwrite
     public static Direction getFacing(float x, float y, float z) {
-        // Vanilla quirk: return NORTH if all entries are zero
+        // Vanilla quirk: return NORTH if all coordinates are zero
         if (x == 0 && y == 0 && z == 0)
             return Direction.NORTH;
 
