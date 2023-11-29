@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.debug;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
@@ -63,7 +64,10 @@ public abstract class MixinDebugHud {
     }
 
     private static List<String> getChunkRendererDebugStrings() {
-        ChunkRenderBackend<?> backend = SodiumWorldRenderer.getInstance().getChunkRenderer();
+        SodiumWorldRenderer renderer = SodiumWorldRenderer.getInstanceNullable();
+        if (renderer == null)
+            return ImmutableList.of();
+        ChunkRenderBackend<?> backend = renderer.getChunkRenderer();
 
         List<String> strings = new ArrayList<>(5);
         strings.add("Chunk Renderer: " + backend.getRendererName());

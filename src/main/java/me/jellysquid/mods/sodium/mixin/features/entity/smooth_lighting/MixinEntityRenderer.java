@@ -33,8 +33,14 @@ public abstract class MixinEntityRenderer<T extends Entity> implements EntityLig
 
     @Inject(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Frustum;isVisible(Lnet/minecraft/util/math/Box;)Z", shift = At.Shift.AFTER), cancellable = true)
     private void preShouldRender(T entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
+        SodiumWorldRenderer renderer = SodiumWorldRenderer.getInstanceNullable();
+
+        if (renderer == null) {
+            return;
+        }
+
         // If the entity isn't culled already by other means, try to perform a second pass
-        if (cir.getReturnValue() && !SodiumWorldRenderer.getInstance().isEntityVisible(entity)) {
+        if (cir.getReturnValue() && !renderer.isEntityVisible(entity)) {
             cir.setReturnValue(false);
         }
     }

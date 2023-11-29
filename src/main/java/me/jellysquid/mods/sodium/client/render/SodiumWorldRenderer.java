@@ -80,11 +80,19 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
      * @throws IllegalStateException If the renderer has not yet been created
      * @return The current instance of this type
      */
+    @Deprecated
     public static SodiumWorldRenderer getInstance() {
         if (instance == null) {
             throw new IllegalStateException("Renderer not initialized");
         }
 
+        return instance;
+    }
+
+    /**
+     * @return The current instance of the Sodium terrain renderer, or null if the renderer is not active
+     */
+    public static SodiumWorldRenderer getInstanceNullable() {
         return instance;
     }
 
