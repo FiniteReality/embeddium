@@ -13,7 +13,7 @@ Discord. I have my own [Discord server](https://discord.gg/rN9Y7caguP) for my mo
 
 ## Compatibility
 
-Generally Embeddium should work out of the box with many more mods than Rubidium. However, given the scope of changes
+Generally, Embeddium should work out of the box with many more mods than Rubidium. However, given the scope of changes
 it makes to the renderer, it may have compatibility issues with some mods that use advanced rendering. Please open an
 issue if you experience problems. Some issues may require changes to be made in the other mod but it's good to have
 them documented.
