@@ -185,8 +185,11 @@ publishing {
         }
     }
 
-    repositories {
-    }
+	repositories {
+		maven {
+			url "file://${System.getenv("local_maven")}"
+		}
+	}
 }
 
 publishMods {
