@@ -76,7 +76,7 @@ dependencies {
     modCompileOnly "curse.maven:oculus-581495:${oculus_fileid}"
 	modCompileOnly "curse.maven:codechickenlib-242818:${codechicken_fileid}"
 
-	modRuntimeOnly "curse.maven:lazydfu-460819:3544496"
+	modLocalRuntime "curse.maven:lazydfu-460819:3544496"
 
 	// runtime remapping at home
 	for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
@@ -133,6 +133,7 @@ tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
+			artifactId "${project.archives_base_name}"
 			artifact(remapJar) {
 				builtBy remapJar
 			}
@@ -143,6 +144,9 @@ publishing {
 	}
 
 	repositories {
+		maven {
+			url "file://${System.getenv("local_maven")}"
+		}
 	}
 }
 
