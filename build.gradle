@@ -133,7 +133,6 @@ tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifactId "${project.archives_base_name}"
 			artifact(remapJar) {
 				builtBy remapJar
 			}
