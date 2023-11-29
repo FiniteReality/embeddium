@@ -67,7 +67,7 @@ dependencies {
 	modCompileOnly "curse.maven:flywheel-486392:3535459"
 	modCompileOnly "curse.maven:codechickenlib-242818:3681973"
 
-	modRuntimeOnly "curse.maven:lazydfu-460819:3249059"
+	modLocalRuntime "curse.maven:lazydfu-460819:3249059"
 
 	// runtime remapping at home
 	for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
