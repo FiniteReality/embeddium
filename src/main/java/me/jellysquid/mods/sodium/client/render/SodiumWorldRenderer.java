@@ -396,6 +396,8 @@ public class SodiumWorldRenderer {
         matrices.pop();
     }
 
+    // the volume of a section multiplied by the number of sections to be checked at most
+    private static final double MAX_ENTITY_CHECK_VOLUME = 16 * 16 * 16 * 15;
 
     private static boolean isInfiniteExtentsBox(Box box) {
         return Double.isInfinite(box.minX) || Double.isInfinite(box.minY) || Double.isInfinite(box.minZ)
@@ -419,6 +421,13 @@ public class SodiumWorldRenderer {
         Box box = entity.getVisibilityBoundingBox();
 
         if (isInfiniteExtentsBox(box)) {
+            return true;
+        }
+
+        // bail on very large entities to avoid checking many sections
+        double entityVolume = (box.maxX - box.minX) * (box.maxY - box.minY) * (box.maxZ - box.minZ);
+        if (entityVolume > MAX_ENTITY_CHECK_VOLUME) {
+            // TODO: do a frustum check instead, even large entities aren't visible if they're outside the frustum
             return true;
         }
 
