@@ -9,7 +9,7 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.text.Text;
-import net.minecraftforge.fml.loading.FMLPaths;
+import org.embeddedt.embeddium.config.ConfigMigrator;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -134,8 +134,7 @@ public class SodiumGameOptions {
     }
 
     private static Path getConfigPath(String name) {
-        return FMLPaths.CONFIGDIR.get()
-                .resolve(name);
+        return ConfigMigrator.handleConfigMigration(name);
     }
 
     public void writeChanges() throws IOException {

@@ -24,10 +24,10 @@ apply from: "${rootProject.projectDir}/gradle/forge.gradle"
 apply from: "${rootProject.projectDir}/gradle/java.gradle"
 
 loom {
-    mixin.defaultRefmapName = "mixins.rubidium.refmap.json"
+    mixin.defaultRefmapName = "mixins.embeddium.refmap.json"
     forge {
         mixinConfigs = [
-                "rubidium.mixins.json"
+                "embeddium.mixins.json"
         ]
     }
 }
