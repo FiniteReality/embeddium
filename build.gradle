@@ -102,11 +102,10 @@ tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17
 }
 
-/*
+
 java {
 	withSourcesJar()
 }
- */
 
 jar {
 	from("LICENSE") {
@@ -126,18 +125,21 @@ def copyJarToBin = tasks.register('copyJarToBin', Copy) {
 	mustRunAfter "copyJarNameConsistent"
 }
 
-/*
 tasks.named("remapSourcesJar") {
 	mustRunAfter "copyJarNameConsistent"
 }
-*/
 
 tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			from components.java
+			artifact(remapJar) {
+				builtBy remapJar
+			}
+			artifact(remapSourcesJar) {
+				builtBy remapSourcesJar
+			}
 		}
 	}
 
