@@ -44,9 +44,11 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
     @Shadow
     private int vertexCount;
 
+    // TODO: Figure out what the purpose of this mixin is, it is very weird
     @Redirect(method = "popData", at = @At(value = "INVOKE", target = "Ljava/nio/Buffer;limit(I)Ljava/nio/Buffer;"))
     public Buffer debugGetNextBuffer(Buffer buffer, int newLimit) {
-        ensureBufferCapacity(newLimit);
+        // This code seems to be a hack to guarantee the buffer is at least as large as the desired limit
+        ensureBufferCapacity(newLimit - this.elementOffset);
         buffer = (Buffer) this.buffer;
         buffer.limit(newLimit);
         return buffer;
@@ -65,7 +67,7 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
 
         int newSize = this.buffer.capacity() + roundBufferSize(bytes);
 
-        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.buffer.capacity(), newSize);
+        SodiumClientMod.logger().info("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.buffer.capacity(), newSize);
 
         this.buffer.position(0);
 
