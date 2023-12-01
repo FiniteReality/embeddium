@@ -67,7 +67,7 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
 
         int newSize = this.buffer.capacity() + roundBufferSize(bytes);
 
-        SodiumClientMod.logger().info("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.buffer.capacity(), newSize);
+        LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.buffer.capacity(), newSize);
 
         this.buffer.position(0);
 
