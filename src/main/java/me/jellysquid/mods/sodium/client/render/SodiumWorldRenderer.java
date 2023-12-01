@@ -27,6 +27,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.Profiler;
+import net.neoforged.neoforge.client.ClientHooks;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -315,7 +316,7 @@ public class SodiumWorldRenderer {
                 }
 
                 for (BlockEntity blockEntity : blockEntities) {
-                    if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
+                    if(!ClientHooks.isBlockEntityRendererVisible(blockEntityRenderer, blockEntity, vanillaFrustum))
                         continue;
                     renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
                 }
@@ -340,7 +341,7 @@ public class SodiumWorldRenderer {
             }
 
             for (var blockEntity : blockEntities) {
-                if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
+                if(!ClientHooks.isBlockEntityRendererVisible(blockEntityRenderer, blockEntity, vanillaFrustum))
                     continue;
                 renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
             }

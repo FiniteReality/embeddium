@@ -3,7 +3,7 @@ loaderVersion="[1,)"
 license="LGPL-3.0-only"
 
 [[mixins]]
-config="rubidium.mixins.json"
+config="embeddium.mixins.json"
 
 [[mods]]
 modId="embeddium"
