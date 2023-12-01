@@ -43,16 +43,6 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
 
     @Shadow
     private int vertexCount;
-
-    // TODO: Figure out what the purpose of this mixin is, it is very weird
-    @Redirect(method = "popData", at = @At(value = "INVOKE", target = "Ljava/nio/Buffer;limit(I)Ljava/nio/Buffer;"))
-    public Buffer debugGetNextBuffer(Buffer buffer, int newLimit) {
-        // This code seems to be a hack to guarantee the buffer is at least as large as the desired limit
-        ensureBufferCapacity(newLimit - this.elementOffset);
-        buffer = (Buffer) this.buffer;
-        buffer.limit(newLimit);
-        return buffer;
-    }
     
     @Override
     public boolean ensureBufferCapacity(int bytes) {

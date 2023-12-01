@@ -75,6 +75,8 @@ public abstract class MixinBillboardParticle extends Particle {
         ParticleVertexSink drain = VertexDrain.of(vertexConsumer)
                 .createSink(VanillaVertexTypes.PARTICLES);
 
+        drain.ensureCapacity(4);
+
         addVertex(drain, quaternion,-1.0F, -1.0F, x, y, z, maxU, maxV, color, light, size);
         addVertex(drain, quaternion,-1.0F, 1.0F, x, y, z, maxU, minV, color, light, size);
         addVertex(drain, quaternion,1.0F, 1.0F, x, y, z, minU, minV, color, light, size);
