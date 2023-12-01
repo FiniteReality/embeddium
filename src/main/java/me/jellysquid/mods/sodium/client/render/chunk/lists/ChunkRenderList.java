@@ -100,4 +100,8 @@ public class ChunkRenderList {
     public RenderRegion getRegion() {
         return this.region;
     }
+
+    public int size() {
+        return this.size;
+    }
 }

@@ -8,6 +8,8 @@ plugins {
     id 'org.ajoberstar.grgit' version '5.0.0'
 
 	id "me.modmuss50.mod-publish-plugin" version "0.3.4"
+
+    id "maven-publish"
 }
 
 archivesBaseName = project.archives_base_name
@@ -83,6 +85,10 @@ jar {
     from sourceSets.legacy.output.resourcesDir
 }
 
+java {
+    withSourcesJar()
+}
+
 def extraModsDir = "extra-mods-${project.minecraft_version}"
 
 repositories {
@@ -147,7 +153,30 @@ tasks.named("remapApiJar") {
     mustRunAfter "copyJarNameConsistent"
 }
 
+tasks.named("remapSourcesJar") {
+    mustRunAfter "copyJarNameConsistent"
+}
+
 tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact(remapJar) {
+                builtBy remapJar
+            }
+            artifact(remapSourcesJar) {
+                builtBy remapSourcesJar
+            }
+        }
+    }
+
+	repositories {
+		maven {
+			url "file://${System.getenv("local_maven")}"
+		}
+	}
+}
 
 publishMods {
 	file = remapJar.archiveFile
