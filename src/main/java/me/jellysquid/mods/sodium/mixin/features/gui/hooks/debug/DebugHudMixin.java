@@ -25,7 +25,7 @@ public abstract class DebugHudMixin {
         ArrayList<String> strings = Lists.newArrayList((String[]) elements);
         strings.add("");
         strings.add("%s%s Renderer (%s)".formatted(getVersionColor(), MODNAME, SodiumClientMod.getVersion()));
-        strings.add("Block renderer: " + (ForgeBlockRenderer.useForgeLightingPipeline() ? "Forge" : "Sodium"));
+        strings.add("Block renderer: " + (ForgeBlockRenderer.useForgeLightingPipeline() ? "NeoForge" : "Sodium"));
 
         var renderer = SodiumWorldRenderer.instanceNullable();
 
