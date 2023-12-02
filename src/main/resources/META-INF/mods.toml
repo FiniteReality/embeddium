@@ -19,7 +19,7 @@ authors="embeddedt"
 [[dependencies.embeddium]] #optional
 modId = "neoforge" #mandatory
 mandatory = true #mandatory
-versionRange = "[20.2,)" #mandatory
+versionRange = "[20.2.86,20.3)" #mandatory
 ordering = "NONE"
 side = "CLIENT"
 
