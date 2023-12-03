@@ -264,6 +264,14 @@ public class SodiumWorldRenderer {
             window.setVsync(MinecraftClient.getInstance().options.getEnableVsync().getValue());
     }
 
+    // We track whether a block entity uses custom block outline rendering, so that the outline postprocessing
+    // shader will be enabled appropriately
+    private boolean blockEntityRequestedOutline;
+
+    public boolean didBlockEntityRequestOutline() {
+        return blockEntityRequestedOutline;
+    }
+
     public void renderBlockEntities(MatrixStack matrices,
                                     BufferBuilderStorage bufferBuilders,
                                     Long2ObjectMap<SortedSet<BlockBreakingInfo>> blockBreakingProgressions,
@@ -277,6 +285,8 @@ public class SodiumWorldRenderer {
         double z = cameraPos.getZ();
 
         BlockEntityRenderDispatcher blockEntityRenderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher();
+
+        this.blockEntityRequestedOutline = false;
 
         this.renderBlockEntities(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
         this.renderGlobalBlockEntities(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
@@ -317,6 +327,11 @@ public class SodiumWorldRenderer {
                 for (BlockEntity blockEntity : blockEntities) {
                     if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
                         continue;
+
+                    if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
+                        this.blockEntityRequestedOutline = true;
+                    }
+
                     renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
                 }
             }
@@ -342,6 +357,11 @@ public class SodiumWorldRenderer {
             for (var blockEntity : blockEntities) {
                 if(!vanillaFrustum.isVisible(blockEntity.getRenderBoundingBox()))
                     continue;
+
+                if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
+                    this.blockEntityRequestedOutline = true;
+                }
+
                 renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
             }
         }
