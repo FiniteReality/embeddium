@@ -260,8 +260,17 @@ public class SodiumWorldRenderer {
         return frustum.isBoxVisible((float)box.minX, (float)box.minY, (float)box.minZ, (float)box.maxX, (float)box.maxY, (float)box.maxZ);
     }
 
+    // We track whether a block entity uses custom block outline rendering, so that the outline postprocessing
+    // shader will be enabled appropriately
+    private boolean blockEntityRequestedOutline;
+
+    public boolean didBlockEntityRequestOutline() {
+        return blockEntityRequestedOutline;
+    }
+
     public void renderTileEntities(MatrixStack matrices, BufferBuilderStorage bufferBuilders, Long2ObjectMap<SortedSet<BlockBreakingInfo>> blockBreakingProgressions,
                                    Camera camera, float tickDelta) {
+
         VertexConsumerProvider.Immediate immediate = bufferBuilders.getEntityVertexConsumers();
 
         Vec3d cameraPos = camera.getPos();
@@ -270,6 +279,8 @@ public class SodiumWorldRenderer {
         double z = cameraPos.getZ();
 
         BlockEntityRenderDispatcher blockEntityRenderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher();
+
+        this.blockEntityRequestedOutline = false;
 
         for (BlockEntity blockEntity : this.renderSectionManager.getVisibleBlockEntities()) {
             if(!checkBEVisibility(blockEntity))
@@ -292,6 +303,10 @@ public class SodiumWorldRenderer {
                 }
             }
 
+            if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
+                this.blockEntityRequestedOutline = true;
+            }
+
             try {
                 blockEntityRenderer.render(blockEntity, tickDelta, matrices, consumer);
             } catch(RuntimeException e) {
@@ -311,10 +326,15 @@ public class SodiumWorldRenderer {
         for (BlockEntity blockEntity : this.globalBlockEntities) {
             if(!checkBEVisibility(blockEntity))
                 continue;
+
             BlockPos pos = blockEntity.getPos();
 
             matrices.push();
             matrices.translate((double) pos.getX() - x, (double) pos.getY() - y, (double) pos.getZ() - z);
+
+            if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
+                this.blockEntityRequestedOutline = true;
+            }
 
             blockEntityRenderer.render(blockEntity, tickDelta, matrices, immediate);
 

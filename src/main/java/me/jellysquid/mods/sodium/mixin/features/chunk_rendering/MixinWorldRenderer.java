@@ -20,6 +20,7 @@ import net.minecraftforge.client.ForgeHooksClient;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -52,6 +53,8 @@ public abstract class MixinWorldRenderer implements WorldRendererExtended {
     
     @Shadow
     private Frustum frustum;
+
+    @Shadow public abstract boolean canDrawEntityOutlines();
 
     @Override
     public SodiumWorldRenderer getSodiumWorldRenderer() {
@@ -194,6 +197,15 @@ public abstract class MixinWorldRenderer implements WorldRendererExtended {
     @Inject(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/WorldRenderer;noCullingBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
     private void onRenderTileEntities(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo ci) {
         this.renderer.renderTileEntities(matrices, this.bufferBuilders, this.blockBreakingProgressions, camera, tickDelta);
+    }
+
+    /**
+     * Target the flag that selects whether or not to enable the entity outline shader, and enable it if
+     * we rendered a block entity that requested it.
+     */
+    @ModifyVariable(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/WorldRenderer;noCullingBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0), ordinal = 4)
+    private boolean changeEntityOutlineFlag(boolean bl) {
+        return bl || (this.renderer.didBlockEntityRequestOutline() && this.canDrawEntityOutlines());
     }
 
     /**
