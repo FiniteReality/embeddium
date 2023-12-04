@@ -26,6 +26,10 @@ For now, please continue to use [Oculus](https://www.curseforge.com/minecraft/mc
 Note that Oculus is somewhat buggy, and your experience will probably be more stable without it. I recommend removing
 Oculus if you do not need shaders.
 
+## Mod integration
+
+If you're looking to add Embeddium to your development environment, please take a look at the [dedicated wiki page](https://github.com/embeddedt/embeddium/wiki/For-Developers).
+
 ## Credits
 
 * JellySquid & the CaffeineMC team, for making Sodium in the first place, without which this project would not be possible

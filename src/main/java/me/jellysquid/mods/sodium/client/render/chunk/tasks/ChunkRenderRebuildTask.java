@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
@@ -63,7 +64,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         this.camera = Vec3d.ZERO;
         this.translucencySorting = SodiumClientMod.options().performance.useTranslucentFaceSorting;
 
-        this.modelDataMap = MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
+        this.modelDataMap = new Object2ObjectOpenHashMap<>(MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ()))));
     }
     
     private final Xoroshiro128PlusPlusRandom random = new Xoroshiro128PlusPlusRandom(42L);
