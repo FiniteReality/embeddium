@@ -26,8 +26,10 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
 import net.minecraft.world.level.ColorResolver;
+import net.minecraftforge.client.model.data.ModelDataManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -272,6 +274,11 @@ public class WorldSlice implements BlockRenderView {
     }
 
     @Override
+    public float getShade(float normalX, float normalY, float normalZ, boolean shade) {
+        return this.world.getShade(normalX, normalY, normalZ, shade);
+    }
+
+    @Override
     public LightingProvider getLightingProvider() {
         return this.world.getLightingProvider();
     }
@@ -325,6 +332,11 @@ public class WorldSlice implements BlockRenderView {
     @Override
     public int getBottomY() {
         return this.world.getBottomY();
+    }
+
+    @Override
+    public @Nullable ModelDataManager getModelDataManager() {
+        return this.world.getModelDataManager();
     }
 
     // Coordinates are in biome space!
