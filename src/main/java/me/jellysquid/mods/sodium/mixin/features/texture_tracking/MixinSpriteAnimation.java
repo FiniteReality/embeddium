@@ -3,7 +3,9 @@ package me.jellysquid.mods.sodium.mixin.features.texture_tracking;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteExtended;
 import net.minecraft.client.texture.Sprite;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,6 +15,16 @@ import java.util.List;
 
 @Mixin(Sprite.Animation.class)
 public class MixinSpriteAnimation {
+    @Shadow
+    public int frameTicks;
+
+    @Shadow
+    public int frameIndex;
+
+    @Shadow
+    @Final
+    public List<Sprite.AnimationFrame> frames;
+
     @Unique
     private Sprite parent;
 
@@ -32,6 +44,11 @@ public class MixinSpriteAnimation {
         boolean onDemand = SodiumClientMod.options().performance.animateOnlyVisibleTextures;
 
         if (onDemand && !parent.isActive()) {
+            this.frameTicks++;
+            if (this.frameTicks >= this.frames.get(this.frameIndex).time) {
+                this.frameIndex = (this.frameIndex + 1) % this.frames.size();
+                this.frameTicks = 0;
+            }
             ci.cancel();
         }
     }
