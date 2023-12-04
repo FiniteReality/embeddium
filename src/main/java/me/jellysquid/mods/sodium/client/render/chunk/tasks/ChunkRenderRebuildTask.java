@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
@@ -63,7 +64,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         this.camera = Vec3d.ZERO;
         this.translucencySorting = SodiumClientMod.options().advanced.translucencySorting;
 
-        this.modelDataMap = ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
+        this.modelDataMap = new Object2ObjectOpenHashMap<>(ModelDataManager.getModelData(MinecraftClient.getInstance().world, new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ()))));
     }
 
     public ChunkRenderRebuildTask<T> withCameraPosition(Vec3d camera) {
