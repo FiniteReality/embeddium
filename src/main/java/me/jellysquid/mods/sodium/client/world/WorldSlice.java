@@ -20,7 +20,7 @@ import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
-import net.minecraftforge.client.model.data.ModelDataManager;
+import net.neoforged.neoforge.client.model.data.ModelDataManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
 import org.jetbrains.annotations.Nullable;
