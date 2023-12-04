@@ -46,6 +46,13 @@ public abstract class MixinSprite implements SpriteExtended {
 
         if (!onDemand || this.forceNextUpdate) {
             this.uploadTexture();
+        } else {
+            // Check and update the frame index anyway to avoid getting out of sync
+            if (this.frameTicks >= this.animationMetadata.getFrameTime(this.frameIndex)) {
+                int frameCount = this.animationMetadata.getFrameCount() == 0 ? this.getFrameCount() : this.animationMetadata.getFrameCount();
+                this.frameIndex = (this.frameIndex + 1) % frameCount;
+                this.frameTicks = 0;
+            }
         }
     }
 
