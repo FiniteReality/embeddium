@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.tasks;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
@@ -64,7 +65,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         this.renderContext = renderContext;
         this.buildTime = time;
 
-        this.modelDataMap = MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ())));
+        this.modelDataMap = new Object2ObjectOpenHashMap<>(MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ()))));
     }
 
     public ChunkBuilderMeshingTask withCameraPosition(Vec3d camera) {
