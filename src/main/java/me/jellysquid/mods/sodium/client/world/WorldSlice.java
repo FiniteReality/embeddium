@@ -20,6 +20,7 @@ import net.minecraft.world.chunk.ChunkNibbleArray;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
+import net.minecraftforge.client.model.data.ModelDataManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
 import org.jetbrains.annotations.Nullable;
@@ -254,6 +255,11 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
     }
 
     @Override
+    public float getShade(float normalX, float normalY, float normalZ, boolean shade) {
+        return this.world.getShade(normalX, normalY, normalZ, shade);
+    }
+
+    @Override
     public LightingProvider getLightingProvider() {
         // Not thread-safe to access lighting data from off-thread, even if Minecraft allows it.
         throw new UnsupportedOperationException();
@@ -350,6 +356,11 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
     @Override
     public int getColor(BiomeColorSource source, int x, int y, int z) {
         return this.biomeColors.getColor(source, x, y, z);
+    }
+
+    @Override
+    public @Nullable ModelDataManager getModelDataManager() {
+        return this.world.getModelDataManager();
     }
 
     public static int getLocalBlockIndex(int x, int y, int z) {
