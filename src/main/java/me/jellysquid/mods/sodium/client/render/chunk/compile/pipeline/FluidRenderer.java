@@ -24,7 +24,6 @@ import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SideShapeType;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
@@ -61,7 +60,7 @@ public class FluidRenderer {
     private final ColorProviderRegistry colorProviderRegistry;
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
-        this.quad.setNormal(NormI8.pack(0.0f, 1.0f, 0.0f));
+        this.quad.setLightFace(Direction.UP);
 
         this.lighters = lighters;
         this.colorProviderRegistry = colorProviderRegistry;

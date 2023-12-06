@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.render.entity.shadows;
 
+import me.jellysquid.mods.sodium.client.render.vertex.VertexConsumerUtils;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.common.ModelVertex;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
@@ -13,13 +14,13 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.chunk.Chunk;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,10 +37,11 @@ public class EntityRenderDispatcherMixin {
      */
     @Inject(method = "renderShadowPart", at = @At("HEAD"), cancellable = true)
     private static void renderShadowPartFast(MatrixStack.Entry entry, VertexConsumer vertices, Chunk chunk, WorldView world, BlockPos pos, double x, double y, double z, float radius, float opacity, CallbackInfo ci) {
-        var writer = VertexBufferWriter.tryOf(vertices);
+        var writer = VertexConsumerUtils.convertOrLog(vertices);
 
-        if (writer == null)
+        if (writer == null) {
             return;
+        }
 
         ci.cancel();
 
@@ -84,14 +86,6 @@ public class EntityRenderDispatcherMixin {
         }
     }
 
-    /**
-     * @deprecated don't call, but just in case...
-     */
-    @Deprecated
-    private static void renderShadowPart(MatrixStack.Entry matrices, VertexConsumer consumer, float radius, float alpha, float minX, float maxX, float minY, float minZ, float maxZ) {
-        renderShadowPart(matrices, VertexBufferWriter.of(consumer), radius, alpha, minX, maxX, minY, minZ, maxZ);
-    }
-
     @Unique
     private static void renderShadowPart(MatrixStack.Entry matrices, VertexBufferWriter writer, float radius, float alpha, float minX, float maxX, float minY, float minZ, float maxZ) {
         float size = 0.5F * (1.0F / radius);
@@ -106,7 +100,7 @@ public class EntityRenderDispatcherMixin {
         var matPosition = matrices.getPositionMatrix();
 
         var color = ColorABGR.withAlpha(SHADOW_COLOR, alpha);
-        var normal = MatrixHelper.transformNormal(matNormal, 0.0f, 1.0f, 0.0f);
+        var normal = MatrixHelper.transformNormal(matNormal, Direction.UP);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             long buffer = stack.nmalloc(4 * ModelVertex.STRIDE);
@@ -124,8 +118,7 @@ public class EntityRenderDispatcherMixin {
             writeShadowVertex(ptr, matPosition, maxX, minY, minZ, u2, v1, color, normal);
             ptr += ModelVertex.STRIDE;
 
-            writer
-                    .push(stack, buffer, 4, ModelVertex.FORMAT);
+            writer.push(stack, buffer, 4, ModelVertex.FORMAT);
         }
     }
 

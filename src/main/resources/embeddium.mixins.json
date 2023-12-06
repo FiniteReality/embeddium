@@ -7,27 +7,12 @@
   "injectors" : {
     "defaultRequire" : 1
   },
-  "overwrites" : {
-    "conformVisibility" : true
+  "overwrites": {
+    "conformVisibility": true
   },
-  "client" : [
+  "client": [
     "core.MinecraftClientMixin",
-    "core.checks.AbstractTextureMixin",
-    "core.checks.AsyncTextureMixin",
-    "core.checks.BufferRendererMixin",
-    "core.checks.FramebufferMixin",
-    "core.checks.GlStateManagerMixin",
-    "core.checks.NativeImageBackedTextureMixin",
-    "core.checks.NativeImageMixin",
-    "core.checks.PlayerSkinTextureMixin",
-    "core.checks.RenderSystemMixin",
-    "core.checks.SpriteAtlasTextureMixin",
-    "core.checks.SpriteContentsAnimatorImplMixin",
-    "core.checks.TextureManagerMixin",
-    "core.checks.VertexBufferMixin",
-    "core.checks.VertexFormatMixin",
-    "core.checks.WindowFramebufferMixin",
-    "core.gui.DownloadingTerrainScreenMixin",
+    "core.gui.WorldLoadingStateMixin",
     "core.model.colors.BlockColorsMixin",
     "core.model.colors.ItemColorsMixin",
     "core.model.quad.BakedQuadMixin",
@@ -39,7 +24,7 @@
     "core.render.immediate.consumer.SpriteTexturedVertexConsumerMixin",
     "core.render.immediate.consumer.VertexConsumersMixin$DualMixin",
     "core.render.immediate.consumer.VertexConsumersMixin$UnionMixin",
-    "core.render.world.ChunkBuilderMixin",
+    "core.render.world.BufferBuilderStorageMixin",
     "core.render.world.WorldRendererMixin",
     "core.world.biome.ClientWorldMixin",
     "core.world.chunk.EmptyPaletteStorageMixin",
@@ -66,8 +51,6 @@
     "features.render.gui.font.GlyphRendererMixin",
     "features.render.gui.outlines.WorldRendererMixin",
     "features.render.immediate.DirectionMixin",
-    "features.render.immediate.buffer_builder.BufferBuilderMixin",
-    "features.render.immediate.buffer_builder.VertexFormatMixin",
     "features.render.immediate.buffer_builder.intrinsics.BufferBuilderMixin",
     "features.render.immediate.buffer_builder.sorting.BufferBuilderMixin",
     "features.render.immediate.buffer_builder.sorting.VertexSorterMixin",

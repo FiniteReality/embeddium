@@ -5,7 +5,7 @@ plugins {
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
     // more easily identified. TODO: Lazily load GrGit via a service only when builds are performed.
-    id 'org.ajoberstar.grgit' version '5.0.0'
+    id 'org.ajoberstar.grgit' version '5.2.0'
 
 	id "me.modmuss50.mod-publish-plugin" version "0.3.4"
 
@@ -116,7 +116,10 @@ repositories {
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    mappings loom.layered() {
+        it.mappings("net.fabricmc:yarn:${project.yarn_mappings}:v2")
+        it.mappings file("mappings/yarnpatch.tiny")
+    }
 
     // Forge API
     neoForge "net.neoforged:neoforge:${forge_version}"

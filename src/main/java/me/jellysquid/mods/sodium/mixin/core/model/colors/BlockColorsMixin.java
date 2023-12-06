@@ -22,8 +22,6 @@ public class BlockColorsMixin implements BlockColorsExtended {
     @Unique
     private final ReferenceSet<Block> overridenBlocks = new ReferenceOpenHashSet<>();
 
-
-
     @Inject(method = "registerColorProvider", at = @At("HEAD"))
     private void preRegisterColorProvider(BlockColorProvider provider, Block[] blocks, CallbackInfo ci) {
         // Happens with Quark. Why??
@@ -45,7 +43,7 @@ public class BlockColorsMixin implements BlockColorsExtended {
     }
 
     @Override
-    public ReferenceSet<Block> embeddium$getOverridenVanillaBlocks() {
+    public ReferenceSet<Block> sodium$getOverridenVanillaBlocks() {
         return ReferenceSets.unmodifiable(this.overridenBlocks);
     }
 }
