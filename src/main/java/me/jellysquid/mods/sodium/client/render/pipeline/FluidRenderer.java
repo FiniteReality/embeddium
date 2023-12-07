@@ -138,14 +138,15 @@ public class FluidRenderer {
             h3 = 1.0f;
             h4 = 1.0f;
         } else {
-            float north1 = this.fluidHeight(world, fluid, pos.north());
-            float south1 = this.fluidHeight(world, fluid, pos.south());
-            float east1 = this.fluidHeight(world, fluid, pos.east());
-            float west1 = this.fluidHeight(world, fluid, pos.west());
-            h1 = this.fluidCornerHeight(world, fluid, fluidHeight, north1, west1, pos.offset(Direction.NORTH).offset(Direction.WEST));
-            h2 = this.fluidCornerHeight(world, fluid, fluidHeight, south1, west1, pos.offset(Direction.SOUTH).offset(Direction.WEST));
-            h3 = this.fluidCornerHeight(world, fluid, fluidHeight, south1, east1, pos.offset(Direction.SOUTH).offset(Direction.EAST));
-            h4 = this.fluidCornerHeight(world, fluid, fluidHeight, north1, east1, pos.offset(Direction.NORTH).offset(Direction.EAST));
+            var scratchPos = new BlockPos.Mutable();
+            float north1 = this.fluidHeight(world, fluid, scratchPos.set(pos, Direction.NORTH));
+            float south1 = this.fluidHeight(world, fluid, scratchPos.set(pos, Direction.SOUTH));
+            float east1 = this.fluidHeight(world, fluid, scratchPos.set(pos, Direction.EAST));
+            float west1 = this.fluidHeight(world, fluid, scratchPos.set(pos, Direction.WEST));
+            h1 = this.fluidCornerHeight(world, fluid, fluidHeight, north1, west1, scratchPos.set(pos).move(Direction.NORTH).move(Direction.WEST));
+            h2 = this.fluidCornerHeight(world, fluid, fluidHeight, south1, west1, scratchPos.set(pos).move(Direction.SOUTH).move(Direction.WEST));
+            h3 = this.fluidCornerHeight(world, fluid, fluidHeight, south1, east1, scratchPos.set(pos).move(Direction.SOUTH).move(Direction.EAST));
+            h4 = this.fluidCornerHeight(world, fluid, fluidHeight, north1, east1, scratchPos.set(pos).move(Direction.NORTH).move(Direction.EAST));
         }
 
         float yOffset = sfDown ? 0.0F : EPSILON;
