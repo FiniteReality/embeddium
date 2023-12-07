@@ -1,7 +1,5 @@
 package me.jellysquid.mods.sodium.client.world.cloned.palette;
 
-import org.apache.commons.lang3.Validate;
-
 public class ClonedPalleteArray<K> implements ClonedPalette<K> {
     private final K[] array;
 
@@ -11,7 +9,11 @@ public class ClonedPalleteArray<K> implements ClonedPalette<K> {
 
     @Override
     public K get(int id) {
+        K value = this.array[id];
         // TODO: Remove this check?
-        return Validate.notNull(this.array[id]);
+        if (value == null) {
+            throw new NullPointerException("Value for " + id + " is null");
+        }
+        return value;
     }
 }
