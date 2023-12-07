@@ -8,15 +8,14 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.MultipartBakedModel;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.MultipartModelData;
 
 import net.minecraftforge.client.model.data.MultipartModelData;
 import org.apache.commons.lang3.tuple.Pair;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
 import java.util.concurrent.locks.StampedLock;
@@ -31,16 +30,8 @@ public class MixinMultipartBakedModel {
     @Final
     private List<Pair<Predicate<BlockState>, BakedModel>> components;
 
-    /**
-     * @author JellySquid
-     * @reason Avoid expensive allocations and replace bitfield indirection
-     */
-    @Overwrite
-    public List<BakedQuad> getQuads(BlockState state, Direction face, Random random, ModelData modelData, RenderLayer layer) {
-        if (state == null) {
-            return Collections.emptyList();
-        }
-
+    @Unique
+    private BakedModel[] getModelComponents(BlockState state) {
         BakedModel[] models;
 
         long readStamp = this.lock.readLock();
@@ -68,6 +59,21 @@ public class MixinMultipartBakedModel {
             }
         }
 
+        return models;
+    }
+
+    /**
+     * @author JellySquid
+     * @reason Avoid expensive allocations and replace bitfield indirection
+     */
+    @Overwrite
+    public List<BakedQuad> getQuads(BlockState state, Direction face, Random random, ModelData modelData, RenderLayer layer) {
+        if (state == null) {
+            return Collections.emptyList();
+        }
+
+        BakedModel[] models = getModelComponents(state);
+
         List<BakedQuad> quads = new ArrayList<>();
 
         long seed = random.nextLong();
@@ -80,6 +86,25 @@ public class MixinMultipartBakedModel {
         }
 
         return quads;
+    }
+
+    /**
+     * @author embeddedt
+     * @reason faster, less allocation
+     */
+    @Overwrite
+    public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull Random random, @NotNull ModelData data) {
+        BakedModel[] models = getModelComponents(state);
+
+        long seed = random.nextLong();
+        LinkedList<ChunkRenderTypeSet> renderTypeSets = new LinkedList<>();
+
+        for (BakedModel model : models) {
+            random.setSeed(seed);
+            renderTypeSets.add(model.getRenderTypes(state, random, data));
+        }
+
+        return ChunkRenderTypeSet.union(renderTypeSets);
     }
 
 }
