@@ -33,7 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
+import net.minecraft.util.math.random.LocalRandom;
 import net.minecraftforge.client.model.data.ModelData;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 
@@ -67,7 +67,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         this.modelDataMap = new Object2ObjectOpenHashMap<>(MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ()))));
     }
     
-    private final Xoroshiro128PlusPlusRandom random = new Xoroshiro128PlusPlusRandom(42L);
+    private final LocalRandom random = new LocalRandom(42L);
 
     public ChunkRenderRebuildTask withCameraPosition(Vec3d camera) {
         this.camera = camera;
