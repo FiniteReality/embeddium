@@ -8,7 +8,9 @@ import net.minecraft.client.render.model.WeightedBakedModel;
 import net.minecraft.util.collection.Weighted;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.model.data.ModelData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
 
@@ -38,6 +40,21 @@ public class WeightedBakedModelMixin {
         }
 
         return Collections.emptyList();
+    }
+
+    /**
+     * @author embeddedt
+     * @reason Avoid excessive object allocations
+     */
+    @Overwrite
+    public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull Random rand, @NotNull ModelData data) {
+        Weighted.Present<BakedModel> quad = getAt(this.models, Math.abs((int) rand.nextLong()) % this.totalWeight);
+
+        if (quad != null) {
+            return quad.getData().getRenderTypes(state, rand, data);
+        }
+
+        return ChunkRenderTypeSet.none();
     }
 
     @Unique
