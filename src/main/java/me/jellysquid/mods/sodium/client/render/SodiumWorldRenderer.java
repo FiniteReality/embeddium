@@ -32,6 +32,7 @@ import net.neoforged.neoforge.client.ClientHooks;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.function.Consumer;
 
 /**
  * Provides an extension to vanilla's {@link WorldRenderer}.
@@ -271,6 +272,49 @@ public class SodiumWorldRenderer {
 
     public boolean didBlockEntityRequestOutline() {
         return blockEntityRequestedOutline;
+    }
+
+    public void forEachVisibleBlockEntity(Consumer<BlockEntity> consumer) {
+        SortedRenderLists renderLists = this.renderSectionManager.getRenderLists();
+        Iterator<ChunkRenderList> renderListIterator = renderLists.iterator();
+
+        while (renderListIterator.hasNext()) {
+            var renderList = renderListIterator.next();
+
+            var renderRegion = renderList.getRegion();
+            var renderSectionIterator = renderList.sectionsWithEntitiesIterator();
+
+            if (renderSectionIterator == null) {
+                continue;
+            }
+
+            while (renderSectionIterator.hasNext()) {
+                var renderSectionId = renderSectionIterator.nextByteAsInt();
+                var renderSection = renderRegion.getSection(renderSectionId);
+
+                var blockEntities = renderSection.getCulledBlockEntities();
+
+                if (blockEntities == null) {
+                    continue;
+                }
+
+                for (BlockEntity blockEntity : blockEntities) {
+                    consumer.accept(blockEntity);
+                }
+            }
+        }
+
+        for (var renderSection : this.renderSectionManager.getSectionsWithGlobalEntities()) {
+            var blockEntities = renderSection.getGlobalBlockEntities();
+
+            if (blockEntities == null) {
+                continue;
+            }
+
+            for (var blockEntity : blockEntities) {
+                consumer.accept(blockEntity);
+            }
+        }
     }
 
     public void renderBlockEntities(MatrixStack matrices,
