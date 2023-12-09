@@ -2,7 +2,9 @@ package me.jellysquid.mods.sodium.client.render.viewport;
 
 import me.jellysquid.mods.sodium.client.render.viewport.frustum.Frustum;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkSectionPos;
+import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import org.joml.Vector3d;
 
 public final class Viewport {
@@ -23,6 +25,21 @@ public final class Viewport {
         );
 
         this.blockCoords = BlockPos.ofFloored(position.x, position.y, position.z);
+    }
+
+    public boolean isBoxVisible(Box box) {
+        if (box.equals(IBlockEntityRendererExtension.INFINITE_EXTENT_AABB)) {
+            return true;
+        }
+
+        return this.frustum.testAab(
+                (float)(box.minX - this.transform.intX) - this.transform.fracX,
+                (float)(box.minY - this.transform.intY) - this.transform.fracY,
+                (float)(box.minZ - this.transform.intZ) - this.transform.fracZ,
+                (float)(box.maxX - this.transform.intX) - this.transform.fracX,
+                (float)(box.maxY - this.transform.intY) - this.transform.fracY,
+                (float)(box.maxZ - this.transform.intZ) - this.transform.fracZ
+        );
     }
 
     public boolean isBoxVisible(int intX, int intY, int intZ, float radius) {

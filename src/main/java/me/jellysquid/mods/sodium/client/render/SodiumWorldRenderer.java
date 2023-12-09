@@ -21,13 +21,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.Profiler;
-import net.neoforged.neoforge.client.ClientHooks;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -49,7 +49,7 @@ public class SodiumWorldRenderer {
 
     private boolean useEntityCulling;
 
-    private Frustum vanillaFrustum;
+    private Viewport currentViewport;
 
     private RenderSectionManager renderSectionManager;
 
@@ -180,7 +180,7 @@ public class SodiumWorldRenderer {
             this.renderSectionManager.markGraphDirty();
         }
 
-        this.vanillaFrustum = MinecraftClient.getInstance().worldRenderer.getFrustum();
+        this.currentViewport = viewport;
 
         this.lastCameraX = pos.x;
         this.lastCameraY = pos.y;
@@ -337,6 +337,15 @@ public class SodiumWorldRenderer {
         this.renderGlobalBlockEntities(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
     }
 
+    private <T extends BlockEntity> boolean isBlockEntityRendererVisible(BlockEntityRenderDispatcher dispatcher, T entity) {
+        BlockEntityRenderer<T> renderer = dispatcher.get(entity);
+        if(renderer == null) {
+            return false;
+        }
+        Box box = renderer.getRenderBoundingBox(entity);
+        return currentViewport.isBoxVisible(box);
+    }
+
     private void renderBlockEntities(MatrixStack matrices,
                                      BufferBuilderStorage bufferBuilders,
                                      Long2ObjectMap<SortedSet<BlockBreakingInfo>> blockBreakingProgressions,
@@ -370,7 +379,7 @@ public class SodiumWorldRenderer {
                 }
 
                 for (BlockEntity blockEntity : blockEntities) {
-                    if(!ClientHooks.isBlockEntityRendererVisible(blockEntityRenderer, blockEntity, vanillaFrustum))
+                    if(!isBlockEntityRendererVisible(blockEntityRenderer, blockEntity))
                         continue;
 
                     if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
@@ -400,7 +409,7 @@ public class SodiumWorldRenderer {
             }
 
             for (var blockEntity : blockEntities) {
-                if(!ClientHooks.isBlockEntityRendererVisible(blockEntityRenderer, blockEntity, vanillaFrustum))
+                if(!isBlockEntityRendererVisible(blockEntityRenderer, blockEntity))
                     continue;
 
                 if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
