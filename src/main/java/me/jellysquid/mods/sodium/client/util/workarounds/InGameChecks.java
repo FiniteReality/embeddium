@@ -41,8 +41,8 @@ public class InGameChecks {
         var customResourcePacks = manager.streamResourcePacks();
 
         customResourcePacks.forEach(resourcePack -> {
-            // Omit 'vanilla' and 'fabric' resource packs
-            if (!resourcePack.getName().equals("vanilla") && !resourcePack.getName().equals("fabric")) {
+            // Omit 'vanilla', 'fabric', and 'mod_resources' resource packs
+            if (!resourcePack.getName().equals("vanilla") && !resourcePack.getName().equals("fabric") && !resourcePack.getName().equals("mod_resources")) {
                 var resourcePackName = resourcePack.getName();
 
                 resourcePack.findResources(ResourceType.CLIENT_RESOURCES, Identifier.DEFAULT_NAMESPACE, "shaders", (path, ignored) -> {
