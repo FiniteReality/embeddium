@@ -364,15 +364,17 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
      * Gets or computes the biome at the given global coordinates.
      */
     public Biome getBiome(int x, int y, int z) {
-        if (!blockBoxContains(this.volume, x, y, z)) {
-            return BuiltinBiomes.PLAINS;
-        }
-
         int relX = x - this.baseX;
         int relY = y - this.baseY;
         int relZ = z - this.baseZ;
 
-        return this.biomeCaches[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
+        int idx = getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4);
+
+        if (idx < 0 || idx >= this.biomeCaches.length) {
+            return BuiltinBiomes.PLAINS;
+        }
+
+        return this.biomeCaches[idx]
                 .getBiome(this, x, relY >> 4, z);
     }
 
