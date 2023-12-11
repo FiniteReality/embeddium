@@ -27,6 +27,12 @@ public class MeshAppenderRenderer {
 
         Reference2ReferenceOpenHashMap<RenderLayer, SinkingVertexBuilder> builders = BUILDERS.get();
 
+        for (var it = builders.reference2ReferenceEntrySet().fastIterator(); it.hasNext(); ) {
+            var entry = it.next();
+
+            entry.getValue().reset();
+        }
+
         MeshAppender.Context context = new MeshAppender.Context(builders::get, world, origin, buffers);
         for (MeshAppender appender : appenders) {
             appender.render(context);
