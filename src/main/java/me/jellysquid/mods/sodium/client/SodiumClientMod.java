@@ -27,8 +27,6 @@ public class SodiumClientMod {
     public static boolean oculusLoaded = false;
 
     public SodiumClientMod() {
-        SodiumPreLaunch.onPreLaunch();
-
         oculusLoaded = ModList.get().isLoaded("oculus");
 
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();

@@ -1,10 +1,10 @@
 package me.jellysquid.mods.sodium.client.platform;
 
+import me.jellysquid.mods.sodium.client.compatibility.environment.OSInfo;
 import me.jellysquid.mods.sodium.client.platform.windows.api.msgbox.MsgBoxParamSw;
 import me.jellysquid.mods.sodium.client.platform.windows.api.msgbox.MsgBoxCallback;
 import me.jellysquid.mods.sodium.client.platform.windows.api.User32;
 import net.minecraft.client.util.Window;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFWNativeWin32;
 import org.lwjgl.system.MemoryStack;
@@ -28,7 +28,7 @@ public class MessageBox {
 
     private interface MessageBoxImpl {
         static @Nullable MessageBoxImpl chooseImpl() {
-            if (Util.getOperatingSystem() == Util.OperatingSystem.WINDOWS) {
+            if (OSInfo.getOS() == OSInfo.OS.WINDOWS) {
                 return new WindowsMessageBoxImpl();
             }
 

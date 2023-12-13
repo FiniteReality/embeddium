@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin;
 
+import me.jellysquid.mods.sodium.client.SodiumPreLaunch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.config.ConfigMigrator;
@@ -29,6 +30,8 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
         this.logger.info("Loaded configuration file for " + MODNAME + ": {} options available, {} override(s) found",
                 this.config.getOptionCount(), this.config.getOptionOverrideCount());
+
+        SodiumPreLaunch.onPreLaunch();
     }
 
     @Override

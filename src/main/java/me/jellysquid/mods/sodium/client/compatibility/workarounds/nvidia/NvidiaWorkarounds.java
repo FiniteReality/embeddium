@@ -1,9 +1,9 @@
 package me.jellysquid.mods.sodium.client.compatibility.workarounds.nvidia;
 
+import me.jellysquid.mods.sodium.client.compatibility.environment.OSInfo;
 import me.jellysquid.mods.sodium.client.platform.unix.Libc;
 import me.jellysquid.mods.sodium.client.platform.windows.api.Kernel32;
 import me.jellysquid.mods.sodium.client.platform.windows.WindowsCommandLine;
-import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public class NvidiaWorkarounds {
         LOGGER.warn("Applying workaround: Prevent the NVIDIA OpenGL driver from using broken optimizations (NVIDIA_THREADED_OPTIMIZATIONS)");
 
         try {
-            switch (Util.getOperatingSystem()) {
+            switch (OSInfo.getOS()) {
                 case WINDOWS -> {
                     // The NVIDIA drivers rely on parsing the command line arguments to detect Minecraft. If we destroy those,
                     // then it shouldn't be able to detect us anymore.
@@ -41,7 +41,7 @@ public class NvidiaWorkarounds {
     }
 
     public static void uninstall() {
-        switch (Util.getOperatingSystem()) {
+        switch (OSInfo.getOS()) {
             case WINDOWS -> {
                 WindowsCommandLine.resetCommandLine();
             }
