@@ -1,8 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
-import codechicken.lib.render.block.ICCBlockRenderer;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.model.color.ColorProvider;
@@ -36,6 +35,7 @@ import net.minecraft.util.math.random.LocalRandom;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import net.minecraftforge.common.ForgeConfig;
+import org.embeddedt.embeddium.api.BlockRendererRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -62,6 +62,8 @@ public class BlockRenderer {
 
     private boolean useReorienting;
 
+    private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
+
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
@@ -87,17 +89,17 @@ public class BlockRenderer {
             renderOffset = Vec3d.ZERO;
         }
 
-        if(SodiumClientMod.cclLoaded) {
-            final MatrixStack mStack = new MatrixStack();
+        // Process custom renderers
+        customRenderers.clear();
+        BlockRendererRegistry.instance().fillCustomRenderers(customRenderers, ctx);
+
+        if(!customRenderers.isEmpty()) {
             final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
-            for (final ICCBlockRenderer renderer : CCLCompat.getCustomRenderers(ctx.world(), ctx.pos())) {
-                if (renderer.canHandleBlock(ctx.world(), ctx.pos(), ctx.state(), ctx.renderLayer())) {
-                    mStack.isEmpty();
-
-                    builder.reset();
-                    renderer.renderBlock(ctx.state(), ctx.pos(), ctx.world(), mStack, builder, random, ctx.modelData(), ctx.renderLayer());
-                    builder.flush(meshBuilder, material, ctx.origin());
-
+            for (BlockRendererRegistry.Renderer customRenderer : customRenderers) {
+                builder.reset();
+                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(ctx, random, builder);
+                builder.flush(meshBuilder, material, ctx.origin());
+                if (result == BlockRendererRegistry.RenderResult.OVERRIDE) {
                     return;
                 }
             }

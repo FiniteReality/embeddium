@@ -52,7 +52,7 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
 		return new Identifier("immersiveengineering", path);
 	}
 
-    public static void meshAppendEvent(ChunkMeshEvent event) {
+    static void meshAppendEvent(ChunkMeshEvent event) {
         if(ImmersiveEmptyChunkChecker.hasWires(event.getSectionOrigin())) {
             event.addMeshAppender(ctx -> renderConnectionsInSection(ctx.sodiumBuildBuffers(), ctx.blockRenderView(), ctx.sectionOrigin()));
         }

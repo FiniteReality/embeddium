@@ -61,6 +61,13 @@ sourceSets {
             compileClasspath += main.output
         }
     }
+
+    compat {
+        java {
+            compileClasspath += main.compileClasspath
+            compileClasspath += main.output
+        }
+    }
 }
 
 loom {
@@ -74,6 +81,7 @@ loom {
             }
         }
     }
+    createRemapConfigurations(sourceSets.compat)
 }
 
 tasks.register('apiJar', Jar) {
@@ -98,6 +106,8 @@ jar {
     from sourceSets.api.output.resourcesDir
     from sourceSets.legacy.output.classesDirs
     from sourceSets.legacy.output.resourcesDir
+    from sourceSets.compat.output.classesDirs
+    from sourceSets.compat.output.resourcesDir
 }
 
 java {
@@ -136,8 +146,8 @@ dependencies {
     forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // Mods
-    modCompileOnly "curse.maven:codechickenlib-242818:${codechicken_fileid}"
-    modCompileOnly "curse.maven:immersiveengineering-231951:${ie_fileid}"
+    modCompatCompileOnly "curse.maven:codechickenlib-242818:${codechicken_fileid}"
+    modCompatCompileOnly "curse.maven:immersiveengineering-231951:${ie_fileid}"
 
 
     // runtime remapping at home

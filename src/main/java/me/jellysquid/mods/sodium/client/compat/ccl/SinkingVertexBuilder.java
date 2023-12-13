@@ -8,7 +8,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEn
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3fc;
@@ -138,7 +137,11 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         resetCurrentVertex();
     }
 
-    public void flush(@Nonnull ChunkModelBuilder buffers, Material material, Vector3fc origin) {
+    public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, Vector3fc origin) {
+        if(currentVertex == 0) {
+            return false;
+        }
+
         final int numQuads = currentVertex >> 2;
 
         for (int quadIdx = 0; quadIdx < numQuads; quadIdx++) {
@@ -192,6 +195,8 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
             sideMask |= 1 << facingIdx;
         }
+
+        return true;
     }
 
     private void resetCurrentVertex() {
