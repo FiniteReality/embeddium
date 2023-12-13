@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client;
 
-import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
@@ -24,9 +23,7 @@ public class SodiumClientMod {
 
     public static final String MODID = "embeddium";
     
-    public static boolean flywheelLoaded;
-    public static boolean cclLoaded;
-    
+
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
         
@@ -34,13 +31,7 @@ public class SodiumClientMod {
     }
     
     public void onInitializeClient(final FMLClientSetupEvent event) {
-    	flywheelLoaded = ModList.get().isLoaded("flywheel");
-    	cclLoaded = ModList.get().isLoaded("codechickenlib");
     	MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
-    	
-    	if(cclLoaded) {
-    		CCLCompat.init();
-    	}
     }
 
     public static SodiumGameOptions options() {

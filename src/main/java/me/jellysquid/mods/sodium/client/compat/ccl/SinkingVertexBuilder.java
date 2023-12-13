@@ -118,7 +118,11 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         resetCurrentVertex();
     }
 
-    public void flush(@Nonnull ChunkModelBuffers buffers) {
+    public boolean flush(@Nonnull ChunkModelBuffers buffers) {
+        if(currentVertex == 0) {
+            return false;
+        }
+
         final int numQuads = currentVertex >> 2;
 
         for (int quadIdx = 0; quadIdx < numQuads; quadIdx++) {
@@ -167,6 +171,8 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
             buffers.getSink(facing).flush();
         }
+
+        return true;
     }
 
     private void writeQuadVertex(@Nonnull ModelVertexSink sink) {

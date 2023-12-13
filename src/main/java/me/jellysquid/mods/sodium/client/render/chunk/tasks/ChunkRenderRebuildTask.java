@@ -4,7 +4,6 @@ import java.util.Map;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -36,6 +35,8 @@ import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.common.MinecraftForge;
+import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -153,8 +154,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                             BlockEntityRenderer<BlockEntity> renderer = BlockEntityRenderDispatcher.INSTANCE.get(entity);
 
                             if (renderer != null) {
-                                if (!FlywheelCompat.isSkipped(entity))
-                                    renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
+                                renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
 
                                 bounds.addBlock(relX, relY, relZ);
                             }
@@ -183,6 +183,8 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
 
         renderData.setOcclusionData(occluder.build());
         renderData.setBounds(bounds.build(this.render.getChunkPos()));
+
+        MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildResult<>(this.render, renderData.build());
     }

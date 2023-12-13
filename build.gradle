@@ -27,6 +27,25 @@ archivesBaseName = project.archives_base_name
 version = "${project.mod_version}${getVersionMetadata()}+mc${project.minecraft_version}"
 group = project.maven_group
 
+sourceSets {
+	compat {
+		java {
+			compileClasspath += main.compileClasspath
+			compileClasspath += main.output
+		}
+	}
+
+	main {
+		java {
+			runtimeClasspath += compat.output
+		}
+	}
+}
+
+loom {
+	createRemapConfigurations(sourceSets.compat)
+}
+
 repositories {
 	maven {
 		url "https://cursemaven.com"
@@ -64,8 +83,8 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 		
-	modCompileOnly "curse.maven:flywheel-486392:3535459"
-	modCompileOnly "curse.maven:codechickenlib-242818:3681973"
+	modCompatCompileOnly "curse.maven:flywheel-486392:3535459"
+	modCompatCompileOnly "curse.maven:codechickenlib-242818:3681973"
 
 	modLocalRuntime "curse.maven:lazydfu-460819:3249059"
 
@@ -106,6 +125,8 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
+	from sourceSets.compat.output.classesDirs
+	from sourceSets.compat.output.resourcesDir
 }
 
 def copyJarNameConsistent = tasks.register('copyJarNameConsistent', Copy) {
