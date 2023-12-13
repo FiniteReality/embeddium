@@ -81,7 +81,7 @@ public class ChunkBuildBuffers {
     public ChunkMeshData createMesh(BlockRenderPass pass, float x, float y, float z, boolean sortTranslucent) {
         VertexBufferBuilder[] builders = this.buffersByLayer[pass.ordinal()];
 
-        ChunkMeshData meshData = new ChunkMeshData();
+        ChunkMeshData meshData = null;
         int bufferLen = 0;
 
         for (int facingId = 0; facingId < builders.length; facingId++) {
@@ -93,6 +93,10 @@ public class ChunkBuildBuffers {
 
             int start = bufferLen;
             int size = builder.getSize();
+
+            if(meshData == null) {
+                meshData = new ChunkMeshData();
+            }
 
             meshData.setModelSlice(ModelQuadFacing.VALUES[facingId], new BufferSlice(start, size));
 
