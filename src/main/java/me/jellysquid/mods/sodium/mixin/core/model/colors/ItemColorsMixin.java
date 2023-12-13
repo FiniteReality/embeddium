@@ -21,8 +21,11 @@ public class ItemColorsMixin implements ItemColorsExtended {
 
     @Inject(method = "register", at = @At("TAIL"))
     private void preRegisterColor(ItemColorProvider provider, ItemConvertible[] items, CallbackInfo ci) {
-        for (ItemConvertible convertible : items) {
-            this.itemsToColor.put(convertible.asItem(), provider);
+        // Synchronize so the inevitable crash mods cause will come from the vanilla map
+        synchronized (this.itemsToColor) {
+            for (ItemConvertible convertible : items) {
+                this.itemsToColor.put(convertible.asItem(), provider);
+            }
         }
     }
 

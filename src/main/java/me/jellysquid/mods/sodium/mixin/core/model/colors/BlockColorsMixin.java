@@ -28,12 +28,15 @@ public class BlockColorsMixin implements BlockColorsExtended {
     private void preRegisterColorProvider(BlockColorProvider provider, Block[] blocks, CallbackInfo ci) {
         // Happens with Quark. Why??
         if(provider != null) {
-            for (Block block : blocks) {
-                // There will be one provider already registered for vanilla blocks, if we are replacing it,
-                // it means a mod is using custom logic and we need to disable per-vertex coloring
-                if (this.blocksToColor.put(block, provider) != null) {
-                    this.overridenBlocks.add(block);
-                    SodiumClientMod.logger().info("Block {} had its color provider replaced and will not use per-vertex coloring", Registries.BLOCK.getId(block));
+            // Synchronize so the inevitable crash mods cause will come from the vanilla map
+            synchronized (this.blocksToColor) {
+                for (Block block : blocks) {
+                    // There will be one provider already registered for vanilla blocks, if we are replacing it,
+                    // it means a mod is using custom logic and we need to disable per-vertex coloring
+                    if (this.blocksToColor.put(block, provider) != null) {
+                        this.overridenBlocks.add(block);
+                        SodiumClientMod.logger().info("Block {} had its color provider replaced and will not use per-vertex coloring", Registries.BLOCK.getId(block));
+                    }
                 }
             }
         }
