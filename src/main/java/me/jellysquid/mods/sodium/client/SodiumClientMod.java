@@ -1,13 +1,11 @@
 package me.jellysquid.mods.sodium.client;
 
-import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
 import net.neoforged.fml.IExtensionPoint;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.embeddedt.embeddium.compat.EmbeddiumCompat;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,30 +23,20 @@ public class SodiumClientMod {
 
     private static String MOD_VERSION;
 
-    public static boolean cclLoaded = false;
     public static boolean oculusLoaded = false;
 
     public SodiumClientMod() {
-        SodiumPreLaunch.onPreLaunch();
-
         oculusLoaded = ModList.get().isLoaded("oculus");
 
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "embeddium", (a, b) -> true));
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
-        EmbeddiumCompat.init();
     }
 
     public void onClientSetup(final FMLClientSetupEvent event) {
         LOGGER = LoggerFactory.getLogger("Sodium");
         CONFIG = loadConfig();
-
-        cclLoaded = ModList.get().isLoaded("codechickenlib");
-
-        if(cclLoaded) {
-            CCLCompat.init();
-        }
     }
 
     public static SodiumGameOptions options() {

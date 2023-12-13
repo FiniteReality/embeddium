@@ -36,6 +36,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.LocalRandom;
 import net.minecraft.util.math.random.Random;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.common.NeoForge;
+import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 
 import java.util.Map;
@@ -186,6 +188,8 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         }
 
         renderData.setOcclusionData(occluder.build());
+
+        NeoForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildOutput(this.render, renderData.build(), meshes, this.buildTime);
     }
