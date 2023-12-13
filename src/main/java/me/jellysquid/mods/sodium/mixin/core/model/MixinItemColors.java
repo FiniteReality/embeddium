@@ -29,8 +29,13 @@ public class MixinItemColors implements ItemColorsExtended {
 
     @Inject(method = "register", at = @At("HEAD"))
     private void preRegisterColor(ItemColorProvider mapper, ItemConvertible[] convertibles, CallbackInfo ci) {
-        for (ItemConvertible convertible : convertibles) {
-            this.itemsToColor.put(convertible.asItem().delegate, mapper);
+        // Synchronize because Forge mods register this without enqueuing the call on the main thread
+        // and then blame Embeddium for the crash because of the mixin, despite vanilla using a non-concurrent
+        // HashMap too
+        synchronized (this.itemsToColor) {
+            for (ItemConvertible convertible : convertibles) {
+                this.itemsToColor.put(convertible.asItem().delegate, mapper);
+            }
         }
     }
 

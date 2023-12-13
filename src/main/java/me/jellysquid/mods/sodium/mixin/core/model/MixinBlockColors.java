@@ -26,9 +26,14 @@ public class MixinBlockColors implements BlockColorsExtended {
 
     @Inject(method = "registerColorProvider", at = @At("HEAD"))
     private void preRegisterColor(BlockColorProvider provider, Block[] blocks, CallbackInfo ci) {
-        for (Block block : blocks) {
-        	if(provider != null)
-        		this.blocksToColor.put(block, provider);
+        // Synchronize because Forge mods register this without enqueuing the call on the main thread
+        // and then blame Embeddium for the crash because of the mixin, despite vanilla using a non-concurrent
+        // HashMap too
+        synchronized (this.blocksToColor) {
+            for (Block block : blocks) {
+                if(provider != null)
+                    this.blocksToColor.put(block, provider);
+            }
         }
     }
 
