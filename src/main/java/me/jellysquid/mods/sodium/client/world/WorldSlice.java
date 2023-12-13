@@ -196,8 +196,6 @@ public class WorldSlice implements BlockRenderView, BiomeAccess.Storage {
     }
 
     private void unpackBlockDataR(BlockState[] states, ClonedChunkSection section, BlockBox box) {
-        Arrays.fill(states, Blocks.AIR.getDefaultState());
-
         PackedIntegerArray intArray = section.getBlockData();
         ClonedPalette<BlockState> palette = section.getBlockPalette();
 
