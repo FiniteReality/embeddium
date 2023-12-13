@@ -190,8 +190,6 @@ public class WorldSlice implements BlockRenderView {
     }
 
     private void unpackBlockDataSlow(BlockState[] states, ClonedChunkSection section, BlockBox box) {
-        Arrays.fill(states, Blocks.AIR.getDefaultState());
-
         PackedIntegerArray intArray = section.getBlockData();
         ClonedPalette<BlockState> palette = section.getBlockPalette();
 
