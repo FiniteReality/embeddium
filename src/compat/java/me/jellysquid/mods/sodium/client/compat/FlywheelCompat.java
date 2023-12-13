@@ -8,11 +8,18 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.Mod;
+import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 
+@Mod.EventBusSubscriber(modid = SodiumClientMod.MODID, value = Dist.CLIENT)
 public class FlywheelCompat {
+    private static final boolean flywheelLoaded = ModList.get().isLoaded("flywheel");
 
 	public static boolean addAndFilterBEs(BlockEntity be) {
-		if(SodiumClientMod.flywheelLoaded) {
+		if(flywheelLoaded) {
 		if (Backend.canUseInstancing(be.getWorld())) {
 			if (InstancedRenderRegistry.canInstance(be.getType()))
 				InstancedRenderDispatcher.getBlockEntities(be.getWorld()).queueAdd(be);
@@ -26,9 +33,15 @@ public class FlywheelCompat {
 	}
 	
     public static void filterBlockEntityList(Collection<BlockEntity> blockEntities) {
-        if (SodiumClientMod.flywheelLoaded) {
+        if (flywheelLoaded) {
             blockEntities.removeIf(InstancedRenderRegistry::shouldSkipRender);
         }
     }
-	
+
+    @SubscribeEvent
+    public static void onChunkDataBuilt(ChunkDataBuiltEvent event) {
+        if(flywheelLoaded) {
+            event.getDataBuilder().removeBlockEntitiesIf(InstancedRenderRegistry::shouldSkipRender);
+        }
+    }
 }

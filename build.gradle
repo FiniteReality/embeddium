@@ -27,6 +27,25 @@ archivesBaseName = project.archives_base_name
 version = "${project.mod_version}${getVersionMetadata()}+mc${project.minecraft_version}"
 group = project.maven_group
 
+sourceSets {
+	compat {
+		java {
+			compileClasspath += main.compileClasspath
+			compileClasspath += main.output
+		}
+	}
+
+	main {
+		java {
+			runtimeClasspath += compat.output
+		}
+	}
+}
+
+loom {
+	createRemapConfigurations(sourceSets.compat)
+}
+
 repositories {
     maven {
         name "Flywheel maven"
@@ -71,11 +90,10 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-	
-	modCompileOnly "com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53"
-	modCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149"
-	modCompileOnly "maven.modrinth:oculus:1.18.2-1.4.3a"
-	modCompileOnly "curse.maven:codechickenlib-242818:4607274"
+
+	modCompatCompileOnly "com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53"
+	modCompatCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149"
+	modCompatCompileOnly "curse.maven:codechickenlib-242818:4607274"
 
 	modLocalRuntime "curse.maven:lazydfu-460819:3544496"
 
@@ -111,6 +129,8 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
+	from sourceSets.compat.output.classesDirs
+	from sourceSets.compat.output.resourcesDir
 }
 
 def copyJarNameConsistent = tasks.register('copyJarNameConsistent', Copy) {

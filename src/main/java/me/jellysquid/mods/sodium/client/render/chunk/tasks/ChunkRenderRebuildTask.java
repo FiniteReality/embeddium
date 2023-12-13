@@ -5,7 +5,6 @@ import java.util.Map;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.FlywheelCompat;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
@@ -40,6 +39,8 @@ import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.common.MinecraftForge;
+import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 
 /**
@@ -164,7 +165,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                             if (entity != null) {
                                 BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(entity);
 
-                                if (renderer != null && FlywheelCompat.addAndFilterBEs(entity)) {
+                                if (renderer != null) {
                                     renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
                                     rendered = true;
                                 }
@@ -208,6 +209,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
         renderData.setOcclusionData(occluder.build());
         renderData.setBounds(bounds.build(this.render.getChunkPos()));
+
+        MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildResult(this.render, renderData.build(), meshes, this.frame);
     }

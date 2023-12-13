@@ -42,13 +42,14 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
                     .getAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE)
                     .getSprite(rl("block/wire"))
     );
-    
+
+
     public static Identifier rl(String path)
 	{
 		return new Identifier("immersiveengineering", path);
 	}
 
-    public static void meshAppendEvent(ChunkMeshEvent event) {
+    static void meshAppendEvent(ChunkMeshEvent event) {
         if(ImmersiveEmptyChunkChecker.hasWires(event.getSectionOrigin())) {
             event.addMeshAppender(ctx -> renderConnectionsInSection(ctx.sodiumBuildBuffers(), ctx.blockRenderView(), ctx.sectionOrigin()));
         }
