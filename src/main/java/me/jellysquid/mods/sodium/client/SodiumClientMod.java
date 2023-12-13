@@ -1,7 +1,5 @@
 package me.jellysquid.mods.sodium.client;
 
-import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
-import org.embeddedt.embeddium.compat.EmbeddiumCompat;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
@@ -24,9 +22,8 @@ public class SodiumClientMod {
     private static String MOD_VERSION;
 
     public static final String MODID = "embeddium";
-    
+
     public static boolean oculusLoaded = false;
-    public static boolean cclLoaded = false;
 
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
@@ -35,17 +32,10 @@ public class SodiumClientMod {
         oculusLoaded = ModList.get().isLoaded("oculus");
 
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-
-        EmbeddiumCompat.init();
     }
     
     public void setup(final FMLClientSetupEvent event) {
         CONFIG = loadConfig();
-        cclLoaded = ModList.get().isLoaded("codechickenlib");
-
-        if(cclLoaded) {
-            CCLCompat.init();
-        }
     }
 
     public static SodiumGameOptions options() {

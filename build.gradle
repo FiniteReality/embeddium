@@ -28,10 +28,29 @@ version = "${project.mod_version}${getVersionMetadata()}+mc${project.minecraft_v
 group = project.maven_group
 
 configurations {
-    modIncludeImplementation
+	modIncludeImplementation
 
-    include.extendsFrom modIncludeImplementation
-    modImplementation.extendsFrom modIncludeImplementation
+	include.extendsFrom modIncludeImplementation
+	modImplementation.extendsFrom modIncludeImplementation
+}
+
+sourceSets {
+	compat {
+		java {
+			compileClasspath += main.compileClasspath
+			compileClasspath += main.output
+		}
+	}
+
+	main {
+		java {
+			runtimeClasspath += compat.output
+		}
+	}
+}
+
+loom {
+	createRemapConfigurations(sourceSets.compat)
 }
 
 repositories {
@@ -71,10 +90,10 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    modCompileOnly "curse.maven:flywheel-486392:${flywheel_fileid}"
-    modCompileOnly "curse.maven:immersive-engineering-231951:${ie_fileid}"
-    modCompileOnly "curse.maven:oculus-581495:${oculus_fileid}"
-	modCompileOnly "curse.maven:codechickenlib-242818:${codechicken_fileid}"
+	modCompatCompileOnly "curse.maven:flywheel-486392:${flywheel_fileid}"
+	modCompatCompileOnly "curse.maven:immersive-engineering-231951:${ie_fileid}"
+	modCompatCompileOnly "curse.maven:oculus-581495:${oculus_fileid}"
+	modCompatCompileOnly "curse.maven:codechickenlib-242818:${codechicken_fileid}"
 
 	modLocalRuntime "curse.maven:lazydfu-460819:3544496"
 
@@ -110,6 +129,8 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
+	from sourceSets.compat.output.classesDirs
+	from sourceSets.compat.output.resourcesDir
 }
 
 def copyJarNameConsistent = tasks.register('copyJarNameConsistent', Copy) {

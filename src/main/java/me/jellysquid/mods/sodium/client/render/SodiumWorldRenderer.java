@@ -360,7 +360,7 @@ public class SodiumWorldRenderer {
 
     public void onChunkRenderUpdated(int x, int y, int z, ChunkRenderData meshBefore, ChunkRenderData meshAfter) {
         ListUtil.updateList(this.globalBlockEntities, meshBefore.getGlobalBlockEntities(), meshAfter.getGlobalBlockEntities());
-        
+
         this.renderSectionManager.onChunkRenderUpdates(x, y, z, meshAfter);
     }
 

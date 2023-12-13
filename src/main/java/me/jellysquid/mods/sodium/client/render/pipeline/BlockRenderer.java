@@ -1,8 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.pipeline;
 
-import codechicken.lib.render.block.ICCBlockRenderer;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.ccl.CCLCompat;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
@@ -36,6 +34,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import net.minecraftforge.client.model.data.ModelData;
+import org.embeddedt.embeddium.api.BlockRendererRegistry;
 
 import java.util.List;
 
@@ -55,6 +54,7 @@ public class BlockRenderer {
     private final boolean useAmbientOcclusion;
 
     private boolean useReorienting;
+    private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
     public BlockRenderer(MinecraftClient client, LightPipelineProvider lighters, ColorBlender colorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
@@ -73,27 +73,28 @@ public class BlockRenderer {
 
         boolean rendered = false;
 
-        if(SodiumClientMod.cclLoaded) {
-            final MatrixStack mStack = new MatrixStack();
+        // Process custom renderers
+        customRenderers.clear();
+        BlockRendererRegistry.instance().fillCustomRenderers(customRenderers, state, pos, world, layer);
+
+        if(!customRenderers.isEmpty()) {
             final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
-            for (final ICCBlockRenderer renderer : CCLCompat.getCustomRenderers(world, pos)) {
-                if (renderer.canHandleBlock(world, pos, state, layer)) {
-                    mStack.isEmpty();
-
-                    builder.reset();
-                    renderer.renderBlock(state, pos, world, mStack, builder, random, modelData, layer);
-                    rendered = true;
-                    builder.flush(buffers, origin);
-
-                    return rendered;
+            for (BlockRendererRegistry.Renderer customRenderer : customRenderers) {
+                builder.reset();
+                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(state, pos, world, builder, random, modelData, layer);
+                builder.flush(buffers, origin);
+                if (result == BlockRendererRegistry.RenderResult.OVERRIDE) {
+                    return true;
                 }
             }
         }
 
+        // Delegate to Forge render pipeline if enabled
         if(ForgeBlockRenderer.useForgeLightingPipeline()) {
             MatrixStack mStack;
             if(offset != Vec3d.ZERO) {
                 mStack = new MatrixStack();
+                mStack.push();
                 mStack.translate(offset.x, offset.y, offset.z);
             } else
                 mStack = EMPTY_STACK;
@@ -103,6 +104,8 @@ public class BlockRenderer {
             builder.flush(buffers, origin);
             return rendered;
         }
+
+        // Use Sodium's default render path
 
         for (Direction dir : DirectionUtil.ALL_DIRECTIONS) {
             random.setSeed(seed);

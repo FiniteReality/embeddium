@@ -8,6 +8,7 @@ import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.Direction;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * The render data for a chunk render container containing all the information about which meshes are attached, the
@@ -97,6 +98,11 @@ public class ChunkRenderData {
          */
         public void addBlockEntity(BlockEntity entity, boolean cull) {
             (cull ? this.blockEntities : this.globalBlockEntities).add(entity);
+        }
+
+        public void removeBlockEntitiesIf(Predicate<BlockEntity> removePredicate) {
+            this.blockEntities.removeIf(removePredicate);
+            this.globalBlockEntities.removeIf(removePredicate);
         }
 
         public ChunkRenderData build() {
