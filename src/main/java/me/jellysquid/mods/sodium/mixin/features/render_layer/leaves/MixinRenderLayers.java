@@ -7,6 +7,7 @@ import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
 import net.minecraft.fluid.Fluid;
+import net.minecraftforge.registries.IRegistryDelegate;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,23 +15,24 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
 @Mixin(RenderLayers.class)
 public class MixinRenderLayers {
     @Mutable
     @Shadow
     @Final
-    private static Map<Block, RenderLayer> BLOCKS;
+    private static Map<IRegistryDelegate<Block>, Predicate<RenderLayer>> blockRenderChecks;
 
     @Mutable
     @Shadow
     @Final
-    private static Map<Fluid, RenderLayer> FLUIDS;
+    private static Map<IRegistryDelegate<Block>, Predicate<RenderLayer>> fluidRenderChecks;
 
     static {
         // Replace the backing collection types with something a bit faster, since this is a hot spot in chunk rendering.
-        BLOCKS = new Reference2ReferenceOpenHashMap<>(BLOCKS);
-        FLUIDS = new Reference2ReferenceOpenHashMap<>(FLUIDS);
+        blockRenderChecks = new Reference2ReferenceOpenHashMap<>(blockRenderChecks);
+        fluidRenderChecks = new Reference2ReferenceOpenHashMap<>(fluidRenderChecks);
     }
 
     @Unique
