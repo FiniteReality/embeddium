@@ -1,13 +1,14 @@
 package me.jellysquid.mods.sodium.mixin.features.render_layer.leaves;
 
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.util.registry.RegistryEntry;
+import net.minecraftforge.client.ChunkRenderTypeSet;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,27 +17,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
 
+
 @Mixin(RenderLayers.class)
 public class MixinRenderLayers {
-    @Mutable
-    @Shadow
-    @Final
-    private static Map<Block, RenderLayer> BLOCKS;
+    // Note: The Sodium patch to replace the backing collection is removed, because Forge uses fastutil
 
-    @Mutable
-    @Shadow
-    @Final
-    private static Map<Fluid, RenderLayer> FLUIDS;
+    @Shadow @Final private static Map<RegistryEntry.Reference<Block>, ChunkRenderTypeSet> BLOCK_RENDER_TYPES;
 
     static {
-        // Replace the backing collection types with something a bit faster, since this is a hot spot in chunk rendering.
-        BLOCKS = new Reference2ReferenceOpenHashMap<>(BLOCKS);
-        
-        // TODO: This is a temporary fix to solve frogspawn blocks making the underlying water invisible due to translucency sorting.
+        // This is a temporary fix to solve frogspawn blocks making the underlying water invisible if translucency sorting
+        // is off.
         // This slightly affects the look of the block, but is better than the alternative for now.
-        BLOCKS.replace(Blocks.FROGSPAWN, RenderLayer.getCutoutMipped());
-        
-        FLUIDS = new Reference2ReferenceOpenHashMap<>(FLUIDS);
+        BLOCK_RENDER_TYPES.put(ForgeRegistries.BLOCKS.getDelegateOrThrow(Blocks.FROGSPAWN), ChunkRenderTypeSet.of(RenderLayer.getCutoutMipped()));
     }
 
     @Unique

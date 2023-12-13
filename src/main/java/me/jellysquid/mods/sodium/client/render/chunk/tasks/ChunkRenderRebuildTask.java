@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
@@ -29,14 +28,13 @@ import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.LocalRandom;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
+import org.embeddedt.embeddium.model.ModelDataSnapshotter;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -65,7 +63,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         this.camera = Vec3d.ZERO;
         this.translucencySorting = SodiumClientMod.options().performance.useTranslucentFaceSorting;
 
-        this.modelDataMap = new Object2ObjectOpenHashMap<>(MinecraftClient.getInstance().world.getModelDataManager().getAt(new ChunkPos(ChunkSectionPos.getSectionCoord(this.render.getOriginX()), ChunkSectionPos.getSectionCoord(this.render.getOriginZ()))));
+        this.modelDataMap = ModelDataSnapshotter.getModelDataForSection(MinecraftClient.getInstance().world, this.renderContext.getOrigin());
     }
     
     private final LocalRandom random = new LocalRandom(42L);
