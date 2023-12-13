@@ -40,13 +40,6 @@ sourceSets {
         }
     }
 
-    legacy {
-        java {
-            compileClasspath += main.compileClasspath
-            compileClasspath += main.output
-        }
-    }
-
     compat {
         java {
             compileClasspath += main.compileClasspath
@@ -89,8 +82,6 @@ build.dependsOn remapApiJar
 jar {
     from sourceSets.api.output.classesDirs
     from sourceSets.api.output.resourcesDir
-    from sourceSets.legacy.output.classesDirs
-    from sourceSets.legacy.output.resourcesDir
     from sourceSets.compat.output.classesDirs
     from sourceSets.compat.output.resourcesDir
 }
