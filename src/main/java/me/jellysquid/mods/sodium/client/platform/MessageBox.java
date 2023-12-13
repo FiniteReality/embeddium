@@ -56,7 +56,7 @@ public class MessageBox {
 
             if (helpUrl != null) {
                 msgBoxCallback = MsgBoxCallback.create(lpHelpInfo -> {
-                    Util.getOperatingSystem()
+                    net.minecraft.util.Util.getOperatingSystem()
                             .open(helpUrl);
                 });
             } else {
