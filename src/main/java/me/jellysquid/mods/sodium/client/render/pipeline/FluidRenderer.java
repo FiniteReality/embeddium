@@ -31,7 +31,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockRenderView;
-import net.minecraftforge.client.ForgeHooksClient;
+import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
 
 public class FluidRenderer {
 	
@@ -51,6 +51,8 @@ public class FluidRenderer {
 
     private final QuadLightData quadLightData = new QuadLightData();
     private final int[] quadColors = new int[4];
+
+    private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
 
     public FluidRenderer(MinecraftClient client, LightPipelineProvider lighters, BiomeColorBlender biomeColorBlender) {
         int normal = Norm3b.pack(0.0f, 1.0f, 0.0f);
@@ -117,7 +119,7 @@ public class FluidRenderer {
             return false;
         }
 
-        Sprite[] sprites = ForgeHooksClient.getFluidSprites(world, pos, fluidState);
+        Sprite[] sprites = fluidSpriteCache.getSprites(world, pos, fluidState);
         boolean hc = fluidState.getFluid().getAttributes().getColor() != 0xffffffff;
 
         boolean rendered = false;
