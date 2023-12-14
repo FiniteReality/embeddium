@@ -34,6 +34,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.model.ModelDataSnapshotter;
+import org.embeddedt.embeddium.org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -108,11 +109,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     buffers.setRenderOffset(pos.getX() - renderOffset.getX(), pos.getY() - renderOffset.getY(), pos.getZ() - renderOffset.getZ());
 
                     if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                    for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-	                        if (!RenderLayers.canRenderInLayer(blockState, layer)) {
-	                        	continue;
-	                        }
-	                        
+                        for (RenderLayer layer : EmbeddiumRenderLayerCache.forState(blockState)) {
 	                        ForgeHooksClient.setRenderLayer(layer);
                             IModelData modelData = modelDataMap.getOrDefault(pos, EmptyModelData.INSTANCE);
 	                        
@@ -131,11 +128,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     FluidState fluidState = blockState.getFluidState();
 
                     if (!fluidState.isEmpty()) {
-                        for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-                            if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
-                                continue;
-                            }
-
+                        for (RenderLayer layer : EmbeddiumRenderLayerCache.forState(fluidState)) {
                             ForgeHooksClient.setRenderLayer(layer);
 
 	                        if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, pos, buffers.get(layer))) {
