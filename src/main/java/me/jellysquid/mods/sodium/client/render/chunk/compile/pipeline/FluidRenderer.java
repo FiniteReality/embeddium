@@ -36,9 +36,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockRenderView;
-import net.minecraftforge.client.ForgeHooksClient;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
 
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
@@ -58,6 +58,8 @@ public class FluidRenderer {
 
     private final ChunkVertexEncoder.Vertex[] vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
     private final ColorProviderRegistry colorProviderRegistry;
+
+    private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setNormal(NormI8.pack(0.0f, 1.0f, 0.0f));
@@ -126,7 +128,7 @@ public class FluidRenderer {
 
         final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid);
 
-        Sprite[] sprites = ForgeHooksClient.getFluidSprites(world, blockPos, fluidState);
+        Sprite[] sprites = fluidSpriteCache.getSprites(world, blockPos, fluidState);
 
         float fluidHeight = this.fluidHeight(world, fluid, blockPos, Direction.UP);
         float northWestHeight, southWestHeight, southEastHeight, northEastHeight;
