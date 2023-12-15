@@ -29,6 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraftforge.common.extensions.IForgeBlockEntity;
+import org.embeddedt.embeddium.org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 import java.util.Collection;
 import java.util.Set;
@@ -246,6 +247,8 @@ public class SodiumWorldRenderer {
         this.globalBlockEntities.clear();
 
         this.renderDistance = this.client.options.getViewDistance();
+
+        EmbeddiumRenderLayerCache.invalidate();
 
         this.renderPassManager = BlockRenderPassManager.createDefaultMappings();
 

@@ -39,6 +39,7 @@ import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 import org.embeddedt.embeddium.model.ModelDataSnapshotter;
+import org.embeddedt.embeddium.org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -121,11 +122,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                         boolean rendered = false;
 
                         if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                            for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-                                if (!RenderLayers.canRenderInLayer(blockState, layer)) {
-                                    continue;
-                                }
-
+                            for (RenderLayer layer : EmbeddiumRenderLayerCache.forState(blockState)) {
                                 ForgeHooksClient.setRenderType(layer);
                                 IModelData modelData = modelDataMap.getOrDefault(blockPos, EmptyModelData.INSTANCE);
 
@@ -143,11 +140,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                         FluidState fluidState = blockState.getFluidState();
 
                         if (!fluidState.isEmpty()) {
-                            for (RenderLayer layer : RenderLayer.getBlockLayers()) {
-                                if (!RenderLayers.canRenderInLayer(fluidState, layer)) {
-                                    continue;
-                                }
-
+                            for (RenderLayer layer : EmbeddiumRenderLayerCache.forState(fluidState)) {
                                 ForgeHooksClient.setRenderType(layer);
 
                                 if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, blockPos, offset, buffers.get(layer))) {

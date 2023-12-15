@@ -35,7 +35,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockRenderView;
-import net.minecraftforge.client.ForgeHooksClient;
+import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
 
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
@@ -56,6 +56,8 @@ public class FluidRenderer {
 
     private final QuadLightData quadLightData = new QuadLightData();
     private final int[] quadColors = new int[4];
+
+    private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
 
     public FluidRenderer(LightPipelineProvider lighters, ColorBlender colorBlender) {
         int normal = Norm3b.pack(0.0f, 1.0f, 0.0f);
@@ -126,7 +128,7 @@ public class FluidRenderer {
 
         ColorSampler<FluidState> colorizer = this.createColorProviderAdapter(world, pos, fluidState);
 
-        Sprite[] sprites = ForgeHooksClient.getFluidSprites(world, pos, fluidState);
+        Sprite[] sprites = fluidSpriteCache.getSprites(world, pos, fluidState);
 
         boolean rendered = false;
 
