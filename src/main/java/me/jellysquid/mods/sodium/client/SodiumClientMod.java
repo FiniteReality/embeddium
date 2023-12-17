@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.config.ConfigMigrator;
+import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
 
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
@@ -32,6 +33,8 @@ public class SodiumClientMod {
     
     public void onInitializeClient(final FMLClientSetupEvent event) {
     	MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
+
+        IncompatibleModManager.checkMods(event);
     }
 
     public static SodiumGameOptions options() {

@@ -39,6 +39,7 @@ public class SodiumGameOptions {
         public boolean allowDirectMemoryAccess = true;
         public boolean ignoreDriverBlacklist = false;
         public boolean translucencySorting = false;
+        public boolean disableIncompatibleModWarnings = false;
     }
 
     public static class PerformanceSettings {
