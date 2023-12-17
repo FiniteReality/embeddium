@@ -21,7 +21,8 @@ public class IncompatibleModManager {
             .build();
 
     public static void checkMods(FMLClientSetupEvent event) {
-        if (SodiumClientMod.options().advanced.disableIncompatibleModWarnings) {
+        // TODO: Enable
+        if (true || SodiumClientMod.options().advanced.disableIncompatibleModWarnings) {
             return;
         }
         IModInfo selfInfo = ModLoadingContext.get().getActiveContainer().getModInfo();
