@@ -20,12 +20,14 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -91,72 +93,81 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         BlockPos.Mutable pos = new BlockPos.Mutable();
         BlockPos renderOffset = this.offset;
 
-        for (int relY = 0; relY < 16; relY++) {
-            if (cancellationSource.isCancelled()) {
-                return null;
-            }
+        try {
+            for (int relY = 0; relY < 16; relY++) {
+                if (cancellationSource.isCancelled()) {
+                    return null;
+                }
 
-            for (int relZ = 0; relZ < 16; relZ++) {
-                for (int relX = 0; relX < 16; relX++) {
-                    BlockState blockState = slice.getBlockStateRelative(relX + 16, relY + 16, relZ + 16);
+                for (int relZ = 0; relZ < 16; relZ++) {
+                    for (int relX = 0; relX < 16; relX++) {
+                        BlockState blockState = slice.getBlockStateRelative(relX + 16, relY + 16, relZ + 16);
 
-                    if (blockState.isAir() && !blockState.hasTileEntity()) {
-                        continue;
-                    }
-
-                    // TODO: commit this separately
-                    pos.set(baseX + relX, baseY + relY, baseZ + relZ);
-                    buffers.setRenderOffset(pos.getX() - renderOffset.getX(), pos.getY() - renderOffset.getY(), pos.getZ() - renderOffset.getZ());
-
-                    if (blockState.getRenderType() == BlockRenderType.MODEL) {
-                        for (RenderLayer layer : EmbeddiumRenderLayerCache.forState(blockState)) {
-	                        ForgeHooksClient.setRenderLayer(layer);
-                            IModelData modelData = modelDataMap.getOrDefault(pos, EmptyModelData.INSTANCE);
-	                        
-	                        BakedModel model = cache.getBlockModels()
-	                                .getModel(blockState);
-	
-	                        long seed = blockState.getRenderingSeed(pos);
-	
-	                        if (cache.getBlockRenderer().renderModel(cache.getLocalSlice(), blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
-	                            bounds.addBlock(relX, relY, relZ);
-	                        }
-	                        
+                        if (blockState.isAir() && !blockState.hasTileEntity()) {
+                            continue;
                         }
-                    }
 
-                    FluidState fluidState = blockState.getFluidState();
+                        // TODO: commit this separately
+                        pos.set(baseX + relX, baseY + relY, baseZ + relZ);
+                        buffers.setRenderOffset(pos.getX() - renderOffset.getX(), pos.getY() - renderOffset.getY(), pos.getZ() - renderOffset.getZ());
 
-                    if (!fluidState.isEmpty()) {
-                        for (RenderLayer layer : EmbeddiumRenderLayerCache.forState(fluidState)) {
-                            ForgeHooksClient.setRenderLayer(layer);
+                        if (blockState.getRenderType() == BlockRenderType.MODEL) {
+                            for (RenderLayer layer : EmbeddiumRenderLayerCache.forState(blockState)) {
+                                ForgeHooksClient.setRenderLayer(layer);
+                                IModelData modelData = modelDataMap.getOrDefault(pos, EmptyModelData.INSTANCE);
 
-	                        if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, pos, buffers.get(layer))) {
-	                            bounds.addBlock(relX, relY, relZ);
-	                        }
-                        }
-                    }
+                                BakedModel model = cache.getBlockModels()
+                                        .getModel(blockState);
 
-                    if (blockState.hasTileEntity()) {
-                        BlockEntity entity = slice.getBlockEntity(pos);
+                                long seed = blockState.getRenderingSeed(pos);
 
-                        if (entity != null) {
-                            BlockEntityRenderer<BlockEntity> renderer = BlockEntityRenderDispatcher.INSTANCE.get(entity);
+                                if (cache.getBlockRenderer().renderModel(cache.getLocalSlice(), blockState, pos, model, buffers.get(layer), true, seed, modelData)) {
+                                    bounds.addBlock(relX, relY, relZ);
+                                }
 
-                            if (renderer != null) {
-                                renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
-
-                                bounds.addBlock(relX, relY, relZ);
                             }
                         }
-                    }
 
-                    if (blockState.isOpaqueFullCube(slice, pos)) {
-                        occluder.markClosed(pos);
+                        FluidState fluidState = blockState.getFluidState();
+
+                        if (!fluidState.isEmpty()) {
+                            for (RenderLayer layer : EmbeddiumRenderLayerCache.forState(fluidState)) {
+                                ForgeHooksClient.setRenderLayer(layer);
+
+                                if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, pos, buffers.get(layer))) {
+                                    bounds.addBlock(relX, relY, relZ);
+                                }
+                            }
+                        }
+
+                        if (blockState.hasTileEntity()) {
+                            BlockEntity entity = slice.getBlockEntity(pos);
+
+                            if (entity != null) {
+                                BlockEntityRenderer<BlockEntity> renderer = BlockEntityRenderDispatcher.INSTANCE.get(entity);
+
+                                if (renderer != null) {
+                                    renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
+
+                                    bounds.addBlock(relX, relY, relZ);
+                                }
+                            }
+                        }
+
+                        if (blockState.isOpaqueFullCube(slice, pos)) {
+                            occluder.markClosed(pos);
+                        }
                     }
                 }
             }
+        } catch (CrashException ex) {
+            // Propagate existing crashes (add context)
+            throw fillCrashInfo(ex.getReport(), slice, pos);
+        } catch (Exception ex) {
+            // Create a new crash report for other exceptions (e.g. thrown in getQuads)
+            throw fillCrashInfo(CrashReport.create(ex, "Encountered exception while building chunk meshes"), slice, pos);
         }
+
         
         ForgeHooksClient.setRenderLayer(null);
 
@@ -177,6 +188,23 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildResult<>(this.render, renderData.build());
+    }
+
+    private CrashException fillCrashInfo(CrashReport report, WorldSlice slice, BlockPos pos) {
+        CrashReportSection crashReportSection = report.addElement("Block being rendered", 1);
+
+        BlockState state = null;
+        try {
+            state = slice.getBlockState(pos);
+        } catch (Exception ignored) {}
+        CrashReportSection.addBlockInfo(crashReportSection, pos, state);
+
+        crashReportSection.add("Chunk section", render);
+        if (context != null) {
+            crashReportSection.add("Render context volume", context.getVolume());
+        }
+
+        return new CrashException(report);
     }
 
     @Override

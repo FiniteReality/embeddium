@@ -12,6 +12,7 @@
     "conformVisibility": true
   },
   "client": [
+    "core.MixinCrashReportSection",
 	"core.MixinDirection",
     "core.frustum.MixinFrustum",
     "core.matrix.MixinMatrix3f",

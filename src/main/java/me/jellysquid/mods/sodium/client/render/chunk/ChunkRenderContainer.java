@@ -320,4 +320,12 @@ public class ChunkRenderContainer<T extends ChunkGraphicsState> {
     public int getId() {
         return this.id;
     }
+
+    @Override
+    public String toString() {
+        return String.format("ChunkRenderContainer at chunk (%d, %d, %d) from (%d, %d, %d) to (%d, %d, %d)",
+                this.chunkX, this.chunkY, this.chunkZ,
+                this.getOriginX(), this.getOriginY(), this.getOriginZ(),
+                this.getOriginX() + 15, this.getOriginY() + 15, this.getOriginZ() + 15);
+    }
 }
