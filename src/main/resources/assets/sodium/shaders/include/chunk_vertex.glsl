@@ -13,7 +13,7 @@ in uvec4 in_VertexData;
 
 in vec3 in_Pos;
 in uint in_Color;
-in uint in_TextureUv;
+in vec2 in_TextureUv;
 in uint in_DrawParamsLight;
 
 #else
@@ -85,7 +85,6 @@ void _vert_init() {
     _vert_light = (uvec2((in_DrawParamsLight >> 16) & 0xFFFFu) >> uvec2(0, 8)) & uvec2(0xFFu);
 
     // Vertex Texture Coords
-    uvec2 packed_tex_coord = (uvec2(in_TextureUv) >> uvec2(0, 16)) & uvec2(0xFFFFu);
-    _vert_tex_coord = vec2(packed_tex_coord) * TEX_COORD_SCALE;
+    _vert_tex_coord = in_TextureUv;
 #endif
 }
