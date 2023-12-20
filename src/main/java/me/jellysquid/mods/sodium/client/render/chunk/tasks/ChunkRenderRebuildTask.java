@@ -174,7 +174,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         } catch (CrashException ex) {
             // Propagate existing crashes (add context)
             throw fillCrashInfo(ex.getReport(), slice, blockPos);
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             // Create a new crash report for other exceptions (e.g. thrown in getQuads)
             throw fillCrashInfo(CrashReport.create(ex, "Encountered exception while building chunk meshes"), slice, blockPos);
         }

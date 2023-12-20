@@ -11,6 +11,7 @@ import net.minecraftforge.network.NetworkConstants;
 
 import java.io.IOException;
 
+import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,8 @@ public class SodiumClientMod {
     
     public void setup(final FMLClientSetupEvent event) {
         CONFIG = loadConfig();
+
+        IncompatibleModManager.checkMods(event);
     }
 
     public static SodiumGameOptions options() {

@@ -282,7 +282,7 @@ public class ChunkBuilder {
         try {
             // Perform the build task with this worker's local resources and obtain the result
             result = job.task.performBuild(context, job);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // Propagate any exception from chunk building
             job.future.completeExceptionally(e);
             SodiumClientMod.logger().error("Chunk build failed", e);

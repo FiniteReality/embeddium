@@ -1,9 +1,0 @@
-Copyright (C) embeddedt 2023
-
-Much of the code is derived from Sodium & Rubidium, and follows their
-respective copyrights.
-
-Embeddium (like its upstreams) is distributed under LGPL-3.0, but includes
-one or more classes from Forge. These classes retain their LGPL-2.1 license,
-and may be replaced within a JAR file. The maintainer(s) of Embeddium
-consider this equivalent to dynamic linking.
