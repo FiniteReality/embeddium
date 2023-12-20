@@ -56,6 +56,7 @@ public class SodiumGameOptions {
     public static class AdvancedSettings {
         public boolean enableMemoryTracing = false;
         public boolean useAdvancedStagingBuffers = true;
+        public boolean disableIncompatibleModWarnings = false;
 
         public int cpuRenderAheadLimit = 3;
     }

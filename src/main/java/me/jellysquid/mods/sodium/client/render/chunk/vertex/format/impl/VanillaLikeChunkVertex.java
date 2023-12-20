@@ -15,15 +15,13 @@ import org.lwjgl.system.MemoryUtil;
  * compatible with mods & resource packs that need high precision for models.
  */
 public class VanillaLikeChunkVertex implements ChunkVertexType {
-    public static final int STRIDE = 24;
-
-    private static final int TEXTURE_MAX_VALUE = 65536;
+    public static final int STRIDE = 28;
 
     public static final GlVertexFormat<VanillaLikeChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(VanillaLikeChunkMeshAttribute.class, STRIDE)
             .addElement(VanillaLikeChunkMeshAttribute.POSITION, 0, GlVertexAttributeFormat.FLOAT, 3, false, false)
             .addElement(VanillaLikeChunkMeshAttribute.COLOR, 12, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
-            .addElement(VanillaLikeChunkMeshAttribute.TEXTURE_UV, 16, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
-            .addElement(VanillaLikeChunkMeshAttribute.DRAW_PARAMS_LIGHT, 20, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
+            .addElement(VanillaLikeChunkMeshAttribute.TEXTURE_UV, 16, GlVertexAttributeFormat.FLOAT, 2, false, false)
+            .addElement(VanillaLikeChunkMeshAttribute.DRAW_PARAMS_LIGHT, 24, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
             .build();
 
     @Override
@@ -38,8 +36,9 @@ public class VanillaLikeChunkVertex implements ChunkVertexType {
             MemoryUtil.memPutFloat(ptr + 4, vertex.y);
             MemoryUtil.memPutFloat(ptr + 8, vertex.z);
             MemoryUtil.memPutInt(ptr + 12, encodeColor(vertex.color));
-            MemoryUtil.memPutInt(ptr + 16, (encodeTexture(vertex.u) << 0) | (encodeTexture(vertex.v) << 16));
-            MemoryUtil.memPutInt(ptr + 20, (encodeDrawParameters(material, sectionIndex) << 0) | (encodeLight(vertex.light) << 16));
+            MemoryUtil.memPutFloat(ptr + 16, encodeTexture(vertex.u));
+            MemoryUtil.memPutFloat(ptr + 20, encodeTexture(vertex.v));
+            MemoryUtil.memPutInt(ptr + 24, (encodeDrawParameters(material, sectionIndex) << 0) | (encodeLight(vertex.light) << 16));
 
             return ptr + STRIDE;
         };
@@ -70,7 +69,7 @@ public class VanillaLikeChunkVertex implements ChunkVertexType {
         return ((block << 0) | (sky << 8));
     }
 
-    private static int encodeTexture(float value) {
-        return (int) (Math.min(0.99999997F, value) * TEXTURE_MAX_VALUE);
+    private static float encodeTexture(float value) {
+        return Math.min(0.99999997F, value);
     }
 }

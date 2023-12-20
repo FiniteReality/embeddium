@@ -7,6 +7,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+
+import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +39,8 @@ public class SodiumClientMod {
     public void onClientSetup(final FMLClientSetupEvent event) {
         LOGGER = LoggerFactory.getLogger("Sodium");
         CONFIG = loadConfig();
+
+        IncompatibleModManager.checkMods(event);
     }
 
     public static SodiumGameOptions options() {
