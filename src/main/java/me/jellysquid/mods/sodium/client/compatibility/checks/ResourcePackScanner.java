@@ -41,8 +41,8 @@ public class ResourcePackScanner {
         var customResourcePacks = manager.streamResourcePacks();
 
         customResourcePacks.forEach(resourcePack -> {
-            // Omit 'vanilla', 'fabric', and 'mod_resources' resource packs
-            if (!resourcePack.getName().equals("vanilla") && !resourcePack.getName().equals("fabric") && !resourcePack.getName().equals("mod_resources")) {
+            // Omit 'vanilla', 'fabric', and mod resource packs
+            if (!resourcePack.getName().equals("vanilla") && !resourcePack.getName().equals("fabric") && !resourcePack.getName().startsWith("mod:")) {
                 var resourcePackName = resourcePack.getName();
 
                 resourcePack.findResources(ResourceType.CLIENT_RESOURCES, Identifier.DEFAULT_NAMESPACE, "shaders", (path, ignored) -> {
