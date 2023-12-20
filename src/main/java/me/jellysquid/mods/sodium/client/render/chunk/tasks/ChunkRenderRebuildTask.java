@@ -163,7 +163,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         } catch (CrashException ex) {
             // Propagate existing crashes (add context)
             throw fillCrashInfo(ex.getReport(), slice, pos);
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             // Create a new crash report for other exceptions (e.g. thrown in getQuads)
             throw fillCrashInfo(CrashReport.create(ex, "Encountered exception while building chunk meshes"), slice, pos);
         }

@@ -374,7 +374,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
                 try {
                     // Perform the build task with this worker's local resources and obtain the result
                     result = job.task.performBuild(this.cache, this.bufferCache, job);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     // Propagate any exception from chunk building
                     job.future.completeExceptionally(e);
                     SodiumClientMod.logger().error("Chunk build failed", e);
