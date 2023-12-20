@@ -8,6 +8,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkConstants;
+
+import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,8 @@ public class SodiumClientMod {
     public void onClientSetup(final FMLClientSetupEvent event) {
         LOGGER = LoggerFactory.getLogger("Sodium");
         CONFIG = loadConfig();
+
+        IncompatibleModManager.checkMods(event);
     }
 
     public static SodiumGameOptions options() {

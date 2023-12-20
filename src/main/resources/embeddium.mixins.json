@@ -30,6 +30,7 @@
     "core.gui.DownloadingTerrainScreenMixin",
     "core.model.colors.BlockColorsMixin",
     "core.model.colors.ItemColorsMixin",
+    "core.model.quad.BakedQuadFactoryMixin",
     "core.model.quad.BakedQuadMixin",
     "core.render.VertexFormatAccessor",
     "core.render.frustum.FrustumMixin",
