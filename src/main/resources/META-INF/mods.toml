@@ -23,10 +23,3 @@ versionRange = "[20.4.48-beta,)" #mandatory
 ordering = "NONE"
 side = "CLIENT"
 
-[[mods]]
-modId = "rubidium"
-version = "0.7.1"
-displayName = "Rubidium (Embeddium)"
-description = '''
-Stub, to allow mods detecting Rubidium to function as expected.
-'''
