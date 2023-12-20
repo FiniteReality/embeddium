@@ -13,6 +13,9 @@ body:
         - **Have you ensured that all of your mods (including Embeddium) are up-to-date?** The latest version of Embeddium
         can always be found [on Modrinth](https://modrinth.com/mod/embeddium).
         
+        - **Have you checked whether you are [using mods that Embeddium does not support](https://github.com/embeddedt/embeddium/wiki/Unsupported-mods)?**
+        Sometimes Embeddium makes existing issues with these mods more obvious.
+        
         - **Have you read Sodium's [list of known driver incompatibilities](https://github.com/CaffeineMC/sodium-fabric/wiki/Driver-Compatibility)?** Most problems
         (including "poor performance") are caused by out-of-date or incompatible graphics drivers.
         
