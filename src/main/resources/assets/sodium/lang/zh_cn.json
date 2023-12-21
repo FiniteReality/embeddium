@@ -19,7 +19,7 @@
   "sodium.options.autosave_indicator.tooltip": "启用后，游戏在将存档保存到磁盘时，将显示一个指示器。",
   "sodium.options.graphics_quality.tooltip": "默认图像品质控制着一些原版选项，并且是模组兼容性所必需的。如果下方的选项保留为“默认”，则它们将使用此设置。",
   "sodium.options.clouds_quality.tooltip": "控制天空中云是否渲染。",
-  "sodium.options.weather_quality.tooltip": "控制雨雪效果的质量。",
+  "sodium.options.weather_quality.tooltip": "控制雨雪效果的品质。",
   "sodium.options.leaves_quality.name": "树叶",
   "sodium.options.leaves_quality.tooltip": "控制树叶的渲染品质。",
   "sodium.options.particle_quality.tooltip": "控制可同时在画面上渲染的最大粒子数量。",
