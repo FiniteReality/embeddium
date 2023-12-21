@@ -21,8 +21,8 @@ public class SodiumClientMod {
     public static final String MODID = "embeddium";
     public static final String MODNAME = "Embeddium";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME);
     private static SodiumGameOptions CONFIG = loadConfig();
-    private static Logger LOGGER = LoggerFactory.getLogger(MODNAME);
 
     private static String MOD_VERSION;
 
@@ -38,9 +38,6 @@ public class SodiumClientMod {
     }
 
     public void onClientSetup(final FMLClientSetupEvent event) {
-        LOGGER = LoggerFactory.getLogger("Sodium");
-        CONFIG = loadConfig();
-
         IncompatibleModManager.checkMods(event);
     }
 
