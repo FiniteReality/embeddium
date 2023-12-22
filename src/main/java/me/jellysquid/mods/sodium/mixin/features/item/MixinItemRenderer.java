@@ -68,6 +68,10 @@ public class MixinItemRenderer {
 
         ItemColorProvider colorProvider = null;
 
+        if(!stack.isEmpty()) {
+            colorProvider = ((ItemColorsExtended) this.colorMap).getColorProvider(stack);
+        }
+
         QuadVertexSink drain = VertexDrain.of(vertexConsumer)
                 .createSink(VanillaVertexTypes.QUADS);
         drain.ensureCapacity(quads.size() * 4);
@@ -75,19 +79,8 @@ public class MixinItemRenderer {
         for (BakedQuad bakedQuad : quads) {
             int color = 0xFFFFFFFF;
 
-            if (!stack.isEmpty() && bakedQuad.hasColor()) {
-                if (colorProvider == null) {
-                    colorProvider = ((ItemColorsExtended) this.colorMap).getColorProvider(stack);
-                }
-
-                try {
-	                if (colorProvider == null) {
-	                    color = ColorARGB.toABGR(this.colorMap.getColorMultiplier(stack, bakedQuad.getColorIndex()), 255);
-	                } else {
-	                    color = ColorARGB.toABGR((colorProvider.getColor(stack, bakedQuad.getColorIndex())), 255);
-	                }
-                }catch(Exception e) {
-                }
+            if (colorProvider != null && bakedQuad.hasColor()) {
+                color = ColorARGB.toABGR(colorProvider.getColor(stack, bakedQuad.getColorIndex()), 255);
             }
 
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
