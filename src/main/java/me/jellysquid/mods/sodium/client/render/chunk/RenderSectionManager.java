@@ -434,6 +434,12 @@ public class RenderSectionManager {
                 continue;
             }
 
+            // Because Sodium creates the update queue on the frame before it's processed,
+            // the update type might no longer match. Filter out such a scenario.
+            if (section.getPendingUpdate() != type) {
+                continue;
+            }
+
             int frame = this.lastUpdatedFrame;
             ChunkBuilderTask<ChunkBuildOutput> task = type.isSort() ? this.createSortTask(section, frame) : this.createRebuildTask(section, frame);
 
