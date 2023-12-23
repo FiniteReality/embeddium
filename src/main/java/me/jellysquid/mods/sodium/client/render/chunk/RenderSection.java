@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphInfo;
@@ -18,7 +19,6 @@ import net.minecraft.util.math.Direction;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * The render state object for a chunk section. This contains all the graphics state for each render pass along with
@@ -90,6 +90,29 @@ public class RenderSection {
             this.rebuildTask.cancel();
             this.rebuildTask = null;
         }
+    }
+
+    /**
+     * Clears the sort data on this section. This will stop any new sorts from being scheduled
+     * till it is rebuilt again.
+     */
+    public void clearTranslucencyData() {
+        for (BlockRenderPass pass : BlockRenderPass.VALUES) {
+            if (!pass.isTranslucent())
+                continue;
+            var state = this.getGraphicsState(pass);
+            if (state == null)
+                continue;
+            state.setTranslucencyData(null);
+        }
+    }
+
+    public ChunkBufferSorter.SortBuffer getTranslucencyData(BlockRenderPass pass) {
+        var state = this.getGraphicsState(pass);
+        if (state == null) {
+            return null;
+        }
+        return state.getTranslucencyData();
     }
 
     public ChunkRenderData getData() {
