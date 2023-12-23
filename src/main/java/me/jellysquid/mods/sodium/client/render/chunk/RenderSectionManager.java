@@ -155,7 +155,7 @@ public class RenderSectionManager {
                 var section = entry.getValue();
                 if(!section.isBuilt())
                     continue;
-                boolean hasTranslucentData = (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0;
+                boolean hasTranslucentData = (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0 && section.getTranslucencyData() != null;
                 if(hasTranslucentData && section.getSquaredDistance(lastCameraPosition) < translucencyBlockRenderDistance) {
                     ChunkUpdateType update = ChunkUpdateType.getPromotionUpdateType(section.getPendingUpdate(),
                             (allowImportantRebuilds() && this.shouldPrioritizeRebuild(section)) ? ChunkUpdateType.IMPORTANT_SORT : ChunkUpdateType.SORT);
@@ -358,11 +358,13 @@ public class RenderSectionManager {
         this.regions.uploadMeshes(RenderDevice.INSTANCE.createCommandList(), filtered);
 
         for (var result : filtered) {
-            if(result.info != null)
+            if(result.info != null) {
                 this.updateSectionInfo(result.render, result.info);
-
-            if(this.translucencySorting)
-                this.updateTranslucencyInfo(result.render, result.meshes.get(DefaultTerrainRenderPasses.TRANSLUCENT));
+                if (this.translucencySorting) {
+                    // We only change the translucency info on full rebuilds, as sorts can keep using the same data
+                    this.updateTranslucencyInfo(result.render, result.meshes.get(DefaultTerrainRenderPasses.TRANSLUCENT));
+                }
+            }
 
             var job = result.render.getBuildCancellationToken();
 
@@ -434,14 +436,31 @@ public class RenderSectionManager {
                 continue;
             }
 
+            // Because Sodium creates the update queue on the frame before it's processed,
+            // the update type might no longer match. Filter out such a scenario.
+            if (section.getPendingUpdate() != type) {
+                continue;
+            }
+
             int frame = this.lastUpdatedFrame;
             ChunkBuilderTask<ChunkBuildOutput> task = type.isSort() ? this.createSortTask(section, frame) : this.createRebuildTask(section, frame);
+
+            if (task == null && type.isSort()) {
+                // Ignore sorts that became invalid
+                section.setPendingUpdate(null);
+                continue;
+            }
 
             if (task != null) {
                 var job = this.builder.scheduleTask(task, type.isImportant(), collector::onJobFinished);
                 collector.addSubmittedJob(job);
 
                 section.setBuildCancellationToken(job);
+
+                if (!type.isSort()) {
+                    // Prevent further sorts from being performed on this section
+                    section.setTranslucencyData(null);
+                }
             } else {
                 var result = ChunkJobResult.successfully(new ChunkBuildOutput(section, BuiltSectionInfo.EMPTY, Collections.emptyMap(), frame));
                 this.buildResults.add(result);
