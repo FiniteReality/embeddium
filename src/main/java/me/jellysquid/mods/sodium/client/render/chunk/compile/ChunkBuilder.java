@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceLinkedOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
@@ -7,6 +8,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkGraphicsState;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderContainer;
+import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderBuildTask;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderEmptyBuildTask;
@@ -155,6 +157,29 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
     }
 
     /**
+     * Prevent sort updates from taking priority over rebuild updates in the upload queue.
+     */
+    public Iterator<ChunkBuildResult<T>> filterChunkBuilds(Iterator<ChunkBuildResult<T>> uploadIterator) {
+        Reference2ReferenceLinkedOpenHashMap<ChunkRenderContainer<T>, ChunkBuildResult<T>> map = new Reference2ReferenceLinkedOpenHashMap<>();
+
+        while (uploadIterator.hasNext()) {
+            ChunkBuildResult<T> result = uploadIterator.next();
+            ChunkRenderContainer<T> section = result.render;
+
+            ChunkBuildResult<T> oldResult = map.get(section);
+
+            // Allow a result to replace the previous result in the map if one of the following conditions hold:
+            // * There is no previous upload in the queue
+            // * The new upload replaces more render types than the old one (in practice, is a rebuild while the other is a sort)
+            if(oldResult == null || result.passesToUpload.length >= oldResult.passesToUpload.length) {
+                map.put(section, result);
+            }
+        }
+
+        return map.values().iterator();
+    }
+
+    /**
      * Processes all pending build task uploads using the chunk render backend.
      */
     // TODO: Limit the amount of time this can take per frame
@@ -163,7 +188,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
             return false;
         }
 
-        this.backend.upload(RenderDevice.INSTANCE.createCommandList(), new DequeDrain<>(this.uploadQueue));
+        this.backend.upload(RenderDevice.INSTANCE.createCommandList(), filterChunkBuilds(new DequeDrain<>(this.uploadQueue)));
 
         return true;
     }
