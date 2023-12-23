@@ -71,6 +71,10 @@ public class RenderRegionManager {
         }
     }
 
+    private static ChunkBufferSorter.SortBuffer getTranslucencyDataIfNonNull(ChunkGraphicsState state) {
+        return state == null ? null : state.getTranslucencyData();
+    }
+
     private void upload(CommandList commandList, RenderRegion region, List<ChunkBuildResult> results) {
         List<PendingSectionUpload> sectionUploads = new ArrayList<>();
 
@@ -95,7 +99,7 @@ public class RenderRegionManager {
 
                     sectionUploads.add(new PendingSectionUpload(result.render, meshData, pass,
                             new PendingUpload(vertexData.vertexBuffer()),
-                            new PendingUpload(vertexData.indexBuffer())));
+                            new PendingUpload(vertexData.indexBuffer()), result.isPartialUpload(), getTranslucencyDataIfNonNull(graphics)));
                 }
             }
         }
@@ -120,8 +124,13 @@ public class RenderRegionManager {
         for (PendingSectionUpload upload : sectionUploads) {
             ChunkGraphicsState state = new ChunkGraphicsState(upload.vertexUpload.getResult(), upload.indicesUpload.getResult(), upload.meshData);
             if(upload.pass.isTranslucent() && SodiumClientMod.options().performance.useTranslucentFaceSorting) {
-                // FIXME: sometimes a NativeBuffer leak message is printed pointing to this line
-                state.setTranslucencyData(ChunkBufferSorter.SortBuffer.copyFrom(upload.meshData));
+                if(!upload.sortOnly) {
+                    // We actually changed the section, replace the data
+                    state.setTranslucencyData(ChunkBufferSorter.SortBuffer.copyFrom(upload.meshData));
+                } else {
+                    // We can reuse the old data
+                    state.setTranslucencyData(upload.oldSortBuffer);
+                }
             }
             upload.section.setGraphicsState(upload.pass, state);
         }
@@ -197,6 +206,11 @@ public class RenderRegionManager {
     }
 
     private record PendingSectionUpload(RenderSection section, ChunkMeshData meshData, BlockRenderPass pass,
-                                        PendingUpload vertexUpload, PendingUpload indicesUpload) {
+                                        PendingUpload vertexUpload, PendingUpload indicesUpload, boolean sortOnly, ChunkBufferSorter.SortBuffer oldSortBuffer) {
+        @Deprecated
+        public PendingSectionUpload(RenderSection section, ChunkMeshData meshData, BlockRenderPass pass,
+                                    PendingUpload vertexUpload, PendingUpload indicesUpload) {
+            this(section, meshData, pass, vertexUpload, indicesUpload, false, null);
+        }
     }
 }

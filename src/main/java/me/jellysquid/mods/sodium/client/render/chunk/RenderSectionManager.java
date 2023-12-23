@@ -198,8 +198,8 @@ public class RenderSectionManager {
                 var section = entry.getValue();
                 if(!section.isBuilt())
                     continue;
-                boolean hasTranslucentData = section.getGraphicsState(BlockRenderPass.TRANSLUCENT) != null ||
-                        section.getGraphicsState(BlockRenderPass.TRIPWIRE) != null;
+                boolean hasTranslucentData = section.getTranslucencyData(BlockRenderPass.TRANSLUCENT) != null ||
+                        section.getTranslucencyData(BlockRenderPass.TRIPWIRE) != null;
                 if(hasTranslucentData && section.getSquaredDistance(cameraX, cameraY, cameraZ) < translucencyBlockRenderDistance) {
                     section.markForUpdate(this.isChunkPrioritized(section) ? ChunkUpdateType.IMPORTANT_SORT : ChunkUpdateType.SORT);
                 }
@@ -404,6 +404,12 @@ public class RenderSectionManager {
             if (task == null)
                 continue;
 
+            if(!ChunkUpdateType.isSort(section.getPendingUpdate())) {
+                // Prevent more sort tasks from being scheduled for the section till this rebuild finishes
+                // This prevents newer sorts from replacing older rebuilds
+                section.clearTranslucencyData();
+            }
+
             ChunkBuilder.WrappedTask future;
 
             if (!this.alwaysDeferChunkUpdates && filterType.isImportant()) {
@@ -456,10 +462,7 @@ public class RenderSectionManager {
         for(BlockRenderPass pass : BlockRenderPass.VALUES) {
             if(!pass.isTranslucent())
                 continue;
-            var state = render.getGraphicsState(pass);
-            if(state == null)
-                continue;
-            var mesh = state.getTranslucencyData();
+            var mesh = render.getTranslucencyData(pass);
             if(mesh != null)
                 meshes.put(pass, mesh.duplicate());
         }
