@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Mod.EventBusSubscriber(modid = SodiumClientMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CCLCompat {
     private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-CCL");
 	private static Map<RegistryEntry<Block>, ICCBlockRenderer> customBlockRenderers;
