@@ -41,7 +41,7 @@ public class FlywheelCompat {
     @SubscribeEvent
     public static void onChunkDataBuilt(ChunkDataBuiltEvent event) {
         if(flywheelLoaded) {
-            event.getDataBuilder().removeBlockEntitiesIf(InstancedRenderRegistry::shouldSkipRender);
+            event.getDataBuilder().removeBlockEntitiesIf(be -> !addAndFilterBEs(be));
         }
     }
 }
