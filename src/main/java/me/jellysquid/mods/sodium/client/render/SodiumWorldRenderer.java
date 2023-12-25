@@ -34,7 +34,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.Profiler;
-import org.embeddedt.embeddium.org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
+import org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 import java.util.Set;
 import java.util.SortedSet;

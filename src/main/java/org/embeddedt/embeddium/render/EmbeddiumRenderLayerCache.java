@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.org.embeddedt.embeddium.render;
+package org.embeddedt.embeddium.render;
 
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;

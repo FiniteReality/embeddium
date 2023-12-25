@@ -36,7 +36,7 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.model.ModelDataSnapshotter;
-import org.embeddedt.embeddium.org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
+import org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
