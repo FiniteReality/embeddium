@@ -39,7 +39,6 @@ public class CCLCompat {
         });
     }
 
-    @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         if(ModList.get().isLoaded("codechickenlib")) {
             init();
