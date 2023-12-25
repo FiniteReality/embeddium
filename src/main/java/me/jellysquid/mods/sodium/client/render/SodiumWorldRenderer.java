@@ -29,7 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraftforge.common.extensions.IForgeBlockEntity;
-import org.embeddedt.embeddium.org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
+import org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 import java.util.Collection;
 import java.util.Set;
