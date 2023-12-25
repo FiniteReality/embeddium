@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Mod.EventBusSubscriber(modid = SodiumClientMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CCLCompat {
 	private static Map<IRegistryDelegate<Block>, ICCBlockRenderer> customBlockRenderers;
     private static Map<IRegistryDelegate<Fluid>, ICCBlockRenderer> customFluidRenderers;
