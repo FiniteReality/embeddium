@@ -13,7 +13,7 @@ public class CCLCompatBootstrap {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         if (ModList.get().isLoaded("codechickenlib")) {
-            FMLJavaModLoadingContext.get().getModEventBus().register(CCLCompat.class);
+            CCLCompat.onClientSetup(event);
         }
     }
 }
