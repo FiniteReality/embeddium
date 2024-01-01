@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.render;
 
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
@@ -20,6 +21,7 @@ import java.util.concurrent.locks.StampedLock;
  * much more efficient than Forge's synchronization-based approach.
  */
 public class EmbeddiumRenderLayerCache {
+    private static final boolean DISABLE_CACHE = Boolean.getBoolean("embeddium.disableRenderLayerCache");
     private static final Reference2ReferenceOpenHashMap<RenderLayer, ImmutableList<RenderLayer>> SINGLE_LAYERS = new Reference2ReferenceOpenHashMap<>();
     private static final Reference2ReferenceOpenHashMap<State<?, ?>, ImmutableList<RenderLayer>> LAYERS_BY_STATE = new Reference2ReferenceOpenHashMap<>();
     private static final StampedLock lock = new StampedLock();
@@ -39,7 +41,11 @@ public class EmbeddiumRenderLayerCache {
      * @param state a BlockState or FluidState
      * @return a list of render layers that the block/fluid state should be rendered on
      */
-    public static <O, S, H extends State<O, S>>  ImmutableList<RenderLayer> forState(H state) {
+    public static <O, S, H extends State<O, S>>  List<RenderLayer> forState(H state) {
+        if(DISABLE_CACHE) {
+            return generateList(state);
+        }
+
         ImmutableList<RenderLayer> list = findExisting(state);
 
         if(list == null) {
@@ -49,7 +55,7 @@ public class EmbeddiumRenderLayerCache {
         return list;
     }
 
-    private static <O, S, H extends State<O, S>> ImmutableList<RenderLayer> createList(H state) {
+    private static <O, S, H extends State<O, S>> List<RenderLayer> generateList(H state) {
         List<RenderLayer> foundLayers = new ArrayList<>(2);
         if(state instanceof BlockState) {
             BlockState blockState = (BlockState)state;
@@ -68,6 +74,12 @@ public class EmbeddiumRenderLayerCache {
         } else {
             throw new IllegalArgumentException("Unexpected type of state received: " + state.getClass().getName());
         }
+
+        return foundLayers;
+    }
+
+    private static <O, S, H extends State<O, S>> ImmutableList<RenderLayer> createList(H state) {
+        List<RenderLayer> foundLayers = generateList(state);
 
         ImmutableList<RenderLayer> layerList;
 
@@ -107,6 +119,9 @@ public class EmbeddiumRenderLayerCache {
     static {
         for(RenderLayer layer : RenderLayer.getBlockLayers()) {
             SINGLE_LAYERS.put(layer, ImmutableList.of(layer));
+        }
+        if(DISABLE_CACHE) {
+            SodiumClientMod.logger().warn("Render layer cache is disabled, performance will be affected.");
         }
     }
 }
