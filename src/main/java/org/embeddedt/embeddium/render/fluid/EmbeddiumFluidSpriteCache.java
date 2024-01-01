@@ -8,6 +8,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
+import net.minecraftforge.fluids.FluidAttributes;
 
 public class EmbeddiumFluidSpriteCache {
     // Cache the sprites array to avoid reallocating it on every call
@@ -26,9 +27,10 @@ public class EmbeddiumFluidSpriteCache {
     }
 
     public Sprite[] getSprites(BlockRenderView world, BlockPos pos, FluidState fluidState) {
-        sprites[0] = getTexture(fluidState.getFluid().getAttributes().getStillTexture(world, pos));
-        sprites[1] = getTexture(fluidState.getFluid().getAttributes().getFlowingTexture(world, pos));
-        Identifier overlay = fluidState.getFluid().getAttributes().getOverlayTexture();
+        FluidAttributes attributes = fluidState.getFluid().getAttributes();
+        sprites[0] = getTexture(attributes.getStillTexture(world, pos));
+        sprites[1] = getTexture(attributes.getFlowingTexture(world, pos));
+        Identifier overlay = attributes.getOverlayTexture();
         sprites[2] = overlay != null ? getTexture(overlay) : null;
         return sprites;
     }
