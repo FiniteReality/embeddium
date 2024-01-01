@@ -1,12 +1,11 @@
 package me.jellysquid.mods.sodium.mixin.features.render_layer.leaves;
 
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.block.Block;
 import net.minecraft.client.option.GraphicsMode;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
-import net.minecraft.fluid.Fluid;
 import net.minecraftforge.registries.IRegistryDelegate;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,8 +30,8 @@ public class MixinRenderLayers {
 
     static {
         // Replace the backing collection types with something a bit faster, since this is a hot spot in chunk rendering.
-        blockRenderChecks = new Reference2ReferenceOpenHashMap<>(blockRenderChecks);
-        fluidRenderChecks = new Reference2ReferenceOpenHashMap<>(fluidRenderChecks);
+        blockRenderChecks = new Object2ObjectOpenHashMap<>(blockRenderChecks);
+        fluidRenderChecks = new Object2ObjectOpenHashMap<>(fluidRenderChecks);
     }
 
     @Unique
