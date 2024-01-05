@@ -141,27 +141,27 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
             this.addDrawCall(state.getModelPart(ModelQuadFacing.UNASSIGNED), indexOffset, baseVertex);
 
             if (this.isBlockFaceCullingEnabled && !(pass.isTranslucent() && SodiumClientMod.options().performance.useTranslucentFaceSorting)) {
-                if (camera.posY > bounds.y1) {
+                if (camera.posY > (bounds.y1 - 3)) {
                     this.addDrawCall(state.getModelPart(ModelQuadFacing.UP), indexOffset, baseVertex);
                 }
 
-                if (camera.posY < bounds.y2) {
+                if (camera.posY < (bounds.y2 + 3)) {
                     this.addDrawCall(state.getModelPart(ModelQuadFacing.DOWN), indexOffset, baseVertex);
                 }
 
-                if (camera.posX > bounds.x1) {
+                if (camera.posX > (bounds.x1 - 3)) {
                     this.addDrawCall(state.getModelPart(ModelQuadFacing.EAST), indexOffset, baseVertex);
                 }
 
-                if (camera.posX < bounds.x2) {
+                if (camera.posX < (bounds.x2 + 3)) {
                     this.addDrawCall(state.getModelPart(ModelQuadFacing.WEST), indexOffset, baseVertex);
                 }
 
-                if (camera.posZ > bounds.z1) {
+                if (camera.posZ > (bounds.z1 - 3)) {
                     this.addDrawCall(state.getModelPart(ModelQuadFacing.SOUTH), indexOffset, baseVertex);
                 }
 
-                if (camera.posZ < bounds.z2) {
+                if (camera.posZ < (bounds.z2 + 3)) {
                     this.addDrawCall(state.getModelPart(ModelQuadFacing.NORTH), indexOffset, baseVertex);
                 }
             } else {
