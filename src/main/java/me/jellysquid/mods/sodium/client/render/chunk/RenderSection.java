@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
 
+import java.lang.ref.WeakReference;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class RenderSection {
     private final RenderSection[] adjacent = new RenderSection[DirectionUtil.ALL_DIRECTIONS.length];
 
     private ChunkRenderData data = ChunkRenderData.ABSENT;
-    private ChunkBuilder.WrappedTask rebuildTask = null;
+    private WeakReference<ChunkBuilder.WrappedTask> rebuildTask = null;
 
     private ChunkUpdateType pendingUpdate;
 
@@ -87,7 +88,10 @@ public class RenderSection {
      */
     public void cancelRebuildTask() {
         if (this.rebuildTask != null) {
-            this.rebuildTask.cancel();
+            var task = this.rebuildTask.get();
+            if(task != null) {
+                task.cancel();
+            }
             this.rebuildTask = null;
         }
     }
@@ -323,12 +327,9 @@ public class RenderSection {
     }
 
     public void onBuildSubmitted(ChunkBuilder.WrappedTask task) {
-        if (this.rebuildTask != null) {
-            this.rebuildTask.cancel();
-            this.rebuildTask = null;
-        }
+        cancelRebuildTask();
 
-        this.rebuildTask = task;
+        this.rebuildTask = new WeakReference<>(task);
         this.pendingUpdate = null;
     }
 
