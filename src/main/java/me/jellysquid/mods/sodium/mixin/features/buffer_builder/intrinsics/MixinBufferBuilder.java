@@ -29,7 +29,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
         if (!this.textured) {
             super.quad(matrices, quad, brightnessTable, r, g, b, light, overlay, colorize);
 
-            SpriteUtil.markSpriteActive(((ModelQuadView)quad).rubidium$getSprite());
+            SpriteUtil.markSpriteActive(quad.getSprite());
 
             return;
         }
@@ -94,6 +94,6 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
 
         drain.flush();
 
-        SpriteUtil.markSpriteActive(((ModelQuadView)quad).rubidium$getSprite());
+        SpriteUtil.markSpriteActive(quad.getSprite());
     }
 }
