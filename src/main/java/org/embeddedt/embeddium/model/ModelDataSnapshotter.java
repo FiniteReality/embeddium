@@ -29,13 +29,18 @@ public class ModelDataSnapshotter {
         BlockBox volume = new BlockBox(origin.getMinX(), origin.getMinY(), origin.getMinZ(), origin.getMaxX(), origin.getMaxY(), origin.getMaxZ());
 
         for(Map.Entry<BlockPos, ModelData> dataEntry : forgeMap.entrySet()) {
+            ModelData data = dataEntry.getValue();
+
+            if(data == null || data == ModelData.EMPTY) {
+                // There is no reason to populate the map with empty model data, because our
+                // getOrDefault call will return the empty instance by default anyway
+                continue;
+            }
+
             BlockPos key = dataEntry.getKey();
 
             if(volume.contains(key)) {
-                ModelData data = dataEntry.getValue();
-                if(data != null) {
-                    ourMap.put(key, data);
-                }
+                ourMap.put(key, data);
             }
         }
 
