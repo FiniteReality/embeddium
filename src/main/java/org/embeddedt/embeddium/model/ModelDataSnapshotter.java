@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraftforge.client.model.ModelDataManager;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
 import java.util.Collections;
@@ -30,13 +31,18 @@ public class ModelDataSnapshotter {
         BlockBox volume = new BlockBox(origin.getMinX(), origin.getMinY(), origin.getMinZ(), origin.getMaxX(), origin.getMaxY(), origin.getMaxZ());
 
         for(Map.Entry<BlockPos, IModelData> dataEntry : forgeMap.entrySet()) {
+            IModelData data = dataEntry.getValue();
+
+            if(data == null || data == EmptyModelData.INSTANCE) {
+                // There is no reason to populate the map with empty model data, because our
+                // getOrDefault call will return the empty instance by default anyway
+                continue;
+            }
+
             BlockPos key = dataEntry.getKey();
 
             if(volume.contains(key)) {
-                IModelData data = dataEntry.getValue();
-                if(data != null) {
-                    ourMap.put(key, data);
-                }
+                ourMap.put(key, data);
             }
         }
 
