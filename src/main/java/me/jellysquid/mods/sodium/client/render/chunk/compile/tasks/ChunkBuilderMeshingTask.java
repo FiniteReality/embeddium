@@ -36,7 +36,6 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.NeoForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
-import org.embeddedt.embeddium.model.ModelDataSnapshotter;
 
 import java.util.Map;
 
@@ -56,16 +55,12 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
     private final int buildTime;
 
-    private final Map<BlockPos, ModelData> modelDataMap;
-
     private Vec3d camera = Vec3d.ZERO;
 
     public ChunkBuilderMeshingTask(RenderSection render, ChunkRenderContext renderContext, int time) {
         this.render = render;
         this.renderContext = renderContext;
         this.buildTime = time;
-
-        this.modelDataMap = ModelDataSnapshotter.getModelDataForSection(MinecraftClient.getInstance().world, this.renderContext.getOrigin());
     }
 
     public ChunkBuilderMeshingTask withCameraPosition(Vec3d camera) {
@@ -120,7 +115,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         if (blockState.getRenderType() == BlockRenderType.MODEL) {
                             BakedModel model = cache.getBlockModels()
                                 .getModel(blockState);
-                            ModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
+                            ModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, slice.getModelDataManager().getAtOrEmpty(blockPos));
 
                             long seed = blockState.getRenderingSeed(blockPos);
                             random.setSeed(seed);

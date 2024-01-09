@@ -84,6 +84,9 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
     // (Local Section -> Block Entity) table.
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
 
+    // Local model data snapshot
+    private ModelDataManager.Snapshot modelDataSnapshot;
+
     // The starting point from which this slice captures blocks
     private int originX, originY, originZ;
     
@@ -131,7 +134,16 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
             }
         }
 
-        return new ChunkRenderContext(origin, sections, volume).withMeshAppenders(meshAppenders);
+        var snapshot = world.getModelDataManager().snapshotSectionRegion(
+                minChunkX,
+                minChunkY,
+                minChunkZ,
+                maxChunkX,
+                maxChunkY,
+                maxChunkZ
+        );
+
+        return new ChunkRenderContext(origin, sections, volume).withMeshAppenders(meshAppenders).withModelDataSnapshot(snapshot);
     }
 
     @SuppressWarnings("unchecked")
@@ -169,6 +181,8 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         this.biomeSlice.update(this.world, context);
         this.biomeColors.update(context);
         this.biomeColorsLegacy.update(context);
+
+        this.modelDataSnapshot = context.getModelDataSnapshot();
     }
 
     private void copySectionData(ChunkRenderContext context, int sectionIndex) {
@@ -223,6 +237,8 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
 
             this.blockEntityArrays[sectionIndex] = null;
         }
+
+        this.modelDataSnapshot = null;
     }
 
     @Override
@@ -359,8 +375,8 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
     }
 
     @Override
-    public @Nullable ModelDataManager getModelDataManager() {
-        return this.world.getModelDataManager();
+    public ModelDataManager.Snapshot getModelDataManager() {
+        return this.modelDataSnapshot;
     }
 
     public static int getLocalBlockIndex(int x, int y, int z) {
