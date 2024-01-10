@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
+import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.light.LightPipelineProvider;
@@ -27,7 +28,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -39,6 +39,7 @@ import net.minecraft.world.BlockRenderView;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
+import org.embeddedt.embeddium.tags.EmbeddiumTags;
 
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
@@ -102,9 +103,22 @@ public class FluidRenderer {
         return true;
     }
 
+    private void renderVanilla(WorldSlice world, FluidState fluidState, BlockPos blockPos, ChunkModelBuilder buffers, Material material) {
+        final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
+        builder.reset();
+        MinecraftClient.getInstance().getBlockRenderManager().renderFluid(blockPos, world, builder, world.getBlockState(blockPos), fluidState);
+        builder.flush(buffers, material, 0, 0, 0);
+    }
+
     public void render(WorldSlice world, FluidState fluidState, BlockPos blockPos, BlockPos offset, ChunkBuildBuffers buffers) {
         var material = DefaultMaterials.forFluidState(fluidState);
         var meshBuilder = buffers.get(material);
+
+        // Embeddium: Delegate to vanilla liquid renderer if fluid has this tag.
+        if(fluidState.getFluid().isIn(EmbeddiumTags.RENDERS_WITH_VANILLA)) {
+            renderVanilla(world, fluidState, blockPos, meshBuilder, material);
+            return;
+        }
 
         int posX = blockPos.getX();
         int posY = blockPos.getY();
