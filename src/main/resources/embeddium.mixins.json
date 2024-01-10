@@ -67,6 +67,7 @@
     "features.render_layer.leaves.MixinRenderLayers",
 	"features.render_layer.leaves.MixinLeavesBlock",
 	"features.sky.MixinWorldRenderer",
+    "features.texture_tracking.MixinBlockModelRenderer",
     "features.texture_tracking.MixinDrawableHelper",
     "features.texture_tracking.MixinSprite",
     "features.texture_tracking.MixinSpriteAtlasTexture",
