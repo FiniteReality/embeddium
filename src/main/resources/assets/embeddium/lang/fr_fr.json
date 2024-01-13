@@ -1,0 +1,4 @@
+{
+  "embeddium.conflicting_mod": "Embeddium a détecté la présence de mods connus pour causer des problèmes de rendu / plantages. Il est recommandé de les désinstaller. Voir la liste ci-dessous.",
+  "embeddium.conflicting_mod_list": "[{2}]"
+}

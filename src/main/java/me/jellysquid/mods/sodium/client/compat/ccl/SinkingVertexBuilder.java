@@ -138,6 +138,10 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, Vector3fc origin) {
+        return flush(buffers, material, origin.x(), origin.y(), origin.z());
+    }
+
+    public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, float oX, float oY, float oZ) {
         if(currentVertex == 0) {
             return false;
         }
@@ -182,9 +186,9 @@ public final class SinkingVertexBuilder implements VertexConsumer {
                     buffer.getInt(); // read normal
 
                 ChunkVertexEncoder.Vertex sodiumVertex = sodiumQuad[i];
-                sodiumVertex.x = origin.x() + buffer.getFloat();
-                sodiumVertex.y = origin.y() + buffer.getFloat();
-                sodiumVertex.z = origin.z() + buffer.getFloat();
+                sodiumVertex.x = oX + buffer.getFloat();
+                sodiumVertex.y = oY + buffer.getFloat();
+                sodiumVertex.z = oZ + buffer.getFloat();
                 sodiumVertex.u = buffer.getFloat();
                 sodiumVertex.v = buffer.getFloat();
                 sodiumVertex.color = buffer.getInt();
