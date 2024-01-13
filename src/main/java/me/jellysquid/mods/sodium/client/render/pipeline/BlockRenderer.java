@@ -39,6 +39,7 @@ import org.embeddedt.embeddium.api.BlockRendererRegistry;
 import java.util.List;
 
 public class BlockRenderer {
+    private static final int[] DEFAULT_QUAD_COLORS = new int[] { -1, -1, -1, -1 };
     private static final MatrixStack EMPTY_STACK = new MatrixStack();
 
     private final BlockColorsExtended blockColors;
@@ -184,10 +185,12 @@ public class BlockRenderer {
         ModelQuadView src = (ModelQuadView) bakedQuad;
         ModelQuadOrientation orientation = this.useReorienting ? ModelQuadOrientation.orientByBrightness(light.br) : ModelQuadOrientation.NORMAL;
 
-        int[] colors = null;
+        int[] colors;
 
         if (bakedQuad.hasColor()) {
             colors = this.colorBlender.getColors(world, pos, src, colorSampler, state);
+        } else {
+            colors = DEFAULT_QUAD_COLORS;
         }
 
         int vertexStart = vertices.getVertexCount();
@@ -199,7 +202,7 @@ public class BlockRenderer {
             float y = src.getY(j) + (float) blockOffset.getY();
             float z = src.getZ(j) + (float) blockOffset.getZ();
 
-            int color = ColorABGR.mul(colors != null ? colors[j] : src.getColor(j), light.br[j]);
+            int color = ColorABGR.mul(ModelQuadUtil.mixARGBColors(colors[j], src.getColor(j)), light.br[j]);
 
             float u = src.getTexU(j);
             float v = src.getTexV(j);
