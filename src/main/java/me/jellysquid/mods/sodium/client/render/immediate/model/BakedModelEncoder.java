@@ -4,7 +4,6 @@ import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.caffeinemc.mods.sodium.api.math.MatrixHelper;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
-import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.api.util.ColorU8;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.common.ModelVertex;
@@ -54,18 +53,7 @@ public class BakedModelEncoder {
     }
 
     private static int multARGBInts(int colorA, int colorB) {
-        // Most common case: Either quad coloring or tint-based coloring, but not both
-        if (colorA == -1) {
-            return colorB;
-        } else if (colorB == -1) {
-            return colorA;
-        }
-        // General case (rare): Both colorings, actually perform the multiplication
-        int a = (int)((ColorARGB.unpackAlpha(colorA)/255.0f) * (ColorARGB.unpackAlpha(colorB)/255.0f) * 255.0f);
-        int b = (int)((ColorARGB.unpackBlue(colorA)/255.0f) * (ColorARGB.unpackBlue(colorB)/255.0f) * 255.0f);
-        int g = (int)((ColorARGB.unpackGreen(colorA)/255.0f) * (ColorARGB.unpackGreen(colorB)/255.0f) * 255.0f);
-        int r = (int)((ColorARGB.unpackRed(colorA)/255.0f) * (ColorARGB.unpackRed(colorB)/255.0f) * 255.0f);
-        return ColorARGB.pack(r, g, b, a);
+        return ModelQuadUtil.mixARGBColors(colorA, colorB);
     }
 
     public static void writeQuadVertices(VertexBufferWriter writer, MatrixStack.Entry matrices, ModelQuadView quad, float r, float g, float b, float[] brightnessTable, boolean colorize, int[] light, int overlay) {
