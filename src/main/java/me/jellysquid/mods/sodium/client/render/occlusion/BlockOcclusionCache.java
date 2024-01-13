@@ -86,7 +86,7 @@ public class BlockOcclusionCache {
         this.map.put(cache.copy(), (byte) (ret ? 1 : 0));
 
         if (this.map.size() > 2048) {
-            this.map.removeLastByte();
+            this.map.removeFirstByte();
         }
 
         return ret;
