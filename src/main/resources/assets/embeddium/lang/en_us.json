@@ -1,4 +1,4 @@
 {
-  "embeddium.conflicting_mod": "Embeddium detected that mods are installed which are known to cause rendering issues/crashes. It is recommended to uninstall them. See list below.",
+  "embeddium.conflicting_mod": "Embeddium detected the presence of mods that are known to cause rendering issues/crashes. It is recommended to uninstall them. See the list below.",
   "embeddium.conflicting_mod_list": "[{2}]"
 }
