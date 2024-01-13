@@ -6,7 +6,6 @@ import me.jellysquid.mods.sodium.client.model.vertex.VertexDrain;
 import me.jellysquid.mods.sodium.client.model.vertex.formats.quad.QuadVertexSink;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import me.jellysquid.mods.sodium.client.world.biome.ItemColorsExtended;
@@ -100,18 +99,7 @@ public class MixinItemRenderer {
     }
     
     private int multARGBInts(int colorA, int colorB) {
-    	// Most common case: Either quad coloring or tint-based coloring, but not both
-        if (colorA == -1) {
-            return colorB;
-        } else if (colorB == -1) {
-            return colorA;
-        }
-        // General case (rare): Both colorings, actually perform the multiplication
-        int a = (int)((ColorABGR.unpackAlpha(colorA)/255.0f) * (ColorABGR.unpackAlpha(colorB)/255.0f) * 255.0f);
-        int b = (int)((ColorABGR.unpackBlue(colorA)/255.0f) * (ColorABGR.unpackBlue(colorB)/255.0f) * 255.0f);
-        int g = (int)((ColorABGR.unpackGreen(colorA)/255.0f) * (ColorABGR.unpackGreen(colorB)/255.0f) * 255.0f);
-        int r = (int)((ColorABGR.unpackRed(colorA)/255.0f) * (ColorABGR.unpackRed(colorB)/255.0f) * 255.0f);
-        return ColorABGR.pack(r, g, b, a);
+    	return ModelQuadUtil.mixABGRColors(colorA, colorB);
     }
     
 }

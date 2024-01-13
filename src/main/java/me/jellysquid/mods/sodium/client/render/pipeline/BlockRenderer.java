@@ -39,6 +39,7 @@ import java.util.Random;
 
 
 public class BlockRenderer {
+    private static final int[] DEFAULT_QUAD_COLORS = new int[] { -1, -1, -1, -1 };
     private static final MatrixStack EMPTY_STACK = new MatrixStack();
 
     private final Random random = new XoRoShiRoRandom();
@@ -173,10 +174,12 @@ public class BlockRenderer {
 
         ModelQuadOrientation order = ModelQuadOrientation.orient(light.br);
 
-        int[] colors = null;
+        int[] colors;
 
         if (bakedQuad.hasColor()) {
             colors = this.biomeColorBlender.getColors(colorProvider, world, state, pos, src);
+        } else {
+            colors = DEFAULT_QUAD_COLORS;
         }
 
         for (int dstIndex = 0; dstIndex < 4; dstIndex++) {
@@ -186,7 +189,7 @@ public class BlockRenderer {
             float y = src.getY(srcIndex) + (float) offset.getY();
             float z = src.getZ(srcIndex) + (float) offset.getZ();
 
-            int color = ColorABGR.mul(colors != null ? colors[srcIndex] : src.getColor(srcIndex), light.br[srcIndex]);
+            int color = ColorABGR.mul(ModelQuadUtil.mixABGRColors(colors[srcIndex], src.getColor(srcIndex)), light.br[srcIndex]);
 
             float u = src.getTexU(srcIndex);
             float v = src.getTexV(srcIndex);
