@@ -192,7 +192,7 @@ public class BlockRenderer {
         if (colorProvider != null && quad.hasColor()) {
             colorProvider.getColors(ctx.world(), ctx.pos(), ctx.state(), quad, vertexColors);
         } else {
-            return null; // force use of the packed color data instead of ours
+            Arrays.fill(vertexColors, 0xFFFFFFFF);
         }
 
         return vertexColors;
@@ -219,7 +219,7 @@ public class BlockRenderer {
             out.y = ctx.origin().y() + quad.getY(srcIndex) + (float) offset.getY();
             out.z = ctx.origin().z() + quad.getZ(srcIndex) + (float) offset.getZ();
 
-            out.color = ColorABGR.withAlpha(colors != null ? colors[srcIndex] : quad.getColor(srcIndex), light.br[srcIndex]);
+            out.color = ColorABGR.withAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), light.br[srcIndex]);
 
             out.u = quad.getTexU(srcIndex);
             out.v = quad.getTexV(srcIndex);
