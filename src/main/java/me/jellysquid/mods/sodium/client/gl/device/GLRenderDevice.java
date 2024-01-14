@@ -153,7 +153,7 @@ public class GLRenderDevice implements RenderDevice {
             int handle = buffer.handle();
             buffer.invalidateHandle();
 
-            GlStateManager._glDeleteBuffers(handle);
+            GL20C.glDeleteBuffers(handle);
         }
 
         @Override
