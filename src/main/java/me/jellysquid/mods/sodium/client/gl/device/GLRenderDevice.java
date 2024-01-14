@@ -153,12 +153,7 @@ public class GLRenderDevice implements RenderDevice {
             int handle = buffer.handle();
             buffer.invalidateHandle();
 
-            if(buffer instanceof GlImmutableBuffer) {
-                // Bypass Mojang's weird glBufferData calls
-                GL15.glDeleteBuffers(handle);
-            } else {
-                GlStateManager._glDeleteBuffers(handle);
-            }
+            GL20C.glDeleteBuffers(handle);
         }
 
         @Override
