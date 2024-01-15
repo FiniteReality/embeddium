@@ -36,6 +36,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockRenderView;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
@@ -61,6 +62,7 @@ public class FluidRenderer {
     private final ColorProviderRegistry colorProviderRegistry;
 
     private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
+    private final SinkingVertexBuilder vertexBuilder = SinkingVertexBuilder.getInstance();
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
@@ -103,29 +105,21 @@ public class FluidRenderer {
         return true;
     }
 
-    private void renderVanilla(WorldSlice world, FluidState fluidState, BlockPos blockPos, ChunkModelBuilder buffers, Material material) {
-        // Call vanilla fluid renderer and capture the results
-        final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
-        builder.reset();
-        MinecraftClient.getInstance().getBlockRenderManager().renderFluid(blockPos, world, builder, world.getBlockState(blockPos), fluidState);
-        builder.flush(buffers, material, 0, 0, 0);
-
-        // Mark fluid sprites as being used in rendering
-        Sprite[] sprites = fluidSpriteCache.getSprites(world, blockPos, fluidState);
-        for(Sprite sprite : sprites) {
-            if (sprite != null) {
-                buffers.addSprite(sprite);
-            }
-        }
-    }
-
     public void render(WorldSlice world, FluidState fluidState, BlockPos blockPos, BlockPos offset, ChunkBuildBuffers buffers) {
         var material = DefaultMaterials.forFluidState(fluidState);
         var meshBuilder = buffers.get(material);
 
-        // Embeddium: Delegate to vanilla liquid renderer if fluid has this tag.
-        if(fluidState.getFluid().isIn(EmbeddiumTags.RENDERS_WITH_VANILLA)) {
-            renderVanilla(world, fluidState, blockPos, meshBuilder, material);
+        // Embeddium: Apply Forge's hook for fluid rendering
+        vertexBuilder.reset();
+        boolean skipDefaultRendering = IClientFluidTypeExtensions.of(fluidState).renderFluid(fluidState, world, blockPos, vertexBuilder, world.getBlockState(blockPos));
+        vertexBuilder.flush(meshBuilder, material, 0, 0, 0);
+        if(skipDefaultRendering) {
+            // Animate any sprites still, since they may have been used in the custom hook
+            for(Sprite sprite : fluidSpriteCache.getSprites(world, blockPos, fluidState)) {
+                if (sprite != null) {
+                    meshBuilder.addSprite(sprite);
+                }
+            }
             return;
         }
 

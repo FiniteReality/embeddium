@@ -5,15 +5,13 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.ColorResolver;
 import net.minecraft.world.chunk.light.LightingProvider;
 import net.neoforged.neoforge.client.model.data.ModelDataManager;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -189,14 +187,18 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
-    @org.jetbrains.annotations.Nullable
-    public BlockEntity getExistingBlockEntity(BlockPos pos) {
-        return view.getExistingBlockEntity(pos);
+    public @org.jetbrains.annotations.Nullable ModelDataManager getModelDataManager() {
+        return view.getModelDataManager();
     }
 
     @Override
-    public @org.jetbrains.annotations.Nullable ModelDataManager getModelDataManager() {
-        return view.getModelDataManager();
+    public @org.jetbrains.annotations.Nullable AuxiliaryLightManager getAuxLightManager(BlockPos pos) {
+        return view.getAuxLightManager(pos);
+    }
+
+    @Override
+    public @org.jetbrains.annotations.Nullable AuxiliaryLightManager getAuxLightManager(ChunkPos pos) {
+        return view.getAuxLightManager(pos);
     }
 
     @Override

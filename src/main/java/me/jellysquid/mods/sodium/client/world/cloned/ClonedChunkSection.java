@@ -18,6 +18,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.*;
 import net.minecraft.world.gen.chunk.DebugChunkGenerator;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +38,8 @@ public class ClonedChunkSection {
     private final @Nullable ReadableContainer<BlockState> blockData;
 
     private final @Nullable ReadableContainer<RegistryEntry<Biome>> biomeData;
+
+    private final @Nullable AuxiliaryLightManager auxLightManager;
 
     private long lastUsedTimestamp = Long.MAX_VALUE;
 
@@ -67,6 +70,8 @@ public class ClonedChunkSection {
         this.blockEntityMap = blockEntityMap;
 
         this.lightDataArrays = copyLightData(world, pos);
+
+        this.auxLightManager = chunk.getAuxLightManager(chunk.getPos());
     }
 
     /**
@@ -175,6 +180,10 @@ public class ClonedChunkSection {
 
     public @Nullable Int2ReferenceMap<BlockEntity> getBlockEntityMap() {
         return this.blockEntityMap;
+    }
+
+    public AuxiliaryLightManager getAuxLightManager() {
+        return this.auxLightManager;
     }
 
     public @Nullable ChunkNibbleArray getLightArray(LightType lightType) {

@@ -36,6 +36,7 @@ import net.minecraft.world.BlockRenderView;
 import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class BlockRenderer {

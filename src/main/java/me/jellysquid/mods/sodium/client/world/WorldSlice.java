@@ -21,6 +21,7 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.world.chunk.light.LightingProvider;
 import net.neoforged.neoforge.client.model.data.ModelDataManager;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
 import org.jetbrains.annotations.Nullable;
@@ -83,6 +84,9 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
 
     // (Local Section -> Block Entity) table.
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
+
+    // (Local Section -> Aux Light) table.
+    private final @Nullable AuxiliaryLightManager[] auxLightArrays;
 
     // Local model data snapshot
     private ModelDataManager.Snapshot modelDataSnapshot;
@@ -152,6 +156,7 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
 
         this.blockArrays = new BlockState[SECTION_ARRAY_SIZE][SECTION_BLOCK_COUNT];
         this.lightArrays = new ChunkNibbleArray[SECTION_ARRAY_SIZE][LIGHT_TYPES.length];
+        this.auxLightArrays = new AuxiliaryLightManager[SECTION_ARRAY_SIZE];
 
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
 
@@ -196,6 +201,7 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
         this.lightArrays[sectionIndex][LightType.SKY.ordinal()] = section.getLightArray(LightType.SKY);
 
         this.blockEntityArrays[sectionIndex] = section.getBlockEntityMap();
+        this.auxLightArrays[sectionIndex] = section.getAuxLightManager();
     }
 
     private void unpackBlockData(BlockState[] blockArray, ChunkRenderContext context, ClonedChunkSection section) {
@@ -377,6 +383,11 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
     @Override
     public ModelDataManager.Snapshot getModelDataManager() {
         return this.modelDataSnapshot;
+    }
+
+    @Override
+    public @Nullable AuxiliaryLightManager getAuxLightManager(ChunkPos pos) {
+        return this.auxLightArrays[getLocalSectionIndex(pos.x, this.originY >> 4, pos.z)];
     }
 
     public static int getLocalBlockIndex(int x, int y, int z) {
