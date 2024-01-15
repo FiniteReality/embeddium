@@ -387,7 +387,10 @@ public class WorldSlice implements BlockRenderView, BiomeColorView {
 
     @Override
     public @Nullable AuxiliaryLightManager getAuxLightManager(ChunkPos pos) {
-        return this.auxLightArrays[getLocalSectionIndex(pos.x, this.originY >> 4, pos.z)];
+        if (pos.x < (this.volume.getMinX() >> 4) || pos.x > (this.volume.getMaxX() >> 4) || pos.z < (this.volume.getMinZ() >> 4) || pos.z > (this.volume.getMaxZ() >> 4)) {
+            return null;
+        }
+        return this.auxLightArrays[getLocalSectionIndex(pos.x - (this.originX >> 4), 0, pos.z - (this.originZ >> 4))];
     }
 
     public static int getLocalBlockIndex(int x, int y, int z) {
