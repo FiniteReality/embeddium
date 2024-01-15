@@ -105,7 +105,8 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                     for (int x = minX; x < maxX; x++) {
                         BlockState blockState = slice.getBlockState(x, y, z);
 
-                        if (blockState.isAir() && !blockState.hasBlockEntity()) {
+                        // Embeddium: use isEmpty instead of isAir/BE check
+                        if (blockState.isEmpty()) {
                             continue;
                         }
 
