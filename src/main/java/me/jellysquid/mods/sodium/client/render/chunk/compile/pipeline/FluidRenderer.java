@@ -62,7 +62,7 @@ public class FluidRenderer {
     private final ColorProviderRegistry colorProviderRegistry;
 
     private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
-    private final SinkingVertexBuilder vertexBuilder = SinkingVertexBuilder.getInstance();
+    private final SinkingVertexBuilder vertexBuilder = new SinkingVertexBuilder();
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
