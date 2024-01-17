@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.client.gui.misc;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public enum GraphicsMode {
     FAST(0, "options.graphics.fast"),
@@ -38,7 +38,7 @@ public enum GraphicsMode {
     }
 
     public static GraphicsMode byId(int id) {
-        return VALUES[MathHelper.floorMod(id, VALUES.length)];
+        return VALUES[Mth.positiveModulo(id, VALUES.length)];
     }
 
     static {

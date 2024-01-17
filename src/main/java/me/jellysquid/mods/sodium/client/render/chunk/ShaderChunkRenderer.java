@@ -8,8 +8,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.*;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.resources.ResourceLocation;
 import java.util.Map;
 
 public abstract class ShaderChunkRenderer implements ChunkRenderer {
@@ -42,13 +41,13 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
         ShaderConstants constants = options.constants();
 
         GlShader vertShader = ShaderLoader.loadShader(ShaderType.VERTEX,
-                new Identifier("sodium", path + ".vsh"), constants);
+                new ResourceLocation("sodium", path + ".vsh"), constants);
         
         GlShader fragShader = ShaderLoader.loadShader(ShaderType.FRAGMENT,
-                new Identifier("sodium", path + ".fsh"), constants);
+                new ResourceLocation("sodium", path + ".fsh"), constants);
 
         try {
-            return GlProgram.builder(new Identifier("sodium", "chunk_shader"))
+            return GlProgram.builder(new ResourceLocation("sodium", "chunk_shader"))
                     .attachShader(vertShader)
                     .attachShader(fragShader)
                     .bindAttribute("a_PosId", ChunkShaderBindingPoints.ATTRIBUTE_POSITION_ID)

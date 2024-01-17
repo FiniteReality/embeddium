@@ -1,8 +1,7 @@
 package me.jellysquid.mods.sodium.common.util.collections;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraft.util.crash.CrashException;
-
+import net.minecraft.ReportedException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -53,9 +52,9 @@ public class WorkStealingFutureDrain<T> implements Iterator<T> {
                     SodiumClientMod.logger()
                             .warn("Future was cancelled: {}", future);
                 } catch (CompletionException e) {
-                    if (e.getCause() instanceof CrashException) {
+                    if (e.getCause() instanceof ReportedException) {
                         // Propagate CrashExceptions directly to provide extra information
-                        throw (CrashException) e.getCause();
+                        throw (ReportedException) e.getCause();
                     } else {
                         throw e;
                     }

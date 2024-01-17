@@ -1,13 +1,10 @@
 package org.embeddedt.embeddium.api;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
-
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,7 +37,7 @@ public class BlockRendererRegistry {
     /**
      * Get a list of custom renderers for the given block & context.
      */
-    public void fillCustomRenderers(List<Renderer> resultList, BlockState state, BlockPos pos, BlockRenderView world) {
+    public void fillCustomRenderers(List<Renderer> resultList, BlockState state, BlockPos pos, BlockAndTintGetter world) {
         if(renderPopulators.isEmpty())
             return;
 
@@ -62,7 +59,7 @@ public class BlockRendererRegistry {
     }
 
     public interface RenderPopulator {
-        void fillCustomRenderers(List<Renderer> resultList, BlockState state, BlockPos pos, BlockRenderView world);
+        void fillCustomRenderers(List<Renderer> resultList, BlockState state, BlockPos pos, BlockAndTintGetter world);
 
         static RenderPopulator forRenderer(Renderer renderer) {
             return (resultList, state, pos, world) -> resultList.add(renderer);
@@ -84,7 +81,7 @@ public class BlockRendererRegistry {
          */
         RenderResult renderBlock(BlockState state,
                 BlockPos pos,
-                BlockRenderView world,
+                BlockAndTintGetter world,
                 VertexConsumer consumer,
                 Random random,
                 IModelData modelData

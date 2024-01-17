@@ -1,21 +1,20 @@
 package me.jellysquid.mods.sodium.client.world.cloned;
 
 import it.unimi.dsi.fastutil.longs.Long2ReferenceLinkedOpenHashMap;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.World;
-
 import java.util.concurrent.TimeUnit;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.Level;
 
 public class ClonedChunkSectionCache {
     private static final int MAX_CACHE_SIZE = 512; /* number of entries */
     private static final long MAX_CACHE_DURATION = TimeUnit.SECONDS.toNanos(5); /* number of nanoseconds */
 
-    private final World world;
+    private final Level world;
 
     private final Long2ReferenceLinkedOpenHashMap<ClonedChunkSection> byPosition = new Long2ReferenceLinkedOpenHashMap<>();
     private long time; // updated once per frame to be the elapsed time since application start
 
-    public ClonedChunkSectionCache(World world) {
+    public ClonedChunkSectionCache(Level world) {
         this.world = world;
         this.time = getMonotonicTimeSource();
     }
@@ -27,7 +26,7 @@ public class ClonedChunkSectionCache {
     }
 
     public synchronized ClonedChunkSection acquire(int x, int y, int z) {
-        long key = ChunkSectionPos.asLong(x, y, z);
+        long key = SectionPos.asLong(x, y, z);
         ClonedChunkSection section = this.byPosition.get(key);
 
         if (section == null) {
@@ -46,7 +45,7 @@ public class ClonedChunkSectionCache {
     private ClonedChunkSection createSection(int x, int y, int z) {
         ClonedChunkSection section = this.allocate();
 
-        ChunkSectionPos pos = ChunkSectionPos.from(x, y, z);
+        SectionPos pos = SectionPos.of(x, y, z);
 	    section.init(this.world, pos);
 
         this.byPosition.putAndMoveToLast(pos.asLong(), section);
@@ -55,7 +54,7 @@ public class ClonedChunkSectionCache {
     }
 
     public synchronized void invalidate(int x, int y, int z) {
-        this.byPosition.remove(ChunkSectionPos.asLong(x, y, z));
+        this.byPosition.remove(SectionPos.asLong(x, y, z));
     }
 
     public void release(ClonedChunkSection section) {

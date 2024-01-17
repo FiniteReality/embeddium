@@ -7,7 +7,7 @@ import com.jozufozu.flywheel.backend.instancing.InstancedRenderDispatcher;
 import com.jozufozu.flywheel.backend.instancing.InstancedRenderRegistry;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -20,9 +20,9 @@ public class FlywheelCompat {
 
 	public static boolean addAndFilterBEs(BlockEntity be) {
 		if(flywheelLoaded) {
-		if (Backend.canUseInstancing(be.getWorld())) {
+		if (Backend.canUseInstancing(be.getLevel())) {
 			if (InstancedRenderRegistry.canInstance(be.getType()))
-				InstancedRenderDispatcher.getBlockEntities(be.getWorld()).queueAdd(be);
+				InstancedRenderDispatcher.getBlockEntities(be.getLevel()).queueAdd(be);
 
 			if (InstancedRenderRegistry.shouldSkipRender(be))
 				return false;

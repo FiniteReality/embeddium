@@ -1,11 +1,10 @@
 package org.embeddedt.embeddium.api;
 
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.BlockRenderView;
-
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.function.Function;
 
 public interface MeshAppender {
@@ -25,8 +24,8 @@ public interface MeshAppender {
      * @param sodiumBuildBuffers Provides access to the Sodium/Embeddium vertex writing APIs. Intended mainly for internal
      *                           use
      */
-    record Context(Function<RenderLayer, VertexConsumer> vertexConsumerProvider,
-                   BlockRenderView blockRenderView,
-                   ChunkSectionPos sectionOrigin,
+    record Context(Function<RenderType, VertexConsumer> vertexConsumerProvider,
+                   BlockAndTintGetter blockRenderView,
+                   SectionPos sectionOrigin,
                    ChunkBuildBuffers sodiumBuildBuffers) {}
 }

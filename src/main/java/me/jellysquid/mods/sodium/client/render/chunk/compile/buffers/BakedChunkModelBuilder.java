@@ -4,7 +4,7 @@ import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
-import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 public class BakedChunkModelBuilder implements ChunkModelBuilder {
     private final ModelVertexSink vertexSink;
@@ -35,7 +35,7 @@ public class BakedChunkModelBuilder implements ChunkModelBuilder {
     }
 
     @Override
-    public void addSprite(Sprite sprite) {
+    public void addSprite(TextureAtlasSprite sprite) {
         this.renderData.addSprite(sprite);
     }
 
