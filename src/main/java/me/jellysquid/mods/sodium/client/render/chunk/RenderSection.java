@@ -4,6 +4,7 @@ import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildResult;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuilder.WrappedTask;
 import me.jellysquid.mods.sodium.client.render.chunk.graph.ChunkGraphInfo;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderBounds;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
@@ -11,12 +12,11 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.client.render.chunk.ChunkOcclusionData;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
-
+import net.minecraft.client.renderer.chunk.VisibilitySet;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
 import java.util.Map;
@@ -165,8 +165,8 @@ public class RenderSection {
     /**
      * Returns the chunk section position which this render refers to in the world.
      */
-    public ChunkSectionPos getChunkPos() {
-        return ChunkSectionPos.from(this.chunkX, this.chunkY, this.chunkZ);
+    public SectionPos getChunkPos() {
+        return SectionPos.of(this.chunkX, this.chunkY, this.chunkZ);
     }
 
     /**
@@ -174,7 +174,7 @@ public class RenderSection {
      * time before this render is drawn if {@link RenderSection#isTickable()} is true.
      */
     public void tick() {
-        for (Sprite sprite : this.data.getAnimatedSprites()) {
+        for (TextureAtlasSprite sprite : this.data.getAnimatedSprites()) {
             SpriteUtil.markSpriteActive(sprite);
         }
     }
@@ -302,7 +302,7 @@ public class RenderSection {
         return this.graphInfo;
     }
 
-    public void setOcclusionData(ChunkOcclusionData occlusionData) {
+    public void setOcclusionData(VisibilitySet occlusionData) {
         this.graphInfo.setOcclusionData(occlusionData);
     }
 

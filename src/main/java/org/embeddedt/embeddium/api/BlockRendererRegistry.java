@@ -1,13 +1,12 @@
 package org.embeddedt.embeddium.api;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
-
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -39,7 +38,7 @@ public class BlockRendererRegistry {
     /**
      * Get a list of custom renderers for the given block & context.
      */
-    public void fillCustomRenderers(List<Renderer> resultList, BlockState state, BlockPos pos, BlockRenderView world, RenderLayer layer) {
+    public void fillCustomRenderers(List<Renderer> resultList, BlockState state, BlockPos pos, BlockAndTintGetter world, RenderType layer) {
         if(renderPopulators.isEmpty())
             return;
 
@@ -61,7 +60,7 @@ public class BlockRendererRegistry {
     }
 
     public interface RenderPopulator {
-        void fillCustomRenderers(List<Renderer> resultList, BlockState state, BlockPos pos, BlockRenderView world, RenderLayer layer);
+        void fillCustomRenderers(List<Renderer> resultList, BlockState state, BlockPos pos, BlockAndTintGetter world, RenderType layer);
 
         static RenderPopulator forRenderer(Renderer renderer) {
             return (resultList, state, pos, world, layer) -> resultList.add(renderer);
@@ -82,11 +81,11 @@ public class BlockRendererRegistry {
          */
         RenderResult renderBlock(BlockState state,
                 BlockPos pos,
-                BlockRenderView world,
+                BlockAndTintGetter world,
                 VertexConsumer consumer,
-                Random random,
+                RandomSource random,
                 ModelData modelData,
-                RenderLayer layer
+                RenderType layer
         );
     }
 }

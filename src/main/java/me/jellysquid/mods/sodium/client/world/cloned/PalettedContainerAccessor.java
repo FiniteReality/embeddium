@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.world.cloned;
 
-import net.minecraft.world.chunk.PalettedContainer;
+import net.minecraft.world.level.chunk.PalettedContainer;
 
 // TODO: Replace with a real accessor
 public interface PalettedContainerAccessor<T> {

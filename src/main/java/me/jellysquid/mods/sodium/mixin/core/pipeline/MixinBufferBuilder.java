@@ -7,22 +7,20 @@ import me.jellysquid.mods.sodium.client.model.vertex.VertexSink;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.type.BlittableVertexType;
 import me.jellysquid.mods.sodium.client.model.vertex.type.VertexType;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.util.GlAllocationUtils;
-
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
+import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import java.nio.ByteBuffer;
 
 @Mixin(BufferBuilder.class)
 public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrain {
     @Shadow
-    private int elementOffset;
+    private int nextElementByte;
 
     @Shadow
     private ByteBuffer buffer;
@@ -32,7 +30,7 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
     private static Logger LOGGER;
 
     @Shadow
-    private static int roundBufferSize(int amount) {
+    private static int roundUp(int amount) {
         throw new UnsupportedOperationException();
     }
 
@@ -40,24 +38,24 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
     private VertexFormat format;
 
     @Shadow
-    private int vertexCount;
+    private int vertices;
     
     @Override
     public boolean ensureBufferCapacity(int bytes) {
     	if(format != null) {
             // Ensure that there is always space for 1 more vertex; see BufferBuilder.next()
-            bytes += format.getVertexSizeByte();
+            bytes += format.getVertexSize();
         }
 
-        if (this.elementOffset + bytes <= this.buffer.capacity()) {
+        if (this.nextElementByte + bytes <= this.buffer.capacity()) {
             return false;
         }
 
-        int newSize = this.buffer.capacity() + roundBufferSize(bytes);
+        int newSize = this.buffer.capacity() + roundUp(bytes);
 
         LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.buffer.capacity(), newSize);
 
-        ByteBuffer byteBuffer = GlAllocationUtils.resizeByteBuffer(this.buffer, newSize);
+        ByteBuffer byteBuffer = MemoryTracker.resize(this.buffer, newSize);
         byteBuffer.rewind();
         this.buffer = byteBuffer;
 
@@ -71,7 +69,7 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
 
     @Override
     public int getWriterPosition() {
-        return this.elementOffset;
+        return this.nextElementByte;
     }
 
     @Override
@@ -85,8 +83,8 @@ public abstract class MixinBufferBuilder implements VertexBufferView, VertexDrai
             throw new IllegalStateException("Mis-matched vertex format (expected: [" + format + "], currently using: [" + this.format + "])");
         }
 
-        this.vertexCount += vertexCount;
-        this.elementOffset += vertexCount * format.getStride();
+        this.vertices += vertexCount;
+        this.nextElementByte += vertexCount * format.getStride();
     }
 
     @Override

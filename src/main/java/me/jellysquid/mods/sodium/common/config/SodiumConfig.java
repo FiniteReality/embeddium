@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraftforge.fml.loading.LoadingModList;
-
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;

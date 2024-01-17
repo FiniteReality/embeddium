@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.texture_tracking;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteExtended;
-import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,27 +13,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(Sprite.Animation.class)
+@Mixin(TextureAtlasSprite.AnimatedTexture.class)
 public class MixinSpriteAnimation {
     @Shadow
-    public int frameTicks;
+    public int subFrame;
 
     @Shadow
-    public int frameIndex;
+    public int frame;
 
     @Shadow
     @Final
-    public List<Sprite.AnimationFrame> frames;
+    public List<TextureAtlasSprite.FrameInfo> frames;
 
     @Unique
-    private Sprite parent;
+    private TextureAtlasSprite parent;
 
     /**
      * @author IMS
      * @reason Replace fragile Shadow
      */
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void assignParent(Sprite parent, List frames, int frameCount, Sprite.Interpolation interpolation, CallbackInfo ci) {
+    public void assignParent(TextureAtlasSprite parent, List frames, int frameCount, TextureAtlasSprite.InterpolationData interpolation, CallbackInfo ci) {
         this.parent = parent;
     }
 
@@ -44,10 +44,10 @@ public class MixinSpriteAnimation {
         boolean onDemand = SodiumClientMod.options().performance.animateOnlyVisibleTextures;
 
         if (onDemand && !parent.isActive()) {
-            this.frameTicks++;
-            if (this.frameTicks >= this.frames.get(this.frameIndex).time) {
-                this.frameIndex = (this.frameIndex + 1) % this.frames.size();
-                this.frameTicks = 0;
+            this.subFrame++;
+            if (this.subFrame >= this.frames.get(this.frame).time) {
+                this.frame = (this.frame + 1) % this.frames.size();
+                this.subFrame = 0;
             }
             ci.cancel();
         }

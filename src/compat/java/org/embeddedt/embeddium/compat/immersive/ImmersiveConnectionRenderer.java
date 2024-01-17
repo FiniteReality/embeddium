@@ -14,18 +14,18 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SynchronousResourceReloader;
-import net.minecraft.screen.PlayerScreenHandler;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.phys.Vec3;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 
 import javax.annotation.Nonnull;
@@ -33,19 +33,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class ImmersiveConnectionRenderer implements SynchronousResourceReloader {
+public class ImmersiveConnectionRenderer implements ResourceManagerReloadListener {
     private static final LoadingCache<SegmentsKey, List<RenderedSegment>> SEGMENT_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(120, TimeUnit.SECONDS)
             .build(CacheLoader.from(ImmersiveConnectionRenderer::renderSegmentForCache));
-    private static final ResettableLazy<Sprite> WIRE_TEXTURE = new ResettableLazy<>(
-            () -> MinecraftClient.getInstance().getBakedModelManager()
-                    .getAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE)
+    private static final ResettableLazy<TextureAtlasSprite> WIRE_TEXTURE = new ResettableLazy<>(
+            () -> Minecraft.getInstance().getModelManager()
+                    .getAtlas(TextureAtlas.LOCATION_BLOCKS)
                     .getSprite(rl("block/wire"))
     );
 
-    public static Identifier rl(String path)
+    public static ResourceLocation rl(String path)
 	{
-		return new Identifier("immersiveengineering", path);
+		return new ResourceLocation("immersiveengineering", path);
 	}
 
     static void meshAppendEvent(ChunkMeshEvent event) {
@@ -55,7 +55,7 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
     }
 
     @Override
-    public void reload(@Nonnull ResourceManager pResourceManager) {
+    public void onResourceManagerReload(@Nonnull ResourceManager pResourceManager) {
         WIRE_TEXTURE.reset();
         resetCache();
     }
@@ -65,18 +65,18 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
     }
 
     public static void renderConnectionsInSection(
-            ChunkBuildBuffers buffers, BlockRenderView region, ChunkSectionPos section
+            ChunkBuildBuffers buffers, BlockAndTintGetter region, SectionPos section
     ) {
-        GlobalWireNetwork globalNet = GlobalWireNetwork.getNetwork(MinecraftClient.getInstance().world);
+        GlobalWireNetwork globalNet = GlobalWireNetwork.getNetwork(Minecraft.getInstance().level);
         List<WireCollisionData.ConnectionSegments> connectionParts = globalNet.getCollisionData().getWiresIn(section);
         if (connectionParts == null || connectionParts.isEmpty()) {
             return;
         }
-        RenderLayer renderType = RenderLayer.getSolid();
+        RenderType renderType = RenderType.solid();
         ChunkModelBuilder builder = buffers.get(renderType);
-        int originX = section.getMinX();
-        int originY = section.getMinY();
-        int originZ = section.getMinZ();
+        int originX = section.minBlockX();
+        int originY = section.minBlockY();
+        int originZ = section.minBlockZ();
         for (WireCollisionData.ConnectionSegments connection : connectionParts) {
             ConnectionPoint connectionOrigin = connection.connection().getEndA();
             renderSegments(
@@ -90,7 +90,7 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
 
     public static void renderSegments(
             ChunkModelBuilder out, WireCollisionData.ConnectionSegments toRender,
-            BlockRenderView level, int offX, int offY, int offZ
+            BlockAndTintGetter level, int offX, int offY, int offZ
     ) {
         Connection connection = toRender.connection();
         int colorRGB = connection.type.getColour(connection);
@@ -125,17 +125,17 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
 
     private static RenderedSegment renderSegmentForCache(SegmentsKey key, int startIndex) {
         Connection.CatenaryData catenaryData = key.catenaryShape();
-        Vec3d start = key.catenaryShape().getRenderPoint(startIndex);
-        Vec3d end = key.catenaryShape().getRenderPoint(startIndex + 1);
-        Vec3d horNormal;
+        Vec3 start = key.catenaryShape().getRenderPoint(startIndex);
+        Vec3 end = key.catenaryShape().getRenderPoint(startIndex + 1);
+        Vec3 horNormal;
         if (key.catenaryShape().isVertical()) {
-            horNormal = new Vec3d(1, 0, 0);
+            horNormal = new Vec3(1, 0, 0);
         } else {
-            horNormal = new Vec3d(-catenaryData.delta().z, 0, catenaryData.delta().x).normalize();
+            horNormal = new Vec3(-catenaryData.delta().z, 0, catenaryData.delta().x).normalize();
         }
-        Vec3d verticalNormal = start.subtract(end).crossProduct(horNormal).normalize();
-        Vec3d horRadius = horNormal.multiply(key.radius());
-        Vec3d verticalRadius = verticalNormal.multiply(-key.radius());
+        Vec3 verticalNormal = start.subtract(end).cross(horNormal).normalize();
+        Vec3 horRadius = horNormal.scale(key.radius());
+        Vec3 verticalRadius = verticalNormal.scale(-key.radius());
         return new RenderedSegment(
                 renderQuad(start, end, horRadius, key.color()),
                 renderQuad(start, end, verticalRadius, key.color()),
@@ -144,21 +144,21 @@ public class ImmersiveConnectionRenderer implements SynchronousResourceReloader 
         );
     }
 
-    private static int getLight(Connection connection, Vec3i point, BlockRenderView level) {
-        return WorldRenderer.getLightmapCoordinates(level, connection.getEndA().position().add(point));
+    private static int getLight(Connection connection, Vec3i point, BlockAndTintGetter level) {
+        return LevelRenderer.getLightColor(level, connection.getEndA().position().offset(point));
     }
 
-    private static Quad renderQuad(Vec3d start, Vec3d end, Vec3d radius, int color) {
-    	Sprite texture = WIRE_TEXTURE.get();
+    private static Quad renderQuad(Vec3 start, Vec3 end, Vec3 radius, int color) {
+    	TextureAtlasSprite texture = WIRE_TEXTURE.get();
         return new Quad(
-                vertex(start.add(radius), texture.getMinU(), texture.getMinV(), color, true),
-                vertex(end.add(radius), texture.getMaxU(), texture.getMinV(), color, false),
-                vertex(end.subtract(radius), texture.getMaxU(), texture.getMaxV(), color, false),
-                vertex(start.subtract(radius), texture.getMinU(), texture.getMaxV(), color, true)
+                vertex(start.add(radius), texture.getU0(), texture.getV0(), color, true),
+                vertex(end.add(radius), texture.getU1(), texture.getV0(), color, false),
+                vertex(end.subtract(radius), texture.getU1(), texture.getV1(), color, false),
+                vertex(start.subtract(radius), texture.getU0(), texture.getV1(), color, true)
         );
     }
 
-    private static Vertex vertex(Vec3d point, double u, double v, int color, boolean lightForStart) {
+    private static Vertex vertex(Vec3 point, double u, double v, int color, boolean lightForStart) {
         return new Vertex(
                 (float) point.x, (float) point.y, (float) point.z, (float) u, (float) v, color, lightForStart
         );

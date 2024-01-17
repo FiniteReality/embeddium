@@ -9,46 +9,44 @@ import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.world.biome.ItemColorsExtended;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.client.color.item.ItemColorProvider;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
-
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 
 @Mixin(ItemRenderer.class)
 public class MixinItemRenderer {
-    private final Xoroshiro128PlusPlusRandom random = new Xoroshiro128PlusPlusRandom(42L);
+    private final XoroshiroRandomSource random = new XoroshiroRandomSource(42L);
 
     @Shadow
     @Final
-    private ItemColors colors;
+    private ItemColors itemColors;
 
     /**
      * @reason Avoid allocations
      * @author JellySquid
      */
     @Overwrite
-    public void renderBakedItemModel(BakedModel model, ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumer vertices) {
-    	Xoroshiro128PlusPlusRandom random = this.random;
+    public void renderModelLists(BakedModel model, ItemStack stack, int light, int overlay, PoseStack matrices, VertexConsumer vertices) {
+    	XoroshiroRandomSource random = this.random;
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
         	random.setSeed(42L);
             List<BakedQuad> quads = model.getQuads(null, direction, random);
 
             if (!quads.isEmpty()) {
-                this.renderBakedItemQuads(matrices, vertices, quads, stack, light, overlay);
+                this.renderQuadList(matrices, vertices, quads, stack, light, overlay);
             }
         }
 
@@ -56,7 +54,7 @@ public class MixinItemRenderer {
         List<BakedQuad> quads = model.getQuads(null, null, random);
 
         if (!quads.isEmpty()) {
-            this.renderBakedItemQuads(matrices, vertices, quads, stack, light, overlay);
+            this.renderQuadList(matrices, vertices, quads, stack, light, overlay);
         }
     }
 
@@ -65,13 +63,13 @@ public class MixinItemRenderer {
      * @author JellySquid
      */
     @Overwrite
-    public void renderBakedItemQuads(MatrixStack matrices, VertexConsumer vertexConsumer, List<BakedQuad> quads, ItemStack stack, int light, int overlay) {
-        MatrixStack.Entry entry = matrices.peek();
+    public void renderQuadList(PoseStack matrices, VertexConsumer vertexConsumer, List<BakedQuad> quads, ItemStack stack, int light, int overlay) {
+        PoseStack.Pose entry = matrices.last();
 
-        ItemColorProvider colorProvider = null;
+        ItemColor colorProvider = null;
 
         if(!stack.isEmpty()) {
-            colorProvider = ((ItemColorsExtended) this.colors).getColorProvider(stack);
+            colorProvider = ((ItemColorsExtended) this.itemColors).getColorProvider(stack);
         }
 
         QuadVertexSink drain = VertexDrain.of(vertexConsumer)
@@ -81,8 +79,8 @@ public class MixinItemRenderer {
         for (BakedQuad bakedQuad : quads) {
             int color = 0xFFFFFFFF;
 
-            if (colorProvider != null && bakedQuad.hasColor()) {
-                color = ColorARGB.toABGR(colorProvider.getColor(stack, bakedQuad.getColorIndex()), 255);
+            if (colorProvider != null && bakedQuad.isTinted()) {
+                color = ColorARGB.toABGR(colorProvider.getColor(stack, bakedQuad.getTintIndex()), 255);
             }
 
             ModelQuadView quad = ((ModelQuadView) bakedQuad);
@@ -90,7 +88,7 @@ public class MixinItemRenderer {
             for (int i = 0; i < 4; i++) {
             	int fColor = multARGBInts(quad.getColor(i), color);
                 drain.writeQuad(entry, quad.getX(i), quad.getY(i), quad.getZ(i), fColor, quad.getTexU(i), quad.getTexV(i),
-                        ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getFace(), quad.getNormal(i)));
+                        ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), overlay, ModelQuadUtil.getFacingNormal(bakedQuad.getDirection(), quad.getNormal(i)));
             }
 
             SpriteUtil.markSpriteActive(quad.getSprite());

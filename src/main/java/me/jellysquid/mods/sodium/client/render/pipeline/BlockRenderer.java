@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.pipeline;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
@@ -21,18 +22,17 @@ import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.world.biome.BlockColorsExtended;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 
@@ -40,7 +40,7 @@ import java.util.List;
 
 public class BlockRenderer {
     private static final int[] DEFAULT_QUAD_COLORS = new int[] { -1, -1, -1, -1 };
-    private static final MatrixStack EMPTY_STACK = new MatrixStack();
+    private static final PoseStack EMPTY_STACK = new PoseStack();
 
     private final BlockColorsExtended blockColors;
     private final BlockOcclusionCache occlusionCache;
@@ -57,20 +57,20 @@ public class BlockRenderer {
     private boolean useReorienting;
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
-    public BlockRenderer(MinecraftClient client, LightPipelineProvider lighters, ColorBlender colorBlender) {
+    public BlockRenderer(Minecraft client, LightPipelineProvider lighters, ColorBlender colorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
         this.colorBlender = colorBlender;
 
         this.lighters = lighters;
 
         this.occlusionCache = new BlockOcclusionCache();
-        this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
+        this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
     }
 
-    public boolean renderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, ModelData modelData, RenderLayer layer, Random random) {
+    public boolean renderModel(BlockAndTintGetter world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, ModelData modelData, RenderType layer, RandomSource random) {
         LightMode mode = this.getLightingMode(state, model, world, pos, layer);
         LightPipeline lighter = this.lighters.getLighter(mode);
-        Vec3d offset = state.getModelOffset(world, pos);
+        Vec3 offset = state.getOffset(world, pos);
 
         boolean rendered = false;
 
@@ -92,10 +92,10 @@ public class BlockRenderer {
 
         // Delegate to Forge render pipeline if enabled
         if(ForgeBlockRenderer.useForgeLightingPipeline()) {
-            MatrixStack mStack;
-            if(offset != Vec3d.ZERO) {
-                mStack = new MatrixStack();
-                mStack.push();
+            PoseStack mStack;
+            if(offset != Vec3.ZERO) {
+                mStack = new PoseStack();
+                mStack.pushPose();
                 mStack.translate(offset.x, offset.y, offset.z);
             } else
                 mStack = EMPTY_STACK;
@@ -137,7 +137,7 @@ public class BlockRenderer {
         return rendered;
     }
 
-    private void renderQuadList(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, LightPipeline lighter, Vec3d offset,
+    private void renderQuadList(BlockAndTintGetter world, BlockState state, BlockPos pos, BlockPos origin, LightPipeline lighter, Vec3 offset,
                                 ChunkModelBuilder buffers, List<BakedQuad> quads, Direction cullFace) {
     	ModelQuadFacing facing = cullFace == null ? ModelQuadFacing.UNASSIGNED : ModelQuadFacing.fromDirection(cullFace);
         ColorSampler<BlockState> colorizer = null;
@@ -168,9 +168,9 @@ public class BlockRenderer {
 
             LightPipeline quadLighter = !quad.hasAmbientOcclusion() ? this.lighters.getLighter(LightMode.FLAT) : lighter;
             QuadLightData light = this.cachedQuadLightData;
-            quadLighter.calculate((ModelQuadView) quad, pos, light, cullFace, quad.getFace(), quad.hasShade());
+            quadLighter.calculate((ModelQuadView) quad, pos, light, cullFace, quad.getDirection(), quad.isShade());
 
-            if (quad.hasColor() && colorizer == null) {
+            if (quad.isTinted() && colorizer == null) {
                 colorizer = this.blockColors.getColorProvider(state);
             }
 
@@ -180,14 +180,14 @@ public class BlockRenderer {
         vertices.flush();
     }
 
-    private void renderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset,
+    private void renderQuad(BlockAndTintGetter world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3 blockOffset,
                             ColorSampler<BlockState> colorSampler, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model) {
         ModelQuadView src = (ModelQuadView) bakedQuad;
         ModelQuadOrientation orientation = this.useReorienting ? ModelQuadOrientation.orientByBrightness(light.br) : ModelQuadOrientation.NORMAL;
 
         int[] colors;
 
-        if (bakedQuad.hasColor()) {
+        if (bakedQuad.isTinted()) {
             colors = this.colorBlender.getColors(world, pos, src, colorSampler, state);
         } else {
             colors = DEFAULT_QUAD_COLORS;
@@ -198,9 +198,9 @@ public class BlockRenderer {
         for (int i = 0; i < 4; i++) {
             int j = orientation.getVertexIndex(i);
 
-            float x = src.getX(j) + (float) blockOffset.getX();
-            float y = src.getY(j) + (float) blockOffset.getY();
-            float z = src.getZ(j) + (float) blockOffset.getZ();
+            float x = src.getX(j) + (float) blockOffset.x();
+            float y = src.getY(j) + (float) blockOffset.y();
+            float z = src.getZ(j) + (float) blockOffset.z();
 
             int color = ColorABGR.mul(ModelQuadUtil.mixARGBColors(colors[j], src.getColor(j)), light.br[j]);
 
@@ -214,7 +214,7 @@ public class BlockRenderer {
 
         indices.add(vertexStart, ModelQuadWinding.CLOCKWISE);
 
-        Sprite sprite = src.getSprite();
+        TextureAtlasSprite sprite = src.getSprite();
 
         if (sprite != null) {
             model.addSprite(sprite);
@@ -223,11 +223,11 @@ public class BlockRenderer {
 
     @Deprecated
     @SuppressWarnings("unused")
-    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos) {
-        return getLightingMode(state, model, world, pos, RenderLayer.getSolid());
+    private LightMode getLightingMode(BlockState state, BakedModel model, BlockAndTintGetter world, BlockPos pos) {
+        return getLightingMode(state, model, world, pos, RenderType.solid());
     }
 
-    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos, RenderLayer layer) {
+    private LightMode getLightingMode(BlockState state, BakedModel model, BlockAndTintGetter world, BlockPos pos, RenderType layer) {
         if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, layer) && state.getLightEmission(world, pos) == 0) {
             return LightMode.SMOOTH;
         } else {

@@ -14,22 +14,22 @@ import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCache
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.util.crash.CrashException;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.LocalRandom;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.chunk.VisGraph;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
@@ -52,7 +52,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
     private final int frame;
     private final Map<BlockPos, ModelData> modelDataMap;
 
-    private Vec3d camera;
+    private Vec3 camera;
 
     private final boolean translucencySorting;
 
@@ -60,15 +60,15 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         this.render = render;
         this.renderContext = renderContext;
         this.frame = frame;
-        this.camera = Vec3d.ZERO;
+        this.camera = Vec3.ZERO;
         this.translucencySorting = SodiumClientMod.options().performance.useTranslucentFaceSorting;
 
-        this.modelDataMap = ModelDataSnapshotter.getModelDataForSection(MinecraftClient.getInstance().world, this.renderContext.getOrigin());
+        this.modelDataMap = ModelDataSnapshotter.getModelDataForSection(Minecraft.getInstance().level, this.renderContext.getOrigin());
     }
     
-    private final LocalRandom random = new LocalRandom(42L);
+    private final SingleThreadedRandomSource random = new SingleThreadedRandomSource(42L);
 
-    public ChunkRenderRebuildTask withCameraPosition(Vec3d camera) {
+    public ChunkRenderRebuildTask withCameraPosition(Vec3 camera) {
         this.camera = camera;
         return this;
     }
@@ -77,7 +77,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
     public ChunkBuildResult performBuild(ChunkBuildContext buildContext, CancellationSource cancellationSource) {
         // COMPATIBLITY NOTE: Oculus relies on the LVT of this method being unchanged, at least in 16.5
         ChunkRenderData.Builder renderData = new ChunkRenderData.Builder();
-        ChunkOcclusionDataBuilder occluder = new ChunkOcclusionDataBuilder();
+        VisGraph occluder = new VisGraph();
         ChunkRenderBounds.Builder bounds = new ChunkRenderBounds.Builder();
 
         ChunkBuildBuffers buffers = buildContext.buffers;
@@ -99,8 +99,8 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         Map<BlockPos, ModelData> modelDataMap = this.modelDataMap;
 
         // Initialise with minX/minY/minZ so initial getBlockState crash context is correct
-        BlockPos.Mutable blockPos = new BlockPos.Mutable(minX, minY, minZ);
-        BlockPos.Mutable offset = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos(minX, minY, minZ);
+        BlockPos.MutableBlockPos offset = new BlockPos.MutableBlockPos();
 
         try {
             for (int y = minY; y < maxY; y++) {
@@ -121,14 +121,14 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
 
                         boolean rendered = false;
 
-                        if (blockState.getRenderType() == BlockRenderType.MODEL) {
+                        if (blockState.getRenderShape() == RenderShape.MODEL) {
                             BakedModel model = cache.getBlockModels()
-                                    .getModel(blockState);
+                                    .getBlockModel(blockState);
                             ModelData modelData = modelDataMap.getOrDefault(blockPos, ModelData.EMPTY);
                             modelData = model.getModelData(cache.getLocalSlice(), blockPos, blockState, modelData);
-                            random.setSeed(blockState.getRenderingSeed(blockPos));
-                            for (RenderLayer layer : model.getRenderTypes(blockState, random, modelData)) {
-                                long seed = blockState.getRenderingSeed(blockPos);
+                            random.setSeed(blockState.getSeed(blockPos));
+                            for (RenderType layer : model.getRenderTypes(blockState, random, modelData)) {
+                                long seed = blockState.getSeed(blockPos);
 
                                 if (cache.getBlockRenderer().renderModel(cache.getLocalSlice(), blockState, blockPos, offset, model, buffers.get(layer), true, seed, modelData, layer, random)) {
                                     rendered = true;
@@ -139,7 +139,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                         FluidState fluidState = blockState.getFluidState();
 
                         if (!fluidState.isEmpty()) {
-                            RenderLayer layer = RenderLayers.getFluidLayer(fluidState);
+                            RenderType layer = ItemBlockRenderTypes.getRenderLayer(fluidState);
 
                             if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, blockPos, offset, buffers.get(layer))) {
                                 rendered = true;
@@ -150,17 +150,17 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                             BlockEntity entity = slice.getBlockEntity(blockPos);
 
                             if (entity != null) {
-                                BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(entity);
+                                BlockEntityRenderer<BlockEntity> renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(entity);
 
                                 if (renderer != null) {
-                                    renderData.addBlockEntity(entity, !renderer.rendersOutsideBoundingBox(entity));
+                                    renderData.addBlockEntity(entity, !renderer.shouldRenderOffScreen(entity));
                                     rendered = true;
                                 }
                             }
                         }
 
-                        if (blockState.isOpaqueFullCube(slice, blockPos)) {
-                            occluder.markClosed(blockPos);
+                        if (blockState.isSolidRender(slice, blockPos)) {
+                            occluder.setOpaque(blockPos);
                         }
 
                         if (rendered) {
@@ -171,12 +171,12 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
             }
 
             MeshAppenderRenderer.renderMeshAppenders(renderContext.getMeshAppenders(), cache.getLocalSlice(), render.getChunkPos(), buffers);
-        } catch (CrashException ex) {
+        } catch (ReportedException ex) {
             // Propagate existing crashes (add context)
             throw fillCrashInfo(ex.getReport(), slice, blockPos);
         } catch (Throwable ex) {
             // Create a new crash report for other exceptions (e.g. thrown in getQuads)
-            throw fillCrashInfo(CrashReport.create(ex, "Encountered exception while building chunk meshes"), slice, blockPos);
+            throw fillCrashInfo(CrashReport.forThrowable(ex, "Encountered exception while building chunk meshes"), slice, blockPos);
         }
 
         Map<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
@@ -192,7 +192,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
             }
         }
 
-        renderData.setOcclusionData(occluder.build());
+        renderData.setOcclusionData(occluder.resolve());
         renderData.setBounds(bounds.build(this.render.getChunkPos()));
 
         MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
@@ -200,21 +200,21 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         return new ChunkBuildResult(this.render, renderData.build(), meshes, this.frame);
     }
 
-    private CrashException fillCrashInfo(CrashReport report, WorldSlice slice, BlockPos pos) {
-        CrashReportSection crashReportSection = report.addElement("Block being rendered", 1);
+    private ReportedException fillCrashInfo(CrashReport report, WorldSlice slice, BlockPos pos) {
+        CrashReportCategory crashReportSection = report.addCategory("Block being rendered", 1);
 
         BlockState state = null;
         try {
             state = slice.getBlockState(pos);
         } catch (Exception ignored) {}
-        CrashReportSection.addBlockInfo(crashReportSection, slice, pos, state);
+        CrashReportCategory.populateBlockDetails(crashReportSection, slice, pos, state);
 
-        crashReportSection.add("Chunk section", render);
+        crashReportSection.setDetail("Chunk section", render);
         if (renderContext != null) {
-            crashReportSection.add("Render context volume", renderContext.getVolume());
+            crashReportSection.setDetail("Render context volume", renderContext.getVolume());
         }
 
-        return new CrashException(report);
+        return new ReportedException(report);
     }
     
     @Override

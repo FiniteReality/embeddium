@@ -1,10 +1,10 @@
 package me.jellysquid.mods.sodium.client.model.light.data;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * The light data cache is used to make accessing the light data and occlusion properties of blocks cheaper. The data
@@ -23,19 +23,19 @@ import net.minecraft.world.BlockRenderView;
  * You can use the various static pack/unpack methods to extract these values in a usable format.
  */
 public abstract class LightDataAccess {
-    private final BlockPos.Mutable pos = new BlockPos.Mutable();
-    protected BlockRenderView world;
+    private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+    protected BlockAndTintGetter world;
 
     public long get(int x, int y, int z, Direction d1, Direction d2) {
-        return this.get(x + d1.getOffsetX() + d2.getOffsetX(),
-                y + d1.getOffsetY() + d2.getOffsetY(),
-                z + d1.getOffsetZ() + d2.getOffsetZ());
+        return this.get(x + d1.getStepX() + d2.getStepX(),
+                y + d1.getStepY() + d2.getStepY(),
+                z + d1.getStepZ() + d2.getStepZ());
     }
 
     public long get(int x, int y, int z, Direction dir) {
-        return this.get(x + dir.getOffsetX(),
-                y + dir.getOffsetY(),
-                z + dir.getOffsetZ());
+        return this.get(x + dir.getStepX(),
+                y + dir.getStepY(),
+                z + dir.getStepZ());
     }
 
     public long get(BlockPos pos, Direction dir) {
@@ -54,7 +54,7 @@ public abstract class LightDataAccess {
 
     protected long compute(int x, int y, int z) {
         BlockPos pos = this.pos.set(x, y, z);
-        BlockRenderView world = this.world;
+        BlockAndTintGetter world = this.world;
 
         BlockState state = world.getBlockState(pos);
 
@@ -62,20 +62,20 @@ public abstract class LightDataAccess {
         boolean em;
 
         if (state.getLightEmission(world, pos) == 0) {
-            ao = state.getAmbientOcclusionLightLevel(world, pos);
-            em = state.hasEmissiveLighting(world, pos);
+            ao = state.getShadeBrightness(world, pos);
+            em = state.emissiveRendering(world, pos);
         } else {
             ao = 1.0f;
             em = true;
         }
 
-        boolean op = !state.shouldBlockVision(world, pos) || state.getOpacity(world, pos) == 0;
-        boolean fo = state.isOpaqueFullCube(world, pos);
-        boolean fc = state.isFullCube(world, pos);
+        boolean op = !state.isViewBlocking(world, pos) || state.getLightBlock(world, pos) == 0;
+        boolean fo = state.isSolidRender(world, pos);
+        boolean fc = state.isCollisionShapeFullBlock(world, pos);
 
         // OPTIMIZE: Do not calculate lightmap data if the block is full and opaque.
         // FIX: Calculate lightmap data for light-emitting or emissive blocks, even though they are full and opaque.
-        int lm = (fo && !em) ? 0 : WorldRenderer.getLightmapCoordinates(world, state, pos);
+        int lm = (fo && !em) ? 0 : LevelRenderer.getLightColor(world, state, pos);
 
         return packAO(ao) | packLM(lm) | packOP(op) | packFO(fo) | packFC(fc) | (1L << 60);
     }
@@ -122,7 +122,7 @@ public abstract class LightDataAccess {
         return aoi * (1.0f / 4096.0f);
     }
 
-    public BlockRenderView getWorld() {
+    public BlockAndTintGetter getWorld() {
         return this.world;
     }
 }

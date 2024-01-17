@@ -1,10 +1,10 @@
 package me.jellysquid.mods.sodium.mixin.core;
 
-import net.minecraft.client.render.OverlayVertexConsumer;
-import net.minecraft.client.render.model.BakedQuadFactory;
-import net.minecraft.client.render.model.json.JsonUnbakedModel;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.FaceBakery;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -13,8 +13,8 @@ public class MixinDirection {
     /**
      * Used by:
      * <ul>
-     *     <li>{@link OverlayVertexConsumer}</li>
-     *     <li>UV-locked faces and cullfaces in {@link JsonUnbakedModel} and {@link BakedQuadFactory}</li>
+     *     <li>{@link SheetedDecalTextureGenerator}</li>
+     *     <li>UV-locked faces and cullfaces in {@link BlockModel} and {@link FaceBakery}</li>
      *     <li>Raycasts, when creating the {@link BlockHitResult}</li>
      * </ul>
      *
@@ -22,7 +22,7 @@ public class MixinDirection {
      * @reason Avoid looping over all directions and computing the dot product
      */
     @Overwrite
-    public static Direction getFacing(float x, float y, float z) {
+    public static Direction getNearest(float x, float y, float z) {
         // Vanilla quirk: return NORTH if all entries are zero
         if (x == 0 && y == 0 && z == 0)
             return Direction.NORTH;

@@ -5,26 +5,25 @@ import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.block.BlockModelRenderer;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.lighting.FlatQuadLighter;
 import net.minecraftforge.client.model.lighting.QuadLighter;
 import net.minecraftforge.client.model.lighting.SmoothQuadLighter;
 import net.minecraftforge.common.ForgeConfig;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 
 /**
@@ -32,11 +31,11 @@ import java.util.List;
  */
 public class ForgeBlockRenderer {
     private static boolean useForgeLightingPipeline = false;
-    private static BlockModelRenderer forgeRenderer;
+    private static ModelBlockRenderer forgeRenderer;
 
     public static void init() {
         useForgeLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
-        forgeRenderer = MinecraftClient.getInstance().getBlockRenderManager().getModelRenderer();
+        forgeRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
     }
 
     public static boolean useForgeLightingPipeline() {
@@ -50,7 +49,7 @@ public class ForgeBlockRenderer {
         }
         for (int i = 0; i < quads.size(); i++) {
             ModelQuadView src = (ModelQuadView)quads.get(i);
-            Sprite sprite = src.getSprite();
+            TextureAtlasSprite sprite = src.getSprite();
 
             if (sprite != null) {
                 renderData.addSprite(sprite);
@@ -59,13 +58,13 @@ public class ForgeBlockRenderer {
         return false;
     }
 
-    public boolean renderBlock(LightMode mode, BlockState state, BlockPos pos, BlockRenderView world, BakedModel model, MatrixStack stack,
-                               VertexConsumer buffer, Random random, long seed, ModelData data, boolean checkSides, BlockOcclusionCache sideCache,
-                               ChunkModelBuilder renderData, RenderLayer layer) {
+    public boolean renderBlock(LightMode mode, BlockState state, BlockPos pos, BlockAndTintGetter world, BakedModel model, PoseStack stack,
+                               VertexConsumer buffer, RandomSource random, long seed, ModelData data, boolean checkSides, BlockOcclusionCache sideCache,
+                               ChunkModelBuilder renderData, RenderType layer) {
         if (mode == LightMode.FLAT) {
-            forgeRenderer.tesselateWithoutAO(world, model, state, pos, stack, buffer, checkSides, random, seed, OverlayTexture.DEFAULT_UV, data, layer);
+            forgeRenderer.tesselateWithoutAO(world, model, state, pos, stack, buffer, checkSides, random, seed, OverlayTexture.NO_OVERLAY, data, layer);
         } else {
-            forgeRenderer.tesselateWithAO(world, model, state, pos, stack, buffer, checkSides, random, seed, OverlayTexture.DEFAULT_UV, data, layer);
+            forgeRenderer.tesselateWithAO(world, model, state, pos, stack, buffer, checkSides, random, seed, OverlayTexture.NO_OVERLAY, data, layer);
         }
 
         // Process the quads a second time for marking animated sprites and detecting emptiness
