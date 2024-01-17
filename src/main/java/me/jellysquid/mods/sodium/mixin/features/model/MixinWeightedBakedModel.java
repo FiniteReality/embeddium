@@ -9,18 +9,17 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.render.model.WeightedBakedModel;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.WeightedBakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 
 @Mixin(WeightedBakedModel.class)
 public class MixinWeightedBakedModel {
     @Shadow
     @Final
-    private List<WeightedBakedModel.Entry> models;
+    private List<WeightedBakedModel.WeightedModel> list;
 
     @Shadow
     @Final
@@ -32,7 +31,7 @@ public class MixinWeightedBakedModel {
      */
     @Overwrite
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction face, Random random, IModelData modelData) {
-    	WeightedBakedModel.Entry entry = getAt(this.models, Math.abs((int) random.nextLong()) % this.totalWeight);
+    	WeightedBakedModel.WeightedModel entry = getAt(this.list, Math.abs((int) random.nextLong()) % this.totalWeight);
 
         if (entry != null) {
             return entry.model.getQuads(state, face, random, modelData);
@@ -41,7 +40,7 @@ public class MixinWeightedBakedModel {
         return Collections.emptyList();
     }
 
-    private static <T extends WeightedBakedModel.Entry> T getAt(List<T> pool, int totalWeight) {
+    private static <T extends WeightedBakedModel.WeightedModel> T getAt(List<T> pool, int totalWeight) {
         int i = 0;
         int len = pool.size();
 

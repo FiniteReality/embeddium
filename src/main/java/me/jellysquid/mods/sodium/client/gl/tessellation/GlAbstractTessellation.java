@@ -26,9 +26,9 @@ public abstract class GlAbstractTessellation implements GlTessellation {
             commandList.bindBuffer(GlBufferTarget.ARRAY_BUFFER,  binding.getBuffer());
 
             for (GlVertexAttributeBinding attrib : binding.getAttributeBindings()) {
-            	GlStateManager.vertexAttribPointer(attrib.getIndex(), attrib.getCount(), attrib.getFormat(), attrib.isNormalized(),
+            	GlStateManager._vertexAttribPointer(attrib.getIndex(), attrib.getCount(), attrib.getFormat(), attrib.isNormalized(),
                         attrib.getStride(), attrib.getPointer());
-            	GlStateManager.enableVertexAttribArray(attrib.getIndex());
+            	GlStateManager._enableVertexAttribArray(attrib.getIndex());
 
                 if (binding.isInstanced()) {
                     GlFunctions.INSTANCED_ARRAY.glVertexAttribDivisor(attrib.getIndex(), 1);

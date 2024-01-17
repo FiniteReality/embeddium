@@ -5,18 +5,18 @@ import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.client.util.color.ColorU8;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.color.block.BlockColorProvider;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class SmoothBiomeColorBlender implements BiomeColorBlender {
     private final int[] cachedRet = new int[4];
 
-    private final BlockPos.Mutable mpos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos();
 
     @Override
-    public int[] getColors(BlockColorProvider colorizer, BlockRenderView world, BlockState state, BlockPos origin,
+    public int[] getColors(BlockColor colorizer, BlockAndTintGetter world, BlockState state, BlockPos origin,
                            ModelQuadView quad) {
         final int[] colors = this.cachedRet;
 
@@ -34,7 +34,7 @@ public class SmoothBiomeColorBlender implements BiomeColorBlender {
         return colors;
     }
 
-    private int getVertexColor(BlockColorProvider colorizer, BlockRenderView world, BlockState state, BlockPos origin,
+    private int getVertexColor(BlockColor colorizer, BlockAndTintGetter world, BlockState state, BlockPos origin,
                                ModelQuadView quad, int vertexIdx) {
         final int x = origin.getX() + (int) quad.getX(vertexIdx);
         final int z = origin.getZ() + (int) quad.getZ(vertexIdx);
@@ -44,12 +44,12 @@ public class SmoothBiomeColorBlender implements BiomeColorBlender {
         return ColorARGB.toABGR(color);
     }
 
-    private int getBlockColor(BlockColorProvider colorizer, BlockRenderView world, BlockState state, BlockPos origin,
+    private int getBlockColor(BlockColor colorizer, BlockAndTintGetter world, BlockState state, BlockPos origin,
                               int x, int z, int colorIdx) {
         return colorizer.getColor(state, world, this.mpos.set(x, origin.getY(), z), colorIdx);
     }
 
-    private int getInterpolatedVertexColor(BlockColorProvider colorizer, BlockRenderView world, BlockState state,
+    private int getInterpolatedVertexColor(BlockColor colorizer, BlockAndTintGetter world, BlockState state,
                                            BlockPos origin, ModelQuadView quad, int vertexIdx) {
         final float x = quad.getX(vertexIdx);
         final float z = quad.getZ(vertexIdx);

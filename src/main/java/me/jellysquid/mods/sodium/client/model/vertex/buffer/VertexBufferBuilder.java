@@ -1,8 +1,7 @@
 package me.jellysquid.mods.sodium.client.model.vertex.buffer;
 
 import me.jellysquid.mods.sodium.client.gl.attribute.BufferVertexFormat;
-import net.minecraft.client.util.GlAllocationUtils;
-
+import com.mojang.blaze3d.platform.MemoryTracker;
 import java.nio.ByteBuffer;
 
 public class VertexBufferBuilder implements VertexBufferView {
@@ -15,7 +14,7 @@ public class VertexBufferBuilder implements VertexBufferView {
     public VertexBufferBuilder(BufferVertexFormat vertexFormat, int initialCapacity) {
         this.vertexFormat = vertexFormat;
 
-        this.buffer = GlAllocationUtils.allocateByteBuffer(initialCapacity);
+        this.buffer = MemoryTracker.createByteBuffer(initialCapacity);
         this.capacity = initialCapacity;
         this.writerOffset = 0;
     }
@@ -25,7 +24,7 @@ public class VertexBufferBuilder implements VertexBufferView {
         int cap = Math.max(this.capacity * 2, this.capacity + len);
 
         // Allocate a new buffer and copy the old buffer's contents into it
-        ByteBuffer buffer = GlAllocationUtils.allocateByteBuffer(cap);
+        ByteBuffer buffer = MemoryTracker.createByteBuffer(cap);
         buffer.put(this.buffer);
         buffer.position(0);
 

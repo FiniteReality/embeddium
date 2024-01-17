@@ -1,20 +1,20 @@
 package me.jellysquid.mods.sodium.mixin.features.world_ticking;
 
 import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.MutableWorldProperties;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeParticleConfig;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.AmbientParticleSettings;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,17 +24,17 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import java.util.Random;
 import java.util.function.Supplier;
 
-@Mixin(ClientWorld.class)
-public abstract class MixinClientWorld extends World {
+@Mixin(ClientLevel.class)
+public abstract class MixinClientWorld extends Level {
     @Shadow
-    protected abstract void addParticle(BlockPos pos, BlockState state, ParticleEffect parameters, boolean bl);
+    protected abstract void trySpawnDripParticles(BlockPos pos, BlockState state, ParticleOptions parameters, boolean bl);
 
-    protected MixinClientWorld(MutableWorldProperties mutableWorldProperties, RegistryKey<World> registryKey,
-                               DimensionType dimensionType, Supplier<Profiler> profiler, boolean bl, boolean bl2, long l) {
+    protected MixinClientWorld(WritableLevelData mutableWorldProperties, ResourceKey<Level> registryKey,
+                               DimensionType dimensionType, Supplier<ProfilerFiller> profiler, boolean bl, boolean bl2, long l) {
         super(mutableWorldProperties, registryKey, dimensionType, profiler, bl, bl2, l);
     }
 
-    @Redirect(method = "doRandomBlockDisplayTicks", at = @At(value = "NEW", target = "java/util/Random"))
+    @Redirect(method = "animateTick", at = @At(value = "NEW", target = "java/util/Random"))
     private Random redirectRandomTickRandom() {
         return new XoRoShiRoRandom();
     }
@@ -44,7 +44,7 @@ public abstract class MixinClientWorld extends World {
      * @author JellySquid
      */
     @Overwrite
-    public void randomBlockDisplayTick(int xCenter, int yCenter, int zCenter, int radius, Random random, boolean spawnBarrierParticles, BlockPos.Mutable pos) {
+    public void doAnimateTick(int xCenter, int yCenter, int zCenter, int radius, Random random, boolean spawnBarrierParticles, BlockPos.MutableBlockPos pos) {
         int x = xCenter + (random.nextInt(radius) - random.nextInt(radius));
         int y = yCenter + (random.nextInt(radius) - random.nextInt(radius));
         int z = zCenter + (random.nextInt(radius) - random.nextInt(radius));
@@ -57,7 +57,7 @@ public abstract class MixinClientWorld extends World {
             this.performBlockDisplayTick(blockState, pos, random, spawnBarrierParticles);
         }
 
-        if (!blockState.isFullCube(this, pos)) {
+        if (!blockState.isCollisionShapeFullBlock(this, pos)) {
             this.performBiomeParticleDisplayTick(pos, random);
         }
 
@@ -69,9 +69,9 @@ public abstract class MixinClientWorld extends World {
     }
 
     private void performBlockDisplayTick(BlockState blockState, BlockPos pos, Random random, boolean spawnBarrierParticles) {
-        blockState.getBlock().randomDisplayTick(blockState, this, pos, random);
+        blockState.getBlock().animateTick(blockState, this, pos, random);
 
-        if (spawnBarrierParticles && blockState.isOf(Blocks.BARRIER)) {
+        if (spawnBarrierParticles && blockState.is(Blocks.BARRIER)) {
             this.performBarrierDisplayTick(pos);
         }
     }
@@ -82,12 +82,12 @@ public abstract class MixinClientWorld extends World {
     }
 
     private void performBiomeParticleDisplayTick(BlockPos pos, Random random) {
-        BiomeParticleConfig config = this.getBiome(pos)
-                .getParticleConfig()
+        AmbientParticleSettings config = this.getBiome(pos)
+                .getAmbientParticle()
                 .orElse(null);
 
-        if (config != null && config.shouldAddParticle(random)) {
-            this.addParticle(config.getParticle(),
+        if (config != null && config.canSpawn(random)) {
+            this.addParticle(config.getOptions(),
                     pos.getX() + random.nextDouble(),
                     pos.getY() + random.nextDouble(),
                     pos.getZ() + random.nextDouble(),
@@ -96,16 +96,16 @@ public abstract class MixinClientWorld extends World {
     }
 
     private void performFluidDisplayTick(BlockState blockState, FluidState fluidState, BlockPos pos, Random random) {
-        fluidState.randomDisplayTick(this, pos, random);
+        fluidState.animateTick(this, pos, random);
 
-        ParticleEffect particleEffect = fluidState.getParticle();
+        ParticleOptions particleEffect = fluidState.getDripParticle();
 
         if (particleEffect != null && random.nextInt(10) == 0) {
-            boolean solid = blockState.isSideSolidFullSquare(this, pos, Direction.DOWN);
+            boolean solid = blockState.isFaceSturdy(this, pos, Direction.DOWN);
 
             // FIXME: don't allocate here
-            BlockPos blockPos = pos.down();
-            this.addParticle(blockPos, this.getBlockState(blockPos), particleEffect, solid);
+            BlockPos blockPos = pos.below();
+            this.trySpawnDripParticles(blockPos, this.getBlockState(blockPos), particleEffect, solid);
         }
     }
 }

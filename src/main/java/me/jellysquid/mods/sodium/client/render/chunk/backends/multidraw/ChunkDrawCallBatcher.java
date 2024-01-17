@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.backends.multidraw;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.BufferUnderflowException;
@@ -19,7 +19,7 @@ public abstract class ChunkDrawCallBatcher extends StructBuffer {
     protected int arrayLength;
 
     protected ChunkDrawCallBatcher(int capacity) {
-        super(MathHelper.smallestEncompassingPowerOfTwo(capacity), 16);
+        super(Mth.smallestEncompassingPowerOfTwo(capacity), 16);
 
         this.capacity = capacity;
     }

@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.world.biome;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.color.block.BlockColorProvider;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.world.level.block.state.BlockState;
 
 public interface BlockColorsExtended {
-    BlockColorProvider getColorProvider(BlockState state);
+    BlockColor getColorProvider(BlockState state);
 }

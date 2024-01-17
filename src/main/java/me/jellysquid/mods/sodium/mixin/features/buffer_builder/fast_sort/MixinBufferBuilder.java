@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.fast_sort;
 
 import com.google.common.primitives.Floats;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexFormat;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -19,13 +19,13 @@ public class MixinBufferBuilder {
     private ByteBuffer buffer;
 
     @Shadow
-    private int vertexCount;
+    private int vertices;
 
     @Shadow
     private VertexFormat format;
 
     @Shadow
-    private int buildStart;
+    private int totalRenderedBytes;
 
     /**
      * @reason Reduce allocations, use stack allocations, avoid unnecessary math and pointer bumping, inline comparators
@@ -37,11 +37,11 @@ public class MixinBufferBuilder {
         FloatBuffer floatBuffer = this.buffer.asFloatBuffer();
 
         int vertexStride = this.format.getVertexSize();
-        int quadStride = this.format.getVertexSizeInteger() * 4;
+        int quadStride = this.format.getIntegerSize() * 4;
 
-        int quadStart = this.buildStart / 4;
-        int quadCount = this.vertexCount / 4;
-        int vertexSizeInteger = this.format.getVertexSizeInteger();
+        int quadStart = this.totalRenderedBytes / 4;
+        int quadCount = this.vertices / 4;
+        int vertexSizeInteger = this.format.getIntegerSize();
 
         float[] distanceArray = new float[quadCount];
         int[] indicesArray = new int[quadCount];

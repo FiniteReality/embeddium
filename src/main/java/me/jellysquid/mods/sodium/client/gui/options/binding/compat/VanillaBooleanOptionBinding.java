@@ -1,10 +1,10 @@
 package me.jellysquid.mods.sodium.client.gui.options.binding.compat;
 
 import me.jellysquid.mods.sodium.client.gui.options.binding.OptionBinding;
-import net.minecraft.client.option.BooleanOption;
-import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.BooleanOption;
+import net.minecraft.client.Options;
 
-public class VanillaBooleanOptionBinding implements OptionBinding<GameOptions, Boolean> {
+public class VanillaBooleanOptionBinding implements OptionBinding<Options, Boolean> {
     private final BooleanOption option;
 
     public VanillaBooleanOptionBinding(BooleanOption option) {
@@ -12,12 +12,12 @@ public class VanillaBooleanOptionBinding implements OptionBinding<GameOptions, B
     }
 
     @Override
-    public void setValue(GameOptions storage, Boolean value) {
+    public void setValue(Options storage, Boolean value) {
         this.option.set(storage, value.toString());
     }
 
     @Override
-    public Boolean getValue(GameOptions storage) {
+    public Boolean getValue(Options storage) {
         return this.option.get(storage);
     }
 }

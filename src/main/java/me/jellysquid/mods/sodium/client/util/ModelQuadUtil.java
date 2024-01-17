@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.client.util;
 
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 
 /**
  * Provides some utilities and constants for interacting with vanilla's model quad vertex format.
@@ -35,7 +35,7 @@ public class ModelQuadUtil {
 
     static {
         for (int i = 0; i < NORMALS.length; i++) {
-            NORMALS[i] = Norm3b.pack(DirectionUtil.ALL_DIRECTIONS[i].getVector());
+            NORMALS[i] = Norm3b.pack(DirectionUtil.ALL_DIRECTIONS[i].getNormal());
         }
     }
 

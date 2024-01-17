@@ -1,24 +1,24 @@
 package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.client.render.RenderLayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.List;
+import net.minecraft.client.renderer.RenderType;
 
-@Mixin(RenderLayer.class)
+@Mixin(RenderType.class)
 public class MixinRenderLayer {
     @Unique
-    private static final List<RenderLayer> embeddium$blockLayers = ImmutableList.of(RenderLayer.getSolid(), RenderLayer.getCutoutMipped(), RenderLayer.getCutout(), RenderLayer.getTranslucent(), RenderLayer.getTripwire());
+    private static final List<RenderType> embeddium$blockLayers = ImmutableList.of(RenderType.solid(), RenderType.cutoutMipped(), RenderType.cutout(), RenderType.translucent(), RenderType.tripwire());
 
     /**
      * @author Kasualix
      * @reason Don't create an immutableList every time this is called.
      */
     @Overwrite
-    public static List<RenderLayer> getBlockLayers() {
+    public static List<RenderType> chunkBufferLayers() {
         return embeddium$blockLayers;
     }
 }

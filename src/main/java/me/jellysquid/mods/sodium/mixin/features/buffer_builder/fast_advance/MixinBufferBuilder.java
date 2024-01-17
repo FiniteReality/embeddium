@@ -1,7 +1,11 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.fast_advance;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferVertexConsumer;
+import com.mojang.blaze3d.vertex.DefaultedVertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import me.jellysquid.mods.sodium.client.buffer.ExtendedVertexFormat;
-import net.minecraft.client.render.*;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -11,23 +15,23 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder extends FixedColorVertexConsumer implements BufferVertexConsumer {
+public abstract class MixinBufferBuilder extends DefaultedVertexConsumer implements BufferVertexConsumer {
     @Shadow
     private VertexFormatElement currentElement;
 
     @Shadow
-    private int elementOffset;
+    private int nextElementByte;
 
     @Shadow
-    private int currentElementId;
+    private int elementIndex;
 
     private ExtendedVertexFormat.Element[] embeddium$vertexFormatExtendedElements;
     private ExtendedVertexFormat.Element embeddium$currentExtendedElement;
 
-    @Inject(method = "method_23918",
+    @Inject(method = "switchFormat",
             at = @At(
                     value = "FIELD",
-                    target = "Lnet/minecraft/client/render/BufferBuilder;format:Lnet/minecraft/client/render/VertexFormat;",
+                    target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;format:Lcom/mojang/blaze3d/vertex/VertexFormat;",
                     opcode = Opcodes.PUTFIELD
             )
     )
@@ -43,14 +47,14 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer implem
     @Override
     @Overwrite
     public void nextElement() {
-        if ((currentElementId += embeddium$currentExtendedElement.increment) >= embeddium$vertexFormatExtendedElements.length)
-            currentElementId -= embeddium$vertexFormatExtendedElements.length;
-        elementOffset += embeddium$currentExtendedElement.byteLength;
-        embeddium$currentExtendedElement = embeddium$vertexFormatExtendedElements[currentElementId];
+        if ((elementIndex += embeddium$currentExtendedElement.increment) >= embeddium$vertexFormatExtendedElements.length)
+            elementIndex -= embeddium$vertexFormatExtendedElements.length;
+        nextElementByte += embeddium$currentExtendedElement.byteLength;
+        embeddium$currentExtendedElement = embeddium$vertexFormatExtendedElements[elementIndex];
         currentElement = embeddium$currentExtendedElement.actual;
 
-        if (this.colorFixed && this.currentElement.getType() == VertexFormatElement.Type.COLOR) {
-            BufferVertexConsumer.super.color(this.fixedRed, this.fixedGreen, this.fixedBlue, this.fixedAlpha);
+        if (this.defaultColorSet && this.currentElement.getUsage() == VertexFormatElement.Usage.COLOR) {
+            BufferVertexConsumer.super.color(this.defaultR, this.defaultG, this.defaultB, this.defaultA);
         }
     }
 }

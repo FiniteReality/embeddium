@@ -2,10 +2,9 @@ package me.jellysquid.mods.sodium.client.model.quad.blender;
 
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-
 import java.util.Set;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 public class DefaultBlockColorSettings {
     private static final Set<Block> BLENDED_BLOCKS = new ReferenceOpenHashSet<>(Sets.newHashSet(

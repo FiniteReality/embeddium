@@ -4,12 +4,12 @@ import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -63,7 +63,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
     @Nonnull
     @Override
-    public VertexConsumer texture(float u, float v) {
+    public VertexConsumer uv(float u, float v) {
         this.u = u;
         this.v = v;
         return this;
@@ -71,13 +71,13 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
     @Nonnull
     @Override
-    public VertexConsumer overlay(int u, int v) {
+    public VertexConsumer overlayCoords(int u, int v) {
         return this;
     }
 
     @Nonnull
     @Override
-    public VertexConsumer light(int u, int v) {
+    public VertexConsumer uv2(int u, int v) {
         light = (v << 16) | u; // Compose lightmap coords into raw light value 0xVVVV_UUUU
         return this;
     }
@@ -92,8 +92,8 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     @Override
-    public void next() {
-        final Direction dir = Direction.fromVector((int) nx, (int) ny, (int) nz);
+    public void endVertex() {
+        final Direction dir = Direction.fromNormal((int) nx, (int) ny, (int) nz);
         final int normal = dir != null ? dir.ordinal() : -1;
 
         // Write the current quad vertex's normal, position, UVs, color and raw light values

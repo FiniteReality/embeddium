@@ -74,7 +74,7 @@ public class GLRenderDevice implements RenderDevice {
         public void uploadData(GlMutableBuffer glBuffer, ByteBuffer byteBuffer) {
             this.bindBuffer(GlBufferTarget.ARRAY_BUFFER, glBuffer);
 
-            GlStateManager.bufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), byteBuffer, glBuffer.getUsageHint().getId());
+            GlStateManager._glBufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), byteBuffer, glBuffer.getUsageHint().getId());
 
             glBuffer.setSize(byteBuffer.limit());
         }
@@ -94,14 +94,14 @@ public class GLRenderDevice implements RenderDevice {
         @Override
         public void bindBuffer(GlBufferTarget target, GlBuffer buffer) {
             if (this.stateTracker.makeBufferActive(target, buffer)) {
-            	GlStateManager.bindBuffers(target.getTargetParameter(), buffer.handle());
+            	GlStateManager._glBindBuffer(target.getTargetParameter(), buffer.handle());
             }
         }
 
         @Override
         public void unbindBuffer(GlBufferTarget target) {
             if (this.stateTracker.makeBufferActive(target, null)) {
-            	GlStateManager.bindBuffers(target.getTargetParameter(), GlBuffer.NULL_BUFFER_ID);
+            	GlStateManager._glBindBuffer(target.getTargetParameter(), GlBuffer.NULL_BUFFER_ID);
             }
         }
 
@@ -130,7 +130,7 @@ public class GLRenderDevice implements RenderDevice {
             int handle = buffer.handle();
             buffer.invalidateHandle();
 
-            GlStateManager.deleteBuffers(handle);
+            GlStateManager._glDeleteBuffers(handle);
         }
 
         @Override

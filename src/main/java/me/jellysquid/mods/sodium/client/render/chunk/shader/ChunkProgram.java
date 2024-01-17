@@ -3,13 +3,12 @@ package me.jellysquid.mods.sodium.client.render.chunk.shader;
 import me.jellysquid.mods.sodium.client.gl.shader.GlProgram;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.GameRendererContext;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.opengl.GL20C;
 import org.lwjgl.system.MemoryStack;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.function.Function;
 
 /**
@@ -26,7 +25,7 @@ public class ChunkProgram extends GlProgram {
     // The fog shader component used by this program in order to setup the appropriate GL state
     private final ChunkShaderFogComponent fogShader;
 
-    protected ChunkProgram(RenderDevice owner, Identifier name, int handle, Function<ChunkProgram, ChunkShaderFogComponent> fogShaderFunction) {
+    protected ChunkProgram(RenderDevice owner, ResourceLocation name, int handle, Function<ChunkProgram, ChunkShaderFogComponent> fogShaderFunction) {
         super(owner, name, handle);
 
         this.uModelViewProjectionMatrix = this.getUniformLocation("u_ModelViewProjectionMatrix");
@@ -39,9 +38,9 @@ public class ChunkProgram extends GlProgram {
         this.fogShader = fogShaderFunction.apply(this);
     }
 
-    public void setup(MatrixStack matrixStack, float modelScale, float textureScale) {
-        GlStateManager.uniform1(this.uBlockTex, 0);
-        GlStateManager.uniform1(this.uLightTex, 2);
+    public void setup(PoseStack matrixStack, float modelScale, float textureScale) {
+        GlStateManager._glUniform1i(this.uBlockTex, 0);
+        GlStateManager._glUniform1i(this.uLightTex, 2);
 
         GL20C.glUniform3f(this.uModelScale, modelScale, modelScale, modelScale);
         GL20C.glUniform2f(this.uTextureScale, textureScale, textureScale);
@@ -49,8 +48,8 @@ public class ChunkProgram extends GlProgram {
         this.fogShader.setup();
 
         try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-        	GlStateManager.uniformMatrix4(this.uModelViewProjectionMatrix, false,
-                    GameRendererContext.getModelViewProjectionMatrix(matrixStack.peek(), memoryStack));
+        	GlStateManager._glUniformMatrix4(this.uModelViewProjectionMatrix, false,
+                    GameRendererContext.getModelViewProjectionMatrix(matrixStack.last(), memoryStack));
         }
     }
 }

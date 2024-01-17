@@ -2,10 +2,10 @@ package org.embeddedt.embeddium.compat.ccl;
 
 import codechicken.lib.render.block.BlockRenderingRegistry;
 import codechicken.lib.render.block.ICCBlockRenderer;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraft.block.Block;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -27,7 +27,7 @@ public class CCLCompat {
     private static List<ICCBlockRenderer> customGlobalRenderers;
 
     private static final Map<ICCBlockRenderer, BlockRendererRegistry.Renderer> ccRendererToSodium = new ConcurrentHashMap<>();
-    private static final ThreadLocal<MatrixStack> STACK_THREAD_LOCAL = ThreadLocal.withInitial(MatrixStack::new);
+    private static final ThreadLocal<PoseStack> STACK_THREAD_LOCAL = ThreadLocal.withInitial(PoseStack::new);
 
     /**
      * Wrap a CodeChickenLib renderer in Embeddium's API.
@@ -59,9 +59,9 @@ public class CCLCompat {
                     }
                 }
                 if(!customFluidRenderers.isEmpty()) {
-                    Fluid fluid = state.getFluidState().getFluid();
+                    Fluid fluid = state.getFluidState().getType();
                     for(Map.Entry<IRegistryDelegate<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
-                        if(entry.getKey().get().matchesType(fluid) && entry.getValue().canHandleBlock(world, pos, state)) {
+                        if(entry.getKey().get().isSame(fluid) && entry.getValue().canHandleBlock(world, pos, state)) {
                             resultList.add(createBridge(entry.getValue()));
                         }
                     }

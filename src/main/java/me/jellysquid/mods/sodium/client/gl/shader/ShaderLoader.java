@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.client.gl.shader;
 
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -22,19 +22,19 @@ public class ShaderLoader {
      * @param constants A list of constants for shader specialization
      * @return An OpenGL shader object compiled with the given user defines
      */
-    public static GlShader loadShader(RenderDevice device, ShaderType type, Identifier name, ShaderConstants constants) {
+    public static GlShader loadShader(RenderDevice device, ShaderType type, ResourceLocation name, ShaderConstants constants) {
         return new GlShader(device, type, name, getShaderSource(getShaderPath(name)), constants);
     }
 
     /**
-     * Use {@link ShaderLoader#loadShader(RenderDevice, ShaderType, Identifier, ShaderConstants)} instead. This will be removed.
+     * Use {@link ShaderLoader#loadShader(RenderDevice, ShaderType, ResourceLocation, ShaderConstants)} instead. This will be removed.
      */
     @Deprecated
-    public static GlShader loadShader(RenderDevice device, ShaderType type, Identifier name, List<String> constants) {
+    public static GlShader loadShader(RenderDevice device, ShaderType type, ResourceLocation name, List<String> constants) {
         return new GlShader(device, type, name, getShaderSource(getShaderPath(name)), ShaderConstants.fromStringList(constants));
     }
 
-    private static String getShaderPath(Identifier name) {
+    private static String getShaderPath(ResourceLocation name) {
         return String.format("/assets/%s/shaders/%s", name.getNamespace(), name.getPath());
     }
 

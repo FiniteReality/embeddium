@@ -30,8 +30,8 @@ import me.jellysquid.mods.sodium.client.render.chunk.region.ChunkRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.region.ChunkRegionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkRenderShaderBackend;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderBindingPoints;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import org.lwjgl.opengl.GL20C;
 
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -393,12 +393,12 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
     private static boolean isWindowsIntelDriver() {
         // We only care about Windows
         // The open-source drivers on Linux are not known to have driver bugs with indirect command buffers
-        if (Util.getOperatingSystem() != Util.OperatingSystem.WINDOWS) {
+        if (Util.getPlatform() != Util.OS.WINDOWS) {
             return false;
         }
 
         // Check to see if the GPU vendor is Intel
-        return Objects.equals(GlStateManager.getString(GL20C.GL_VENDOR), INTEL_VENDOR_NAME);
+        return Objects.equals(GlStateManager._getString(GL20C.GL_VENDOR), INTEL_VENDOR_NAME);
     }
 
     /**
@@ -411,7 +411,7 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
             return false;
         }
 
-        String version = GlStateManager.getString(GL20C.GL_VERSION);
+        String version = GlStateManager._getString(GL20C.GL_VERSION);
 
         // The returned version string may be null in the case of an error
         if (version == null) {
@@ -440,7 +440,7 @@ public class MultidrawChunkRenderBackend extends ChunkRenderShaderBackend<Multid
         List<String> list = new ArrayList<>();
         list.add(String.format("Active Buffers: %s", this.bufferManager.getAllocatedRegionCount()));
         list.add(String.format("Submission Mode: %s", this.commandBuffer != null ?
-                Formatting.AQUA + "Buffer" : Formatting.LIGHT_PURPLE + "Client Memory"));
+                ChatFormatting.AQUA + "Buffer" : ChatFormatting.LIGHT_PURPLE + "Client Memory"));
 
         return list;
     }

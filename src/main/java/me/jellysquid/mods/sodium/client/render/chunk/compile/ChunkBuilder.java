@@ -20,13 +20,12 @@ import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.common.util.collections.DequeDrain;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.Vector3d;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.crash.CrashException;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.ReportedException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -54,8 +53,8 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
 
     private ClonedChunkSectionCache sectionCache;
 
-    private World world;
-    private Vec3d cameraPosition = Vec3d.ZERO;
+    private Level world;
+    private Vec3 cameraPosition = Vec3.ZERO;
     private BlockRenderPassManager renderPassManager;
 
     private final int limitThreads;
@@ -89,7 +88,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
             throw new IllegalStateException("Threads are still alive while in the STOPPED state");
         }
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
         for (int i = 0; i < this.limitThreads; i++) {
             ChunkBuildBuffers buffers = new ChunkBuildBuffers(this.vertexType, this.renderPassManager);
@@ -200,9 +199,9 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
             // If there is any exception from the build failure queue, throw it
             Throwable ex = errorIterator.next();
 
-            if (ex instanceof CrashException) {
+            if (ex instanceof ReportedException) {
                 // Propagate CrashExceptions directly to provide extra information
-                throw (CrashException)ex;
+                throw (ReportedException)ex;
             } else {
                 throw new RuntimeException("Chunk build failed", ex);
             }
@@ -229,13 +228,13 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
      * Sets the current camera position of the player used for task prioritization.
      */
     public void setCameraPosition(double x, double y, double z) {
-        this.cameraPosition = new Vec3d(x, y, z);
+        this.cameraPosition = new Vec3(x, y, z);
     }
 
     /**
      * Returns the current camera position of the player used for task prioritization.
      */
-    public Vec3d getCameraPosition() {
+    public Vec3 getCameraPosition() {
         return this.cameraPosition;
     }
 
@@ -253,7 +252,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
      * @param world The world instance
      * @param renderPassManager The render pass manager used for the world
      */
-    public void init(ClientWorld world, BlockRenderPassManager renderPassManager) {
+    public void init(ClientLevel world, BlockRenderPassManager renderPassManager) {
         if (world == null) {
             throw new NullPointerException("World is null");
         }
@@ -274,7 +273,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
      * but can be up to the number of available processor threads on the system.
      */
     private static int getOptimalThreadCount() {
-        return MathHelper.clamp(Math.max(getMaxThreadCount() / 3, getMaxThreadCount() - 6), 1, 10);
+        return Mth.clamp(Math.max(getMaxThreadCount() / 3, getMaxThreadCount() - 6), 1, 10);
     }
 
     private static int getThreadCount() {

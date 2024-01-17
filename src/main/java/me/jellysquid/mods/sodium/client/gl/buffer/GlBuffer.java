@@ -13,7 +13,7 @@ public abstract class GlBuffer extends GlObject {
     protected GlBuffer(RenderDevice owner, GlBufferUsage usage) {
         super(owner);
 
-        this.setHandle(GlStateManager.genBuffers());
+        this.setHandle(GlStateManager._glGenBuffers());
 
         this.usage = usage;
     }

@@ -6,15 +6,14 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.render.chunk.cull.ChunkCuller;
 import me.jellysquid.mods.sodium.client.util.math.FrustumExtended;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.chunk.ChunkOcclusionData;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.chunk.VisibilitySet;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -23,7 +22,7 @@ public class ChunkGraphCuller implements ChunkCuller {
     private final Long2ObjectMap<ChunkGraphNode> nodes = new Long2ObjectOpenHashMap<>();
 
     private final ChunkGraphIterationQueue visible = new ChunkGraphIterationQueue();
-    private final World world;
+    private final Level world;
     private final int renderDistance;
 
     private FrustumExtended frustum;
@@ -32,7 +31,7 @@ public class ChunkGraphCuller implements ChunkCuller {
     private int activeFrame = 0;
     private int centerChunkX, centerChunkY, centerChunkZ;
 
-    public ChunkGraphCuller(World world, int renderDistance) {
+    public ChunkGraphCuller(Level world, int renderDistance) {
         this.world = world;
         this.renderDistance = renderDistance;
     }
@@ -73,11 +72,11 @@ public class ChunkGraphCuller implements ChunkCuller {
     private void initSearch(Camera camera, FrustumExtended frustum, int frame, boolean spectator) {
         this.activeFrame = frame;
         this.frustum = frustum;
-        this.useOcclusionCulling = MinecraftClient.getInstance().chunkCullingEnabled;
+        this.useOcclusionCulling = Minecraft.getInstance().smartCull;
 
         this.visible.clear();
 
-        BlockPos origin = camera.getBlockPos();
+        BlockPos origin = camera.getBlockPosition();
 
         int chunkX = origin.getX() >> 4;
         int chunkY = origin.getY() >> 4;
@@ -93,13 +92,13 @@ public class ChunkGraphCuller implements ChunkCuller {
             rootNode.resetCullingState();
             rootNode.setLastVisibleFrame(frame);
 
-            if (spectator && this.world.getBlockState(origin).isOpaqueFullCube(this.world, origin)) {
+            if (spectator && this.world.getBlockState(origin).isSolidRender(this.world, origin)) {
                 this.useOcclusionCulling = false;
             }
 
             this.visible.add(rootNode);
         } else {
-            chunkY = MathHelper.clamp(origin.getY() >> 4, 0, 15);
+            chunkY = Mth.clamp(origin.getY() >> 4, 0, 15);
 
             List<ChunkGraphNode> bestNodes = new ArrayList<>();
 
@@ -169,15 +168,15 @@ public class ChunkGraphCuller implements ChunkCuller {
     }
 
     private ChunkGraphNode findAdjacentNode(ChunkGraphNode node, Direction dir) {
-        return this.getNode(node.getChunkX() + dir.getOffsetX(), node.getChunkY() + dir.getOffsetY(), node.getChunkZ() + dir.getOffsetZ());
+        return this.getNode(node.getChunkX() + dir.getStepX(), node.getChunkY() + dir.getStepY(), node.getChunkZ() + dir.getStepZ());
     }
 
     private ChunkGraphNode getNode(int x, int y, int z) {
-        return this.nodes.get(ChunkSectionPos.asLong(x, y, z));
+        return this.nodes.get(SectionPos.asLong(x, y, z));
     }
 
     @Override
-    public void onSectionStateChanged(int x, int y, int z, ChunkOcclusionData occlusionData) {
+    public void onSectionStateChanged(int x, int y, int z, VisibilitySet occlusionData) {
         ChunkGraphNode node = this.getNode(x, y, z);
 
         if (node != null) {
@@ -190,7 +189,7 @@ public class ChunkGraphCuller implements ChunkCuller {
         ChunkGraphNode node = new ChunkGraphNode(x, y, z, id);
         ChunkGraphNode prev;
 
-        if ((prev = this.nodes.put(ChunkSectionPos.asLong(x, y, z), node)) != null) {
+        if ((prev = this.nodes.put(SectionPos.asLong(x, y, z), node)) != null) {
             this.disconnectNeighborNodes(prev);
         }
 
@@ -199,7 +198,7 @@ public class ChunkGraphCuller implements ChunkCuller {
 
     @Override
     public void onSectionUnloaded(int x, int y, int z) {
-        ChunkGraphNode node = this.nodes.remove(ChunkSectionPos.asLong(x, y, z));
+        ChunkGraphNode node = this.nodes.remove(SectionPos.asLong(x, y, z));
 
         if (node != null) {
             this.disconnectNeighborNodes(node);

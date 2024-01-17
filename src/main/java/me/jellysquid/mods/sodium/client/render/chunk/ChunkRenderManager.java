@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -30,16 +31,14 @@ import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import me.jellysquid.mods.sodium.common.util.IdTable;
 import me.jellysquid.mods.sodium.common.util.collections.FutureDequeDrain;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.chunk.ChunkSection;
-
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.phys.Vec3;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
@@ -85,7 +84,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     private final ObjectList<BlockEntity> visibleBlockEntities = new ObjectArrayList<>();
 
     private final SodiumWorldRenderer renderer;
-    private final ClientWorld world;
+    private final ClientLevel world;
 
     private final ChunkCuller culler;
     private final boolean useBlockFaceCulling;
@@ -104,7 +103,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     
     private boolean alwaysDeferChunkUpdates;
 
-    public ChunkRenderManager(SodiumWorldRenderer renderer, ChunkRenderBackend<T> backend, BlockRenderPassManager renderPassManager, ClientWorld world, int renderDistance) {
+    public ChunkRenderManager(SodiumWorldRenderer renderer, ChunkRenderBackend<T> backend, BlockRenderPassManager renderPassManager, ClientLevel world, int renderDistance) {
         this.backend = backend;
         this.renderer = renderer;
         this.world = world;
@@ -136,7 +135,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     }
 
     private void setup(Camera camera) {
-        Vec3d cameraPos = camera.getPos();
+        Vec3 cameraPos = camera.getPosition();
 
         this.cameraX = (float) cameraPos.x;
         this.cameraY = (float) cameraPos.y;
@@ -298,7 +297,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     }
 
     public ChunkRenderContainer<T> getRender(int x, int y, int z) {
-        ChunkRenderColumn<T> column = this.columns.get(ChunkPos.toLong(x, z));
+        ChunkRenderColumn<T> column = this.columns.get(ChunkPos.asLong(x, z));
 
         if (column == null) {
             return null;
@@ -348,7 +347,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         ChunkRenderColumn<T> column = new ChunkRenderColumn<>(x, z);
         ChunkRenderColumn<T> prev;
 
-        if ((prev = this.columns.put(ChunkPos.toLong(x, z), column)) != null) {
+        if ((prev = this.columns.put(ChunkPos.asLong(x, z), column)) != null) {
             this.unloadSections(prev);
         }
 
@@ -359,7 +358,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     }
 
     private void unloadChunk(int x, int z) {
-        ChunkRenderColumn<T> column = this.columns.remove(ChunkPos.toLong(x, z));
+        ChunkRenderColumn<T> column = this.columns.remove(ChunkPos.asLong(x, z));
 
         if (column == null) {
             return;
@@ -424,17 +423,17 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     }
 
     private ChunkRenderColumn<T> getAdjacentColumn(ChunkRenderColumn<T> column, Direction dir) {
-        return this.getColumn(column.getX() + dir.getOffsetX(), column.getZ() + dir.getOffsetZ());
+        return this.getColumn(column.getX() + dir.getStepX(), column.getZ() + dir.getStepZ());
     }
 
     private ChunkRenderColumn<T> getColumn(int x, int z) {
-        return this.columns.get(ChunkPos.toLong(x, z));
+        return this.columns.get(ChunkPos.asLong(x, z));
     }
 
     private ChunkRenderContainer<T> createChunkRender(ChunkRenderColumn<T> column, int x, int y, int z) {
         ChunkRenderContainer<T> render = new ChunkRenderContainer<>(this.backend, this.renderer, x, y, z, column);
 
-        if (ChunkSection.isEmpty(this.world.getChunk(x, z).getSectionArray()[y])) {
+        if (LevelChunkSection.isEmpty(this.world.getChunk(x, z).getSections()[y])) {
             render.setData(ChunkRenderData.EMPTY);
         } else {
             render.scheduleRebuild(false);
@@ -445,7 +444,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         return render;
     }
 
-    public void renderLayer(MatrixStack matrixStack, BlockRenderPass pass, double x, double y, double z) {
+    public void renderLayer(PoseStack matrixStack, BlockRenderPass pass, double x, double y, double z) {
         ChunkRenderList<T> chunkRenderList = this.chunkRenderLists[pass.ordinal()];
         ChunkRenderListIterator<T> iterator = chunkRenderList.iterator(pass.isTranslucent());
 
@@ -547,7 +546,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
         while (it.hasNext()) {
             long pos = it.nextLong();
 
-            this.loadChunk(ChunkPos.getPackedX(pos), ChunkPos.getPackedZ(pos));
+            this.loadChunk(ChunkPos.getX(pos), ChunkPos.getZ(pos));
         }
     }
 
@@ -576,7 +575,7 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
     }
 
     private void scheduleRebuildOffThread(int x, int y, int z, boolean important) {
-        MinecraftClient.getInstance().submit(() -> this.scheduleRebuild(x, y, z, important));
+        Minecraft.getInstance().submit(() -> this.scheduleRebuild(x, y, z, important));
     }
 
     public void scheduleRebuild(int x, int y, int z, boolean important) {

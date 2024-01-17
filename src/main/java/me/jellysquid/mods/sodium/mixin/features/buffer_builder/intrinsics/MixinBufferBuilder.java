@@ -1,5 +1,11 @@
 package me.jellysquid.mods.sodium.mixin.features.buffer_builder.intrinsics;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultedVertexConsumer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector4f;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.vertex.VanillaVertexTypes;
 import me.jellysquid.mods.sodium.client.model.vertex.VertexDrain;
@@ -9,42 +15,35 @@ import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorU8;
 import me.jellysquid.mods.sodium.client.util.math.MatrixUtil;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.FixedColorVertexConsumer;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Matrix3f;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Vector4f;
-
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
+public abstract class MixinBufferBuilder extends DefaultedVertexConsumer {
     @Shadow
     private boolean field_227826_s_; // is baked quad format
 
     @Override
-    public void quad(MatrixStack.Entry matrices, BakedQuad quad, float[] brightnessTable, float r, float g, float b, int[] light, int overlay, boolean colorize) {
+    public void putBulkData(PoseStack.Pose matrices, BakedQuad quad, float[] brightnessTable, float r, float g, float b, int[] light, int overlay, boolean colorize) {
         if (!this.field_227826_s_) {
-            super.quad(matrices, quad, brightnessTable, r, g, b, light, overlay, colorize);
+            super.putBulkData(matrices, quad, brightnessTable, r, g, b, light, overlay, colorize);
 
             SpriteUtil.markSpriteActive(((ModelQuadView)quad).rubidium$getSprite());
 
             return;
         }
 
-        if (this.colorFixed) {
+        if (this.defaultColorSet) {
             throw new IllegalStateException();
         }
 
         ModelQuadView quadView = (ModelQuadView) quad;
 
-        Matrix4f modelMatrix = matrices.getModel();
-        Matrix3f normalMatrix = matrices.getNormal();
+        Matrix4f modelMatrix = matrices.pose();
+        Matrix3f normalMatrix = matrices.normal();
 
-        int norm = MatrixUtil.computeNormal(normalMatrix, quad.getFace());
+        int norm = MatrixUtil.computeNormal(normalMatrix, quad.getDirection());
 
         QuadVertexSink drain = VertexDrain.of(this)
                 .createSink(VanillaVertexTypes.QUADS);
@@ -90,7 +89,7 @@ public abstract class MixinBufferBuilder extends FixedColorVertexConsumer {
                 norm = MatrixUtil.transformPackedNormal(bakedNorm, normalMatrix);
             }
 
-            drain.writeQuad(pos.getX(), pos.getY(), pos.getZ(), color, u, v, ModelQuadUtil.mergeBakedLight(quadView.getLight(i), light[i]), overlay, norm);
+            drain.writeQuad(pos.x(), pos.y(), pos.z(), color, u, v, ModelQuadUtil.mergeBakedLight(quadView.getLight(i), light[i]), overlay, norm);
         }
 
         drain.flush();

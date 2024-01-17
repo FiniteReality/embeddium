@@ -1,27 +1,27 @@
 package me.jellysquid.mods.sodium.mixin.features.sky;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BackgroundRenderer;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public class MixinWorldRenderer {
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
     /**
      * <p>Prevents the sky layer from rendering when the fog distance is reduced
@@ -38,17 +38,17 @@ public class MixinWorldRenderer {
      * outside of water, so the fog should also be covering the sun and sky.</p>
      * 
      * <p>When updating Sodium to new releases of the game, please check for new
-     * ways the fog can be reduced in {@link BackgroundRenderer#applyFog()}.</p>
+     * ways the fog can be reduced in {@link FogRenderer#setupFog()}.</p>
      */
     @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
-    private void preRenderSky(MatrixStack matrices, float tickDelta, CallbackInfo callbackInfo) {
-        Camera camera = this.client.gameRenderer.getCamera();
-        Vec3d cameraPosition = camera.getPos();
-        Entity cameraEntity = camera.getFocusedEntity();
+    private void preRenderSky(PoseStack matrices, float tickDelta, CallbackInfo callbackInfo) {
+        Camera camera = this.minecraft.gameRenderer.getMainCamera();
+        Vec3 cameraPosition = camera.getPosition();
+        Entity cameraEntity = camera.getEntity();
 
-        boolean hasBlindness = cameraEntity instanceof LivingEntity && ((LivingEntity) cameraEntity).hasStatusEffect(StatusEffects.BLINDNESS);
-        boolean useThickFog = this.client.world.getSkyProperties().useThickFog(MathHelper.floor(cameraPosition.getX()),
-                MathHelper.floor(cameraPosition.getY())) || this.client.inGameHud.getBossBarHud().shouldThickenFog();
+        boolean hasBlindness = cameraEntity instanceof LivingEntity && ((LivingEntity) cameraEntity).hasEffect(MobEffects.BLINDNESS);
+        boolean useThickFog = this.minecraft.level.effects().isFoggyAt(Mth.floor(cameraPosition.x()),
+                Mth.floor(cameraPosition.y())) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
 
         if (hasBlindness || useThickFog) {
             callbackInfo.cancel();

@@ -7,10 +7,9 @@ import com.google.gson.JsonSyntaxException;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.FormattedTextProvider;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
-import net.minecraft.client.option.GraphicsMode;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-
+import net.minecraft.client.GraphicsStatus;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -63,39 +62,39 @@ public class SodiumGameOptions {
     }
 
     public enum GraphicsQuality implements FormattedTextProvider {
-        DEFAULT(new TranslatableText("generator.default")),
-        FANCY(new TranslatableText("options.clouds.fancy")),
-        FAST(new TranslatableText("options.clouds.fast"));
+        DEFAULT(new TranslatableComponent("generator.default")),
+        FANCY(new TranslatableComponent("options.clouds.fancy")),
+        FAST(new TranslatableComponent("options.clouds.fast"));
 
-        private final Text name;
+        private final Component name;
 
-        GraphicsQuality(Text name) {
+        GraphicsQuality(Component name) {
             this.name = name;
         }
 
         @Override
-        public Text getLocalizedName() {
+        public Component getLocalizedName() {
             return this.name;
         }
 
-        public boolean isFancy(GraphicsMode graphicsMode) {
-            return (this == FANCY) || (this == DEFAULT && (graphicsMode == GraphicsMode.FANCY || graphicsMode == GraphicsMode.FABULOUS));
+        public boolean isFancy(GraphicsStatus graphicsMode) {
+            return (this == FANCY) || (this == DEFAULT && (graphicsMode == GraphicsStatus.FANCY || graphicsMode == GraphicsStatus.FABULOUS));
         }
     }
 
     public enum LightingQuality implements FormattedTextProvider {
-        HIGH(new TranslatableText("options.ao.max")),
-        LOW(new TranslatableText("options.ao.min")),
-        OFF(new TranslatableText("options.ao.off"));
+        HIGH(new TranslatableComponent("options.ao.max")),
+        LOW(new TranslatableComponent("options.ao.min")),
+        OFF(new TranslatableComponent("options.ao.off"));
 
-        private final Text name;
+        private final Component name;
 
-        LightingQuality(Text name) {
+        LightingQuality(Component name) {
             this.name = name;
         }
 
         @Override
-        public Text getLocalizedName() {
+        public Component getLocalizedName() {
             return this.name;
         }
     }

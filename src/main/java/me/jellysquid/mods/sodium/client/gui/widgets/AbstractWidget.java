@@ -1,31 +1,35 @@
 package me.jellysquid.mods.sodium.client.gui.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.render.*;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import org.lwjgl.opengl.GL20C;
 
 import java.util.function.Consumer;
 
-public abstract class AbstractWidget implements Drawable, Element {
-    protected final TextRenderer font;
+public abstract class AbstractWidget implements Widget, GuiEventListener {
+    protected final Font font;
 
     protected AbstractWidget() {
-        this.font = MinecraftClient.getInstance().textRenderer;
+        this.font = Minecraft.getInstance().font;
     }
 
-    protected void drawString(MatrixStack matrixStack, String str, int x, int y, int color) {
+    protected void drawString(PoseStack matrixStack, String str, int x, int y, int color) {
         this.font.draw(matrixStack, str, x, y, color);
     }
 
-    protected void drawText(MatrixStack matrixStack, Text text, int x, int y, int color) {
+    protected void drawText(PoseStack matrixStack, Component text, int x, int y, int color) {
         this.font.draw(matrixStack, text, x, y, color);
     }
 
@@ -43,35 +47,35 @@ public abstract class AbstractWidget implements Drawable, Element {
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
 
-        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-        bufferBuilder.begin(GL20C.GL_QUADS, VertexFormats.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(GL20C.GL_QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         consumer.accept(bufferBuilder);
 
         bufferBuilder.end();
 
-        BufferRenderer.draw(bufferBuilder);
+        BufferUploader.end(bufferBuilder);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
     protected static void addQuad(VertexConsumer consumer, double x1, double y1, double x2, double y2, float a, float r, float g, float b) {
-        consumer.vertex(x2, y1, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x1, y1, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x1, y2, 0.0D).color(r, g, b, a).next();
-        consumer.vertex(x2, y2, 0.0D).color(r, g, b, a).next();
+        consumer.vertex(x2, y1, 0.0D).color(r, g, b, a).endVertex();
+        consumer.vertex(x1, y1, 0.0D).color(r, g, b, a).endVertex();
+        consumer.vertex(x1, y2, 0.0D).color(r, g, b, a).endVertex();
+        consumer.vertex(x2, y2, 0.0D).color(r, g, b, a).endVertex();
     }
 
     protected void playClickSound() {
-        MinecraftClient.getInstance().getSoundManager()
-                .play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        Minecraft.getInstance().getSoundManager()
+                .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     protected int getStringWidth(String text) {
-        return this.font.getWidth(text);
+        return this.font.width(text);
     }
 
-    protected int getTextWidth(Text text) {
-        return this.font.getWidth(text);
+    protected int getTextWidth(Component text) {
+        return this.font.width(text);
     }
 }

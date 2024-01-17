@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.model.quad.blender;
 
-import net.minecraft.state.State;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.StateHolder;
 
 public interface BlockColorSettings<T> {
     /**
@@ -12,12 +12,12 @@ public interface BlockColorSettings<T> {
      *
      * @return True if interpolation should be used, otherwise false.
      */
-    boolean useSmoothColorBlending(BlockRenderView view, T state, BlockPos pos);
+    boolean useSmoothColorBlending(BlockAndTintGetter view, T state, BlockPos pos);
 
     @SuppressWarnings("unchecked")
-    static <T> boolean isSmoothBlendingEnabled(BlockRenderView world, State<T, ?> state, BlockPos pos) {
+    static <T> boolean isSmoothBlendingEnabled(BlockAndTintGetter world, StateHolder<T, ?> state, BlockPos pos) {
         if (state.owner instanceof BlockColorSettings) {
-        	BlockColorSettings<State<T, ?>> settings = (BlockColorSettings<State<T, ?>>) state.owner;
+        	BlockColorSettings<StateHolder<T, ?>> settings = (BlockColorSettings<StateHolder<T, ?>>) state.owner;
             return settings.useSmoothColorBlending(world, state, pos);
         }
 

@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.tasks;
 
+import com.mojang.blaze3d.platform.MemoryTracker;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.jellysquid.mods.sodium.client.gl.buffer.VertexData;
@@ -16,10 +17,8 @@ import me.jellysquid.mods.sodium.client.render.chunk.format.sfp.SFPModelVertexTy
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
-import net.minecraft.client.util.GlAllocationUtils;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,9 +33,9 @@ public class ChunkRenderTranslucencySortTask<T extends ChunkGraphicsState> exten
 
     private final ChunkRenderContainer<T> render;
     private final BlockPos offset;
-    private final Vec3d camera;
+    private final Vec3 camera;
 
-    public ChunkRenderTranslucencySortTask(ChunkRenderContainer<T> render, BlockPos offset, Vec3d camera) {
+    public ChunkRenderTranslucencySortTask(ChunkRenderContainer<T> render, BlockPos offset, Vec3 camera) {
         this.render = render;
         this.offset = offset;
         this.camera = camera;
@@ -63,7 +62,7 @@ public class ChunkRenderTranslucencySortTask<T extends ChunkGraphicsState> exten
                 continue;
 
             // Make a snapshot of the translucency data to sort
-            ByteBuffer sortedData = GlAllocationUtils.allocateByteBuffer(translucencyData.capacity());
+            ByteBuffer sortedData = MemoryTracker.createByteBuffer(translucencyData.capacity());
             synchronized (translucencyData) {
                 sortedData.put(translucencyData);
                 translucencyData.position(0);

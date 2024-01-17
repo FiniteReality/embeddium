@@ -1,11 +1,11 @@
 package me.jellysquid.mods.sodium.mixin.features.model;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.render.model.MultipartBakedModel;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.MultiPartBakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 
 import net.minecraftforge.client.model.data.MultipartModelData;
@@ -19,14 +19,14 @@ import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Predicate;
 
-@Mixin(MultipartBakedModel.class)
+@Mixin(MultiPartBakedModel.class)
 public class MixinMultipartBakedModel {
 	private final Map<BlockState, BakedModel[]> stateCacheFast = new Reference2ReferenceOpenHashMap<>();
     private final StampedLock lock = new StampedLock();
 
     @Shadow
     @Final
-    private List<Pair<Predicate<BlockState>, BakedModel>> components;
+    private List<Pair<Predicate<BlockState>, BakedModel>> selectors;
 
     /**
      * @author JellySquid
@@ -50,9 +50,9 @@ public class MixinMultipartBakedModel {
         if (models == null) {
             long writeStamp = this.lock.writeLock();
             try {
-                List<BakedModel> modelList = new ArrayList<>(this.components.size());
+                List<BakedModel> modelList = new ArrayList<>(this.selectors.size());
 
-                for (Pair<Predicate<BlockState>, BakedModel> pair : this.components) {
+                for (Pair<Predicate<BlockState>, BakedModel> pair : this.selectors) {
                     if (pair.getLeft().test(state)) {
                         modelList.add(pair.getRight());
                     }

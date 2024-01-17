@@ -1,23 +1,20 @@
 package me.jellysquid.mods.sodium.client.world;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.LightType;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeAccess;
-import net.minecraft.world.chunk.light.LightingProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ColorResolver;
-
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -28,41 +25,41 @@ import java.util.stream.Stream;
  * Wrapper object used to defeat identity comparisons in mods. Since vanilla provides a unique object to them for each
  * subchunk, we do the same.
  */
-public class WorldSliceLocal implements BlockRenderView {
-    private final BlockRenderView view;
+public class WorldSliceLocal implements BlockAndTintGetter {
+    private final BlockAndTintGetter view;
 
-    public WorldSliceLocal(BlockRenderView view) {
+    public WorldSliceLocal(BlockAndTintGetter view) {
         this.view = view;
     }
 
     @Override
-    public float getBrightness(Direction direction, boolean shaded) {
-        return view.getBrightness(direction, shaded);
+    public float getShade(Direction direction, boolean shaded) {
+        return view.getShade(direction, shaded);
     }
 
     @Override
-    public LightingProvider getLightingProvider() {
-        return view.getLightingProvider();
+    public LevelLightEngine getLightEngine() {
+        return view.getLightEngine();
     }
 
     @Override
-    public int getColor(BlockPos pos, ColorResolver colorResolver) {
-        return view.getColor(pos, colorResolver);
+    public int getBlockTint(BlockPos pos, ColorResolver colorResolver) {
+        return view.getBlockTint(pos, colorResolver);
     }
 
     @Override
-    public int getLightLevel(LightType type, BlockPos pos) {
-        return view.getLightLevel(type, pos);
+    public int getBrightness(LightLayer type, BlockPos pos) {
+        return view.getBrightness(type, pos);
     }
 
     @Override
-    public int getBaseLightLevel(BlockPos pos, int ambientDarkness) {
-        return view.getBaseLightLevel(pos, ambientDarkness);
+    public int getRawBrightness(BlockPos pos, int ambientDarkness) {
+        return view.getRawBrightness(pos, ambientDarkness);
     }
 
     @Override
-    public boolean isSkyVisible(BlockPos pos) {
-        return view.isSkyVisible(pos);
+    public boolean canSeeSky(BlockPos pos) {
+        return view.canSeeSky(pos);
     }
 
     @Override
@@ -82,8 +79,8 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
-    public int getLuminance(BlockPos pos) {
-        return view.getLuminance(pos);
+    public int getLightEmission(BlockPos pos) {
+        return view.getLightEmission(pos);
     }
 
     @Override
@@ -92,37 +89,37 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
-    public int getHeight() {
-        return view.getHeight();
+    public int getMaxBuildHeight() {
+        return view.getMaxBuildHeight();
     }
 
     @Override
-    public Stream<BlockState> method_29546(Box arg) {
-        return view.method_29546(arg);
+    public Stream<BlockState> getBlockStates(AABB arg) {
+        return view.getBlockStates(arg);
     }
 
     @Override
-    public BlockHitResult raycast(RaycastContext context) {
-        return view.raycast(context);
+    public BlockHitResult clip(ClipContext context) {
+        return view.clip(context);
     }
 
     @Override
     @Nullable
-    public BlockHitResult raycastBlock(Vec3d start, Vec3d end, BlockPos pos, VoxelShape shape, BlockState state) {
-        return view.raycastBlock(start, end, pos, shape, state);
+    public BlockHitResult clipWithInteractionOverride(Vec3 start, Vec3 end, BlockPos pos, VoxelShape shape, BlockState state) {
+        return view.clipWithInteractionOverride(start, end, pos, shape, state);
     }
 
     @Override
-    public double getDismountHeight(VoxelShape blockCollisionShape, Supplier<VoxelShape> belowBlockCollisionShapeGetter) {
-        return view.getDismountHeight(blockCollisionShape, belowBlockCollisionShapeGetter);
+    public double getBlockFloorHeight(VoxelShape blockCollisionShape, Supplier<VoxelShape> belowBlockCollisionShapeGetter) {
+        return view.getBlockFloorHeight(blockCollisionShape, belowBlockCollisionShapeGetter);
     }
 
     @Override
-    public double getDismountHeight(BlockPos pos) {
-        return view.getDismountHeight(pos);
+    public double getBlockFloorHeight(BlockPos pos) {
+        return view.getBlockFloorHeight(pos);
     }
 
-    public static <T> T raycast(RaycastContext arg, BiFunction<RaycastContext, BlockPos, T> context, Function<RaycastContext, T> blockRaycaster) {
-        return BlockView.raycast(arg, context, blockRaycaster);
+    public static <T> T traverseBlocks(ClipContext arg, BiFunction<ClipContext, BlockPos, T> context, Function<ClipContext, T> blockRaycaster) {
+        return BlockGetter.traverseBlocks(arg, context, blockRaycaster);
     }
 }

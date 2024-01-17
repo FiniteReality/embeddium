@@ -5,11 +5,10 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import me.jellysquid.mods.sodium.client.gl.util.BufferSlice;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.chunk.ChunkOcclusionData;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.util.math.Direction;
-
+import net.minecraft.client.renderer.chunk.VisibilitySet;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -28,10 +27,10 @@ public class ChunkRenderData {
 
     private EnumMap<BlockRenderPass, ChunkMeshData> meshes;
 
-    private ChunkOcclusionData occlusionData;
+    private VisibilitySet occlusionData;
     private ChunkRenderBounds bounds;
 
-    private List<Sprite> animatedSprites;
+    private List<TextureAtlasSprite> animatedSprites;
 
     private boolean isEmpty;
     private int meshByteSize;
@@ -48,11 +47,11 @@ public class ChunkRenderData {
         return this.bounds;
     }
 
-    public ChunkOcclusionData getOcclusionData() {
+    public VisibilitySet getOcclusionData() {
         return this.occlusionData;
     }
 
-    public List<Sprite> getAnimatedSprites() {
+    public List<TextureAtlasSprite> getAnimatedSprites() {
         return this.animatedSprites;
     }
 
@@ -122,11 +121,11 @@ public class ChunkRenderData {
     public static class Builder {
         private final List<BlockEntity> globalBlockEntities = new ArrayList<>();
         private final List<BlockEntity> blockEntities = new ArrayList<>();
-        private final Set<Sprite> animatedSprites = new ObjectOpenHashSet<>();
+        private final Set<TextureAtlasSprite> animatedSprites = new ObjectOpenHashSet<>();
 
         private final EnumMap<BlockRenderPass, ChunkMeshData> meshes = new EnumMap<>(BlockRenderPass.class);
 
-        private ChunkOcclusionData occlusionData;
+        private VisibilitySet occlusionData;
         private ChunkRenderBounds bounds = ChunkRenderBounds.ALWAYS_FALSE;
 
         public Builder() {
@@ -139,7 +138,7 @@ public class ChunkRenderData {
             this.bounds = bounds;
         }
 
-        public void setOcclusionData(ChunkOcclusionData data) {
+        public void setOcclusionData(VisibilitySet data) {
             this.occlusionData = data;
         }
 
@@ -148,8 +147,8 @@ public class ChunkRenderData {
          * before rendering as necessary.
          * @param sprite The sprite
          */
-        public void addSprite(Sprite sprite) {
-            if (sprite.isAnimated()) {
+        public void addSprite(TextureAtlasSprite sprite) {
+            if (sprite.isAnimation()) {
                 this.animatedSprites.add(sprite);
             }
         }
@@ -201,8 +200,8 @@ public class ChunkRenderData {
     }
 
     private static ChunkRenderData createEmptyData() {
-        ChunkOcclusionData occlusionData = new ChunkOcclusionData();
-        occlusionData.addOpenEdgeFaces(EnumSet.allOf(Direction.class));
+        VisibilitySet occlusionData = new VisibilitySet();
+        occlusionData.add(EnumSet.allOf(Direction.class));
 
         ChunkRenderData.Builder meshInfo = new ChunkRenderData.Builder();
         meshInfo.setOcclusionData(occlusionData);

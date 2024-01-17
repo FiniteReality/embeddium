@@ -5,12 +5,12 @@ import org.lwjgl.opengl.GL20;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkFogMode;
-import net.minecraft.client.render.BackgroundRenderer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.util.Mth;
 
 public class FogHelper {
     private static final float FAR_PLANE_THRESHOLD_EXP = (float) Math.log(1.0f / 0.0019f);
-    private static final float FAR_PLANE_THRESHOLD_EXP2 = MathHelper.sqrt(FAR_PLANE_THRESHOLD_EXP);
+    private static final float FAR_PLANE_THRESHOLD_EXP2 = Mth.sqrt(FAR_PLANE_THRESHOLD_EXP);
 
     public static float getFogEnd() {
     	return GlStateManager.FOG.end;
@@ -30,7 +30,7 @@ public class FogHelper {
     public static ChunkFogMode getFogMode() {
         int mode = GlStateManager.FOG.mode;
         
-        if(mode == 0 || !GlStateManager.FOG.capState.state)
+        if(mode == 0 || !GlStateManager.FOG.enable.enabled)
         	return ChunkFogMode.NONE;
 
         switch (mode) {
@@ -60,6 +60,6 @@ public class FogHelper {
     }
     
     public static float[] getFogColor() {
-    	return new float[]{BackgroundRenderer.red, BackgroundRenderer.green, BackgroundRenderer.blue, 1.0F};
+    	return new float[]{FogRenderer.fogRed, FogRenderer.fogGreen, FogRenderer.fogBlue, 1.0F};
     }
 }

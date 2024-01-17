@@ -2,7 +2,7 @@ package me.jellysquid.mods.sodium.client.gl.shader;
 
 import me.jellysquid.mods.sodium.client.gl.GlObject;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL20C;
@@ -19,18 +19,18 @@ import java.io.StringReader;
 public class GlShader extends GlObject {
     private static final Logger LOGGER = LogManager.getLogger(GlShader.class);
 
-    private final Identifier name;
+    private final ResourceLocation name;
 
-    public GlShader(RenderDevice owner, ShaderType type, Identifier name, String src, ShaderConstants constants) {
+    public GlShader(RenderDevice owner, ShaderType type, ResourceLocation name, String src, ShaderConstants constants) {
         super(owner);
 
         this.name = name;
 
         src = processShader(src, constants);
 
-        int handle = GlStateManager.createShader(type.id);
+        int handle = GlStateManager.glCreateShader(type.id);
         ShaderWorkarounds.safeShaderSource(handle, src);
-        GlStateManager.compileShader(handle);
+        GlStateManager.glCompileShader(handle);
 
         String log = GL20C.glGetShaderInfoLog(handle);
 
@@ -38,7 +38,7 @@ public class GlShader extends GlObject {
             LOGGER.warn("Shader compilation log for " + this.name + ": " + log);
         }
 
-        int result = GlStateManager.getShader(handle, GL20C.GL_COMPILE_STATUS);
+        int result = GlStateManager.glGetShaderi(handle, GL20C.GL_COMPILE_STATUS);
 
         if (result != GL20C.GL_TRUE) {
             throw new RuntimeException("Shader compilation failed, see log for details");
@@ -80,12 +80,12 @@ public class GlShader extends GlObject {
         return builder.toString();
     }
 
-    public Identifier getName() {
+    public ResourceLocation getName() {
         return this.name;
     }
 
     public void delete() {
-    	GlStateManager.deleteShader(this.handle());
+    	GlStateManager.glDeleteShader(this.handle());
 
         this.invalidateHandle();
     }
