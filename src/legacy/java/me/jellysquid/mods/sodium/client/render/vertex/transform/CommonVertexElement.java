@@ -1,9 +1,10 @@
 package me.jellysquid.mods.sodium.client.render.vertex.transform;
 
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormatElement;
-import net.minecraft.client.render.VertexFormats;
-
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.Arrays;
 
 public enum CommonVertexElement {
@@ -17,27 +18,27 @@ public enum CommonVertexElement {
     public static final int COUNT = CommonVertexElement.values().length;
 
     public static CommonVertexElement getCommonType(VertexFormatElement element) {
-        if (element == VertexFormats.POSITION_ELEMENT) {
+        if (element == DefaultVertexFormat.ELEMENT_POSITION) {
             return POSITION;
         }
 
-        if (element == VertexFormats.COLOR_ELEMENT) {
+        if (element == DefaultVertexFormat.ELEMENT_COLOR) {
             return COLOR;
         }
 
-        if (element == VertexFormats.TEXTURE_ELEMENT) {
+        if (element == DefaultVertexFormat.ELEMENT_UV0) {
             return TEXTURE;
         }
 
-        if (element == VertexFormats.OVERLAY_ELEMENT) {
+        if (element == DefaultVertexFormat.ELEMENT_UV1) {
             return OVERLAY;
         }
 
-        if (element == VertexFormats.LIGHT_ELEMENT) {
+        if (element == DefaultVertexFormat.ELEMENT_UV2) {
             return LIGHT;
         }
 
-        if (element == VertexFormats.NORMAL_ELEMENT) {
+        if (element == DefaultVertexFormat.ELEMENT_NORMAL) {
             return NORMAL;
         }
 

@@ -2,17 +2,18 @@ package me.jellysquid.mods.sodium.client.compatibility.checks;
 
 import me.jellysquid.mods.sodium.client.gui.console.Console;
 import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class ResourcePackScanner {
 
@@ -38,14 +39,14 @@ public class ResourcePackScanner {
      */
     public static void checkIfCoreShaderLoaded(ResourceManager manager) {
         HashMap<String, MessageLevel> detectedResourcePacks = new HashMap<>();
-        var customResourcePacks = manager.streamResourcePacks();
+        var customResourcePacks = manager.listPacks();
 
         customResourcePacks.forEach(resourcePack -> {
             // Omit 'vanilla', 'fabric', and 'mod_resources' resource packs
-            if (!resourcePack.getName().equals("vanilla") && !resourcePack.getName().equals("fabric") && !resourcePack.getName().equals("mod_resources")) {
-                var resourcePackName = resourcePack.getName();
+            if (!resourcePack.packId().equals("vanilla") && !resourcePack.packId().equals("fabric") && !resourcePack.packId().equals("mod_resources")) {
+                var resourcePackName = resourcePack.packId();
 
-                resourcePack.findResources(ResourceType.CLIENT_RESOURCES, Identifier.DEFAULT_NAMESPACE, "shaders", (path, ignored) -> {
+                resourcePack.listResources(PackType.CLIENT_RESOURCES, ResourceLocation.DEFAULT_NAMESPACE, "shaders", (path, ignored) -> {
                     // Trim full shader file path to only contain the filename
                     var shaderName = path.getPath().substring(path.getPath().lastIndexOf('/') + 1);
                     if (VSH_FSH_BLACKLIST.contains(shaderName)) {
@@ -73,37 +74,37 @@ public class ResourcePackScanner {
         });
 
         if (detectedResourcePacks.containsValue(MessageLevel.SEVERE)) {
-            showConsoleMessage(Text.translatable("sodium.console.core_shaders_error"), MessageLevel.SEVERE);
+            showConsoleMessage(Component.translatable("sodium.console.core_shaders_error"), MessageLevel.SEVERE);
 
             for (Map.Entry<String, MessageLevel> entry : detectedResourcePacks.entrySet()) {
 
                 if (entry.getValue() == MessageLevel.SEVERE) {
                     // Omit 'file/' prefix for the in-game message
                     var message = entry.getKey().startsWith("file/") ? entry.getKey().substring(5) : entry.getKey();
-                    showConsoleMessage(Text.literal(message), MessageLevel.SEVERE);
+                    showConsoleMessage(Component.literal(message), MessageLevel.SEVERE);
                 }
             }
         }
 
         if (detectedResourcePacks.containsValue(MessageLevel.WARN)) {
-            showConsoleMessage(Text.translatable("sodium.console.core_shaders_warn"), MessageLevel.WARN);
+            showConsoleMessage(Component.translatable("sodium.console.core_shaders_warn"), MessageLevel.WARN);
 
             for (Map.Entry<String, MessageLevel> entry : detectedResourcePacks.entrySet()) {
 
                 if (entry.getValue() == MessageLevel.WARN) {
                     // Omit 'file/' prefix for the in-game message
                     var message = entry.getKey().startsWith("file/") ? entry.getKey().substring(5) : entry.getKey();
-                    showConsoleMessage(Text.literal(message), MessageLevel.WARN);
+                    showConsoleMessage(Component.literal(message), MessageLevel.WARN);
                 }
             }
         }
 
         if (!detectedResourcePacks.isEmpty()) {
-            showConsoleMessage(Text.translatable("sodium.console.core_shaders_info"), MessageLevel.INFO);
+            showConsoleMessage(Component.translatable("sodium.console.core_shaders_info"), MessageLevel.INFO);
         }
     }
 
-    private static void showConsoleMessage(MutableText message, MessageLevel messageLevel) {
+    private static void showConsoleMessage(MutableComponent message, MessageLevel messageLevel) {
         Console.instance().logMessage(messageLevel, message, 20.0);
     }
 

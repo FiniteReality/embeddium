@@ -1,10 +1,11 @@
 package me.jellysquid.mods.sodium.client.compatibility.checks;
 
-import net.minecraft.util.WinNativeModuleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import net.minecraft.util.NativeModuleLister;
+import net.minecraft.util.NativeModuleLister.NativeModuleInfo;
 
 /**
  * Utility class for determining whether the current process has been injected into or otherwise modified. This should
@@ -17,10 +18,10 @@ public class ModuleScanner {
     private static final String[] RTSS_HOOKS_MODULE_NAMES = { "RTSSHooks64.dll", "RTSSHooks.dll" };
 
     public static void checkModules() {
-        List<WinNativeModuleUtil.NativeModule> modules;
+        List<NativeModuleLister.NativeModuleInfo> modules;
 
         try {
-            modules = WinNativeModuleUtil.collectNativeModules();
+            modules = NativeModuleLister.listModules();
         } catch (Throwable t) {
             LOGGER.warn("Failed to scan the currently loaded modules", t);
             return;
@@ -38,10 +39,10 @@ public class ModuleScanner {
         }
     }
 
-    private static boolean isModuleLoaded(List<WinNativeModuleUtil.NativeModule> modules, String[] names) {
+    private static boolean isModuleLoaded(List<NativeModuleLister.NativeModuleInfo> modules, String[] names) {
         for (var name : names) {
             for (var module : modules) {
-                if (module.path.equalsIgnoreCase(name)) {
+                if (module.name.equalsIgnoreCase(name)) {
                     return true;
                 }
             }

@@ -1,7 +1,7 @@
 package net.caffeinemc.mods.sodium.api.math;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.caffeinemc.mods.sodium.api.util.NormI8;
-import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Math;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -119,7 +119,7 @@ public class MatrixHelper {
      * @param angleY The angle to rotate by on the Y-axis
      * @param angleX The angle to rotate by on the X-axis
      */
-    public static void rotateZYX(MatrixStack.Entry matrices, float angleZ, float angleY, float angleX) {
+    public static void rotateZYX(PoseStack.Pose matrices, float angleZ, float angleY, float angleX) {
         float sinX = Math.sin(angleX);
         float cosX = Math.cosFromSin(sinX, angleX);
         float sinInvX = -sinX;
@@ -132,8 +132,8 @@ public class MatrixHelper {
         float cosZ = Math.cosFromSin(sinZ, angleZ);
         float sinInvZ = -sinZ;
 
-        applySinCosMat4(matrices.getPositionMatrix(), sinX, sinY, sinZ, cosX, cosY, cosZ, sinInvX, sinInvY, sinInvZ);
-        applySinCosMat3(matrices.getNormalMatrix(), sinX, sinY, sinZ, cosX, cosY, cosZ, sinInvX, sinInvY, sinInvZ);
+        applySinCosMat4(matrices.pose(), sinX, sinY, sinZ, cosX, cosY, cosZ, sinInvX, sinInvY, sinInvZ);
+        applySinCosMat3(matrices.normal(), sinX, sinY, sinZ, cosX, cosY, cosZ, sinInvX, sinInvY, sinInvZ);
     }
 
     private static void applySinCosMat4(Matrix4f mat, float sinX, float sinY, float sinZ, float cosX, float cosY, float cosZ, float sinInvX, float sinInvY, float sinInvZ) {

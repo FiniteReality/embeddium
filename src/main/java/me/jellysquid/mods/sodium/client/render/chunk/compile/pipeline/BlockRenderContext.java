@@ -2,10 +2,10 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.WorldSliceLocal;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -14,7 +14,7 @@ public class BlockRenderContext {
     private final WorldSlice world;
     private final WorldSliceLocal localSlice;
 
-    private final BlockPos.Mutable pos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
     private final Vector3f origin = new Vector3f();
 
@@ -24,7 +24,7 @@ public class BlockRenderContext {
     private long seed;
 
     private ModelData modelData;
-    private RenderLayer renderLayer;
+    private RenderType renderLayer;
 
 
     public BlockRenderContext(WorldSlice world) {
@@ -32,7 +32,7 @@ public class BlockRenderContext {
         this.localSlice = new WorldSliceLocal(world);
     }
 
-    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, ModelData modelData, RenderLayer renderLayer) {
+    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, ModelData modelData, RenderType renderLayer) {
         this.pos.set(pos);
         this.origin.set(origin.getX(), origin.getY(), origin.getZ());
 
@@ -104,7 +104,7 @@ public class BlockRenderContext {
     /**
      * @return The render layer for model rendering
      */
-    public RenderLayer renderLayer() {
+    public RenderType renderLayer() {
         return this.renderLayer;
     }
 }

@@ -2,9 +2,9 @@ package me.jellysquid.mods.sodium.mixin.features.render.immediate.buffer_builder
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import me.jellysquid.mods.sodium.client.buffer.ExtendedVertexFormat;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormatElement;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,7 +33,7 @@ public class VertexFormatMixin implements ExtendedVertexFormat {
         VertexFormatElement currentElement = elements.get(0);
         int id = 0;
         for (VertexFormatElement element : this.elements) {
-            if (element.getType() == VertexFormatElement.Type.PADDING) continue;
+            if (element.getUsage() == VertexFormatElement.Usage.PADDING) continue;
 
             int oldId = id;
             int byteLength = 0;
@@ -41,9 +41,9 @@ public class VertexFormatMixin implements ExtendedVertexFormat {
             do {
                 if (++id >= this.embeddium$extendedElements.length)
                     id -= this.embeddium$extendedElements.length;
-                byteLength += currentElement.getByteLength();
+                byteLength += currentElement.getByteSize();
                 currentElement = this.elements.get(id);
-            } while (currentElement.getType() == VertexFormatElement.Type.PADDING);
+            } while (currentElement.getUsage() == VertexFormatElement.Usage.PADDING);
 
             this.embeddium$extendedElements[oldId] = new ExtendedVertexFormat.Element(element, id - oldId, byteLength);
         }

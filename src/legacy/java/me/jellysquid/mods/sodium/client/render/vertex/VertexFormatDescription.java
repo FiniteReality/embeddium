@@ -1,11 +1,10 @@
 package me.jellysquid.mods.sodium.client.render.vertex;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntLists;
 import me.jellysquid.mods.sodium.client.render.vertex.transform.CommonVertexElement;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormatElement;
-
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,7 +23,7 @@ public class VertexFormatDescription {
     public VertexFormatDescription(VertexFormat format, int id) {
         this.format = format;
         this.id = id;
-        this.stride = format.getVertexSizeByte();
+        this.stride = format.getVertexSize();
 
         this.elementCount = format.getElements().size();
         this.elementOffsets = CommonVertexElement.getOffsets(format);

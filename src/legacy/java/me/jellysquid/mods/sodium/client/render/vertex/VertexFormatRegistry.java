@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.vertex;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import net.minecraft.client.render.VertexFormat;
 
 @Deprecated
 public class VertexFormatRegistry {

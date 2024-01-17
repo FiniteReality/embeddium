@@ -29,6 +29,7 @@
  */
 package me.jellysquid.mods.sodium.client.util.sorting;
 
+
 /**
  * Based upon {@link it.unimi.dsi.fastutil.ints.IntArrays} implementation.
  */

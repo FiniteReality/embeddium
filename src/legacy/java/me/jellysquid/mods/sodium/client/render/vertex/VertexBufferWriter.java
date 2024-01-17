@@ -1,6 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.vertex;
 
-import net.minecraft.client.render.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.lwjgl.system.MemoryStack;
 
 @Deprecated

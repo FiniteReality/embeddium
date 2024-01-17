@@ -1,9 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.immediate.model;
 
 import net.caffeinemc.mods.sodium.api.math.MatrixHelper;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 import org.joml.*;
-
 import java.util.Set;
 
 public class ModelCuboid {
@@ -130,7 +129,7 @@ public class ModelCuboid {
             this.positions = positions;
             this.textures = textures;
 
-            this.direction = direction.getUnitVector();
+            this.direction = direction.step();
 
             if (flip) {
                 this.direction.mul(-1.0F, 1.0F, 1.0F);

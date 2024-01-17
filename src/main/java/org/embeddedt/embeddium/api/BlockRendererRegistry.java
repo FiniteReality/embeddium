@@ -1,14 +1,9 @@
 package org.embeddedt.embeddium.api;
 
 import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.util.RandomSource;
 import net.minecraftforge.client.model.data.ModelData;
-
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -78,6 +73,6 @@ public class BlockRendererRegistry {
          * @param random the RNG used for rendering
          * @return the result of the rendering
          */
-        RenderResult renderBlock(BlockRenderContext ctx, Random random, VertexConsumer consumer);
+        RenderResult renderBlock(BlockRenderContext ctx, RandomSource random, VertexConsumer consumer);
     }
 }

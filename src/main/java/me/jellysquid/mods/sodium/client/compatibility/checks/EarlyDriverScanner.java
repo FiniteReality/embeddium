@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.compatibility.checks;
 import me.jellysquid.mods.sodium.client.compatibility.environment.OSInfo;
 import me.jellysquid.mods.sodium.client.platform.MessageBox;
 import me.jellysquid.mods.sodium.client.platform.windows.WindowsDriverStoreVersion;
+import me.jellysquid.mods.sodium.client.compatibility.environment.probe.GraphicsAdapterInfo;
 import me.jellysquid.mods.sodium.client.compatibility.environment.probe.GraphicsAdapterProbe;
 import me.jellysquid.mods.sodium.client.compatibility.environment.probe.GraphicsAdapterVendor;
 import org.jetbrains.annotations.Nullable;

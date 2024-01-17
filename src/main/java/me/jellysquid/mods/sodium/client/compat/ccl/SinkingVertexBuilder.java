@@ -6,13 +6,13 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3fc;
 
 import javax.annotation.Nonnull;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -70,19 +70,19 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     @Override
-    public void fixedColor(int r, int g, int b, int a) {
+    public void defaultColor(int r, int g, int b, int a) {
         fixedColor = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
         hasFixedColor = true;
     }
 
     @Override
-    public void unfixColor() {
+    public void unsetDefaultColor() {
         hasFixedColor = false;
     }
 
     @Nonnull
     @Override
-    public VertexConsumer texture(float u, float v) {
+    public VertexConsumer uv(float u, float v) {
         this.u = u;
         this.v = v;
         return this;
@@ -90,13 +90,13 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
     @Nonnull
     @Override
-    public VertexConsumer overlay(int u, int v) {
+    public VertexConsumer overlayCoords(int u, int v) {
         return this;
     }
 
     @Nonnull
     @Override
-    public VertexConsumer light(int u, int v) {
+    public VertexConsumer uv2(int u, int v) {
         light = (v << 16) | u; // Compose lightmap coords into raw light value 0xVVVV_UUUU
         return this;
     }
@@ -111,8 +111,8 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     @Override
-    public void next() {
-        final Direction dir = Direction.fromVector((int) nx, (int) ny, (int) nz);
+    public void endVertex() {
+        final Direction dir = Direction.fromDelta((int) nx, (int) ny, (int) nz);
         final int normal = dir != null ? dir.ordinal() : -1;
 
         // Write the current quad vertex's normal, position, UVs, color and raw light values

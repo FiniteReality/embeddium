@@ -6,17 +6,16 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelB
 import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockOcclusionCache;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.block.BlockModelRenderer;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.ForgeConfig;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 
 /**
@@ -24,11 +23,11 @@ import java.util.List;
  */
 public class ForgeBlockRenderer {
     private static boolean useForgeLightingPipeline = false;
-    private static BlockModelRenderer forgeRenderer;
+    private static ModelBlockRenderer forgeRenderer;
 
     public static void init() {
         useForgeLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
-        forgeRenderer = MinecraftClient.getInstance().getBlockRenderManager().getModelRenderer();
+        forgeRenderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
     }
 
     public static boolean useForgeLightingPipeline() {
@@ -42,7 +41,7 @@ public class ForgeBlockRenderer {
         }
         for (int i = 0; i < quads.size(); i++) {
             ModelQuadView src = (ModelQuadView)quads.get(i);
-            Sprite sprite = src.getSprite();
+            TextureAtlasSprite sprite = src.getSprite();
 
             if (sprite != null) {
                 renderData.addSprite(sprite);
@@ -51,12 +50,12 @@ public class ForgeBlockRenderer {
         return false;
     }
 
-    public boolean renderBlock(LightMode mode, BlockRenderContext ctx, VertexConsumer buffer, MatrixStack stack,
-                               Random random, BlockOcclusionCache sideCache, ChunkModelBuilder renderData) {
+    public boolean renderBlock(LightMode mode, BlockRenderContext ctx, VertexConsumer buffer, PoseStack stack,
+                               RandomSource random, BlockOcclusionCache sideCache, ChunkModelBuilder renderData) {
         if (mode == LightMode.FLAT) {
-            forgeRenderer.tesselateWithoutAO(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), stack, buffer, true, random, ctx.seed(), OverlayTexture.DEFAULT_UV, ctx.modelData(), ctx.renderLayer());
+            forgeRenderer.tesselateWithoutAO(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), stack, buffer, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY, ctx.modelData(), ctx.renderLayer());
         } else {
-            forgeRenderer.tesselateWithAO(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), stack, buffer, true, random, ctx.seed(), OverlayTexture.DEFAULT_UV, ctx.modelData(), ctx.renderLayer());
+            forgeRenderer.tesselateWithAO(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), stack, buffer, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY, ctx.modelData(), ctx.renderLayer());
         }
 
         // Process the quads a second time for marking animated sprites and detecting emptiness

@@ -2,20 +2,21 @@ package me.jellysquid.mods.sodium.mixin.features.render.entity.shadows;
 
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.common.ModelVertex;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.caffeinemc.mods.sodium.api.math.MatrixHelper;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.chunk.Chunk;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,8 +35,8 @@ public class EntityRenderDispatcherMixin {
      * @author JellySquid
      * @reason Reduce vertex assembly overhead for shadow rendering
      */
-    @Inject(method = "renderShadowPart", at = @At("HEAD"), cancellable = true)
-    private static void renderShadowPartFast(MatrixStack.Entry entry, VertexConsumer vertices, Chunk chunk, WorldView world, BlockPos pos, double x, double y, double z, float radius, float opacity, CallbackInfo ci) {
+    @Inject(method = "renderBlockShadow", at = @At("HEAD"), cancellable = true)
+    private static void renderShadowPartFast(PoseStack.Pose entry, VertexConsumer vertices, ChunkAccess chunk, LevelReader world, BlockPos pos, double x, double y, double z, float radius, float opacity, CallbackInfo ci) {
         var writer = VertexBufferWriter.tryOf(vertices);
 
         if (writer == null)
@@ -43,26 +44,26 @@ public class EntityRenderDispatcherMixin {
 
         ci.cancel();
 
-        BlockPos blockPos = pos.down();
+        BlockPos blockPos = pos.below();
         BlockState blockState = world.getBlockState(blockPos);
 
-        if (blockState.getRenderType() == BlockRenderType.INVISIBLE || !blockState.isFullCube(world, blockPos)) {
+        if (blockState.getRenderShape() == RenderShape.INVISIBLE || !blockState.isCollisionShapeFullBlock(world, blockPos)) {
             return;
         }
 
-        var light = world.getLightLevel(pos);
+        var light = world.getMaxLocalRawBrightness(pos);
 
         if (light <= 3) {
             return;
         }
 
-        VoxelShape voxelShape = blockState.getOutlineShape(world, blockPos);
+        VoxelShape voxelShape = blockState.getShape(world, blockPos);
 
         if (voxelShape.isEmpty()) {
             return;
         }
 
-        float brightness = LightmapTextureManager.getBrightness(world.getDimension(), light);
+        float brightness = LightTexture.getBrightness(world.dimensionType(), light);
         float alpha = (float) (((double) opacity - ((y - (double) pos.getY()) / 2.0)) * 0.5 * (double) brightness);
 
         if (alpha >= 0.0F) {
@@ -70,7 +71,7 @@ public class EntityRenderDispatcherMixin {
                 alpha = 1.0F;
             }
 
-            Box box = voxelShape.getBoundingBox();
+            AABB box = voxelShape.bounds();
 
             float minX = (float) ((pos.getX() + box.minX) - x);
             float maxX = (float) ((pos.getX() + box.maxX) - x);
@@ -88,12 +89,12 @@ public class EntityRenderDispatcherMixin {
      * @deprecated don't call, but just in case...
      */
     @Deprecated
-    private static void renderShadowPart(MatrixStack.Entry matrices, VertexConsumer consumer, float radius, float alpha, float minX, float maxX, float minY, float minZ, float maxZ) {
+    private static void renderShadowPart(PoseStack.Pose matrices, VertexConsumer consumer, float radius, float alpha, float minX, float maxX, float minY, float minZ, float maxZ) {
         renderShadowPart(matrices, VertexBufferWriter.of(consumer), radius, alpha, minX, maxX, minY, minZ, maxZ);
     }
 
     @Unique
-    private static void renderShadowPart(MatrixStack.Entry matrices, VertexBufferWriter writer, float radius, float alpha, float minX, float maxX, float minY, float minZ, float maxZ) {
+    private static void renderShadowPart(PoseStack.Pose matrices, VertexBufferWriter writer, float radius, float alpha, float minX, float maxX, float minY, float minZ, float maxZ) {
         float size = 0.5F * (1.0F / radius);
 
         float u1 = (-minX * size) + 0.5F;
@@ -102,8 +103,8 @@ public class EntityRenderDispatcherMixin {
         float v1 = (-minZ * size) + 0.5F;
         float v2 = (-maxZ * size) + 0.5F;
 
-        var matNormal = matrices.getNormalMatrix();
-        var matPosition = matrices.getPositionMatrix();
+        var matNormal = matrices.normal();
+        var matPosition = matrices.pose();
 
         var color = ColorABGR.withAlpha(SHADOW_COLOR, alpha);
         var normal = MatrixHelper.transformNormal(matNormal, 0.0f, 1.0f, 0.0f);
@@ -136,6 +137,6 @@ public class EntityRenderDispatcherMixin {
         float yt = MatrixHelper.transformPositionY(matPosition, x, y, z);
         float zt = MatrixHelper.transformPositionZ(matPosition, x, y, z);
 
-        ModelVertex.write(ptr, xt, yt, zt, color, u, v, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, normal);
+        ModelVertex.write(ptr, xt, yt, zt, color, u, v, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, normal);
     }
 }
