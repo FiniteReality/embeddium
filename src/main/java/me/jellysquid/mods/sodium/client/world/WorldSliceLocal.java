@@ -1,15 +1,24 @@
 package me.jellysquid.mods.sodium.client.world;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.*;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.*;
-import net.minecraft.world.biome.ColorResolver;
-import net.minecraft.world.chunk.light.LightingProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.ClipBlockStateContext;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.model.data.ModelDataManager;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 
@@ -24,41 +33,41 @@ import java.util.stream.Stream;
  * Wrapper object used to defeat identity comparisons in mods. Since vanilla provides a unique object to them for each
  * subchunk, we do the same.
  */
-public class WorldSliceLocal implements BlockRenderView {
-    private final BlockRenderView view;
+public class WorldSliceLocal implements BlockAndTintGetter {
+    private final BlockAndTintGetter view;
 
-    public WorldSliceLocal(BlockRenderView view) {
+    public WorldSliceLocal(BlockAndTintGetter view) {
         this.view = view;
     }
 
     @Override
-    public float getBrightness(Direction direction, boolean shaded) {
-        return view.getBrightness(direction, shaded);
+    public float getShade(Direction direction, boolean shaded) {
+        return view.getShade(direction, shaded);
     }
 
     @Override
-    public LightingProvider getLightingProvider() {
-        return view.getLightingProvider();
+    public LevelLightEngine getLightEngine() {
+        return view.getLightEngine();
     }
 
     @Override
-    public int getColor(BlockPos pos, ColorResolver colorResolver) {
-        return view.getColor(pos, colorResolver);
+    public int getBlockTint(BlockPos pos, ColorResolver colorResolver) {
+        return view.getBlockTint(pos, colorResolver);
     }
 
     @Override
-    public int getLightLevel(LightType type, BlockPos pos) {
-        return view.getLightLevel(type, pos);
+    public int getBrightness(LightLayer type, BlockPos pos) {
+        return view.getBrightness(type, pos);
     }
 
     @Override
-    public int getBaseLightLevel(BlockPos pos, int ambientDarkness) {
-        return view.getBaseLightLevel(pos, ambientDarkness);
+    public int getRawBrightness(BlockPos pos, int ambientDarkness) {
+        return view.getRawBrightness(pos, ambientDarkness);
     }
 
     @Override
-    public boolean isSkyVisible(BlockPos pos) {
-        return view.isSkyVisible(pos);
+    public boolean canSeeSky(BlockPos pos) {
+        return view.canSeeSky(pos);
     }
 
     @Override
@@ -83,8 +92,8 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
-    public int getLuminance(BlockPos pos) {
-        return view.getLuminance(pos);
+    public int getLightEmission(BlockPos pos) {
+        return view.getLightEmission(pos);
     }
 
     @Override
@@ -93,38 +102,38 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
-    public Stream<BlockState> getStatesInBox(Box box) {
-        return view.getStatesInBox(box);
+    public Stream<BlockState> getBlockStates(AABB box) {
+        return view.getBlockStates(box);
     }
 
     @Override
-    public BlockHitResult raycast(BlockStateRaycastContext context) {
-        return view.raycast(context);
+    public BlockHitResult isBlockInLine(ClipBlockStateContext context) {
+        return view.isBlockInLine(context);
     }
 
     @Override
-    public BlockHitResult raycast(RaycastContext context) {
-        return view.raycast(context);
+    public BlockHitResult clip(ClipContext context) {
+        return view.clip(context);
     }
 
     @Override
     @Nullable
-    public BlockHitResult raycastBlock(Vec3d start, Vec3d end, BlockPos pos, VoxelShape shape, BlockState state) {
-        return view.raycastBlock(start, end, pos, shape, state);
+    public BlockHitResult clipWithInteractionOverride(Vec3 start, Vec3 end, BlockPos pos, VoxelShape shape, BlockState state) {
+        return view.clipWithInteractionOverride(start, end, pos, shape, state);
     }
 
     @Override
-    public double getDismountHeight(VoxelShape blockCollisionShape, Supplier<VoxelShape> belowBlockCollisionShapeGetter) {
-        return view.getDismountHeight(blockCollisionShape, belowBlockCollisionShapeGetter);
+    public double getBlockFloorHeight(VoxelShape blockCollisionShape, Supplier<VoxelShape> belowBlockCollisionShapeGetter) {
+        return view.getBlockFloorHeight(blockCollisionShape, belowBlockCollisionShapeGetter);
     }
 
     @Override
-    public double getDismountHeight(BlockPos pos) {
-        return view.getDismountHeight(pos);
+    public double getBlockFloorHeight(BlockPos pos) {
+        return view.getBlockFloorHeight(pos);
     }
 
-    public static <T, C> T raycast(Vec3d start, Vec3d end, C context, BiFunction<C, BlockPos, T> blockHitFactory, Function<C, T> missFactory) {
-        return BlockView.raycast(start, end, context, blockHitFactory, missFactory);
+    public static <T, C> T traverseBlocks(Vec3 start, Vec3 end, C context, BiFunction<C, BlockPos, T> blockHitFactory, Function<C, T> missFactory) {
+        return BlockGetter.traverseBlocks(start, end, context, blockHitFactory, missFactory);
     }
 
     @Override
@@ -133,38 +142,38 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
-    public int getBottomY() {
-        return view.getBottomY();
+    public int getMinBuildHeight() {
+        return view.getMinBuildHeight();
     }
 
     @Override
-    public int getTopY() {
-        return view.getTopY();
+    public int getMaxBuildHeight() {
+        return view.getMaxBuildHeight();
     }
 
     @Override
-    public int countVerticalSections() {
-        return view.countVerticalSections();
+    public int getSectionsCount() {
+        return view.getSectionsCount();
     }
 
     @Override
-    public int getBottomSectionCoord() {
-        return view.getBottomSectionCoord();
+    public int getMinSection() {
+        return view.getMinSection();
     }
 
     @Override
-    public int getTopSectionCoord() {
-        return view.getTopSectionCoord();
+    public int getMaxSection() {
+        return view.getMaxSection();
     }
 
     @Override
-    public boolean isOutOfHeightLimit(BlockPos pos) {
-        return view.isOutOfHeightLimit(pos);
+    public boolean isOutsideBuildHeight(BlockPos pos) {
+        return view.isOutsideBuildHeight(pos);
     }
 
     @Override
-    public boolean isOutOfHeightLimit(int y) {
-        return view.isOutOfHeightLimit(y);
+    public boolean isOutsideBuildHeight(int y) {
+        return view.isOutsideBuildHeight(y);
     }
 
     @Override
@@ -173,17 +182,17 @@ public class WorldSliceLocal implements BlockRenderView {
     }
 
     @Override
-    public int sectionCoordToIndex(int coord) {
-        return view.sectionCoordToIndex(coord);
+    public int getSectionIndexFromSectionY(int coord) {
+        return view.getSectionIndexFromSectionY(coord);
     }
 
     @Override
-    public int sectionIndexToCoord(int index) {
-        return view.sectionIndexToCoord(index);
+    public int getSectionYFromSectionIndex(int index) {
+        return view.getSectionYFromSectionIndex(index);
     }
 
-    public static HeightLimitView create(int bottomY, int height) {
-        return HeightLimitView.create(bottomY, height);
+    public static LevelHeightAccessor create(int bottomY, int height) {
+        return LevelHeightAccessor.create(bottomY, height);
     }
 
     @Override

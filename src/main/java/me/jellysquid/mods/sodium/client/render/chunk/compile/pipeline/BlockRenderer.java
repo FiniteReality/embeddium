@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
@@ -16,23 +17,24 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder.Vertex;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.LocalRandom;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockRenderView;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 
@@ -40,8 +42,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BlockRenderer {
-    private static final MatrixStack EMPTY_STACK = new MatrixStack();
-    private final Random random = new LocalRandom(42L);
+    private static final PoseStack EMPTY_STACK = new PoseStack();
+    private final RandomSource random = new SingleThreadedRandomSource(42L);
 
     private final ColorProviderRegistry colorProviderRegistry;
     private final BlockOcclusionCache occlusionCache;
@@ -68,7 +70,7 @@ public class BlockRenderer {
         this.lighters = lighters;
 
         this.occlusionCache = new BlockOcclusionCache();
-        this.useAmbientOcclusion = MinecraftClient.isAmbientOcclusionEnabled();
+        this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
         this.useForgeExperimentalLightingPipeline = NeoForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
     }
 
@@ -80,12 +82,12 @@ public class BlockRenderer {
 
         LightMode mode = this.getLightingMode(ctx.state(), ctx.model(), ctx.localSlice(), ctx.pos(), ctx.renderLayer());
         LightPipeline lighter = this.lighters.getLighter(mode);
-        Vec3d renderOffset;
+        Vec3 renderOffset;
         
-        if (ctx.state().hasModelOffset()) {
-            renderOffset = ctx.state().getModelOffset(ctx.localSlice(), ctx.pos());
+        if (ctx.state().hasOffsetFunction()) {
+            renderOffset = ctx.state().getOffset(ctx.localSlice(), ctx.pos());
         } else {
-            renderOffset = Vec3d.ZERO;
+            renderOffset = Vec3.ZERO;
         }
 
         // Process custom renderers
@@ -105,9 +107,9 @@ public class BlockRenderer {
         }
 
         if(this.useForgeExperimentalLightingPipeline) {
-            final MatrixStack mStack;
-            if(renderOffset != Vec3d.ZERO) {
-                mStack = new MatrixStack();
+            final PoseStack mStack;
+            if(renderOffset != Vec3.ZERO) {
+                mStack = new PoseStack();
                 mStack.translate(renderOffset.x, renderOffset.y, renderOffset.z);
             } else
                 mStack = EMPTY_STACK;
@@ -145,7 +147,7 @@ public class BlockRenderer {
         return this.occlusionCache.shouldDrawSide(ctx.state(), ctx.localSlice(), ctx.pos(), face);
     }
 
-    private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3d offset,
+    private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3 offset,
                                 ChunkModelBuilder builder, List<BakedQuad> quads, Direction cullFace) {
 
         this.useReorienting = true;
@@ -172,7 +174,7 @@ public class BlockRenderer {
 
             this.writeGeometry(ctx, builder, offset, material, quad, vertexColors, lightData);
 
-            Sprite sprite = quad.getSprite();
+            TextureAtlasSprite sprite = quad.getSprite();
 
             if (sprite != null) {
                 builder.addSprite(sprite);
@@ -201,7 +203,7 @@ public class BlockRenderer {
 
     private void writeGeometry(BlockRenderContext ctx,
                                ChunkModelBuilder builder,
-                               Vec3d offset,
+                               Vec3 offset,
                                Material material,
                                BakedQuadView quad,
                                int[] colors,
@@ -216,9 +218,9 @@ public class BlockRenderer {
             int srcIndex = orientation.getVertexIndex(dstIndex);
 
             var out = vertices[dstIndex];
-            out.x = ctx.origin().x() + quad.getX(srcIndex) + (float) offset.getX();
-            out.y = ctx.origin().y() + quad.getY(srcIndex) + (float) offset.getY();
-            out.z = ctx.origin().z() + quad.getZ(srcIndex) + (float) offset.getZ();
+            out.x = ctx.origin().x() + quad.getX(srcIndex) + (float) offset.x();
+            out.y = ctx.origin().y() + quad.getY(srcIndex) + (float) offset.y();
+            out.z = ctx.origin().z() + quad.getZ(srcIndex) + (float) offset.z();
 
             out.color = ColorABGR.withAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), light.br[srcIndex]);
 
@@ -232,7 +234,7 @@ public class BlockRenderer {
         vertexBuffer.push(vertices, material);
     }
 
-    private LightMode getLightingMode(BlockState state, BakedModel model, BlockRenderView world, BlockPos pos, RenderLayer renderLayer) {
+    private LightMode getLightingMode(BlockState state, BakedModel model, BlockAndTintGetter world, BlockPos pos, RenderType renderLayer) {
         if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, renderLayer) && state.getLightEmission(world, pos) == 0) {
             return LightMode.SMOOTH;
         } else {

@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.api;
 
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.World;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.Event;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,20 +16,20 @@ import java.util.Objects;
  * This event is fired by Embeddium to allow mods to add their own custom geometry to chunks as they are being meshed.
  *
  * <p>In vanilla, mods often accomplish this by using a <a href="https://github.com/BluSunrize/ImmersiveEngineering/blob/1.18.2/src/main/java/blusunrize/immersiveengineering/mixin/coremods/client/RebuildTaskMixin.java">mixin</a></a>
- * into {@link net.minecraft.client.render.chunk.ChunkBuilder.BuiltChunk.RebuildTask}, but that is hacky and does not
+ * into {@link net.minecraft.client.renderer.chunk.SectionRenderDispatcher.RenderSection.RebuildTask}, but that is hacky and does not
  * work with Embeddium as it doesn't use vanilla's chunk task classes.
  *
  * <p>This event is fired on the main thread, and provides the world being rendered and the section position. If you
  * wish to add additional static geometry for this section, you should register your {@link MeshAppender} inside the
  * event handler. Note that {@link MeshAppender#render(MeshAppender.Context)} will be called on a worker thread, and
- * therefore accessing the world is not safe inside the appender itself. Instead, use the provided {@link BlockRenderView}.
+ * therefore accessing the world is not safe inside the appender itself. Instead, use the provided {@link BlockAndTintGetter}.
  */
 public class ChunkMeshEvent extends Event {
-    private final World world;
-    private final ChunkSectionPos sectionOrigin;
+    private final Level world;
+    private final SectionPos sectionOrigin;
     private List<MeshAppender> meshAppenders = null;
 
-    ChunkMeshEvent(World world, ChunkSectionPos sectionOrigin) {
+    ChunkMeshEvent(Level world, SectionPos sectionOrigin) {
         this.world = world;
         this.sectionOrigin = sectionOrigin;
     }
@@ -37,11 +37,11 @@ public class ChunkMeshEvent extends Event {
     /**
      * Retrieves the current world (not cloned chunk section).
      */
-    public World getWorld() {
+    public Level getWorld() {
         return world;
     }
 
-    public ChunkSectionPos getSectionOrigin() {
+    public SectionPos getSectionOrigin() {
         return sectionOrigin;
     }
 
@@ -58,7 +58,7 @@ public class ChunkMeshEvent extends Event {
     }
 
     @ApiStatus.Internal
-    public static List<MeshAppender> post(World world, ChunkSectionPos origin) {
+    public static List<MeshAppender> post(Level world, SectionPos origin) {
         ChunkMeshEvent event = new ChunkMeshEvent(world, origin);
         NeoForge.EVENT_BUS.post(event);
         return Objects.requireNonNullElse(event.meshAppenders, Collections.emptyList());

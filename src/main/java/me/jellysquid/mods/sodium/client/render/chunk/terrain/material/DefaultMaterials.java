@@ -2,10 +2,9 @@ package me.jellysquid.mods.sodium.client.render.chunk.terrain.material;
 
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.parameters.AlphaCutoffParameter;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.fluid.FluidState;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.level.material.FluidState;
 
 public class DefaultMaterials {
     public static final Material SOLID = new Material(DefaultTerrainRenderPasses.SOLID, AlphaCutoffParameter.ZERO, true);
@@ -14,17 +13,17 @@ public class DefaultMaterials {
     public static final Material TRANSLUCENT = new Material(DefaultTerrainRenderPasses.TRANSLUCENT, AlphaCutoffParameter.ZERO, true);
 
     public static Material forFluidState(FluidState state) {
-        return forRenderLayer(RenderLayers.getFluidLayer(state));
+        return forRenderLayer(ItemBlockRenderTypes.getRenderLayer(state));
     }
 
-    public static Material forRenderLayer(RenderLayer layer) {
-        if (layer == RenderLayer.getSolid()) {
+    public static Material forRenderLayer(RenderType layer) {
+        if (layer == RenderType.solid()) {
             return SOLID;
-        } else if (layer == RenderLayer.getCutout()) {
+        } else if (layer == RenderType.cutout()) {
             return CUTOUT;
-        } else if (layer == RenderLayer.getCutoutMipped() || layer == RenderLayer.getTripwire()) {
+        } else if (layer == RenderType.cutoutMipped() || layer == RenderType.tripwire()) {
             return CUTOUT_MIPPED;
-        } else if (layer == RenderLayer.getTranslucent()) {
+        } else if (layer == RenderType.translucent()) {
             return TRANSLUCENT;
         }
 

@@ -4,12 +4,11 @@ import me.jellysquid.mods.sodium.client.compatibility.environment.OSInfo;
 import me.jellysquid.mods.sodium.client.platform.windows.api.msgbox.MsgBoxParamSw;
 import me.jellysquid.mods.sodium.client.platform.windows.api.msgbox.MsgBoxCallback;
 import me.jellysquid.mods.sodium.client.platform.windows.api.User32;
-import net.minecraft.client.util.Window;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFWNativeWin32;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-
+import com.mojang.blaze3d.platform.Window;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
@@ -56,8 +55,8 @@ public class MessageBox {
 
             if (helpUrl != null) {
                 msgBoxCallback = MsgBoxCallback.create(lpHelpInfo -> {
-                    net.minecraft.util.Util.getOperatingSystem()
-                            .open(helpUrl);
+                    net.minecraft.Util.getPlatform()
+                            .openUri(helpUrl);
                 });
             } else {
                 msgBoxCallback = null;
@@ -66,7 +65,7 @@ public class MessageBox {
             final long hWndOwner;
 
             if (window != null) {
-                hWndOwner = GLFWNativeWin32.glfwGetWin32Window(window.getHandle());
+                hWndOwner = GLFWNativeWin32.glfwGetWin32Window(window.getWindow());
             } else {
                 hWndOwner = MemoryUtil.NULL;
             }

@@ -17,6 +17,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.SectionRenderDataUnsaf
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderListIterable;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
+import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion.DeviceResources;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderBindingPoints;
 import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderInterface;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
@@ -26,8 +27,8 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexTy
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.VanillaLikeChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.viewport.CameraTransform;
 import me.jellysquid.mods.sodium.client.util.BitwiseMath;
+import me.jellysquid.mods.sodium.client.util.iterator.ByteIterator;
 import org.lwjgl.system.MemoryUtil;
-
 import java.util.Iterator;
 
 public class DefaultChunkRenderer extends ShaderChunkRenderer {

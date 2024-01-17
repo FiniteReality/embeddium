@@ -10,7 +10,6 @@ import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatRegistry;
 import net.caffeinemc.mods.sodium.api.vertex.serializer.VertexSerializerRegistry;
-import net.minecraft.client.render.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.objectweb.asm.Opcodes;
@@ -21,13 +20,17 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultedVertexConsumer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import java.nio.ByteBuffer;
 
 @Mixin(BufferBuilder.class)
-public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implements VertexBufferWriter {
+public abstract class BufferBuilderMixin extends DefaultedVertexConsumer implements VertexBufferWriter {
     @Shadow
-    protected abstract void grow(int size);
+    protected abstract void ensureCapacity(int size);
 
     @Unique
     private static final int ATTRIBUTE_NOT_PRESENT = -1;
@@ -45,13 +48,13 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
     private ByteBuffer buffer;
 
     @Shadow
-    private int vertexCount;
+    private int vertices;
 
     @Shadow
-    private int elementOffset;
+    private int nextElementByte;
 
     @Shadow
-    private VertexFormat.DrawMode drawMode;
+    private VertexFormat.Mode mode;
 
     @Unique
     private VertexFormatDescription formatDescription;
@@ -89,10 +92,10 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
     }
 
     @Inject(
-            method = "setFormat",
+            method = "switchFormat",
             at = @At(
                     value = "FIELD",
-                    target = "Lnet/minecraft/client/render/BufferBuilder;format:Lnet/minecraft/client/render/VertexFormat;",
+                    target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;format:Lcom/mojang/blaze3d/vertex/VertexFormat;",
                     opcode = Opcodes.PUTFIELD
             )
     )
@@ -143,19 +146,19 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             method = "begin",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/render/BufferBuilder;setFormat(Lnet/minecraft/client/render/VertexFormat;)V"
+                    target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;switchFormat(Lcom/mojang/blaze3d/vertex/VertexFormat;)V"
             )
     )
-    private void onBegin(VertexFormat.DrawMode drawMode, VertexFormat format, CallbackInfo ci) {
-        this.writtenAttributes = 0;
-    }
-
-    @Inject(method = "resetBuilding", at = @At("RETURN"))
-    private void onResetBuilding(CallbackInfo ci) {
+    private void onBegin(VertexFormat.Mode drawMode, VertexFormat format, CallbackInfo ci) {
         this.writtenAttributes = 0;
     }
 
     @Inject(method = "reset", at = @At("RETURN"))
+    private void onResetBuilding(CallbackInfo ci) {
+        this.writtenAttributes = 0;
+    }
+
+    @Inject(method = "discard", at = @At("RETURN"))
     private void onReset(CallbackInfo ci) {
         this.writtenAttributes = 0;
     }
@@ -166,7 +169,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             return;
         }
 
-        final long offset = MemoryUtil.memAddress(this.buffer, this.elementOffset + this.attributeOffsetPosition);
+        final long offset = MemoryUtil.memAddress(this.buffer, this.nextElementByte + this.attributeOffsetPosition);
         PositionAttribute.put(offset, x, y, z);
 
         this.writtenAttributes |= ATTRIBUTE_POSITION_BIT;
@@ -179,7 +182,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             return;
         }
 
-        final long offset = MemoryUtil.memAddress(this.buffer, this.elementOffset + this.attributeOffsetColor);
+        final long offset = MemoryUtil.memAddress(this.buffer, this.nextElementByte + this.attributeOffsetColor);
         ColorAttribute.set(offset, rgba);
 
         this.writtenAttributes |= ATTRIBUTE_COLOR_BIT;
@@ -191,7 +194,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             return;
         }
 
-        final long offset = MemoryUtil.memAddress(this.buffer, this.elementOffset + this.attributeOffsetTexture);
+        final long offset = MemoryUtil.memAddress(this.buffer, this.nextElementByte + this.attributeOffsetTexture);
         TextureAttribute.put(offset, u, v);
 
         this.writtenAttributes |= ATTRIBUTE_TEXTURE_BIT;
@@ -203,7 +206,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             return;
         }
 
-        final long offset = MemoryUtil.memAddress(this.buffer, this.elementOffset + this.attributeOffsetOverlay);
+        final long offset = MemoryUtil.memAddress(this.buffer, this.nextElementByte + this.attributeOffsetOverlay);
         OverlayAttribute.set(offset, uv);
 
         this.writtenAttributes |= ATTRIBUTE_OVERLAY_BIT;
@@ -215,7 +218,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             return;
         }
 
-        final long offset = MemoryUtil.memAddress(this.buffer, this.elementOffset + this.attributeOffsetLight);
+        final long offset = MemoryUtil.memAddress(this.buffer, this.nextElementByte + this.attributeOffsetLight);
         LightAttribute.set(offset, uv);
 
         this.writtenAttributes |= ATTRIBUTE_LIGHT_BIT;
@@ -227,7 +230,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             return;
         }
 
-        final long offset = MemoryUtil.memAddress(this.buffer, this.elementOffset + this.attributeOffsetNormal);
+        final long offset = MemoryUtil.memAddress(this.buffer, this.nextElementByte + this.attributeOffsetNormal);
         NormalAttribute.set(offset, normal);
 
         this.writtenAttributes |= ATTRIBUTE_NORMAL_BIT;
@@ -240,11 +243,11 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
                        int overlay, int light,
                        float normalX, float normalY, float normalZ
     ) {
-        if (this.colorFixed) {
+        if (this.defaultColorSet) {
             throw new IllegalStateException();
         }
 
-        final long offset = MemoryUtil.memAddress(this.buffer, this.elementOffset);
+        final long offset = MemoryUtil.memAddress(this.buffer, this.nextElementByte);
 
         if (this.attributeOffsetPosition != ATTRIBUTE_NOT_PRESENT) {
             PositionAttribute.put(offset + this.attributeOffsetPosition, x, y, z);
@@ -274,7 +277,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
         this.writtenAttributes = ATTRIBUTE_POSITION_BIT | ATTRIBUTE_COLOR_BIT | ATTRIBUTE_TEXTURE_BIT |
                 ATTRIBUTE_OVERLAY_BIT | ATTRIBUTE_LIGHT_BIT | ATTRIBUTE_NORMAL_BIT;
 
-        this.next();
+        this.endVertex();
     }
 
     @Override
@@ -286,7 +289,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
 
     @Override
     public VertexConsumer color(int red, int green, int blue, int alpha) {
-        if (this.colorFixed) {
+        if (this.defaultColorSet) {
             throw new IllegalStateException();
         }
 
@@ -297,7 +300,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
 
     @Override
     public VertexConsumer color(int argb) { // No, this isn't a typo. One method takes RGBA, but this one takes ARGB.
-        if (this.colorFixed) {
+        if (this.defaultColorSet) {
             throw new IllegalStateException();
         }
 
@@ -312,14 +315,14 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
     }
 
     @Override
-    public VertexConsumer texture(float u, float v) {
+    public VertexConsumer uv(float u, float v) {
         this.putTextureAttribute(u, v);
 
         return this;
     }
 
     @Override
-    public VertexConsumer overlay(int uv) {
+    public VertexConsumer overlayCoords(int uv) {
         this.putOverlayAttribute(uv);
 
         return this;
@@ -327,7 +330,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
 
 
     @Override
-    public VertexConsumer light(int uv) {
+    public VertexConsumer uv2(int uv) {
         this.putLightAttribute(uv);
 
         return this;
@@ -340,13 +343,13 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
     }
 
     @Override
-    public VertexConsumer light(int u, int v) {
-        return this.light(packU16x2(u, v));
+    public VertexConsumer uv2(int u, int v) {
+        return this.uv2(packU16x2(u, v));
     }
 
     @Override
-    public VertexConsumer overlay(int u, int v) {
-        return this.overlay(packU16x2(u, v));
+    public VertexConsumer overlayCoords(int u, int v) {
+        return this.overlayCoords(packU16x2(u, v));
     }
 
     @Unique
@@ -360,7 +363,7 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
      * @reason Only used by BufferVertexConsumer's default implementations, which our patches remove
      */
     @Overwrite
-    public VertexFormatElement getCurrentElement() {
+    public VertexFormatElement currentElement() {
         throw createBlockedUpcallException();
     }
 
@@ -406,8 +409,8 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
      */
     @Overwrite
     @Override
-    public void next() {
-        if (this.colorFixed) {
+    public void endVertex() {
+        if (this.defaultColorSet) {
             this.writeFixedColor();
         }
 
@@ -415,12 +418,12 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             throw new IllegalStateException("Not filled all elements of the vertex");
         }
 
-        this.vertexCount++;
-        this.elementOffset += this.vertexStride;
+        this.vertices++;
+        this.nextElementByte += this.vertexStride;
 
         this.writtenAttributes = 0;
 
-        this.grow(this.vertexStride);
+        this.ensureCapacity(this.vertexStride);
 
         if (this.shouldDuplicateVertices()) {
             this.duplicateVertex();
@@ -434,25 +437,25 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
 
     @Unique
     private void writeFixedColor() {
-        this.putColorAttribute(ColorABGR.pack(this.fixedRed, this.fixedGreen, this.fixedBlue, this.fixedAlpha));
+        this.putColorAttribute(ColorABGR.pack(this.defaultR, this.defaultG, this.defaultB, this.defaultA));
     }
 
     @Unique
     private boolean shouldDuplicateVertices() {
-        return this.drawMode == VertexFormat.DrawMode.LINES || this.drawMode == VertexFormat.DrawMode.LINE_STRIP;
+        return this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP;
     }
 
     @Unique
     private void duplicateVertex() {
         MemoryIntrinsics.copyMemory(
-                MemoryUtil.memAddress(this.buffer, this.elementOffset - this.vertexStride),
-                MemoryUtil.memAddress(this.buffer, this.elementOffset),
+                MemoryUtil.memAddress(this.buffer, this.nextElementByte - this.vertexStride),
+                MemoryUtil.memAddress(this.buffer, this.nextElementByte),
                 this.vertexStride);
 
-        this.elementOffset += this.vertexStride;
-        this.vertexCount++;
+        this.nextElementByte += this.vertexStride;
+        this.vertices++;
 
-        this.grow(this.vertexStride);
+        this.ensureCapacity(this.vertexStride);
     }
 
     @Override
@@ -465,11 +468,11 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
         var length = count * this.vertexStride;
 
         // Ensure that there is always space for 1 more vertex; see BufferBuilder.next()
-        this.grow(length + this.vertexStride);
+        this.ensureCapacity(length + this.vertexStride);
 
         // The buffer may change in the even, so we need to make sure that the
         // pointer is retrieved *after* the resize
-        var dst = MemoryUtil.memAddress(this.buffer, this.elementOffset);
+        var dst = MemoryUtil.memAddress(this.buffer, this.nextElementByte);
 
         if (format == this.formatDescription) {
             // The layout is the same, so we can just perform a memory copy
@@ -480,8 +483,8 @@ public abstract class BufferBuilderMixin extends FixedColorVertexConsumer implem
             this.copySlow(src, dst, count, format);
         }
 
-        this.vertexCount += count;
-        this.elementOffset += length;
+        this.vertices += count;
+        this.nextElementByte += length;
     }
 
     @Unique

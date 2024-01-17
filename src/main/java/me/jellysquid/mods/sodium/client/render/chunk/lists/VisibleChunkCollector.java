@@ -2,8 +2,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.lists;
 
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkUpdateType;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
-import net.minecraft.util.math.Vec3d;
-
 import java.util.ArrayDeque;
 import java.util.EnumMap;
 import java.util.Map;

@@ -1,13 +1,13 @@
 package me.jellysquid.mods.sodium.mixin.core.render.world;
 
-import net.minecraft.client.render.chunk.ChunkBuilder;
+import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-@Mixin(ChunkBuilder.class)
+@Mixin(SectionRenderDispatcher.class)
 public class ChunkBuilderMixin {
-    @ModifyVariable(method = "<init>(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/render/WorldRenderer;Ljava/util/concurrent/Executor;ZLnet/minecraft/client/render/chunk/BlockBufferBuilderStorage;I)V", index = 9, at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayListWithExpectedSize(I)Ljava/util/ArrayList;", remap = false))
+    @ModifyVariable(method = "<init>(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/renderer/LevelRenderer;Ljava/util/concurrent/Executor;ZLnet/minecraft/client/renderer/SectionBufferBuilderPack;I)V", index = 9, at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayListWithExpectedSize(I)Ljava/util/ArrayList;", remap = false))
     private int modifyThreadPoolSize(int prev) {
         // Do not allow any resources to be allocated
         return 0;

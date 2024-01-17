@@ -5,8 +5,7 @@ import me.jellysquid.mods.sodium.client.compatibility.checks.ModuleScanner;
 import me.jellysquid.mods.sodium.client.compatibility.checks.LateDriverScanner;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.Workarounds;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.nvidia.NvidiaWorkarounds;
-import net.minecraft.client.util.Window;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import net.neoforged.fml.loading.ImmediateWindowHandler;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
@@ -28,6 +27,8 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
+
+import com.mojang.blaze3d.platform.Window;
 
 
 @Mixin(Window.class)
@@ -69,7 +70,7 @@ public class WindowMixin {
     private GLCapabilities postWindowCreated() {
         GLCapabilities caps = GL.createCapabilities();
         // Capture the current WGL context so that we can detect it being replaced later.
-        if (Util.getOperatingSystem() == Util.OperatingSystem.WINDOWS) {
+        if (Util.getPlatform() == Util.OS.WINDOWS) {
             this.wglPrevContext = WGL.wglGetCurrentContext();
         } else {
             this.wglPrevContext = MemoryUtil.NULL;
@@ -80,7 +81,7 @@ public class WindowMixin {
         return caps;
     }
 
-    @Inject(method = "swapBuffers", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;flipFrame(J)V", shift = At.Shift.AFTER))
+    @Inject(method = "updateDisplay", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;flipFrame(J)V", shift = At.Shift.AFTER))
     private void preSwapBuffers(CallbackInfo ci) {
         if (this.wglPrevContext == MemoryUtil.NULL) {
             // There is no prior recorded context.

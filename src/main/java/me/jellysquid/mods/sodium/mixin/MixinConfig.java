@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.mixin;
 
 import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

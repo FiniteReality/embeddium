@@ -2,11 +2,11 @@ package org.embeddedt.embeddium.compat.ccl;
 
 import codechicken.lib.render.block.BlockRenderingRegistry;
 import codechicken.lib.render.block.ICCBlockRenderer;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraft.block.Block;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -23,12 +23,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CCLCompat {
     private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-CCL");
-	private static Map<RegistryEntry<Block>, ICCBlockRenderer> customBlockRenderers;
-    private static Map<RegistryEntry<Fluid>, ICCBlockRenderer> customFluidRenderers;
+	private static Map<Holder<Block>, ICCBlockRenderer> customBlockRenderers;
+    private static Map<Holder<Fluid>, ICCBlockRenderer> customFluidRenderers;
     private static List<ICCBlockRenderer> customGlobalRenderers;
 
     private static final Map<ICCBlockRenderer, BlockRendererRegistry.Renderer> ccRendererToSodium = new ConcurrentHashMap<>();
-    private static final ThreadLocal<MatrixStack> STACK_THREAD_LOCAL = ThreadLocal.withInitial(MatrixStack::new);
+    private static final ThreadLocal<PoseStack> STACK_THREAD_LOCAL = ThreadLocal.withInitial(PoseStack::new);
 
     /**
      * Wrap a CodeChickenLib renderer in Embeddium's API.
@@ -55,16 +55,16 @@ public class CCLCompat {
                 }
                 if(!customBlockRenderers.isEmpty()) {
                     Block block = ctx.state().getBlock();
-                    for(Map.Entry<RegistryEntry<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
+                    for(Map.Entry<Holder<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
                         if(entry.getKey().value() == block && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state(), ctx.renderLayer())) {
                             resultList.add(createBridge(entry.getValue()));
                         }
                     }
                 }
                 if(!customFluidRenderers.isEmpty()) {
-                    Fluid fluid = ctx.state().getFluidState().getFluid();
-                    for(Map.Entry<RegistryEntry<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
-                        if(entry.getKey().value().matchesType(fluid) && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state(), ctx.renderLayer())) {
+                    Fluid fluid = ctx.state().getFluidState().getType();
+                    for(Map.Entry<Holder<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
+                        if(entry.getKey().value().isSame(fluid) && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state(), ctx.renderLayer())) {
                             resultList.add(createBridge(entry.getValue()));
                         }
                     }
@@ -80,12 +80,12 @@ public class CCLCompat {
 			LOGGER.info("Retrieving block renderers");
             final Field blockRenderersField = BlockRenderingRegistry.class.getDeclaredField("blockRenderers");
             blockRenderersField.setAccessible(true);
-            customBlockRenderers = (Map<RegistryEntry<Block>, ICCBlockRenderer>) blockRenderersField.get(null);
+            customBlockRenderers = (Map<Holder<Block>, ICCBlockRenderer>) blockRenderersField.get(null);
 
             LOGGER.info("Retrieving fluid renderers");
             final Field fluidRenderersField = BlockRenderingRegistry.class.getDeclaredField("fluidRenderers");
             fluidRenderersField.setAccessible(true);
-            customFluidRenderers = (Map<RegistryEntry<Fluid>, ICCBlockRenderer>) fluidRenderersField.get(null);
+            customFluidRenderers = (Map<Holder<Fluid>, ICCBlockRenderer>) fluidRenderersField.get(null);
 
             LOGGER.info("Retrieving global renderers");
             final Field globalRenderersField = BlockRenderingRegistry.class.getDeclaredField("globalRenderers");

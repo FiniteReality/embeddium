@@ -1,8 +1,7 @@
 package me.jellysquid.mods.sodium.client.compat.modernui;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraft.client.MinecraftClient;
-
+import net.minecraft.client.Minecraft;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
@@ -40,6 +39,6 @@ public class MuiGuiScaleHook {
             }
         }
         // default vanilla logic
-        return MinecraftClient.getInstance().getWindow().calculateScaleFactor(0, MinecraftClient.getInstance().forcesUnicodeFont());
+        return Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode());
     }
 }
