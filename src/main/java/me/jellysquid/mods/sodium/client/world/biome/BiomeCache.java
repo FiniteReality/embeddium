@@ -5,6 +5,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeZoomer;
+
 import java.util.Arrays;
 
 public class BiomeCache {
@@ -17,11 +18,11 @@ public class BiomeCache {
         this.type = world.dimensionType().getBiomeZoomer();
         this.seed = ((ClientWorldExtended) world).getBiomeSeed();
 
-        this.biomes = new Biome[16 * 16];
+        this.biomes = new Biome[16 * 16 * 16];
     }
 
     public Biome getBiome(BiomeManager.NoiseBiomeSource storage, int x, int y, int z) {
-        int idx = ((z & 15) << 4) | (x & 15);
+        int idx = ((y & 16) << 8) | ((z & 15) << 4) | (x & 15);
 
         Biome biome = this.biomes[idx];
 
