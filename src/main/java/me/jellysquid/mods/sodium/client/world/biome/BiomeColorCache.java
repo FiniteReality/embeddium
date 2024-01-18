@@ -1,12 +1,11 @@
 package me.jellysquid.mods.sodium.client.world.biome;
 
-import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.biome.BoxBlur.ColorBuffer;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
+
 import java.util.Arrays;
 
 public class BiomeColorCache {
@@ -23,9 +22,9 @@ public class BiomeColorCache {
     private int minX, minY, minZ;
     private int maxX, maxY, maxZ;
 
-    public BiomeColorCache(BiomeSlice biomeData) {
+    public BiomeColorCache(BiomeSlice biomeData, int blendRadius) {
         this.biomeData = biomeData;
-        this.blendRadius = Minecraft.getInstance().options.biomeBlendRadius;
+        this.blendRadius = blendRadius;
 
         int sizeXZ = 16 + ((NEIGHBOR_BLOCK_RADIUS + this.blendRadius) * 2);
         int sizeY = 16 + (NEIGHBOR_BLOCK_RADIUS * 2);

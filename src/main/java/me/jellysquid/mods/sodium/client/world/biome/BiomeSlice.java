@@ -56,7 +56,11 @@ public class BiomeSlice {
                     int biomeZ = (sectionZ * 4) + z;
 
                     int idx = dataArrayIndex(biomeX, biomeY, biomeZ);
-                    this.biomes[idx] = section.getBiomeForNoiseGen(x, y, z);
+
+                    int chunkX = x;
+                    int chunkY = y + sectionY * 4 + worldY / 4;
+                    int chunkZ = z;
+                    this.biomes[idx] = section.getBiomeForNoiseGen(chunkX, chunkY, chunkZ);
                 }
             }
         }

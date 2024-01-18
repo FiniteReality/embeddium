@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -144,8 +145,9 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
         this.blockStatesArrays = new BlockState[SECTION_TABLE_ARRAY_SIZE][];
 
         this.biomeSlice = new BiomeSlice();
-        this.biomeColors = new BiomeColorCache(this.biomeSlice);
-        this.biomeColorsLegacy = new ColorResolverCache(this.biomeSlice);
+        int biomeBlendRadius = Minecraft.getInstance().options.biomeBlendRadius;
+        this.biomeColors = new BiomeColorCache(this.biomeSlice, biomeBlendRadius);
+        this.biomeColorsLegacy = new ColorResolverCache(this.biomeSlice, biomeBlendRadius);
 
         for (int x = 0; x < SECTION_LENGTH; x++) {
             for (int y = 0; y < SECTION_LENGTH; y++) {

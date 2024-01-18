@@ -1,13 +1,12 @@
 package me.jellysquid.mods.sodium.client.world.biome;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
+
 import java.util.Map;
 
 public class ColorResolverCache {
@@ -30,9 +29,9 @@ public class ColorResolverCache {
 
     private boolean dirty = false;
 
-    public ColorResolverCache(BiomeSlice biomeData) {
+    public ColorResolverCache(BiomeSlice biomeData, int radius) {
         this.biomeData = biomeData;
-        this.radius = Minecraft.getInstance().options.biomeBlendRadius;
+        this.radius = radius;
 
         int borderXZ = radius + BORDER;
         int borderY = BORDER;
