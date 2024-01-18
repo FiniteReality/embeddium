@@ -158,6 +158,10 @@ tasks.named('jar', Jar).configure {
 	}
 	from sourceSets.compat.output.classesDirs
 	from sourceSets.compat.output.resourcesDir
+    from sourceSets.api.output.classesDirs
+    from sourceSets.api.output.resourcesDir
+    from sourceSets.legacy.output.classesDirs
+    from sourceSets.legacy.output.resourcesDir
 }
 
 tasks.named('sourcesJar', Jar).configure {
