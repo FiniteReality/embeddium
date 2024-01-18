@@ -1,13 +1,13 @@
 package me.jellysquid.mods.sodium.client.world;
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
-import me.jellysquid.mods.sodium.client.world.biome.BiomeCache;
-import me.jellysquid.mods.sodium.client.world.biome.BiomeColorCache;
+import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
+import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -28,8 +28,8 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
+
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Takes a slice of world state (block states, biome and light data arrays) and copies the data for use in off-thread
@@ -79,19 +79,14 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
     // Local section copies. Read-only.
     private ClonedChunkSection[] sections;
 
-    // Biome caches for each chunk section
-    private BiomeCache[] biomeCaches;
+    // The accessor used for fetching biome data from the slice
+    private final BiomeSlice biomeSlice;
 
-    // The biome blend caches for each color resolver type
-    // This map is always re-initialized, but the caches themselves are taken from an object pool
-    private final Map<ColorResolver, BiomeColorCache> biomeColorCaches = new Reference2ObjectOpenHashMap<>();
+    // The biome blend cache
+    private final BiomeColorCache biomeColors;
 
-    // The previously accessed and cached color resolver, used in conjunction with the cached color cache field
-    private ColorResolver prevColorResolver;
-
-    // The cached lookup result for the previously accessed color resolver to avoid excess hash table accesses
-    // for vertex color blending
-    private BiomeColorCache prevColorCache;
+    // The biome blend cache for custom ColorResolvers
+    private final ColorResolverCache biomeColorsLegacy;
 
     // The starting point from which this slice captures blocks
     private int baseX, baseY, baseZ;
@@ -148,7 +143,11 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
 
         this.sections = new ClonedChunkSection[SECTION_TABLE_ARRAY_SIZE];
         this.blockStatesArrays = new BlockState[SECTION_TABLE_ARRAY_SIZE][];
-        this.biomeCaches = new BiomeCache[SECTION_TABLE_ARRAY_SIZE];
+
+        this.biomeSlice = new BiomeSlice();
+        int biomeBlendRadius = Minecraft.getInstance().options.biomeBlendRadius;
+        this.biomeColors = new BiomeColorCache(this.biomeSlice, biomeBlendRadius);
+        this.biomeColorsLegacy = new ColorResolverCache(this.biomeSlice, biomeBlendRadius);
 
         for (int x = 0; x < SECTION_LENGTH; x++) {
             for (int y = 0; y < SECTION_LENGTH; y++) {
@@ -157,7 +156,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
 
                     this.blockStatesArrays[i] = new BlockState[SECTION_BLOCK_COUNT];
                     Arrays.fill(this.blockStatesArrays[i], Blocks.AIR.defaultBlockState());
-                    this.biomeCaches[i] = new BiomeCache(this.world);
                 }
             }
         }
@@ -168,11 +166,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
         this.sections = context.getSections();
         this.volume = context.getVolume();
 
-        this.prevColorCache = null;
-        this.prevColorResolver = null;
-
-        this.biomeColorCaches.clear();
-
         this.baseX = (this.origin.getX() - NEIGHBOR_CHUNK_RADIUS) << 4;
         this.baseY = (this.origin.getY() - NEIGHBOR_CHUNK_RADIUS) << 4;
         this.baseZ = (this.origin.getZ() - NEIGHBOR_CHUNK_RADIUS) << 4;
@@ -182,12 +175,14 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
                 for (int z = 0; z < SECTION_LENGTH; z++) {
                     int idx = getLocalSectionIndex(x, y, z);
 
-                    this.biomeCaches[idx].reset();
-
                     this.unpackBlockData(this.blockStatesArrays[idx], this.sections[idx], context.getVolume());
                 }
             }
         }
+
+        this.biomeSlice.update((ClientLevel) this.world, context);
+        this.biomeColors.update(context);
+        this.biomeColorsLegacy.update(context);
     }
 
     private void unpackBlockData(BlockState[] states, ClonedChunkSection section, BoundingBox box) {
@@ -299,26 +294,12 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
 
     @Override
     public int getBlockTint(BlockPos pos, ColorResolver resolver) {
-        if(!blockBoxContains(this.volume, pos.getX(), pos.getY(), pos.getZ())) {
-            return resolver.getColor(Biomes.PLAINS, pos.getX(), pos.getZ());
-        }
+        BiomeColorSource source = BiomeColorSource.from(resolver);
+        if(source != null)
+            return this.biomeColors.getColor(source, pos.getX(), pos.getY(), pos.getZ());
 
-        BiomeColorCache cache;
-
-        if (this.prevColorResolver == resolver) {
-            cache = this.prevColorCache;
-        } else {
-            cache = this.biomeColorCaches.get(resolver);
-
-            if (cache == null) {
-                this.biomeColorCaches.put(resolver, cache = new BiomeColorCache(resolver, this));
-            }
-
-            this.prevColorResolver = resolver;
-            this.prevColorCache = cache;
-        }
-
-        return cache.getBlendedColor(pos);
+        // fallback
+        return this.biomeColorsLegacy.getColor(resolver, pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
@@ -359,24 +340,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
         }
 
         return this.world.getUncachedNoiseBiome(x, y, z);
-    }
-
-    /**
-     * Gets or computes the biome at the given global coordinates.
-     */
-    public Biome getBiome(int x, int y, int z) {
-        int relX = x - this.baseX;
-        int relY = y - this.baseY;
-        int relZ = z - this.baseZ;
-
-        int idx = getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4);
-
-        if (idx < 0 || idx >= this.biomeCaches.length) {
-            return Biomes.PLAINS;
-        }
-
-        return this.biomeCaches[idx]
-                .getBiome(this, x, relY >> 4, z);
     }
 
     public SectionPos getOrigin() {
