@@ -17,8 +17,7 @@ public class MixinOptionsScreen extends Screen {
         super(title);
     }
 
-    @Dynamic
-    @Inject(method = "m_96271_", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "lambda$init$4", at = @At("HEAD"), cancellable = true)
     private void open(Button widget, CallbackInfo ci) {
         this.minecraft.setScreen(new SodiumOptionsGUI(this));
 

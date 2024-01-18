@@ -1,6 +1,8 @@
 plugins {
-	id 'dev.architectury.loom' version '1.4.380'
+	id 'idea'
+	id 'net.neoforged.gradle' version '6.0.21'
 	id 'maven-publish'
+	id 'org.spongepowered.mixin' version '0.7.38'
 
 	// This dependency is only used to determine the state of the Git working tree so that build artifacts can be
 	// more easily identified. TODO: Lazily load GrGit via a service only when builds are performed.
@@ -9,22 +11,18 @@ plugins {
 	id "me.modmuss50.mod-publish-plugin" version "0.3.4"
 }
 
-loom {
-    silentMojangMappingsLicense()
-	forge {
-		mixinConfigs = [
-			"embeddium.mixins.json"
-		]
-	}
-	mixin.defaultRefmapName = "embeddium-refmap.json"
-}
-
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = project.archives_base_name
 version = "${project.mod_version}${getVersionMetadata()}+mc${project.minecraft_version}"
 group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 sourceSets {
 	compat {
@@ -41,11 +39,15 @@ sourceSets {
 	}
 }
 
-loom {
-	createRemapConfigurations(sourceSets.compat)
-}
-
 repositories {
+	maven {
+		name "Forge maven"
+		url "https://maven.minecraftforge.net/"
+	}
+	maven {
+		name "Fabric maven"
+		url "https://maven.fabricmc.net"
+	}
     maven {
         name "Flywheel maven"
         url "https://maven.tterrag.com/"
@@ -69,6 +71,41 @@ repositories {
 	}
 }
 
+
+minecraft {
+	mappings channel: "official", version: project.minecraft_version
+	copyIdeResources = true
+	accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+	runs {
+		configureEach {
+			workingDirectory project.file('run')
+
+			property 'forge.logging.console.level', 'info'
+
+			property 'mixin.env.remapRefMap', 'true'
+			property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+			mods {
+				embeddium {
+					source sourceSets.main
+					source sourceSets.compat
+				}
+			}
+		}
+
+		client {}
+	}
+}
+
+configurations {
+	create("runtimeOnlyNonPublishable") {
+		description = "Runtime only dependencies that are not published alongside the jar"
+		canBeConsumed = false
+		canBeResolved = false
+	}
+	runtimeClasspath.extendsFrom(runtimeOnlyNonPublishable)
+}
+
 def extraModsDir = "extra-mods-${project.minecraft_version}"
 
 repositories {
@@ -85,16 +122,22 @@ repositories {
 	}
 }
 
+mixin {
+	// MixinGradle Settings
+	add sourceSets.main, 'embeddium-refmap.json'
+	config 'embeddium.mixins.json'
+}
+
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings() //"net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+	minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-	modCompatCompileOnly "com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53"
-	modCompatCompileOnly "blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149"
-	modCompatCompileOnly "curse.maven:codechickenlib-242818:4607274"
+	annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
 
-	modLocalRuntime "curse.maven:lazydfu-460819:3544496"
+	compatCompileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53")
+	compatCompileOnly fg.deobf("blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149")
+	compatCompileOnly fg.deobf("curse.maven:codechickenlib-242818:4607274")
+
+	runtimeOnlyNonPublishable fg.deobf("curse.maven:lazydfu-460819:3544496")
 
 	// runtime remapping at home
 	for (extraModJar in fileTree(dir: extraModsDir, include: '*.jar')) {
@@ -103,7 +146,7 @@ dependencies {
 		assert versionSep != -1
 		def artifactId = basename.substring(0, versionSep)
 		def version = basename.substring(versionSep + 1)
-		modRuntimeOnly("extra-mods:$artifactId:$version")
+		runtimeOnly fg.deobf("extra-mods:$artifactId:$version")
 	}
 }
 
@@ -124,41 +167,40 @@ java {
 	withSourcesJar()
 }
 
-jar {
+tasks.named('jar', Jar).configure {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
 	from sourceSets.compat.output.classesDirs
 	from sourceSets.compat.output.resourcesDir
+
+	finalizedBy 'reobfJar'
+}
+
+tasks.named('sourcesJar', Jar).configure {
+	from(sourceSets.compat.allJava)
 }
 
 def copyJarNameConsistent = tasks.register('copyJarNameConsistent', Copy) {
-	from remapJar // shortcut for createJar.outputs.files
+	from jar // shortcut for createJar.outputs.files
 	into project.file("build/libs")
 	rename { name -> "embeddium-latest.jar" }
 }
 
 def copyJarToBin = tasks.register('copyJarToBin', Copy) {
-	from remapJar // shortcut for createJar.outputs.files
+	from jar // shortcut for createJar.outputs.files
 	into rootProject.file("bin")
-	mustRunAfter "copyJarNameConsistent"
-}
-
-tasks.named("remapSourcesJar") {
 	mustRunAfter "copyJarNameConsistent"
 }
 
 tasks.build.dependsOn(copyJarToBin, copyJarNameConsistent)
 
 publishing {
+	tasks.publish.dependsOn 'build'
 	publications {
 		mavenJava(MavenPublication) {
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(remapSourcesJar) {
-				builtBy remapSourcesJar
-			}
+			artifact jar
+			artifact sourcesJar
 		}
 	}
 
@@ -170,7 +212,7 @@ publishing {
 }
 
 publishMods {
-	file = remapJar.archiveFile
+	file = jar.archiveFile
 	changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
 	type = STABLE
 	modLoaders.add("forge")
