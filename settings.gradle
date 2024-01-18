@@ -1,12 +1,8 @@
 pluginManagement {
     repositories {
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
-        }
-        maven { url "https://maven.architectury.dev/" }
-        maven { url "https://maven.minecraftforge.net" }
-        mavenCentral() // backup mirror for JCenter's Bintray, which is ordinarily used to resolve Eclipse's JGit
+        maven { url = 'https://maven.neoforged.net' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        mavenCentral()
         gradlePluginPortal()
     }
 }

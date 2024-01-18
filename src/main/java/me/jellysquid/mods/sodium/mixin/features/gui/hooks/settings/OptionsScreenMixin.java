@@ -4,7 +4,6 @@ import me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,8 +15,7 @@ public class OptionsScreenMixin extends Screen {
         super(title);
     }
 
-    @Dynamic
-    @Inject(method = {"method_19828", "m_260753_"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = "lambda$init$2", at = @At("HEAD"), cancellable = true)
     private void open(CallbackInfoReturnable<Screen> ci) {
         ci.setReturnValue(new SodiumOptionsGUI(this));
     }
