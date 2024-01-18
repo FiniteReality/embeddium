@@ -15,7 +15,7 @@ public class ColorResolverCache {
 
     private final Biome[][] biomes;
     private final Map<ColorResolver, int[][]> colors;
-    private final WorldSlice biomeData;
+    private final BiomeSlice biomeData;
 
     private final int sizeHorizontal;
     private final int sizeVertical;
@@ -30,7 +30,7 @@ public class ColorResolverCache {
 
     private boolean dirty = false;
 
-    public ColorResolverCache(WorldSlice biomeData) {
+    public ColorResolverCache(BiomeSlice biomeData) {
         this.biomeData = biomeData;
         this.radius = Minecraft.getInstance().options.biomeBlendRadius;
 
@@ -89,7 +89,7 @@ public class ColorResolverCache {
     }
 
     private Biome[] gatherBiomes(int level) {
-        WorldSlice biomeAccess = this.biomeData;
+        BiomeSlice biomeAccess = this.biomeData;
         Biome[] biomeData = new Biome[this.sizeHorizontal * this.sizeHorizontal];
 
         for (int x = 0; x < this.sizeHorizontal; x++) {

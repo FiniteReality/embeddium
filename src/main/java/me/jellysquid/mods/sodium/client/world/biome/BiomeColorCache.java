@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class BiomeColorCache {
     private static final int NEIGHBOR_BLOCK_RADIUS = 2;
-    private final WorldSlice biomeData;
+    private final BiomeSlice biomeData;
 
     private final Slice[] slices;
     private final boolean[] populatedSlices;
@@ -23,7 +23,7 @@ public class BiomeColorCache {
     private int minX, minY, minZ;
     private int maxX, maxY, maxZ;
 
-    public BiomeColorCache(WorldSlice biomeData) {
+    public BiomeColorCache(BiomeSlice biomeData) {
         this.biomeData = biomeData;
         this.blendRadius = Minecraft.getInstance().options.biomeBlendRadius;
 
