@@ -185,6 +185,7 @@ def copyJarNameConsistent = tasks.register('copyJarNameConsistent', Copy) {
 	from jar // shortcut for createJar.outputs.files
 	into project.file("build/libs")
 	rename { name -> "embeddium-latest.jar" }
+	mustRunAfter "reobfJar"
 }
 
 def copyJarToBin = tasks.register('copyJarToBin', Copy) {
