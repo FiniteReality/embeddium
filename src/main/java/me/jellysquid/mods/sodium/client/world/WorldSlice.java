@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
+import me.jellysquid.mods.sodium.mixin.features.chunk_rendering.AccessorBiomeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -143,7 +145,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
 
         this.biomeSlice = new BiomeSlice();
         int biomeBlendRadius = Minecraft.getInstance().options.biomeBlendRadius;
-        this.biomeColors = new BiomeColorCache(this.biomeSlice, biomeBlendRadius);
+        this.biomeColors = new BiomeColorCache(this.biomeSlice, biomeBlendRadius, ((AccessorBiomeManager)this.world.getBiomeManager()).getZoomer() != FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE);
 
         for (int x = 0; x < SECTION_LENGTH; x++) {
             for (int y = 0; y < SECTION_LENGTH; y++) {

@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.world.biome;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.biome.BoxBlur.ColorBuffer;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
-import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
@@ -27,10 +26,13 @@ public class BiomeColorCache {
 
     private final int sizeXZ, sizeY;
 
+    private final boolean uses3DBiomes;
 
-    public BiomeColorCache(BiomeSlice biomeData, int blendRadius) {
+
+    public BiomeColorCache(BiomeSlice biomeData, int blendRadius, boolean is3D) {
         this.biomeData = biomeData;
         this.blendRadius = blendRadius;
+        this.uses3DBiomes = is3D;
 
         this.sizeXZ = 16 + ((NEIGHBOR_BLOCK_RADIUS + this.blendRadius) * 2);
         this.sizeY = 16 + (NEIGHBOR_BLOCK_RADIUS * 2);
@@ -77,8 +79,15 @@ public class BiomeColorCache {
         Slice[] slice = new Slice[this.sizeY];
         this.slices.put(resolver, slice);
 
-        for (int y = 0; y < this.sizeY; y++) {
-            slice[y] = new Slice(this.sizeXZ);
+        if (this.uses3DBiomes) {
+            // Use a unique slice for each Y level
+            for (int y = 0; y < this.sizeY; y++) {
+                slice[y] = new Slice(this.sizeXZ);
+            }
+        } else {
+            // Use the same slice for all Y levels
+            // On 1.16, this gives a free speedup in the overworld since Y level is ignored for biome calculation
+            Arrays.fill(slice, new Slice(this.sizeXZ));
         }
     }
 
