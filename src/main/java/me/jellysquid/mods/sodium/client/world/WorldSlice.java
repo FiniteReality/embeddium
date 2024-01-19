@@ -85,9 +85,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
     // The biome blend cache
     private final BiomeColorCache biomeColors;
 
-    // The biome blend cache for custom ColorResolvers
-    private final ColorResolverCache biomeColorsLegacy;
-
     // The starting point from which this slice captures blocks
     private int baseX, baseY, baseZ;
 
@@ -147,7 +144,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
         this.biomeSlice = new BiomeSlice();
         int biomeBlendRadius = Minecraft.getInstance().options.biomeBlendRadius;
         this.biomeColors = new BiomeColorCache(this.biomeSlice, biomeBlendRadius);
-        this.biomeColorsLegacy = new ColorResolverCache(this.biomeSlice, biomeBlendRadius);
 
         for (int x = 0; x < SECTION_LENGTH; x++) {
             for (int y = 0; y < SECTION_LENGTH; y++) {
@@ -182,7 +178,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
 
         this.biomeSlice.update((ClientLevel) this.world, context);
         this.biomeColors.update(context);
-        this.biomeColorsLegacy.update(context);
     }
 
     private void unpackBlockData(BlockState[] states, ClonedChunkSection section, BoundingBox box) {
@@ -294,12 +289,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
 
     @Override
     public int getBlockTint(BlockPos pos, ColorResolver resolver) {
-        BiomeColorSource source = BiomeColorSource.from(resolver);
-        if(source != null)
-            return this.biomeColors.getColor(source, pos.getX(), pos.getY(), pos.getZ());
-
-        // fallback
-        return this.biomeColorsLegacy.getColor(resolver, pos.getX(), pos.getY(), pos.getZ());
+        return this.biomeColors.getColor(resolver, pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
