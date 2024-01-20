@@ -65,6 +65,8 @@ public class BlockRenderer {
 
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
+    private final SinkingVertexBuilder sinkingVertexBuilder = new SinkingVertexBuilder();
+
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
@@ -95,11 +97,10 @@ public class BlockRenderer {
         BlockRendererRegistry.instance().fillCustomRenderers(customRenderers, ctx);
 
         if(!customRenderers.isEmpty()) {
-            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
             for (BlockRendererRegistry.Renderer customRenderer : customRenderers) {
-                builder.reset();
-                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(ctx, random, builder);
-                builder.flush(meshBuilder, material, ctx.origin());
+                sinkingVertexBuilder.reset();
+                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(ctx, random, sinkingVertexBuilder);
+                sinkingVertexBuilder.flush(meshBuilder, material, ctx.origin());
                 if (result == BlockRendererRegistry.RenderResult.OVERRIDE) {
                     return;
                 }
@@ -114,10 +115,9 @@ public class BlockRenderer {
             } else
                 mStack = EMPTY_STACK;
 
-            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
-            builder.reset();
-            forgeBlockRenderer.renderBlock(mode, ctx, builder, mStack, this.random, this.occlusionCache, meshBuilder);
-            builder.flush(meshBuilder, material, ctx.origin());
+            sinkingVertexBuilder.reset();
+            forgeBlockRenderer.renderBlock(mode, ctx, sinkingVertexBuilder, mStack, this.random, this.occlusionCache, meshBuilder);
+            sinkingVertexBuilder.flush(meshBuilder, material, ctx.origin());
             return;
         }
 
