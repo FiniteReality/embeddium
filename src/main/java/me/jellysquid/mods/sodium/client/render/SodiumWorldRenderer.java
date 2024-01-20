@@ -27,6 +27,7 @@ import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCache
 import me.jellysquid.mods.sodium.client.util.math.FrustumExtended;
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListenerManager;
+import me.jellysquid.mods.sodium.client.world.WorldRendererExtended;
 import me.jellysquid.mods.sodium.common.util.ListUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -58,8 +59,6 @@ import java.util.SortedSet;
  * Provides an extension to vanilla's {@link LevelRenderer}.
  */
 public class SodiumWorldRenderer implements ChunkStatusListener {
-    private static SodiumWorldRenderer instance;
-
     private final Minecraft client;
 
     private ClientLevel world;
@@ -83,11 +82,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
      * Instantiates Sodium's world renderer. This should be called at the time of the world renderer initialization.
      */
     public static SodiumWorldRenderer create() {
-        if (instance == null) {
-            instance = new SodiumWorldRenderer(Minecraft.getInstance());
-        }
-
-        return instance;
+        return new SodiumWorldRenderer(Minecraft.getInstance());
     }
 
     /**
@@ -96,6 +91,8 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
      */
     @Deprecated
     public static SodiumWorldRenderer getInstance() {
+        SodiumWorldRenderer instance = getInstanceNullable();
+
         if (instance == null) {
             throw new IllegalStateException("Renderer not initialized");
         }
@@ -107,7 +104,7 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
      * @return The current instance of the Sodium terrain renderer, or null if the renderer is not active
      */
     public static SodiumWorldRenderer getInstanceNullable() {
-        return instance;
+        return ((WorldRendererExtended) Minecraft.getInstance().levelRenderer).getSodiumWorldRenderer();
     }
 
     private SodiumWorldRenderer(Minecraft client) {

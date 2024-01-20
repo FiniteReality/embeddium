@@ -5,6 +5,7 @@ import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
+import me.jellysquid.mods.sodium.client.world.WorldRendererExtended;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -29,7 +30,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.SortedSet;
 
 @Mixin(LevelRenderer.class)
-public abstract class MixinWorldRenderer {
+public abstract class MixinWorldRenderer implements WorldRendererExtended {
     @Shadow
     @Final
     private RenderBuffers renderBuffers;
@@ -174,5 +175,10 @@ public abstract class MixinWorldRenderer {
     @Overwrite
     public String getChunkStatistics() {
         return this.renderer.getChunksDebugString();
+    }
+
+    @Override
+    public SodiumWorldRenderer getSodiumWorldRenderer() {
+        return this.renderer;
     }
 }
