@@ -43,13 +43,6 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     private int fixedColor;
     private boolean hasFixedColor = false;
 
-    private static final ThreadLocal<SinkingVertexBuilder> instance = ThreadLocal.withInitial(SinkingVertexBuilder::new);
-    
-    @Nonnull
-    public static SinkingVertexBuilder getInstance() {
-        return instance.get();
-    }
-
     @Nonnull
     @Override
     public VertexConsumer vertex(double x, double y, double z) {
