@@ -16,6 +16,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.RenderSectionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
+import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheShared;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import me.jellysquid.mods.sodium.client.util.frustum.Frustum;
@@ -40,9 +41,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.extensions.IForgeBlockEntity;
-import org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -259,8 +260,6 @@ public class SodiumWorldRenderer {
 
         this.renderDistance = this.client.options.getEffectiveRenderDistance();
 
-        EmbeddiumRenderLayerCache.invalidate();
-
         this.renderPassManager = BlockRenderPassManager.createDefaultMappings();
 
         this.renderSectionManager = new RenderSectionManager(this, this.renderPassManager, this.world, this.renderDistance, commandList);
@@ -457,5 +456,9 @@ public class SodiumWorldRenderer {
 
     public ChunkTracker getChunkTracker() {
         return this.chunkTracker;
+    }
+
+    public Collection<ChunkRenderCacheLocal> getActiveChunkRenderCaches() {
+        return this.renderSectionManager != null ? this.renderSectionManager.getBuilder().getChunkRenderCaches() : Collections.emptyList();
     }
 }

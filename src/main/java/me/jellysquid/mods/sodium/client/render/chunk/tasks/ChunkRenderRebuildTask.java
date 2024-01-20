@@ -26,6 +26,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,7 +39,6 @@ import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 import org.embeddedt.embeddium.model.ModelDataSnapshotter;
-import org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -121,7 +121,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                         boolean rendered = false;
 
                         if (blockState.getRenderShape() == RenderShape.MODEL) {
-                            for (RenderType layer : EmbeddiumRenderLayerCache.forState(blockState)) {
+                            for (RenderType layer : cache.getRenderLayerCache().forState(blockState)) {
                                 ForgeHooksClient.setRenderType(layer);
                                 IModelData modelData = modelDataMap.getOrDefault(blockPos, EmptyModelData.INSTANCE);
 
@@ -139,7 +139,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
                         FluidState fluidState = blockState.getFluidState();
 
                         if (!fluidState.isEmpty()) {
-                            for (RenderType layer : EmbeddiumRenderLayerCache.forState(fluidState)) {
+                            for (RenderType layer : cache.getRenderLayerCache().forState(fluidState)) {
                                 ForgeHooksClient.setRenderType(layer);
 
                                 if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, blockPos, offset, buffers.get(layer))) {

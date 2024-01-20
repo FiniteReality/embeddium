@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.gl.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderBuildTask;
+import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.util.task.CancellationSource;
 import me.jellysquid.mods.sodium.common.util.collections.QueueDrainingIterator;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -28,6 +29,7 @@ public class ChunkBuilder {
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<Thread> threads = new ArrayList<>();
+    private final List<ChunkRenderCacheLocal> chunkRenderCaches = new ArrayList<>();
 
     private Level world;
     private BlockRenderPassManager renderPassManager;
@@ -74,6 +76,7 @@ public class ChunkBuilder {
             thread.start();
 
             this.threads.add(thread);
+            this.chunkRenderCaches.add(context.cache);
         }
 
         LOGGER.info("Started {} worker threads", this.threads.size());
@@ -110,6 +113,7 @@ public class ChunkBuilder {
         }
 
         this.threads.clear();
+        this.chunkRenderCaches.clear();
 
         // Delete any queued tasks and resources attached to them
         for (WrappedTask job : this.buildQueue) {
@@ -221,6 +225,10 @@ public class ChunkBuilder {
 
     public Iterator<Throwable> createDeferredBuildFailureDrain() {
         return new QueueDrainingIterator<>(this.deferredFailureQueue);
+    }
+
+    public Collection<ChunkRenderCacheLocal> getChunkRenderCaches() {
+        return Collections.unmodifiableList(this.chunkRenderCaches);
     }
 
     /**
