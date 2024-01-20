@@ -65,6 +65,8 @@ public class FluidRenderer {
 
     private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
 
+    private final SinkingVertexBuilder fluidVertexBuilder = new SinkingVertexBuilder();
+;
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setNormal(NormI8.pack(0.0f, 1.0f, 0.0f));
 
@@ -108,10 +110,9 @@ public class FluidRenderer {
 
     private void renderVanilla(WorldSlice world, FluidState fluidState, BlockPos blockPos, ChunkModelBuilder buffers, Material material) {
         // Call vanilla fluid renderer and capture the results
-        final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
-        builder.reset();
-        Minecraft.getInstance().getBlockRenderer().renderLiquid(blockPos, world, builder, world.getBlockState(blockPos), fluidState);
-        builder.flush(buffers, material, 0, 0, 0);
+        fluidVertexBuilder.reset();
+        Minecraft.getInstance().getBlockRenderer().renderLiquid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState);
+        fluidVertexBuilder.flush(buffers, material, 0, 0, 0);
 
         // Mark fluid sprites as being used in rendering
         TextureAtlasSprite[] sprites = fluidSpriteCache.getSprites(world, blockPos, fluidState);
