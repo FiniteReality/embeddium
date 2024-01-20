@@ -57,6 +57,8 @@ public class BlockRenderer {
     private boolean useReorienting;
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
+    private final SinkingVertexBuilder sinkingVertexBuilder = new SinkingVertexBuilder();
+
     public BlockRenderer(Minecraft client, LightPipelineProvider lighters, ColorBlender colorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
         this.colorBlender = colorBlender;
@@ -79,11 +81,10 @@ public class BlockRenderer {
         BlockRendererRegistry.instance().fillCustomRenderers(customRenderers, state, pos, world, layer);
 
         if(!customRenderers.isEmpty()) {
-            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
             for (BlockRendererRegistry.Renderer customRenderer : customRenderers) {
-                builder.reset();
-                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(state, pos, world, builder, random, modelData, layer);
-                builder.flush(buffers, origin);
+                sinkingVertexBuilder.reset();
+                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(state, pos, world, sinkingVertexBuilder, random, modelData, layer);
+                sinkingVertexBuilder.flush(buffers, origin);
                 if (result == BlockRendererRegistry.RenderResult.OVERRIDE) {
                     return true;
                 }
@@ -99,10 +100,9 @@ public class BlockRenderer {
                 mStack.translate(offset.x, offset.y, offset.z);
             } else
                 mStack = EMPTY_STACK;
-            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
-            builder.reset();
-            rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, builder, random, seed, modelData, cull, this.occlusionCache, buffers, layer);
-            builder.flush(buffers, origin);
+            sinkingVertexBuilder.reset();
+            rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, sinkingVertexBuilder, random, seed, modelData, cull, this.occlusionCache, buffers, layer);
+            sinkingVertexBuilder.flush(buffers, origin);
             return rendered;
         }
 
