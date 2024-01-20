@@ -1,6 +1,7 @@
 bin/
 eclipse
 run
+runs
 libs
 media
 __pycache__
