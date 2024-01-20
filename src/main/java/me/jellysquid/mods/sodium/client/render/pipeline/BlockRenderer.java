@@ -58,6 +58,8 @@ public class BlockRenderer {
 
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
+    private final SinkingVertexBuilder sinkingVertexBuilder = new SinkingVertexBuilder();
+
     public BlockRenderer(Minecraft client, LightPipelineProvider lighters, BiomeColorBlender biomeColorBlender) {
         this.blockColors = (BlockColorsExtended) client.getBlockColors();
         this.biomeColorBlender = biomeColorBlender;
@@ -82,11 +84,10 @@ public class BlockRenderer {
         BlockRendererRegistry.instance().fillCustomRenderers(customRenderers, state, pos, world);
 
         if(!customRenderers.isEmpty()) {
-            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
             for (BlockRendererRegistry.Renderer customRenderer : customRenderers) {
-                builder.reset();
-                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(state, pos, world, builder, random, modelData);
-                builder.flush(buffers);
+                sinkingVertexBuilder.reset();
+                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(state, pos, world, sinkingVertexBuilder, random, modelData);
+                sinkingVertexBuilder.flush(buffers);
                 if (result == BlockRendererRegistry.RenderResult.OVERRIDE) {
                     return true;
                 }
@@ -102,10 +103,9 @@ public class BlockRenderer {
                 mStack.translate(offset.x, offset.y, offset.z);
             } else
                 mStack = EMPTY_STACK;
-            final SinkingVertexBuilder builder = SinkingVertexBuilder.getInstance();
-            builder.reset();
-            rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, builder, random, seed, modelData, cull, this.occlusionCache, buffers.getRenderData());
-            builder.flush(buffers);
+            sinkingVertexBuilder.reset();
+            rendered = forgeBlockRenderer.renderBlock(mode, state, pos, world, model, mStack, sinkingVertexBuilder, random, seed, modelData, cull, this.occlusionCache, buffers.getRenderData());
+            sinkingVertexBuilder.flush(buffers);
             return rendered;
         }
 
