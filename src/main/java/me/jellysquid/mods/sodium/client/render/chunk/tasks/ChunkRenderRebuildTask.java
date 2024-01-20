@@ -25,6 +25,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,7 +37,6 @@ import net.minecraftforge.client.model.data.IModelData;
 import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.model.ModelDataSnapshotter;
-import org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -103,7 +103,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                     for (int relX = 0; relX < 16; relX++) {
                         BlockState blockState = slice.getBlockStateRelative(relX + 16, relY + 16, relZ + 16);
 
-                        if (blockState.isAir() && !blockState.hasTileEntity()) {
+                        if (blockState.isAir()) {
                             continue;
                         }
 
@@ -112,7 +112,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                         buffers.setRenderOffset(pos.getX() - renderOffset.getX(), pos.getY() - renderOffset.getY(), pos.getZ() - renderOffset.getZ());
 
                         if (blockState.getRenderShape() == RenderShape.MODEL) {
-                            for (RenderType layer : EmbeddiumRenderLayerCache.forState(blockState)) {
+                            for (RenderType layer : cache.getRenderLayerCache().forState(blockState)) {
                                 ForgeHooksClient.setRenderLayer(layer);
                                 IModelData modelData = modelDataMap.getOrDefault(pos, EmptyModelData.INSTANCE);
 
@@ -131,7 +131,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                         FluidState fluidState = blockState.getFluidState();
 
                         if (!fluidState.isEmpty()) {
-                            for (RenderType layer : EmbeddiumRenderLayerCache.forState(fluidState)) {
+                            for (RenderType layer : cache.getRenderLayerCache().forState(fluidState)) {
                                 ForgeHooksClient.setRenderLayer(layer);
 
                                 if (cache.getFluidRenderer().render(cache.getLocalSlice(), fluidState, pos, buffers.get(layer))) {
@@ -140,7 +140,8 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                             }
                         }
 
-                        if (blockState.hasTileEntity()) {
+                        // Try to avoid the interface dispatch by hoisting the vanilla check
+                        if (blockState.getBlock() instanceof EntityBlock && blockState.hasTileEntity()) {
                             BlockEntity entity = slice.getBlockEntity(pos);
 
                             if (entity != null) {

@@ -26,6 +26,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderListIterator;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
+import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.util.math.FrustumExtended;
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
@@ -622,5 +623,9 @@ public class ChunkRenderManager<T extends ChunkGraphicsState> implements ChunkSt
 
     public void onChunkRenderUpdates(int x, int y, int z, ChunkRenderData data) {
         this.culler.onSectionStateChanged(x, y, z, data.getOcclusionData());
+    }
+
+    public Collection<ChunkRenderCacheLocal> getActiveChunkRenderCaches() {
+        return this.builder.getChunkRenderCaches();
     }
 }

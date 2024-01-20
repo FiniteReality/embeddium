@@ -11,7 +11,6 @@ import net.minecraft.world.level.material.FluidState;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.locks.StampedLock;
 
 /**
  * Implements a caching layer over Forge's predicate logic in {@link ItemBlockRenderTypes}. There is quite a bit
@@ -22,17 +21,11 @@ import java.util.concurrent.locks.StampedLock;
 public class EmbeddiumRenderLayerCache {
     private static final boolean DISABLE_CACHE = Boolean.getBoolean("embeddium.disableRenderLayerCache");
     private static final Reference2ReferenceOpenHashMap<RenderType, ImmutableList<RenderType>> SINGLE_LAYERS = new Reference2ReferenceOpenHashMap<>();
-    private static final Reference2ReferenceOpenHashMap<StateHolder<?, ?>, ImmutableList<RenderType>> LAYERS_BY_STATE = new Reference2ReferenceOpenHashMap<>();
-    private static final StampedLock lock = new StampedLock();
 
-    private static <O, S, H extends StateHolder<O, S>> ImmutableList<RenderType> findExisting(H state) {
-        long stamp = lock.readLock();
+    private volatile Reference2ReferenceOpenHashMap<StateHolder<?, ?>, ImmutableList<RenderType>> stateToLayerMap;
 
-        try {
-            return LAYERS_BY_STATE.get(state);
-        } finally {
-            lock.unlock(stamp);
-        }
+    public EmbeddiumRenderLayerCache() {
+        invalidate();
     }
 
     /**
@@ -40,12 +33,12 @@ public class EmbeddiumRenderLayerCache {
      * @param state a BlockState or FluidState
      * @return a list of render layers that the block/fluid state should be rendered on
      */
-    public static <O, S, H extends StateHolder<O, S>>  List<RenderType> forState(H state) {
+    public <O, S, H extends StateHolder<O, S>>  List<RenderType> forState(H state) {
         if(DISABLE_CACHE) {
             return generateList(state);
         }
 
-        ImmutableList<RenderType> list = findExisting(state);
+        ImmutableList<RenderType> list = stateToLayerMap.get(state);
 
         if(list == null) {
             list = createList(state);
@@ -77,7 +70,7 @@ public class EmbeddiumRenderLayerCache {
         return foundLayers;
     }
 
-    private static <O, S, H extends StateHolder<O, S>> ImmutableList<RenderType> createList(H state) {
+    private <O, S, H extends StateHolder<O, S>> ImmutableList<RenderType> createList(H state) {
         List<RenderType> foundLayers = generateList(state);
 
         ImmutableList<RenderType> layerList;
@@ -92,27 +85,18 @@ public class EmbeddiumRenderLayerCache {
             layerList = ImmutableList.copyOf(foundLayers);
         }
 
-        long stamp = lock.writeLock();
-        try {
-            LAYERS_BY_STATE.put(state, layerList);
-        } finally {
-            lock.unlock(stamp);
-        }
+        stateToLayerMap.put(state, layerList);
 
         return layerList;
     }
 
     /**
      * Invalidate the cached mapping of states to render layers to force the data to be queried
-     * from Forge again.
+     * from Forge again. We create a new map instead of clearing since this will be called on the render thread,
+     * while we mutate this from a worker thread.
      */
-    public static void invalidate() {
-        long stamp = lock.writeLock();
-        try {
-            LAYERS_BY_STATE.clear();
-        } finally {
-            lock.unlock(stamp);
-        }
+    public void invalidate() {
+        stateToLayerMap = new Reference2ReferenceOpenHashMap<>();
     }
 
     static {

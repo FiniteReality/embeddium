@@ -22,6 +22,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.ChunkRenderData;
 import me.jellysquid.mods.sodium.client.render.chunk.format.DefaultModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManager;
+import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheLocal;
 import me.jellysquid.mods.sodium.client.render.pipeline.context.ChunkRenderCacheShared;
 import me.jellysquid.mods.sodium.client.util.math.FrustumExtended;
 import me.jellysquid.mods.sodium.client.world.ChunkStatusListener;
@@ -47,8 +48,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -283,9 +285,6 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
         this.globalBlockEntities.clear();
 
-        // Failsafe in case the mixin that invalidates it on calls to RenderLayers.setRenderLayer does not fire
-        EmbeddiumRenderLayerCache.invalidate();
-
         RenderDevice device = RenderDevice.INSTANCE;
 
         this.renderDistance = this.client.options.renderDistance;
@@ -497,5 +496,9 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
 
     public ChunkRenderBackend<?> getChunkRenderer() {
         return this.chunkRenderBackend;
+    }
+
+    public Collection<ChunkRenderCacheLocal> getActiveChunkRenderCaches() {
+        return this.chunkRenderManager != null ? this.chunkRenderManager.getActiveChunkRenderCaches() : Collections.emptyList();
     }
 }

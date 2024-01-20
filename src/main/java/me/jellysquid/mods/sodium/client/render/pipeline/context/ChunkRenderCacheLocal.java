@@ -12,6 +12,7 @@ import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.world.level.Level;
+import org.embeddedt.embeddium.render.EmbeddiumRenderLayerCache;
 
 public class ChunkRenderCacheLocal extends ChunkRenderCache {
     private final ArrayLightDataCache lightDataCache;
@@ -22,6 +23,8 @@ public class ChunkRenderCacheLocal extends ChunkRenderCache {
     private final BlockModelShaper blockModels;
     private final WorldSlice worldSlice;
     private WorldSliceLocal localSlice;
+
+    private final EmbeddiumRenderLayerCache renderLayerCache;
 
     public ChunkRenderCacheLocal(Minecraft client, Level world) {
         this.worldSlice = new WorldSlice(world);
@@ -34,6 +37,8 @@ public class ChunkRenderCacheLocal extends ChunkRenderCache {
         this.fluidRenderer = new FluidRenderer(client, lightPipelineProvider, biomeColorBlender);
 
         this.blockModels = client.getModelManager().getBlockModelShaper();
+
+        this.renderLayerCache = new EmbeddiumRenderLayerCache();
     }
 
     public BlockModelShaper getBlockModels() {
@@ -46,6 +51,10 @@ public class ChunkRenderCacheLocal extends ChunkRenderCache {
 
     public FluidRenderer getFluidRenderer() {
         return this.fluidRenderer;
+    }
+
+    public EmbeddiumRenderLayerCache getRenderLayerCache() {
+        return this.renderLayerCache;
     }
 
     public void init(ChunkRenderContext context) {

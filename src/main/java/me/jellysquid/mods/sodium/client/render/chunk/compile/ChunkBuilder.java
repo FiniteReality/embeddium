@@ -50,6 +50,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final List<Thread> threads = new ArrayList<>();
+    private final List<ChunkRenderCacheLocal> chunkRenderCaches = new ArrayList<>();
 
     private ClonedChunkSectionCache sectionCache;
 
@@ -101,6 +102,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
             thread.start();
 
             this.threads.add(thread);
+            this.chunkRenderCaches.add(pipeline);
         }
 
         LOGGER.info("Started {} worker threads", this.threads.size());
@@ -136,6 +138,7 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
         }
 
         this.threads.clear();
+        this.chunkRenderCaches.clear();
 
         // Drop any pending work queues and cancel futures
         this.uploadQueue.clear();
@@ -222,6 +225,13 @@ public class ChunkBuilder<T extends ChunkGraphicsState> {
         }
 
         return job.future;
+    }
+
+    /**
+     * Get the list of current chunk render caches.
+     */
+    public Collection<ChunkRenderCacheLocal> getChunkRenderCaches() {
+        return Collections.unmodifiableList(this.chunkRenderCaches);
     }
 
     /**
