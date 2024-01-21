@@ -76,9 +76,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
     // The biome blend cache
     private final BiomeColorCache biomeColors;
 
-    // The biome blend cache for custom ColorResolvers
-    private final ColorResolverCache biomeColorsLegacy;
-
     // (Local Section -> Block States) table.
     private final BlockState[][] blockArrays;
 
@@ -149,7 +146,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
-        this.biomeColorsLegacy = new ColorResolverCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
 
         for (BlockState[] blockArray : this.blockArrays) {
             Arrays.fill(blockArray, EMPTY_BLOCK_STATE);
@@ -172,7 +168,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
         this.biomeSlice.update(this.world, context);
         this.biomeColors.update(context);
-        this.biomeColorsLegacy.update(context);
     }
 
     private void copySectionData(ChunkRenderContext context, int sectionIndex) {
@@ -339,12 +334,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
     @Override
     public int getBlockTint(BlockPos pos, ColorResolver resolver) {
-        BiomeColorSource source = BiomeColorSource.from(resolver);
-        if(source != null)
-            return this.biomeColors.getColor(source, pos.getX(), pos.getY(), pos.getZ());
-
-        // fallback
-        return this.biomeColorsLegacy.getColor(resolver, pos.getX(), pos.getY(), pos.getZ());
+        return this.biomeColors.getColor(resolver, pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
