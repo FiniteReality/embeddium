@@ -104,7 +104,13 @@ public class SodiumWorldRenderer implements ChunkStatusListener {
      * @return The current instance of the Sodium terrain renderer, or null if the renderer is not active
      */
     public static SodiumWorldRenderer getInstanceNullable() {
-        return ((WorldRendererExtended) Minecraft.getInstance().levelRenderer).getSodiumWorldRenderer();
+        LevelRenderer world = Minecraft.getInstance().levelRenderer;
+
+        if (world instanceof WorldRendererExtended) {
+            return ((WorldRendererExtended) world).getSodiumWorldRenderer();
+        }
+
+        return null;
     }
 
     private SodiumWorldRenderer(Minecraft client) {
