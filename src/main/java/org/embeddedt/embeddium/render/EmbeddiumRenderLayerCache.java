@@ -97,7 +97,7 @@ public class EmbeddiumRenderLayerCache {
      * just returns the value of one field.
      */
     public void invalidate() {
-        if(stateToLayerMap.size() > 0) {
+        if(stateToLayerMap == null || stateToLayerMap.size() > 0) {
             stateToLayerMap = new Reference2ReferenceOpenHashMap<>();
         }
     }
