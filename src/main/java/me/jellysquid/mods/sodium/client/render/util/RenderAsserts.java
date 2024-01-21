@@ -12,7 +12,7 @@ public class RenderAsserts {
      */
     public static boolean validateCurrentThread() {
         if (!RenderSystem.isOnRenderThread()) {
-            throw new IllegalStateException("Accessing OpenGL functions from outside the main render thread is not supported when using Sodium");
+            throw new IllegalStateException("Accessing OpenGL functions from outside the main render thread is not supported when using Embeddium");
         }
 
         return true;

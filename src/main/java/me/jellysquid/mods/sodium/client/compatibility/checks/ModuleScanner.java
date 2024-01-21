@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * is initialized before injecting.
  */
 public class ModuleScanner {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-Win32ModuleChecks");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-Win32ModuleChecks");
 
     private static final String[] RTSS_HOOKS_MODULE_NAMES = { "RTSSHooks64.dll", "RTSSHooks.dll" };
 
@@ -64,13 +64,13 @@ public class ModuleScanner {
 
         if (version == null || !isRTSSCompatible(version)) {
             Window window = Minecraft.getInstance().getWindow();
-            MessageBox.showMessageBox(window, MessageBox.IconType.ERROR, "Sodium Renderer",
-                    "You appear to be using an older version of RivaTuner Statistics Server (RTSS) which is not compatible with Sodium. " +
+            MessageBox.showMessageBox(window, MessageBox.IconType.ERROR, "Embeddium Renderer",
+                    "You appear to be using an older version of RivaTuner Statistics Server (RTSS) which is not compatible with Embeddium. " +
                             "You must either update to a newer version (7.3.4 and later) or close the RivaTuner Statistics Server application.\n\n" +
                             "For more information on how to solve this problem, click the 'Help' button.",
                     "https://github.com/CaffeineMC/sodium-fabric/wiki/Known-Issues#rtss-incompatible");
             
-            throw new RuntimeException("RivaTuner Statistics Server (RTSS) is not compatible with Sodium, " +
+            throw new RuntimeException("RivaTuner Statistics Server (RTSS) is not compatible with Embeddium, " +
                     "see here for more details: https://github.com/CaffeineMC/sodium-fabric/wiki/Known-Issues#rtss-incompatible");
         }
     }
