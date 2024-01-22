@@ -93,10 +93,13 @@ public class EmbeddiumRenderLayerCache {
     /**
      * Invalidate the cached mapping of states to render layers to force the data to be queried
      * from Forge again. We create a new map instead of clearing since this will be called on the render thread,
-     * while we mutate this from a worker thread.
+     * while we mutate this from a worker thread. Nonetheless, we abuse implementation details knowing that size()
+     * just returns the value of one field.
      */
     public void invalidate() {
-        stateToLayerMap = new Reference2ReferenceOpenHashMap<>();
+        if(stateToLayerMap == null || stateToLayerMap.size() > 0) {
+            stateToLayerMap = new Reference2ReferenceOpenHashMap<>();
+        }
     }
 
     static {

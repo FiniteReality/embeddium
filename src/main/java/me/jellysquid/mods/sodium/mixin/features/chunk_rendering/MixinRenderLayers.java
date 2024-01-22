@@ -15,6 +15,10 @@ public class MixinRenderLayers {
     @Inject(method = { "setRenderLayer(Lnet/minecraft/world/level/block/Block;Ljava/util/function/Predicate;)V", "setRenderLayer(Lnet/minecraft/world/level/material/Fluid;Ljava/util/function/Predicate;)V" }, at = @At("RETURN"), remap = false)
     private static void onRenderLayerPredicateChanged(CallbackInfo ci) {
         Minecraft.getInstance().execute(() -> {
+            if (Minecraft.getInstance().levelRenderer == null) {
+                // There is no active world, so nothing to invalidate
+                return;
+            }
             SodiumWorldRenderer renderer = SodiumWorldRenderer.instanceNullable();
             if (renderer != null) {
                 for (ChunkRenderCacheLocal cache : renderer.getActiveChunkRenderCaches()) {
