@@ -25,6 +25,8 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -206,6 +208,10 @@ public class ClonedChunkSection {
         }
 
         return section;
+    }
+
+    public @Nullable PalettedContainer<Holder<Biome>> getBiomeData() {
+        return this.biomeData;
     }
 
     public void acquireReference() {
