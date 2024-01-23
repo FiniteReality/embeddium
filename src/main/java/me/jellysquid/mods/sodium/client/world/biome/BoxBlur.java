@@ -1,86 +1,146 @@
 package me.jellysquid.mods.sodium.client.world.biome;
 
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
-import org.apache.commons.lang3.Validate;
+import net.minecraft.util.Mth;
 
 public class BoxBlur {
-    /**
-     * Performs a box blur with the specified radius on the 2D array of color values.
-     *
-     * @param data The array of color values to blur in-place
-     * @param width The width of the array
-     * @param height The height of the array
-     * @param radius The radius to blur with
-     */
-    public static void blur(int[] data, int width, int height, int radius) {
-        Validate.isTrue(data.length == (width * height), "data.length != (width * height)");
 
-        // TODO: Re-use allocations between invocations
-        var tmp = new int[width * height];
-        blur(data, tmp, width, height, radius); // X-axis
-        blur(tmp, data, width, height, radius); // Y-axis
+    public static void blur(ColorBuffer buf, ColorBuffer tmp, int radius) {
+        if (buf.width != tmp.width || buf.height != tmp.height) {
+            throw new IllegalArgumentException("Color buffers must have same dimensions");
+        }
+
+        if (isHomogenous(buf.data)) {
+            return;
+        }
+
+        blurImpl(buf.data, tmp.data, buf.width, buf.height, radius); // X-axis
+        blurImpl(tmp.data, buf.data, buf.width, buf.height, radius); // Y-axis
     }
 
-    private static void blur(int[] src, int[] dst, final int width, final int height, int radius) {
-        final int windowSize = (radius * 2) + 1;
-        final int edgeExtendAmount = radius + 1;
+    /**
+     * @deprecated Used by the biome color fallback ported from older Sodium, avoid using in new code.
+     */
+    @Deprecated
+    public static void blur(int[] data, int[] tmp, int width, int height, int radius) {
+        if (isHomogenous(data)) {
+            return;
+        }
 
-        int srcIndex = 0;
+        blurImpl(data, tmp, width, height, radius); // X-axis
+        blurImpl(tmp, data, width, height, radius); // Y-axis
+    }
 
-        // TODO: SIMD
+    private static void blurImpl(int[] src, int[] dst, int width, int height, int radius) {
+        int multiplier = getAveragingMultiplier((radius * 2) + 1);
+
         for (int y = 0; y < height; y++) {
-            int dstIndex = y;
-            int color = src[srcIndex];
+            int srcRowOffset = ColorBuffer.getIndex(0, y, width);
 
-            int alpha = ColorARGB.unpackAlpha(color);
-            int red = ColorARGB.unpackRed(color);
-            int green = ColorARGB.unpackGreen(color);
-            int blue = ColorARGB.unpackBlue(color);
+            int red, green, blue;
+
+            {
+                int color = src[srcRowOffset];
+                red = ColorARGB.unpackRed(color);
+                green = ColorARGB.unpackGreen(color);
+                blue = ColorARGB.unpackBlue(color);
+            }
 
             // Extend the window backwards by repeating the colors at the edge N times
-            alpha *= edgeExtendAmount;
-            red *= edgeExtendAmount;
-            green *= edgeExtendAmount;
-            blue *= edgeExtendAmount;
+            red += red * radius;
+            green += green * radius;
+            blue += blue * radius;
 
             // Extend the window forwards by sampling ahead N times
-            for (int i = 1; i <= radius; i++) {
-                int neighborColor = src[srcIndex + i];
-
-                alpha += ColorARGB.unpackAlpha(neighborColor);
-                red += ColorARGB.unpackRed(neighborColor);
-                green += ColorARGB.unpackGreen(neighborColor);
-                blue += ColorARGB.unpackBlue(neighborColor);
+            for (int x = 1; x <= radius; x++) {
+                var color = src[srcRowOffset + x];
+                red += ColorARGB.unpackRed(color);
+                green += ColorARGB.unpackGreen(color);
+                blue += ColorARGB.unpackBlue(color);
             }
 
             for (int x = 0; x < width; x++) {
-                // TODO: Avoid division
-                dst[dstIndex] = ColorARGB.pack(red / windowSize, green / windowSize,
-                        blue / windowSize, alpha / windowSize);
+                // The x and y coordinates are transposed to flip the output image
+                dst[ColorBuffer.getIndex(y, x, width)] = averageRGB(red, green, blue, multiplier);
 
-                int previousPixelIndex = Math.max(x - radius, 0);
-                int previousPixel = src[srcIndex + previousPixelIndex];
+                {
+                    // Remove the color values that are behind the window
+                    var color = src[srcRowOffset + Math.max(0, x - radius)];
 
-                // Remove the color values that are behind the window
-                alpha -= ColorARGB.unpackAlpha(previousPixel);
-                red -= ColorARGB.unpackRed(previousPixel);
-                green -= ColorARGB.unpackGreen(previousPixel);
-                blue -= ColorARGB.unpackBlue(previousPixel);
+                    red -= ColorARGB.unpackRed(color);
+                    green -= ColorARGB.unpackGreen(color);
+                    blue -= ColorARGB.unpackBlue(color);
+                }
 
-                int nextPixelIndex = Math.min(x + edgeExtendAmount, width - 1);
-                int nextPixel = src[srcIndex + nextPixelIndex];
-
-                // Add the color values that are ahead of the window
-                alpha += ColorARGB.unpackAlpha(nextPixel);
-                red += ColorARGB.unpackRed(nextPixel);
-                green += ColorARGB.unpackGreen(nextPixel);
-                blue += ColorARGB.unpackBlue(nextPixel);
-
-                // Move the window forward
-                dstIndex += width;
+                {
+                    // Add the color values that are ahead of the window
+                    var color = src[srcRowOffset + Math.min(width - 1, x + radius + 1)];
+                    red += ColorARGB.unpackRed(color);
+                    green += ColorARGB.unpackGreen(color);
+                    blue += ColorARGB.unpackBlue(color);
+                }
             }
+        }
+    }
 
-            srcIndex += width;
+    /**
+     * Pre-computes a multiplier that can be used to avoid costly division when averaging the color data in the
+     * sliding window.
+     * @param size The size of the rolling window
+     * @author 2No2Name
+     */
+    private static int getAveragingMultiplier(int size) {
+        return Mth.ceil((1L << 24) / (double) size);
+    }
+
+    /**
+     * Calculates the average color within the sliding window using the pre-computed constant.
+     * @param multiplier The pre-computed constant provided by {@link BoxBlur#getAveragingMultiplier(int)} for a window
+     *                   of the given size
+     * @author 2No2Name
+     */
+    public static int averageRGB(int red, int green, int blue, int multiplier) {
+        int value = 0xFF << 24; // Alpha is constant (fully opaque)
+        value |= ((blue * multiplier) >>> 24) << 0;
+        value |= ((green * multiplier) >>> 24) << 8;
+        value |= ((red * multiplier) >>> 24) << 16;
+
+        return value;
+    }
+
+    private static boolean isHomogenous(int[] array) {
+        int first = array[0];
+
+        for (int i = 1; i < array.length; i++) {
+            if (array[i] != first) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static class ColorBuffer {
+        protected final int[] data;
+        protected final int width, height;
+
+        public ColorBuffer(int width, int height) {
+            this.data = new int[width * height];
+            this.width = width;
+            this.height = height;
+        }
+
+        public void set(int x, int y, int color) {
+            this.data[getIndex(x, y, this.width)] = color;
+        }
+
+
+        public int get(int x, int y) {
+            return this.data[getIndex(x, y, this.width)];
+        }
+
+        public static int getIndex(int x, int y, int width) {
+            return (y * width) + x;
         }
     }
 }

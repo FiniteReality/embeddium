@@ -1,12 +1,14 @@
 package me.jellysquid.mods.sodium.client.world;
 
-import me.jellysquid.mods.sodium.client.world.biome.BlockColorCache;
+import me.jellysquid.mods.sodium.client.world.biome.BiomeColorCache;
+import me.jellysquid.mods.sodium.client.world.biome.BiomeSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
 import me.jellysquid.mods.sodium.client.world.cloned.PackedIntegerArrayExtended;
 import me.jellysquid.mods.sodium.client.world.cloned.palette.ClonedPalette;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -83,9 +85,6 @@ public class WorldSlice implements BlockAndTintGetter {
     // The world this slice has copied data from
     private final Level world;
 
-    // The accessor used for fetching biome data from the slice
-    private final BiomeManager biomeAccess;
-
     // Local Section->BlockState table.
     private final BlockState[][] blockStatesArrays;
 
@@ -95,8 +94,11 @@ public class WorldSlice implements BlockAndTintGetter {
     // Local section copies. Read-only.
     private ClonedChunkSection[] sections;
 
+    // The accessor used for fetching biome data from the slice
+    private final BiomeSlice biomeSlice;
+
     // The biome blend cache
-    private BlockColorCache biomeColors;
+    private final BiomeColorCache biomeColors;
 
     // The starting point from which this slice captures blocks
     private int baseX, baseY, baseZ;
@@ -154,8 +156,6 @@ public class WorldSlice implements BlockAndTintGetter {
     public WorldSlice(Level world) {
         this.world = world;
 
-        this.biomeAccess = new BiomeManager(this::getStoredBiome, ((BiomeSeedProvider) this.world).getBiomeSeed());
-
         this.sections = new ClonedChunkSection[SECTION_TABLE_ARRAY_SIZE];
         this.blockStatesArrays = new BlockState[SECTION_TABLE_ARRAY_SIZE][SECTION_BLOCK_COUNT];
         for (BlockState[] blockStatesArray : this.blockStatesArrays) {
@@ -163,6 +163,8 @@ public class WorldSlice implements BlockAndTintGetter {
         }
         this.biomeArrays = new Holder[SECTION_TABLE_ARRAY_SIZE][SECTION_BIOME_COUNT];
 
+        this.biomeSlice = new BiomeSlice();
+        this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
     }
 
     public void copyData(ChunkRenderContext context) {
@@ -184,7 +186,8 @@ public class WorldSlice implements BlockAndTintGetter {
             }
         }
 
-        this.biomeColors = new BlockColorCache(this, Minecraft.getInstance().options.biomeBlendRadius().get());
+        this.biomeSlice.update((ClientLevel)this.world, context);
+        this.biomeColors.update(context);
     }
 
     private void unpackBlockData(BlockState[] states, ClonedChunkSection section, BoundingBox box) {
@@ -339,26 +342,6 @@ public class WorldSlice implements BlockAndTintGetter {
     @Override
     public @Nullable ModelDataManager getModelDataManager() {
         return this.world.getModelDataManager();
-    }
-
-    // Coordinates are in biome space!
-    private Holder<Biome> getStoredBiome(int biomeX, int biomeY, int biomeZ) {
-        int chunkX = (QuartPos.toBlock(biomeX) - this.baseX) >> 4;
-        int chunkY = (QuartPos.toBlock(biomeY) - this.baseY) >> 4;
-        int chunkZ = (QuartPos.toBlock(biomeZ) - this.baseZ) >> 4;
-
-        int sectionIndex = getLocalSectionIndex(chunkX, chunkY, chunkZ);
-
-        if(sectionIndex < 0 || sectionIndex >= this.biomeArrays.length) {
-            return this.world.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getHolderOrThrow(Biomes.PLAINS);
-        }
-
-        return this.biomeArrays[sectionIndex]
-                [getLocalBiomeIndex(biomeX & 3, biomeY & 3, biomeZ & 3)];
-    }
-
-    public BiomeManager getBiomeAccess() {
-        return this.biomeAccess;
     }
 
     private static int getLocalBiomeIndex(int x, int y, int z) {
