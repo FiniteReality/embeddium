@@ -141,8 +141,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
                             }
                         }
 
-                        // Try to avoid the interface dispatch by hoisting the vanilla check
-                        if (blockState.getBlock() instanceof EntityBlock && blockState.hasTileEntity()) {
+                        if (blockState.hasTileEntity()) {
                             BlockEntity entity = slice.getBlockEntity(pos);
 
                             if (entity != null) {
