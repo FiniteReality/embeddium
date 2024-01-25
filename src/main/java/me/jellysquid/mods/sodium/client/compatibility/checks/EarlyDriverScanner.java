@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * opportunity at game startup, and uses a custom hardware prober to search for problematic drivers.
  */
 public class EarlyDriverScanner {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-EarlyDriverScanner");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-EarlyDriverScanner");
 
     private static final String CONSOLE_MESSAGE_TEMPLATE = """ 
             ###ERROR_DESCRIPTION###
@@ -53,7 +53,7 @@ public class EarlyDriverScanner {
                 .replace("###HELP_URL###", url));
 
         // Try to show a graphical message box (if the platform supports it) and shut down the game.
-        MessageBox.showMessageBox(null, MessageBox.IconType.ERROR, "Sodium Renderer - Unsupported Driver", message, url);
+        MessageBox.showMessageBox(null, MessageBox.IconType.ERROR, "Embeddium Renderer - Unsupported Driver", message, url);
         System.exit(1 /* failure code */);
     }
 

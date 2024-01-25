@@ -5,7 +5,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 
-public record ChunkShaderOptions(ChunkFogMode fog, TerrainRenderPass pass, ChunkVertexType type) {
+public record ChunkShaderOptions(ChunkFogMode fog, TerrainRenderPass pass, ChunkVertexType vertexType) {
     /**
      * @deprecated Only kept for Iris/Oculus compatibility, do not use
      */
@@ -18,11 +18,19 @@ public record ChunkShaderOptions(ChunkFogMode fog, TerrainRenderPass pass, Chunk
     public ShaderConstants constants() {
         ShaderConstants.Builder constants = ShaderConstants.builder();
         constants.addAll(this.fog.getDefines());
-        constants.add(this.type.getDefine());
 
         if (this.pass.supportsFragmentDiscard()) {
             constants.add("USE_FRAGMENT_DISCARD");
         }
+
+        // Embeddium: indicate whether compact vertex format is disabled to shaders
+        if(this.vertexType != ChunkMeshFormats.VANILLA_LIKE) {
+            constants.add("USE_VERTEX_COMPRESSION");
+        }
+
+        constants.add("VERT_POS_SCALE", String.valueOf(this.vertexType.getPositionScale()));
+        constants.add("VERT_POS_OFFSET", String.valueOf(this.vertexType.getPositionOffset()));
+        constants.add("VERT_TEX_SCALE", String.valueOf(this.vertexType.getTextureScale()));
 
         return constants.build();
     }
