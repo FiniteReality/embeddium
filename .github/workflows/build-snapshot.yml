@@ -32,9 +32,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-snapshot-
       - name: Build artifacts
-        run: ./gradlew build
+        run: ./gradlew reobfJar
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Embeddium
-          path: bin
+          path: build/libs
