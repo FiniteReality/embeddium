@@ -146,12 +146,12 @@ public class SodiumGameOptionPages {
                 .build());
 
         groups.add(OptionGroup.createBuilder()
-        		.add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
+        		.add(OptionImpl.createBuilder(CloudStatus.class, vanillaOpts)
                         .setName(Component.translatable("options.renderClouds"))
                         .setTooltip(Component.translatable("sodium.options.clouds_quality.tooltip"))
-                        .setControl(TickBoxControl::new)
+                        .setControl(option -> new CyclingControl<>(option, CloudStatus.class, new Component[] { Component.translatable("addServer.resourcePack.disabled"), Component.literal("2D"), Component.literal("3D") }))
                         .setBinding((opts, value) -> {
-                            opts.cloudStatus().set(value ? CloudStatus.FANCY : CloudStatus.OFF);
+                            opts.cloudStatus().set(value);
 
                             if (Minecraft.useShaderTransparency()) {
                                 RenderTarget framebuffer = Minecraft.getInstance().levelRenderer.getCloudsTarget();
@@ -159,7 +159,7 @@ public class SodiumGameOptionPages {
                                     framebuffer.clear(Minecraft.ON_OSX);
                                 }
                             }
-                        }, opts -> opts.cloudStatus().get() == CloudStatus.FANCY)
+                        }, opts -> opts.cloudStatus().get())
                         .setImpact(OptionImpact.LOW)
                         .build())
                 .add(OptionImpl.createBuilder(SodiumGameOptions.GraphicsQuality.class, sodiumOpts)
