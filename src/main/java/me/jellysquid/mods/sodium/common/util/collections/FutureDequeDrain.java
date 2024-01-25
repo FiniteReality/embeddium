@@ -1,10 +1,13 @@
 package me.jellysquid.mods.sodium.common.util.collections;
 
+import net.minecraft.ReportedException;
+
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class FutureDequeDrain<T> implements Iterator<T> {
     private final Deque<CompletableFuture<T>> deque;
@@ -34,6 +37,13 @@ public class FutureDequeDrain<T> implements Iterator<T> {
                 return;
             } catch (CancellationException e) {
                 // no-op
+            } catch (CompletionException e) {
+                if (e.getCause() instanceof ReportedException) {
+                    // Propagate CrashExceptions directly to provide extra information
+                    throw (ReportedException) e.getCause();
+                } else {
+                    throw e;
+                }
             }
         }
     }
