@@ -149,7 +149,7 @@ public class SodiumGameOptionPages {
         		.add(OptionImpl.createBuilder(CloudStatus.class, vanillaOpts)
                         .setName(Component.translatable("options.renderClouds"))
                         .setTooltip(Component.translatable("sodium.options.clouds_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, CloudStatus.class, new Component[] { Component.translatable("addServer.resourcePack.disabled"), Component.literal("2D"), Component.literal("3D") }))
+                        .setControl(option -> new CyclingControl<>(option, CloudStatus.class, new Component[] { Component.translatable("options.off"), Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy") }))
                         .setBinding((opts, value) -> {
                             opts.cloudStatus().set(value);
 
