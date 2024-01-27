@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.client.ClientHooks;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
@@ -32,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 import java.util.SortedSet;
+import java.util.function.Consumer;
 
 @Mixin(LevelRenderer.class)
 public abstract class WorldRendererMixin implements WorldRendererExtended {
@@ -101,6 +103,15 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Overwrite
     public int countRenderedSections() {
         return this.renderer.getVisibleChunkCount();
+    }
+
+    /**
+     * @reason Redirect to our renderer
+     * @author embeddedt
+     */
+    @Overwrite
+    public void iterateVisibleBlockEntities(Consumer<BlockEntity> blockEntityConsumer) {
+        this.renderer.forEachVisibleBlockEntity(blockEntityConsumer);
     }
 
     /**
