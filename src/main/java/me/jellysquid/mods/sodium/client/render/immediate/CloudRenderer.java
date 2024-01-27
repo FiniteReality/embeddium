@@ -18,6 +18,7 @@ import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.common.ColorVertex;
 import net.minecraft.client.Camera;
+import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -64,6 +65,7 @@ public class CloudRenderer {
     private final FogRenderer.FogData fogData = new FogRenderer.FogData(FogRenderer.FogMode.FOG_TERRAIN);
 
     private int prevCenterCellX, prevCenterCellY, cachedRenderDistance;
+    private CloudStatus cloudRenderMode;
 
     public CloudRenderer(ResourceProvider factory) {
         this.reloadTextures(factory);
@@ -93,9 +95,11 @@ public class CloudRenderer {
         int centerCellX = (int) (Math.floor(cloudCenterX / 12));
         int centerCellZ = (int) (Math.floor(cloudCenterZ / 12));
 
-        if (this.vertexBuffer == null || this.prevCenterCellX != centerCellX || this.prevCenterCellY != centerCellZ || this.cachedRenderDistance != renderDistance) {
+        if (this.vertexBuffer == null || this.prevCenterCellX != centerCellX || this.prevCenterCellY != centerCellZ || this.cachedRenderDistance != renderDistance || cloudRenderMode != Minecraft.getInstance().options.getCloudsType()) {
             BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+
+            this.cloudRenderMode = Minecraft.getInstance().options.getCloudsType();
 
             this.rebuildGeometry(bufferBuilder, cloudDistance, centerCellX, centerCellZ);
 
@@ -132,8 +136,9 @@ public class CloudRenderer {
         this.vertexBuffer.bind();
 
         boolean insideClouds = cameraY < cloudHeight + 4.5f && cameraY > cloudHeight - 0.5f;
+        boolean fastClouds = cloudRenderMode == CloudStatus.FAST;
 
-        if (insideClouds) {
+        if (insideClouds || fastClouds) {
             RenderSystem.disableCull();
         } else {
             RenderSystem.enableCull();
@@ -228,6 +233,8 @@ public class CloudRenderer {
     private void rebuildGeometry(BufferBuilder bufferBuilder, int cloudDistance, int centerCellX, int centerCellZ) {
         var writer = VertexBufferWriter.of(bufferBuilder);
 
+        boolean fastClouds = cloudRenderMode == CloudStatus.FAST;
+
         for (int offsetX = -cloudDistance; offsetX < cloudDistance; offsetX++) {
             for (int offsetZ = -cloudDistance; offsetZ < cloudDistance; offsetZ++) {
                 int connectedEdges = this.edges.getEdges(centerCellX + offsetX, centerCellZ + offsetZ);
@@ -242,14 +249,14 @@ public class CloudRenderer {
                 float z = offsetZ * 12;
 
                 try (MemoryStack stack = MemoryStack.stackPush()) {
-                    final long buffer = stack.nmalloc(6 * 4 * ColorVertex.STRIDE);
+                    final long buffer = stack.nmalloc((fastClouds ? 4 : (6 * 4)) * ColorVertex.STRIDE);
 
                     long ptr = buffer;
                     int count = 0;
 
                     // -Y
                     if ((connectedEdges & DIR_NEG_Y) != 0) {
-                        int mixedColor = ColorMixer.mul(texel, CLOUD_COLOR_NEG_Y);
+                        int mixedColor = ColorMixer.mul(texel, fastClouds ? CLOUD_COLOR_POS_Y : CLOUD_COLOR_NEG_Y);
 
                         ptr = writeVertex(ptr, x + 12, 0.0f, z + 12, mixedColor);
                         ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + 12, mixedColor);
@@ -257,6 +264,12 @@ public class CloudRenderer {
                         ptr = writeVertex(ptr, x + 12, 0.0f, z + 0.0f, mixedColor);
 
                         count += 4;
+                    }
+
+                    // Only emit -Y geometry to emulate vanilla fast clouds
+                    if (fastClouds) {
+                        writer.push(stack, buffer, count, ColorVertex.FORMAT);
+                        continue;
                     }
 
                     // +Y
