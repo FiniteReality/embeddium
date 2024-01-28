@@ -69,7 +69,10 @@ public class SodiumGameOptions {
     }
 
     public static class NotificationSettings {
-        public boolean hideDonationButton = false;
+        public boolean forceDisableDonationPrompts = false;
+
+        public boolean hasClearedDonationButton = false;
+        public boolean hasSeenDonationPrompt = false;
     }
 
     public enum GraphicsQuality implements TextProvider {
