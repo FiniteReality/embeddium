@@ -71,7 +71,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
     private void checkPromptTimers() {
         // Never show the prompt in developer workspaces.
-        if (false && !FMLLoader.isProduction()) {
+        if (!FMLLoader.isProduction()) {
             return;
         }
 
