@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.renderer.Rect2i;
 
 public class TickBoxControl implements Control<Boolean> {
@@ -80,7 +81,7 @@ public class TickBoxControl implements Control<Boolean> {
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             if (!isFocused()) return false;
 
-            if (keyCode == InputConstants.KEY_RETURN) {
+            if (CommonInputs.selected(keyCode)) {
                 toggleControl();
                 this.playClickSound();
 
