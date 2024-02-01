@@ -86,11 +86,6 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     }
 
     @Override
-    public int getNormal() {
-        return this.normal;
-    }
-
-    @Override
     public float getTexU(int idx) {
         return Float.intBitsToFloat(this.vertices[vertexOffset(idx) + TEXTURE_INDEX]);
     }

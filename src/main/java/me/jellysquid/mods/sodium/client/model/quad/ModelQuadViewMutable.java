@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.model.quad;
 
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 
 /**
  * Provides a mutable view to a model quad.
@@ -58,9 +59,9 @@ public interface ModelQuadViewMutable extends ModelQuadView {
     void setColorIndex(int index);
 
     /**
-     * Sets the 3-byte packed normal for this quad
+     * Sets the face used by this quad for lighting effects
      */
-    void setNormal(int norm);
+    void setLightFace(Direction face);
 
     void setHasAmbientOcclusion(boolean hasAmbientOcclusion);
 }

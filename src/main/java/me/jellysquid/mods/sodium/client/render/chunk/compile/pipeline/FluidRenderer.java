@@ -68,7 +68,7 @@ public class FluidRenderer {
     private final SinkingVertexBuilder fluidVertexBuilder = new SinkingVertexBuilder();
 ;
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
-        this.quad.setNormal(NormI8.pack(0.0f, 1.0f, 0.0f));
+        this.quad.setLightFace(Direction.UP);
 
         this.lighters = lighters;
         this.colorProviderRegistry = colorProviderRegistry;

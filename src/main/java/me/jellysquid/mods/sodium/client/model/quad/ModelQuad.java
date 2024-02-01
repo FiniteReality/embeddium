@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.model.quad;
 import static me.jellysquid.mods.sodium.client.util.ModelQuadUtil.*;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 
 /**
  * A simple implementation of the {@link ModelQuadViewMutable} interface which can provide an on-heap scratch area
@@ -14,7 +15,7 @@ public class ModelQuad implements ModelQuadViewMutable {
 
     private TextureAtlasSprite sprite;
     private int colorIdx;
-    private int normal;
+    private Direction direction;
 
     private boolean hasAmbientOcclusion = true;
 
@@ -69,8 +70,8 @@ public class ModelQuad implements ModelQuadViewMutable {
     }
 
     @Override
-    public void setNormal(int norm) {
-        this.normal = norm;
+    public void setLightFace(Direction face) {
+        this.direction = face;
     }
 
     @Override
@@ -134,8 +135,8 @@ public class ModelQuad implements ModelQuadViewMutable {
     }
 
     @Override
-    public int getNormal() {
-        return this.normal;
+    public Direction getLightFace() {
+        return this.direction;
     }
 
     @Override
