@@ -17,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.VideoSettingsScreen;
 import net.minecraft.locale.Language;
@@ -133,6 +134,10 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
         super.init();
 
         this.rebuildGUI();
+
+        if (this.prompt != null) {
+            this.prompt.init();
+        }
     }
 
     private void rebuildGUI() {
@@ -366,11 +371,11 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (this.prompt != null) {
-            return this.prompt.keyPressed(keyCode, scanCode, modifiers);
+        if (this.prompt != null && this.prompt.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
         }
 
-        if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0) {
+        if (this.prompt == null && keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0) {
             Minecraft.getInstance().setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance().options));
 
             return true;
@@ -403,6 +408,11 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
     @Override
     public void onClose() {
         this.minecraft.setScreen(this.prevScreen);
+    }
+
+    @Override
+    public List<? extends GuiEventListener> children() {
+        return this.prompt == null ? super.children() : this.prompt.getWidgets();
     }
 
     @Override

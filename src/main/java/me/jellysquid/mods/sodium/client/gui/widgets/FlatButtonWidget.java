@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
@@ -85,7 +86,7 @@ public class FlatButtonWidget extends AbstractWidget implements Renderable {
         if (!this.isFocused())
             return false;
 
-        if (keyCode == InputConstants.KEY_RETURN) {
+        if (CommonInputs.selected(keyCode)) {
             doAction();
             return true;
         }

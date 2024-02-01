@@ -127,6 +127,9 @@ public class SodiumGameOptions {
 
         config.configPath = path;
 
+        // TODO Embeddium: Remove the field completely in 0.4
+        config.notifications.forceDisableDonationPrompts = false;
+
         try {
             if(resaveConfig)
                 config.writeChanges();
