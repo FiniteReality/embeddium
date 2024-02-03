@@ -51,6 +51,7 @@ public class MixinConfig {
 
         this.addMixinRule("features.render.entity", true);
         this.addMixinRule("features.render.entity.cull", true);
+        this.addMixinRule("features.render.entity.fast_render", true);
         this.addMixinRule("features.render.entity.shadow", true);
 
         this.addMixinRule("features.render.gui", true);
@@ -85,6 +86,24 @@ public class MixinConfig {
         this.addMixinRule("workarounds", true);
         this.addMixinRule("workarounds.context_creation", true);
         this.addMixinRule("workarounds.event_loop", true);
+
+        this.applyBuiltInCompatOverrides();
+    }
+
+    private static boolean isModLoaded(String modId) {
+        return LoadingModList.get().getModFileById(modId) != null;
+    }
+
+    private void applyBuiltInCompatOverrides() {
+        // The fast entity renderer prevents their mixins from applying:
+        // https://github.com/KosmX/bendy-lib/tree/1.19.4/common/src/main/java/io/github/kosmx/bendylib/mixin
+        this.disableIfModPresent("bendylib", "features.render.entity.fast_render");
+    }
+
+    private void disableIfModPresent(String modId, String option) {
+        if (isModLoaded((modId))) {
+            this.applyModOverride(modId, "mixin." + option, false);
+        }
     }
 
     /**
