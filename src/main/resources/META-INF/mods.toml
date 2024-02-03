@@ -19,3 +19,11 @@ displayName = "Rubidium (Embeddium)"
 description = '''
 Stub, to allow mods detecting Rubidium to function as expected.
 '''
+
+# Enforce new enough Oculus
+[[dependencies.embeddium]]
+modId = "oculus"
+mandatory = false
+versionRange = "[1.6.15,)"
+ordering = "BEFORE"
+side = "CLIENT"
