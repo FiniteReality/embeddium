@@ -1,4 +1,4 @@
-package me.jellysquid.mods.sodium.mixin.features.render.entity;
+package me.jellysquid.mods.sodium.mixin.features.render.entity.fast_render;
 
 import me.jellysquid.mods.sodium.client.model.ModelCuboidAccessor;
 import me.jellysquid.mods.sodium.client.render.immediate.model.ModelCuboid;
