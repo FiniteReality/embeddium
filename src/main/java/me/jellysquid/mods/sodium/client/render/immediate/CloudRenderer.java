@@ -11,7 +11,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import me.jellysquid.mods.sodium.client.util.MathUtil;
-import me.jellysquid.mods.sodium.mixin.features.render.world.clouds.BackgroundRendererInvoker;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.api.util.ColorMixer;
@@ -221,7 +220,7 @@ public class CloudRenderer {
             fogData.end = Math.min((cloudDistance), 192.0f) * 0.5f;
         }
 
-        FogRenderer.MobEffectFogFunction fogModifier = BackgroundRendererInvoker.invokeGetFogModifier(player, tickDelta);
+        FogRenderer.MobEffectFogFunction fogModifier = FogRenderer.getPriorityFogFunction(player, tickDelta);
         if (fogModifier != null) {
             MobEffectInstance statusEffectInstance = player.getEffect(fogModifier.getMobEffect());
             if (statusEffectInstance != null) {

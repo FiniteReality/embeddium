@@ -86,8 +86,8 @@ public abstract class BufferBuilderMixin {
     private void writePrimitiveIndices(VertexFormat.IndexType indexType, int[] indices) {
         long ptr = MemoryUtil.memAddress(this.buffer, this.nextElementByte);
 
-        switch (indexType) {
-            case SHORT -> {
+        switch (indexType.bytes) {
+            case 2 -> { // SHORT
                 for (int index : indices) {
                     int start = index * 4;
 
@@ -97,7 +97,7 @@ public abstract class BufferBuilderMixin {
                     }
                 }
             }
-            case INT -> {
+            case 4 -> { // INT
                 for (int index : indices) {
                     int start = index * 4;
 
