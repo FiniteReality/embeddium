@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.common.config;
 
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,6 +66,16 @@ public class SodiumConfig {
         this.addMixinRule("features.texture_updates", true);
         this.addMixinRule("features.world_ticking", true);
         this.addMixinRule("features.fast_biome_colors", true);
+
+        Pattern replacePattern = Pattern.compile("[^\\w]");
+
+        if (FMLLoader.getLoadingModList().getErrors().isEmpty()) {
+            for (ModInfo modInfo : FMLLoader.getLoadingModList().getMods()) {
+                // Convert anything but alphabets and numbers to _
+                String sanitizedModId = replacePattern.matcher(modInfo.getModId()).replaceAll("_");
+                this.addMixinRule("modcompat." + sanitizedModId, true);
+            }
+        }
     }
 
     /**
