@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -100,16 +101,31 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
         }
 
         ModFile modFile = FMLLoader.getLoadingModList().getModFileById("embeddium").getFile();
-        Path mixinFolderPath = modFile.getLocator().findPath(modFile, "me", "jellysquid", "mods", "sodium", "mixin");
-        try {
-            return Files.find(mixinFolderPath, Integer.MAX_VALUE, (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith(".class"))
-                    .filter(MixinClassValidator::isMixinClass)
-                    .map(path -> mixinClassify(mixinFolderPath, path))
-                    .collect(Collectors.toList());
-        } catch(IOException e) {
-            e.printStackTrace();
-            return null;
+        Set<Path> rootPaths = new HashSet<>();
+        // This allows us to see it from multiple sourcesets if need be
+        for(String basePackage : new String[] { "core", "modcompat" }) {
+            Path mixinPackagePath = modFile.getLocator().findPath(modFile, "me", "jellysquid", "mods", "sodium", "mixin", basePackage);
+            if(Files.exists(mixinPackagePath)) {
+                rootPaths.add(mixinPackagePath.getParent());
+            }
         }
+
+        Set<String> possibleMixinClasses = new HashSet<>();
+        for(Path rootPath : rootPaths) {
+            Stream<Path> mixinStream;
+            try {
+                mixinStream = Files.find(rootPath, Integer.MAX_VALUE, (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith(".class"));
+            } catch(IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+            mixinStream
+                    .filter(MixinClassValidator::isMixinClass)
+                    .map(path -> mixinClassify(rootPath, path))
+                    .forEach(possibleMixinClasses::add);
+        }
+
+        return new ArrayList<>(possibleMixinClasses);
     }
 
     @Override

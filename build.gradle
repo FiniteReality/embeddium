@@ -43,6 +43,14 @@ sourceSets {
 
 loom {
 	createRemapConfigurations(sourceSets.compat)
+	runs {
+		client {
+			// This disgusting hack ensures the compat sourceset is available when running in dev
+			def classPath = "main%%${getProject().buildDir}/resources/main:main%%${getProject().buildDir}/classes/java/main:" +
+					"main%%${getProject().buildDir}/resources/compat:main%%${getProject().buildDir}/classes/java/compat"
+			environmentVariable("MOD_CLASSES", classPath)
+		}
+	}
 }
 
 repositories {
