@@ -47,18 +47,14 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (!mixinClassName.startsWith(MIXIN_PACKAGE_ROOT)) {
-            this.logger.error("Expected mixin '{}' to start with package root '{}', treating as foreign and " +
-                    "disabling!", mixinClassName, MIXIN_PACKAGE_ROOT);
+    public boolean shouldApplyMixin(String s, String s1) {
+        return true;
+    }
 
-            return false;
-        }
-        
-        String mixin = mixinClassName.substring(MIXIN_PACKAGE_ROOT.length());
+    private boolean isMixinEnabled(String mixin) {
         Option option = this.config.getEffectiveOptionForMixin(mixin);
 
-        if (option == null) {
+        if (option == null && !mixin.startsWith("modcompat.")) {
             this.logger.error("No rules matched mixin '{}', treating as foreign and disabling!", mixin);
 
             return false;
@@ -122,6 +118,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
             mixinStream
                     .filter(MixinClassValidator::isMixinClass)
                     .map(path -> mixinClassify(rootPath, path))
+                    .filter(this::isMixinEnabled)
                     .forEach(possibleMixinClasses::add);
         }
 
