@@ -43,9 +43,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.SortedSet;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Provides an extension to vanilla's {@link LevelRenderer}.
@@ -287,6 +288,49 @@ public class SodiumWorldRenderer {
         return blockEntityRequestedOutline;
     }
 
+    public void forEachVisibleBlockEntity(Consumer<BlockEntity> consumer) {
+        SortedRenderLists renderLists = this.renderSectionManager.getRenderLists();
+        Iterator<ChunkRenderList> renderListIterator = renderLists.iterator();
+
+        while (renderListIterator.hasNext()) {
+            var renderList = renderListIterator.next();
+
+            var renderRegion = renderList.getRegion();
+            var renderSectionIterator = renderList.sectionsWithEntitiesIterator();
+
+            if (renderSectionIterator == null) {
+                continue;
+            }
+
+            while (renderSectionIterator.hasNext()) {
+                var renderSectionId = renderSectionIterator.nextByteAsInt();
+                var renderSection = renderRegion.getSection(renderSectionId);
+
+                var blockEntities = renderSection.getCulledBlockEntities();
+
+                if (blockEntities == null) {
+                    continue;
+                }
+
+                for (BlockEntity blockEntity : blockEntities) {
+                    consumer.accept(blockEntity);
+                }
+            }
+        }
+
+        for (var renderSection : this.renderSectionManager.getSectionsWithGlobalEntities()) {
+            var blockEntities = renderSection.getGlobalBlockEntities();
+
+            if (blockEntities == null) {
+                continue;
+            }
+
+            for (var blockEntity : blockEntities) {
+                consumer.accept(blockEntity);
+            }
+        }
+    }
+
     public void renderBlockEntities(PoseStack matrices,
                                     RenderBuffers bufferBuilders,
                                     Long2ObjectMap<SortedSet<BlockDestructionProgress>> blockBreakingProgressions,
@@ -430,6 +474,8 @@ public class SodiumWorldRenderer {
 
         matrices.popPose();
     }
+
+
 
     // the volume of a section multiplied by the number of sections to be checked at most
     private static final double MAX_ENTITY_CHECK_VOLUME = 16 * 16 * 16 * 15;

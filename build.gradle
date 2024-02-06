@@ -83,6 +83,7 @@ repositories {
 			includeGroup "curse.maven"
 		}
 	}
+	maven { url = "https://maven.covers1624.net/" }
 }
 
 

@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin;
 
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +10,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
@@ -86,6 +88,16 @@ public class MixinConfig {
         this.addMixinRule("workarounds", true);
         this.addMixinRule("workarounds.context_creation", true);
         this.addMixinRule("workarounds.event_loop", true);
+
+        Pattern replacePattern = Pattern.compile("[^\\w]");
+
+        if (FMLLoader.getLoadingModList().getErrors().isEmpty()) {
+            for (ModInfo modInfo : FMLLoader.getLoadingModList().getMods()) {
+                // Convert anything but alphabets and numbers to _
+                String sanitizedModId = replacePattern.matcher(modInfo.getModId()).replaceAll("_");
+                this.addMixinRule("modcompat." + sanitizedModId, true);
+            }
+        }
 
         this.applyBuiltInCompatOverrides();
     }
