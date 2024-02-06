@@ -69,6 +69,7 @@ repositories {
 			includeGroup "curse.maven"
 		}
 	}
+	maven { url = "https://maven.covers1624.net/" }
 }
 
 
@@ -136,6 +137,7 @@ dependencies {
 	compatCompileOnly fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.0.53")
 	compatCompileOnly fg.deobf("blusunrize.immersiveengineering:ImmersiveEngineering:1.18.2-8.0.2-149")
 	compatCompileOnly fg.deobf("curse.maven:codechickenlib-242818:4607274")
+	compatCompileOnly fg.deobf("com.brandon3055.brandonscore:BrandonsCore:1.18.2-3.1.10.283:universal")
 
 	runtimeOnlyNonPublishable fg.deobf("curse.maven:lazydfu-460819:3544496")
 
