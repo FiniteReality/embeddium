@@ -88,9 +88,6 @@ public class WorldSlice implements BlockAndTintGetter {
     // Local Section->BlockState table.
     private final BlockState[][] blockStatesArrays;
 
-    // Local Section->Biome table.
-    private final Holder<Biome>[][] biomeArrays;
-
     // Local section copies. Read-only.
     private ClonedChunkSection[] sections;
 
@@ -161,7 +158,6 @@ public class WorldSlice implements BlockAndTintGetter {
         for (BlockState[] blockStatesArray : this.blockStatesArrays) {
             Arrays.fill(blockStatesArray, Blocks.AIR.defaultBlockState());
         }
-        this.biomeArrays = new Holder[SECTION_TABLE_ARRAY_SIZE][SECTION_BIOME_COUNT];
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
@@ -181,7 +177,6 @@ public class WorldSlice implements BlockAndTintGetter {
                 for (int z = 0; z < SECTION_LENGTH; z++) {
                     int idx = getLocalSectionIndex(x, y, z);
                     this.unpackBlockData(this.blockStatesArrays[idx], this.sections[idx], context.getVolume());
-                    this.unpackBiomeData(this.biomeArrays[idx], this.sections[idx]);
                 }
             }
         }
@@ -228,16 +223,6 @@ public class WorldSlice implements BlockAndTintGetter {
     private void unpackBlockData(BlockState[] states, ClonedChunkSection section) {
         ((PackedIntegerArrayExtended) section.getBlockData())
                 .copyUsingPalette(states, section.getBlockPalette());
-    }
-
-    private void unpackBiomeData(Holder<Biome>[] biomes, ClonedChunkSection section) {
-        for (int x = 0; x < 4; x++) {
-            for (int y = 0; y < 4; y++) {
-                for (int z = 0; z < 4; z++) {
-                    biomes[getLocalBiomeIndex(x, y, z)] = section.getBiome(x, y, z);
-                }
-            }
-        }
     }
 
     private static boolean blockBoxContains(BoundingBox box, int x, int y, int z) {
@@ -342,10 +327,6 @@ public class WorldSlice implements BlockAndTintGetter {
     @Override
     public @Nullable ModelDataManager getModelDataManager() {
         return this.world.getModelDataManager();
-    }
-
-    private static int getLocalBiomeIndex(int x, int y, int z) {
-        return y << BIOME_BITS << BIOME_BITS | z << BIOME_BITS | x;
     }
 
     public static int getLocalBlockIndex(int x, int y, int z) {

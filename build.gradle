@@ -69,6 +69,7 @@ repositories {
 			includeGroup "curse.maven"
 		}
 	}
+	maven { url = "https://maven.covers1624.net/" }
 }
 
 
@@ -137,6 +138,7 @@ dependencies {
 	compatCompileOnly fg.deobf("curse.maven:codechickenlib-242818:${codechicken_fileid}")
 
 	annotationProcessor 'net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5'
+
 
 	runtimeOnlyNonPublishable fg.deobf("curse.maven:lazydfu-460819:3544496")
 

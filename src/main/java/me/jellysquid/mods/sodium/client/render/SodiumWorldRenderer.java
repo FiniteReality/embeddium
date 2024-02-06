@@ -44,6 +44,7 @@ import net.minecraftforge.common.extensions.IForgeBlockEntity;
 import java.util.Collection;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.stream.Stream;
 
 /**
  * Provides an extension to vanilla's {@link LevelRenderer}.
@@ -351,6 +352,10 @@ public class SodiumWorldRenderer {
 
             matrices.popPose();
         }
+    }
+
+    public Stream<BlockEntity> streamBlockEntities() {
+        return Stream.concat(this.renderSectionManager.getVisibleBlockEntities().stream(), this.globalBlockEntities.stream());
     }
 
     public void onChunkAdded(int x, int z) {
