@@ -55,8 +55,11 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     private boolean isMixinEnabled(String mixin) {
         Option option = this.config.getEffectiveOptionForMixin(mixin);
 
-        if (option == null && !mixin.startsWith("modcompat.")) {
-            this.logger.error("No rules matched mixin '{}', treating as foreign and disabling!", mixin);
+        if (option == null) {
+            // Missing modcompat options are fine
+            if(!mixin.startsWith("modcompat.")) {
+                this.logger.error("No rules matched mixin '{}', treating as foreign and disabling!", mixin);
+            }
 
             return false;
         }
