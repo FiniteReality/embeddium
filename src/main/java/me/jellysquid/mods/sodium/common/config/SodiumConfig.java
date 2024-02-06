@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.common.config;
 
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,7 +69,16 @@ public class SodiumConfig {
         if(FMLLoader.getLoadingModList().getModFileById("seamless_loading_screen") != null) { this.options.get("mixin.features.gui.fast_loading_screen").addModOverride(false, "seamless_loading_screen"); }
 
         if(FMLLoader.getLoadingModList().getModFileById("abnormals_core") != null) { this.options.get("mixin.features.world_ticking").addModOverride(false, "abnormals_core"); }
-        
+
+        Pattern replacePattern = Pattern.compile("[^\\w]");
+
+        if (FMLLoader.getLoadingModList().getErrors().isEmpty()) {
+            for (ModInfo modInfo : FMLLoader.getLoadingModList().getMods()) {
+                // Convert anything but alphabets and numbers to _
+                String sanitizedModId = replacePattern.matcher(modInfo.getModId()).replaceAll("_");
+                this.addMixinRule("modcompat." + sanitizedModId, true);
+            }
+        }
     }
 
     /**
