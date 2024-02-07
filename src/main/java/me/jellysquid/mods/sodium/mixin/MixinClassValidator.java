@@ -17,15 +17,23 @@ public class MixinClassValidator {
 
         try {
             bytecode = Files.readAllBytes(classPath);
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
 
+        return isMixinClass(fromBytecode(bytecode));
+    }
+
+    public static ClassNode fromBytecode(byte[] bytecode) {
         ClassNode node = new ClassNode();
         ClassReader reader = new ClassReader(bytecode);
         reader.accept(node, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
 
+        return node;
+    }
+
+    public static boolean isMixinClass(ClassNode node) {
         if(node.invisibleAnnotations == null) {
             return false;
         }

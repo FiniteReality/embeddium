@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.config.ConfigMigrator;
 import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
+import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
@@ -29,6 +30,8 @@ public class SodiumClientMod {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onInitializeClient);
         
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+
+        TaintDetector.init();
     }
     
     public void onInitializeClient(final FMLClientSetupEvent event) {
