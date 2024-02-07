@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.taint.scanning;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import me.jellysquid.mods.sodium.mixin.MixinClassValidator;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -17,10 +18,7 @@ import org.objectweb.asm.tree.ClassNode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -35,6 +33,8 @@ public class TaintDetector {
     );
 
     private static final Multimap<ModFileInfo, TargetingClass> DISCOVERED_MODS = ArrayListMultimap.create();
+
+    private static final Set<String> EXCLUDED_MOD_IDS = ImmutableSet.of("embeddium");
 
     static class TargetingClass {
         String className;
@@ -68,8 +68,8 @@ public class TaintDetector {
         ModFileInfo self = FMLLoader.getLoadingModList().getModFileById("embeddium");
         Objects.requireNonNull(self, "Embeddium mod file does not exist");
         for (ModFileInfo file : FMLLoader.getLoadingModList().getModFiles()) {
-            // There is no reason for us to scan ourselves
-            if (file == self) {
+            // Skip scanning files that provide a mod we know and trust
+            if (file.getMods().stream().anyMatch(modInfo -> EXCLUDED_MOD_IDS.contains(modInfo.getModId()))) {
                 continue;
             }
 
