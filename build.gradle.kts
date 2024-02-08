@@ -218,6 +218,22 @@ tasks.build {
     dependsOn(copyJarToBin, copyJarNameConsistent)
 }
 
+publishing {
+    tasks.publish {
+        dependsOn(tasks.build)
+    }
+    publications {
+        this.create<MavenPublication>("mavenJava") {
+            artifact(tasks.jar)
+            artifact(tasks.named("remapSourcesJar"))
+        }
+    }
+
+    repositories {
+        maven("file://${System.getenv("local_maven")}")
+    }
+}
+
 publishMods {
 	file = remapJar.archiveFile
 	changelog = "https://github.com/Nolij/nolijium/wiki/Changelog"
