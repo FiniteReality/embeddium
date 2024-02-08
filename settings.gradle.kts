@@ -1,11 +1,13 @@
 pluginManagement {
     repositories {
-        maven("https://maven.neoforged.net")
-        maven("https://repo.spongepowered.org/repository/maven-public/")
+        maven("https://maven.fabricmc.net/")
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
 val minecraft_version: String by settings
-rootProject.name = "embeddium-${minecraft_version}"
+rootProject.name = "embeddium-fabric-${minecraft_version}"
+
+include("stub:sodium")
+include("stub:indium")

@@ -33,7 +33,8 @@ public class WorldRendererMixin {
      */
     @Overwrite
     public void renderClouds(PoseStack matrices, Matrix4f projectionMatrix, float tickDelta, double x, double y, double z) {
-        if (!this.level.effects().renderClouds(this.level, this.ticks, tickDelta, matrices, x, y, z, projectionMatrix)) {
+        // On Forge, 'true' is a check for whether a mod is rendering clouds itself
+        if (true) {
             if (this.cloudRenderer == null) {
                 this.cloudRenderer = new CloudRenderer(this.minecraft.getResourceManager());
             }

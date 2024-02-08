@@ -6,24 +6,26 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3fc;
 
-import javax.annotation.Nonnull;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
 /**
- * A allocation-free {@link IVertexBuilder} implementation
- * which pipes vertices into a {@link ModelVertexSink}.
+ * A allocation-free {@link VertexConsumer} implementation
+ * which pipes vertices into a {@link ChunkModelBuilder}.
  *
  * @author KitsuneAlex
  */
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public final class SinkingVertexBuilder implements VertexConsumer {
     private final ByteBuffer buffer = ByteBuffer.allocateDirect(2097152).order(ByteOrder.nativeOrder());
     private final int[] sideCount = new int[ModelQuadFacing.VALUES.length];
@@ -45,7 +47,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
     private final ChunkVertexEncoder.Vertex[] sodiumVertexArray = ChunkVertexEncoder.Vertex.uninitializedQuad();
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer vertex(double x, double y, double z) {
         this.x = (float) x;
@@ -54,7 +56,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer color(int r, int g, int b, int a) {
         color = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
@@ -73,7 +75,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         hasFixedColor = false;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer uv(float u, float v) {
         this.u = u;
@@ -81,20 +83,20 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer overlayCoords(int u, int v) {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer uv2(int u, int v) {
         light = (v << 16) | u; // Compose lightmap coords into raw light value 0xVVVV_UUUU
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer normal(float x, float y, float z) {
         nx = x;
@@ -130,11 +132,11 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         resetCurrentVertex();
     }
 
-    public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, Vector3fc origin) {
+    public boolean flush(@NotNull ChunkModelBuilder buffers, Material material, Vector3fc origin) {
         return flush(buffers, material, origin.x(), origin.y(), origin.z());
     }
 
-    public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, float oX, float oY, float oZ) {
+    public boolean flush(@NotNull ChunkModelBuilder buffers, Material material, float oX, float oY, float oZ) {
         if(currentVertex == 0) {
             return false;
         }
@@ -174,6 +176,8 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
             ChunkVertexEncoder.Vertex[] sodiumQuad = sodiumVertexArray;
 
+            float midU = 0, midV = 0;
+
             for(int i = 0; i < 4; i++) {
                 if(i != 0)
                     buffer.getInt(); // read normal
@@ -184,8 +188,17 @@ public final class SinkingVertexBuilder implements VertexConsumer {
                 sodiumVertex.z = oZ + buffer.getFloat();
                 sodiumVertex.u = buffer.getFloat();
                 sodiumVertex.v = buffer.getFloat();
+                midU += sodiumVertex.u;
+                midV += sodiumVertex.v;
                 sodiumVertex.color = buffer.getInt();
                 sodiumVertex.light = buffer.getInt();
+            }
+
+            // Detect sprite
+            TextureAtlasSprite sprite = SpriteFinderCache.forBlockAtlas().find(midU / 4, midV / 4);
+
+            if(sprite != null) {
+                buffers.addSprite(sprite);
             }
 
             sink.push(sodiumQuad, material);

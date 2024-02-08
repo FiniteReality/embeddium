@@ -1,18 +1,13 @@
 package me.jellysquid.mods.sodium.mixin.features.model;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.MultiPartBakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.ChunkRenderTypeSet;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.data.MultipartModelData;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;
 
 import java.util.*;
@@ -66,8 +61,8 @@ public class MultipartBakedModelMixin {
      * @author JellySquid
      * @reason Avoid expensive allocations and replace bitfield indirection
      */
-    @Overwrite(remap = false)
-    public List<BakedQuad> getQuads(BlockState state, Direction face, RandomSource random, ModelData modelData, RenderType renderLayer) {
+    @Overwrite
+    public List<BakedQuad> getQuads(BlockState state, Direction face, RandomSource random) {
         if (state == null) {
             return Collections.emptyList();
         }
@@ -80,29 +75,9 @@ public class MultipartBakedModelMixin {
         for (BakedModel model : models) {
             random.setSeed(seed);
 
-            if (renderLayer == null || model.getRenderTypes(state, random, modelData).contains(renderLayer)) // FORGE: Only put quad data if the model is using the render type passed
-                quads.addAll(model.getQuads(state, face, random, MultipartModelData.resolve(modelData, model), renderLayer));
+            quads.addAll(model.getQuads(state, face, random));
         }
 
         return quads;
-    }
-
-    /**
-     * @author embeddedt
-     * @reason faster, less allocation
-     */
-    @Overwrite(remap = false)
-    public ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource random, @NotNull ModelData data) {
-        BakedModel[] models = getModelComponents(state);
-
-        long seed = random.nextLong();
-        LinkedList<ChunkRenderTypeSet> renderTypeSets = new LinkedList<>();
-
-        for (BakedModel model : models) {
-            random.setSeed(seed);
-            renderTypeSets.add(model.getRenderTypes(state, random, data));
-        }
-
-        return ChunkRenderTypeSet.union(renderTypeSets);
     }
 }

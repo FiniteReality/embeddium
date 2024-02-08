@@ -1,10 +1,10 @@
 package me.jellysquid.mods.sodium.client.model.color;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap.Entry;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.jellysquid.mods.sodium.client.model.color.interop.BlockColorsExtended;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -61,7 +61,9 @@ public class ColorProviderRegistry {
 
     private void registerFluids(ColorProvider<FluidState> resolver, Fluid... fluids) {
         for (var fluid : fluids) {
-            this.fluids.put(fluid, resolver);
+            if (FluidRenderHandlerRegistry.INSTANCE.get(fluid).getClass().getPackageName().startsWith("net.fabricmc.")) {
+                this.fluids.put(fluid, resolver);
+            }
         }
     }
 

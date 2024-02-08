@@ -68,7 +68,7 @@ public abstract class LightDataAccess {
         boolean fo = state.isSolidRender(world, pos);
         boolean fc = state.isCollisionShapeFullBlock(world, pos);
 
-        int lu = state.getLightEmission(world, pos);
+        int lu = state.getLightEmission();
 
         // OPTIMIZE: Do not calculate light data if the block is full and opaque and does not emit light.
         int bl;

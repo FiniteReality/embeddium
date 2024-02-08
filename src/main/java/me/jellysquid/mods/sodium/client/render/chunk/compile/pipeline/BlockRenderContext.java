@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -23,7 +22,6 @@ public class BlockRenderContext {
 
     private long seed;
 
-    private ModelData modelData;
     private RenderType renderLayer;
 
 
@@ -32,7 +30,7 @@ public class BlockRenderContext {
         this.localSlice = new WorldSliceLocal(world);
     }
 
-    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, ModelData modelData, RenderType renderLayer) {
+    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, RenderType renderLayer) {
         this.pos.set(pos);
         this.origin.set(origin.getX(), origin.getY(), origin.getZ());
 
@@ -41,7 +39,6 @@ public class BlockRenderContext {
 
         this.seed = seed;
 
-        this.modelData = modelData;
         this.renderLayer = renderLayer;
     }
 
@@ -92,13 +89,6 @@ public class BlockRenderContext {
      */
     public long seed() {
         return this.seed;
-    }
-
-    /**
-     * @return The additional data for model instance
-     */
-    public ModelData modelData() {
-        return this.modelData;
     }
 
     /**

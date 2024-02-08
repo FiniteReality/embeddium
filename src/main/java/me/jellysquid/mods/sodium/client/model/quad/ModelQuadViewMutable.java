@@ -62,6 +62,4 @@ public interface ModelQuadViewMutable extends ModelQuadView {
      * Sets the face used by this quad for lighting effects
      */
     void setLightFace(Direction face);
-
-    void setHasAmbientOcclusion(boolean hasAmbientOcclusion);
 }

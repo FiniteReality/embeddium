@@ -13,6 +13,7 @@ import me.jellysquid.mods.sodium.client.gui.prompt.ScreenPromptable;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.caffeinemc.mods.sodium.api.util.ColorMixer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -25,7 +26,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraftforge.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -72,7 +72,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
     private void checkPromptTimers() {
         // Never show the prompt in developer workspaces.
-        if (!FMLLoader.isProduction()) {
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             return;
         }
 

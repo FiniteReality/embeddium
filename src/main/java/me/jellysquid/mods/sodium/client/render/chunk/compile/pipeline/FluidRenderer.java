@@ -17,17 +17,16 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder.Vertex;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.NormI8;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -41,7 +40,6 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
 import org.embeddedt.embeddium.tags.EmbeddiumTags;
 
 public class FluidRenderer {
@@ -62,8 +60,6 @@ public class FluidRenderer {
 
     private final ChunkVertexEncoder.Vertex[] vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
     private final ColorProviderRegistry colorProviderRegistry;
-
-    private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
 
     private final SinkingVertexBuilder fluidVertexBuilder = new SinkingVertexBuilder();
 ;
@@ -115,7 +111,7 @@ public class FluidRenderer {
         fluidVertexBuilder.flush(buffers, material, 0, 0, 0);
 
         // Mark fluid sprites as being used in rendering
-        TextureAtlasSprite[] sprites = fluidSpriteCache.getSprites(world, blockPos, fluidState);
+        TextureAtlasSprite[] sprites = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getType()).getFluidSprites(world, blockPos, fluidState);
         for(TextureAtlasSprite sprite : sprites) {
             if (sprite != null) {
                 buffers.addSprite(sprite);
@@ -155,7 +151,7 @@ public class FluidRenderer {
 
         final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid);
 
-        TextureAtlasSprite[] sprites = fluidSpriteCache.getSprites(world, blockPos, fluidState);
+        TextureAtlasSprite[] sprites = FluidRenderHandlerRegistry.INSTANCE.get(fluid).getFluidSprites(world, blockPos, fluidState);
 
         float fluidHeight = this.fluidHeight(world, fluid, blockPos, Direction.UP);
         float northWestHeight, southWestHeight, southEastHeight, northEastHeight;
@@ -357,7 +353,7 @@ public class FluidRenderer {
                     BlockPos adjPos = this.scratchPos.set(adjX, adjY, adjZ);
                     BlockState adjBlock = world.getBlockState(adjPos);
 
-                    if (sprites[2] != null && adjBlock.shouldDisplayFluidOverlay(world, adjPos, fluidState)) {
+                    if (sprites[2] != null && FluidRenderHandlerRegistry.INSTANCE.isBlockTransparent(adjBlock.getBlock())) {
                         sprite = sprites[2];
                         isOverlay = true;
                     }
@@ -398,7 +394,7 @@ public class FluidRenderer {
             return override;
         }
         
-        return DefaultColorProviders.getFluidProvider();
+        return DefaultColorProviders.adapt(FluidRenderHandlerRegistry.INSTANCE.get(fluid));
     }
 
     private void updateQuad(ModelQuadView quad, WorldSlice world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness,

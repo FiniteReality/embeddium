@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.client.quirks;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraftforge.fml.ModList;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -35,6 +35,6 @@ public class QuirkManager {
     }
 
     private static boolean isLoaded(String modId) {
-        return ModList.get().isLoaded(modId);
+        return FabricLoader.getInstance().isModLoaded(modId);
     }
 }

@@ -1,8 +1,9 @@
 package me.jellysquid.mods.sodium.mixin;
 
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.CustomValue;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -91,10 +92,10 @@ public class MixinConfig {
 
         Pattern replacePattern = Pattern.compile("[^\\w]");
 
-        if (FMLLoader.getLoadingModList().getErrors().isEmpty()) {
-            for (ModInfo modInfo : FMLLoader.getLoadingModList().getMods()) {
+        if (true) {
+            for (ModContainer container : FabricLoader.getInstance().getAllMods()) {
                 // Convert anything but alphabets and numbers to _
-                String sanitizedModId = replacePattern.matcher(modInfo.getModId()).replaceAll("_");
+                String sanitizedModId = replacePattern.matcher(container.getMetadata().getId()).replaceAll("_");
                 this.addMixinRule("modcompat." + sanitizedModId, true);
             }
         }
@@ -103,7 +104,7 @@ public class MixinConfig {
     }
 
     private static boolean isModLoaded(String modId) {
-        return LoadingModList.get().getModFileById(modId) != null;
+        return FabricLoader.getInstance().isModLoaded(modId);
     }
 
     private void applyBuiltInCompatOverrides() {
@@ -160,23 +161,21 @@ public class MixinConfig {
     }
 
     private void applyModOverrides() {
-        // Example of how to put overrides into the mods.toml file:
-        // ...
-        // [[mods]]
-        // modId="examplemod"
-        // [mods."sodium:options"]
-        // "features.chunk_rendering"=false
-        // ...
-        for (var meta : LoadingModList.get().getMods()) {
-            meta.getConfigElement(JSON_KEY_SODIUM_OPTIONS).ifPresent(overridesObj -> {
-                if (overridesObj instanceof Map overrides && overrides.keySet().stream().allMatch(key -> key instanceof String)) {
-                    overrides.forEach((key, value) -> {
-                        this.applyModOverride(meta.getModId(), (String)key, value);
-                    });
-                } else {
-                    LOGGER.warn("Mod '{}' contains invalid " + MODNAME + " option overrides, ignoring", meta.getModId());
+        for (ModContainer container : FabricLoader.getInstance().getAllMods()) {
+            ModMetadata meta = container.getMetadata();
+
+            if (meta.containsCustomValue(JSON_KEY_SODIUM_OPTIONS)) {
+                CustomValue overrides = meta.getCustomValue(JSON_KEY_SODIUM_OPTIONS);
+
+                if (overrides.getType() != CustomValue.CvType.OBJECT) {
+                    LOGGER.warn("Mod '{}' contains invalid Sodium option overrides, ignoring", meta.getId());
+                    continue;
                 }
-            });
+
+                for (Map.Entry<String, CustomValue> entry : overrides.getAsObject()) {
+                    this.applyModOverride(meta.getId(), entry.getKey(), entry.getValue());
+                }
+            }
         }
     }
 

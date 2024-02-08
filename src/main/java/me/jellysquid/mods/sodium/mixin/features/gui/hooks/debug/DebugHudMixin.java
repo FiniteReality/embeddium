@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.mixin.features.gui.hooks.debug;
 
 import com.google.common.collect.Lists;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.util.MathUtil;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
@@ -25,7 +24,6 @@ public abstract class DebugHudMixin {
         ArrayList<String> strings = Lists.newArrayList((String[]) elements);
         strings.add("");
         strings.add("%s%s Renderer (%s)".formatted(getVersionColor(), MODNAME, SodiumClientMod.getVersion()));
-        strings.add("Block renderer: " + (ForgeBlockRenderer.useForgeLightingPipeline() ? "Forge" : "Sodium"));
 
         var renderer = SodiumWorldRenderer.instanceNullable();
 

@@ -3,22 +3,18 @@ package me.jellysquid.mods.sodium.client;
 import me.jellysquid.mods.sodium.client.data.fingerprint.FingerprintMeasure;
 import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.network.NetworkConstants;
 
-import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.packs.PackType;
+import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-@Mod(SodiumClientMod.MODID)
-public class SodiumClientMod {
+public class SodiumClientMod implements ClientModInitializer {
 
     public static final String MODID = "embeddium";
     public static final String MODNAME = "Embeddium";
@@ -30,23 +26,19 @@ public class SodiumClientMod {
 
     public static boolean oculusLoaded = false;
 
-    public SodiumClientMod() {
-        oculusLoaded = ModList.get().isLoaded("oculus");
+    @Override
+    public void onInitializeClient() {
+        oculusLoaded = FabricLoader.getInstance().isModLoaded("iris");
 
-        MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
+        MOD_VERSION = FabricLoader.getInstance().getModContainer(MODID).get().getMetadata().getVersion().toString();
 
         try {
             updateFingerprint();
         } catch (Throwable t) {
             LOGGER.error("Failed to update fingerprint", t);
         }
-    }
 
-    public void onClientSetup(final FMLClientSetupEvent event) {
-        IncompatibleModManager.checkMods(event);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(SpriteFinderCache.ReloadListener.INSTANCE);
     }
 
     public static SodiumGameOptions options() {

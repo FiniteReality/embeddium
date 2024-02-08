@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.config;
 
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,11 +15,11 @@ public class ConfigMigrator {
      * Tries to migrate the equivalent config file from Rubidium to the Embeddium name if possible.
      */
     public static Path handleConfigMigration(String fileName) {
-        Path mainPath = FMLPaths.CONFIGDIR.get().resolve(fileName);
+        Path mainPath = FabricLoader.getInstance().getConfigDir().resolve(fileName);
         try {
             if(Files.notExists(mainPath)) {
-                String legacyName = fileName.replace("embeddium", "rubidium");
-                Path legacyPath = FMLPaths.CONFIGDIR.get().resolve(legacyName);
+                String legacyName = fileName.replace("embeddium", "sodium");
+                Path legacyPath = FabricLoader.getInstance().getConfigDir().resolve(legacyName);
                 if(Files.exists(legacyPath)) {
                     Files.move(legacyPath, mainPath);
                     LOGGER.warn("Migrated {} config file to {}", legacyName, fileName);

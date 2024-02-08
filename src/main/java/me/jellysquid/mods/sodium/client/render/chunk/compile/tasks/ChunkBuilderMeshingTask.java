@@ -20,6 +20,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.chunk.VisGraph;
@@ -32,11 +33,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
-import org.embeddedt.embeddium.model.ModelDataSnapshotter;
 
 import java.util.Map;
 
@@ -49,14 +47,10 @@ import java.util.Map;
  */
 public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> {
 
-    private final RandomSource random = new SingleThreadedRandomSource(42L);
-
     private final RenderSection render;
     private final ChunkRenderContext renderContext;
 
     private final int buildTime;
-
-    private final Map<BlockPos, ModelData> modelDataMap;
 
     private Vec3 camera = Vec3.ZERO;
 
@@ -64,8 +58,6 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         this.render = render;
         this.renderContext = renderContext;
         this.buildTime = time;
-
-        this.modelDataMap = ModelDataSnapshotter.getModelDataForSection(Minecraft.getInstance().level, this.renderContext.getOrigin());
     }
 
     public ChunkBuilderMeshingTask withCameraPosition(Vec3 camera) {
@@ -120,16 +112,13 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         if (blockState.getRenderShape() == RenderShape.MODEL) {
                             BakedModel model = cache.getBlockModels()
                                 .getBlockModel(blockState);
-                            ModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
 
                             long seed = blockState.getSeed(blockPos);
-                            random.setSeed(seed);
 
-                            for (RenderType layer : model.getRenderTypes(blockState, random, modelData)) {
-                                context.update(blockPos, modelOffset, blockState, model, seed, modelData, layer);
-                                cache.getBlockRenderer()
-                                        .renderModel(context, buffers);
-                            }
+                            RenderType layer = ItemBlockRenderTypes.getChunkRenderType(blockState);
+                            context.update(blockPos, modelOffset, blockState, model, seed, layer);
+                            cache.getBlockRenderer()
+                                    .renderModel(context, buffers);
                         }
 
                         FluidState fluidState = blockState.getFluidState();
@@ -187,7 +176,8 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
         renderData.setOcclusionData(occluder.resolve());
 
-        MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
+        // TODO port
+        //MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildOutput(this.render, renderData.build(), meshes, this.buildTime);
     }

@@ -2,9 +2,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
-import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.model.color.ColorProvider;
 import me.jellysquid.mods.sodium.client.model.color.ColorProviderRegistry;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
@@ -18,15 +16,14 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder.Vertex;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -36,7 +33,6 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeConfig;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 
 import java.util.Arrays;
@@ -58,7 +54,7 @@ public class BlockRenderer {
     private final boolean useAmbientOcclusion;
     private final boolean useForgeExperimentalLightingPipeline;
 
-    private final ForgeBlockRenderer forgeBlockRenderer = new ForgeBlockRenderer();
+    private final IndigoBlockRenderContext indigoRenderContext = new IndigoBlockRenderContext();
 
     private final int[] quadColors = new int[4];
 
@@ -74,7 +70,8 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
-        this.useForgeExperimentalLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+        // TODO: Expose config option and use this as a way to unconditionally delegate to the vanilla renderer
+        this.useForgeExperimentalLightingPipeline = false; // ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -108,7 +105,7 @@ public class BlockRenderer {
             }
         }
 
-        if(this.useForgeExperimentalLightingPipeline) {
+        if(!ctx.model().isVanillaAdapter()) {
             final PoseStack mStack;
             if(renderOffset != Vec3.ZERO) {
                 mStack = new PoseStack();
@@ -116,9 +113,9 @@ public class BlockRenderer {
             } else
                 mStack = EMPTY_STACK;
 
-            sinkingVertexBuilder.reset();
-            forgeBlockRenderer.renderBlock(mode, ctx, sinkingVertexBuilder, mStack, this.random, this.occlusionCache, meshBuilder);
-            sinkingVertexBuilder.flush(meshBuilder, material, ctx.origin());
+            indigoRenderContext.reset();
+            indigoRenderContext.render(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), mStack, null, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY);
+            indigoRenderContext.flush(buffers, ctx.origin());
             return;
         }
 
@@ -141,7 +138,7 @@ public class BlockRenderer {
         var random = this.random;
         random.setSeed(ctx.seed());
 
-        return ctx.model().getQuads(ctx.state(), face, random, ctx.modelData(), ctx.renderLayer());
+        return ctx.model().getQuads(ctx.state(), face, random);
     }
 
     private boolean isFaceVisible(BlockRenderContext ctx, Direction face) {
@@ -153,6 +150,8 @@ public class BlockRenderer {
 
         this.useReorienting = true;
 
+        // TODO: Check if Fabric allows disabling AO per-quad
+        /*
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
             if (!quads.get(i).hasAmbientOcclusion()) {
@@ -164,13 +163,14 @@ public class BlockRenderer {
                 break;
             }
         }
+         */
 
         // This is a very hot allocation, iterate over it manually
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
             BakedQuadView quad = (BakedQuadView) quads.get(i);
 
-            final var lightData = this.getVertexLight(ctx, quad.hasAmbientOcclusion() ? lighter : this.lighters.getLighter(LightMode.FLAT), cullFace, quad);
+            final var lightData = this.getVertexLight(ctx, lighter, cullFace, quad);
             final var vertexColors = this.getVertexColors(ctx, colorizer, quad);
 
             this.writeGeometry(ctx, builder, offset, material, quad, vertexColors, lightData);
@@ -236,7 +236,7 @@ public class BlockRenderer {
     }
 
     private LightMode getLightingMode(BlockState state, BakedModel model, BlockAndTintGetter world, BlockPos pos, RenderType renderLayer) {
-        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, renderLayer) && state.getLightEmission(world, pos) == 0) {
+        if (this.useAmbientOcclusion && model.useAmbientOcclusion() && state.getLightEmission() == 0) {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;

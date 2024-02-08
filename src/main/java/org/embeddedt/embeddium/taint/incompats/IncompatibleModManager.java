@@ -2,12 +2,6 @@ package org.embeddedt.embeddium.taint.incompats;
 
 import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.ModLoadingStage;
-import net.minecraftforge.fml.ModLoadingWarning;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.util.List;
 
@@ -20,8 +14,9 @@ public class IncompatibleModManager {
             .add(new ModDeclaration.Single("sound_physics_remastered", "Sound Physics Remastered"))
             .build();
 
-    public static void checkMods(FMLClientSetupEvent event) {
+    public static void checkMods() {
         // TODO: Enable
+        /*
         if (true || SodiumClientMod.options().advanced.disableIncompatibleModWarnings) {
             return;
         }
@@ -33,5 +28,7 @@ public class IncompatibleModManager {
                 ModLoader.get().addWarning(new ModLoadingWarning(selfInfo, ModLoadingStage.SIDED_SETUP, "embeddium.conflicting_mod_list", String.join(", ", modDeclarationList)));
             });
         }
+
+         */
     }
 }

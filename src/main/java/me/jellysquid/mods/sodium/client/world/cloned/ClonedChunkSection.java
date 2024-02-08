@@ -35,6 +35,7 @@ public class ClonedChunkSection {
     private final SectionPos pos;
 
     private final @Nullable Int2ReferenceMap<BlockEntity> blockEntityMap;
+    private final @Nullable Int2ReferenceMap<Object> blockEntityRenderDataMap;
 
     private final @Nullable DataLayer[] lightDataArrays;
 
@@ -51,6 +52,8 @@ public class ClonedChunkSection {
         PalettedContainerRO<Holder<Biome>> biomeData = null;
 
         Int2ReferenceMap<BlockEntity> blockEntityMap = null;
+        Int2ReferenceMap<Object> blockEntityRenderDataMap = null;
+
 
         if (section != null) {
             if (!section.hasOnlyAir()) {
@@ -60,6 +63,10 @@ public class ClonedChunkSection {
                     blockData = constructDebugWorldContainer(pos);
                 }
                 blockEntityMap = copyBlockEntities(chunk, pos);
+
+                if (blockEntityMap != null) {
+                    blockEntityRenderDataMap = copyBlockEntityRenderData(blockEntityMap);
+                }
             }
 
             biomeData = ReadableContainerExtended.clone(section.getBiomes());
@@ -69,6 +76,7 @@ public class ClonedChunkSection {
         this.biomeData = biomeData;
 
         this.blockEntityMap = blockEntityMap;
+        this.blockEntityRenderDataMap = blockEntityRenderDataMap;
 
         this.lightDataArrays = copyLightData(world, pos);
     }
@@ -165,6 +173,33 @@ public class ClonedChunkSection {
         return blockEntities;
     }
 
+    @Nullable
+    private static Int2ReferenceMap<Object> copyBlockEntityRenderData(Int2ReferenceMap<BlockEntity> blockEntities) {
+        Int2ReferenceOpenHashMap<Object> blockEntityRenderDataMap = null;
+
+        // Retrieve any render data after we have copied all block entities, as this will call into the code of
+        // other mods. This could potentially result in the chunk being modified, which would cause problems if we
+        // were iterating over any data in that chunk.
+        // See https://github.com/CaffeineMC/sodium-fabric/issues/942 for more info.
+        for (var entry : Int2ReferenceMaps.fastIterable(blockEntities)) {
+            Object data = entry.getValue().getRenderData();
+
+            if (data != null) {
+                if (blockEntityRenderDataMap == null) {
+                    blockEntityRenderDataMap = new Int2ReferenceOpenHashMap<>();
+                }
+
+                blockEntityRenderDataMap.put(entry.getIntKey(), data);
+            }
+        }
+
+        if (blockEntityRenderDataMap != null) {
+            blockEntityRenderDataMap.trim();
+        }
+
+        return blockEntityRenderDataMap;
+    }
+
     public SectionPos getPosition() {
         return this.pos;
     }
@@ -179,6 +214,10 @@ public class ClonedChunkSection {
 
     public @Nullable Int2ReferenceMap<BlockEntity> getBlockEntityMap() {
         return this.blockEntityMap;
+    }
+
+    public @Nullable Int2ReferenceMap<Object> getBlockEntityRenderDataMap() {
+        return this.blockEntityRenderDataMap;
     }
 
     public @Nullable DataLayer getLightArray(LightLayer lightType) {

@@ -1,9 +1,8 @@
 package me.jellysquid.mods.sodium.mixin;
 
-import me.jellysquid.mods.sodium.client.SodiumPreLaunch;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.moddiscovery.ModFile;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.config.ConfigMigrator;
@@ -39,8 +38,6 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
         this.logger.info("Loaded configuration file for " + MODNAME + ": {} options available, {} override(s) found",
                 this.config.getOptionCount(), this.config.getOptionOverrideCount());
-
-        SodiumPreLaunch.onPreLaunch();
     }
 
     @Override
@@ -95,18 +92,22 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
         return className.substring(0, className.length() - 6);
     }
 
+    private static Path findPathInMod(ModContainer modFile, String... pathComponents) {
+        return modFile.findPath(String.join("/", pathComponents)).orElse(null);
+    }
+
     @Override
     public List<String> getMixins() {
-        if (FMLLoader.getDist() != Dist.CLIENT) {
+        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
             return null;
         }
 
-        ModFile modFile = FMLLoader.getLoadingModList().getModFileById("embeddium").getFile();
+        ModContainer modFile = FabricLoader.getInstance().getModContainer("embeddium").get();
         Set<Path> rootPaths = new HashSet<>();
         // This allows us to see it from multiple sourcesets if need be
         for(String basePackage : new String[] { "core", "modcompat" }) {
-            Path mixinPackagePath = modFile.findResource("me", "jellysquid", "mods", "sodium", "mixin", basePackage);
-            if(Files.exists(mixinPackagePath)) {
+            Path mixinPackagePath = findPathInMod(modFile, "me", "jellysquid", "mods", "sodium", "mixin", basePackage);
+            if(mixinPackagePath != null && Files.exists(mixinPackagePath)) {
                 rootPaths.add(mixinPackagePath.getParent());
             }
         }

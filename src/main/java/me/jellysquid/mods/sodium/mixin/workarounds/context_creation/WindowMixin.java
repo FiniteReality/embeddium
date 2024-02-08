@@ -6,7 +6,6 @@ import me.jellysquid.mods.sodium.client.compatibility.checks.LateDriverScanner;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.Workarounds;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.nvidia.NvidiaWorkarounds;
 import net.minecraft.Util;
-import net.minecraftforge.fml.loading.ImmediateWindowHandler;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
@@ -41,8 +40,8 @@ public class WindowMixin {
     private long wglPrevContext = MemoryUtil.NULL;
 
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/loading/ImmediateWindowHandler;setupMinecraftWindow(Ljava/util/function/IntSupplier;Ljava/util/function/IntSupplier;Ljava/util/function/Supplier;Ljava/util/function/LongSupplier;)J"))
-    private long wrapGlfwCreateWindow(IntSupplier width, IntSupplier height, Supplier<String> title, LongSupplier monitor) {
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"))
+    private long wrapGlfwCreateWindow(int width, int height, CharSequence title, long monitor, long share) {
         final boolean applyNvidiaWorkarounds = Workarounds.isWorkaroundEnabled(Workarounds.Reference.NVIDIA_THREADED_OPTIMIZATIONS);
 
         if (applyNvidiaWorkarounds) {
@@ -59,7 +58,7 @@ public class WindowMixin {
         }
 
         try {
-            return ImmediateWindowHandler.setupMinecraftWindow(width, height, title, monitor);
+            return GLFW.glfwCreateWindow(width, height, title, monitor, share);
         } finally {
             if (applyNvidiaWorkarounds) {
                 NvidiaWorkarounds.uninstall();

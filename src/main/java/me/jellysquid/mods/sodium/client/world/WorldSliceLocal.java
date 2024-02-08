@@ -1,7 +1,9 @@
 package me.jellysquid.mods.sodium.client.world;
 
+import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipBlockStateContext;
@@ -9,6 +11,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,9 +21,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.client.model.data.ModelDataManager;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -31,7 +33,7 @@ import java.util.stream.Stream;
  * Wrapper object used to defeat identity comparisons in mods. Since vanilla provides a unique object to them for each
  * subchunk, we do the same.
  */
-public class WorldSliceLocal implements BlockAndTintGetter {
+public class WorldSliceLocal implements BlockAndTintGetter, RenderAttachedBlockView {
     private final BlockAndTintGetter view;
 
     public WorldSliceLocal(BlockAndTintGetter view) {
@@ -189,23 +191,22 @@ public class WorldSliceLocal implements BlockAndTintGetter {
         return view.getSectionYFromSectionIndex(index);
     }
 
+    @Override
+    public @Nullable Object getBlockEntityRenderData(BlockPos pos) {
+        return view.getBlockEntityRenderData(pos);
+    }
+
+    @Override
+    public boolean hasBiomes() {
+        return view.hasBiomes();
+    }
+
+    @Override
+    public Holder<Biome> getBiomeFabric(BlockPos pos) {
+        return view.getBiomeFabric(pos);
+    }
+
     public static LevelHeightAccessor create(int bottomY, int height) {
         return LevelHeightAccessor.create(bottomY, height);
-    }
-
-    @Override
-    @org.jetbrains.annotations.Nullable
-    public BlockEntity getExistingBlockEntity(BlockPos pos) {
-        return view.getExistingBlockEntity(pos);
-    }
-
-    @Override
-    public @org.jetbrains.annotations.Nullable ModelDataManager getModelDataManager() {
-        return view.getModelDataManager();
-    }
-
-    @Override
-    public float getShade(float normalX, float normalY, float normalZ, boolean shade) {
-        return view.getShade(normalX, normalY, normalZ, shade);
     }
 }

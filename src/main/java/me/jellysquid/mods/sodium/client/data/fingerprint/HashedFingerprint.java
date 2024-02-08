@@ -3,7 +3,7 @@ package me.jellysquid.mods.sodium.client.data.fingerprint;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import me.jellysquid.mods.sodium.client.util.FileUtil;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,7 +68,7 @@ public record HashedFingerprint(
     }
 
     private static Path getFilePath() {
-        return FMLPaths.CONFIGDIR.get()
+        return FabricLoader.getInstance().getConfigDir()
                 .resolve("embeddium-fingerprint.json");
     }
 }

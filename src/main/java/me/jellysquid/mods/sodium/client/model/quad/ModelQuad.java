@@ -17,8 +17,6 @@ public class ModelQuad implements ModelQuadViewMutable {
     private int colorIdx;
     private Direction direction;
 
-    private boolean hasAmbientOcclusion = true;
-
     @Override
     public void setX(int idx, float x) {
         this.data[vertexOffset(idx) + POSITION_INDEX] = Float.floatToRawIntBits(x);
@@ -72,11 +70,6 @@ public class ModelQuad implements ModelQuadViewMutable {
     @Override
     public void setLightFace(Direction face) {
         this.direction = face;
-    }
-
-    @Override
-    public void setHasAmbientOcclusion(boolean hasAmbientOcclusion) {
-        this.hasAmbientOcclusion = hasAmbientOcclusion;
     }
 
     @Override
@@ -137,10 +130,5 @@ public class ModelQuad implements ModelQuadViewMutable {
     @Override
     public Direction getLightFace() {
         return this.direction;
-    }
-
-    @Override
-    public boolean hasAmbientOcclusion() {
-        return this.hasAmbientOcclusion;
     }
 }

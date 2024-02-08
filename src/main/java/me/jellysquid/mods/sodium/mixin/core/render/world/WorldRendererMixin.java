@@ -21,7 +21,6 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
-import net.minecraftforge.client.ForgeHooksClient;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,11 +50,6 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Shadow
     @Final
     private Minecraft minecraft;
-
-    @Shadow
-    public Frustum getFrustum() {
-        return null;
-    }
 
     @Unique
     private SodiumWorldRenderer renderer;
@@ -128,8 +122,6 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
         } finally {
             RenderDevice.exitManagedCode();
         }
-
-        ForgeHooksClient.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), matrices, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.getFrustum());
     }
 
     /**
@@ -218,10 +210,14 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      *
      * NOTE: When updating Embeddium to newer versions of the game, this injection point must be checked.
      */
+    // TODO: Check if Fabric has similar API
+    /*
     @ModifyVariable(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0), ordinal = 3)
     private boolean changeEntityOutlineFlag(boolean bl) {
         return bl || (this.renderer.didBlockEntityRequestOutline() && this.shouldShowEntityOutlines());
     }
+
+     */
 
     /**
      * @reason Replace the debug string
