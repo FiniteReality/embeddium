@@ -1,5 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
@@ -21,7 +23,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEn
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
-import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.Minecraft;
@@ -40,7 +41,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.embeddedt.embeddium.tags.EmbeddiumTags;
+
+import java.util.function.Predicate;
 
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
@@ -62,7 +64,9 @@ public class FluidRenderer {
     private final ColorProviderRegistry colorProviderRegistry;
 
     private final SinkingVertexBuilder fluidVertexBuilder = new SinkingVertexBuilder();
-;
+
+    private final Reference2BooleanOpenHashMap<Class<? extends FluidRenderHandler>> handlersUsingCustomRenderer = new Reference2BooleanOpenHashMap<>();
+
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
 
@@ -104,28 +108,46 @@ public class FluidRenderer {
         return true;
     }
 
-    private void renderVanilla(WorldSlice world, FluidState fluidState, BlockPos blockPos, ChunkModelBuilder buffers, Material material) {
+    private boolean renderCustomFluid(WorldSlice world, FluidState fluidState, BlockPos blockPos, ChunkModelBuilder buffers, Material material) {
+        var handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getType());
+
+        // TODO move to a separate class
+        boolean overridesRenderFluid = handlersUsingCustomRenderer.computeIfAbsent(handler.getClass(), (Predicate<? super Class<? extends FluidRenderHandler>>)handlerClass -> {
+            try {
+                var method = handlerClass.getMethod("renderFluid", BlockPos.class, BlockAndTintGetter.class, VertexConsumer.class, BlockState.class, FluidState.class);
+                return method.getDeclaringClass() != FluidRenderHandler.class;
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException("Unable to find renderFluid method. Possibly a mismatched Fabric API version?", e);
+            }
+        });
+
+        if (!overridesRenderFluid) {
+            // Use our renderer for higher performance
+            return false;
+        }
+
         // Call vanilla fluid renderer and capture the results
         fluidVertexBuilder.reset();
-        Minecraft.getInstance().getBlockRenderer().renderLiquid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState);
+        handler.renderFluid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState);
         fluidVertexBuilder.flush(buffers, material, 0, 0, 0);
 
         // Mark fluid sprites as being used in rendering
-        TextureAtlasSprite[] sprites = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getType()).getFluidSprites(world, blockPos, fluidState);
+        TextureAtlasSprite[] sprites = handler.getFluidSprites(world, blockPos, fluidState);
         for(TextureAtlasSprite sprite : sprites) {
             if (sprite != null) {
                 buffers.addSprite(sprite);
             }
         }
+
+        return true;
     }
 
     public void render(WorldSlice world, FluidState fluidState, BlockPos blockPos, BlockPos offset, ChunkBuildBuffers buffers) {
         var material = DefaultMaterials.forFluidState(fluidState);
         var meshBuilder = buffers.get(material);
 
-        // Embeddium: Delegate to vanilla liquid renderer if fluid has this tag.
-        if(fluidState.getType().is(EmbeddiumTags.RENDERS_WITH_VANILLA)) {
-            renderVanilla(world, fluidState, blockPos, meshBuilder, material);
+        // Embeddium: Delegate to mod's custom fluid renderer if present
+        if(renderCustomFluid(world, fluidState, blockPos, meshBuilder, material)) {
             return;
         }
 
