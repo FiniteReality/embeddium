@@ -236,8 +236,8 @@ publishing {
 
 publishMods {
 	file = remapJar.archiveFile
-	changelog = "https://github.com/Nolij/nolijium/wiki/Changelog"
-	type = STABLE
+	changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
+	type = BETA
     modLoaders.add("fabric")
 
 	curseforge {
