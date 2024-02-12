@@ -31,7 +31,7 @@ public abstract class OutlineVertexConsumerMixin extends DefaultedVertexConsumer
     }
 
     @Override
-    public boolean isFullWriter() {
+    public boolean canUseIntrinsics() {
         return this.isFullWriter;
     }
 

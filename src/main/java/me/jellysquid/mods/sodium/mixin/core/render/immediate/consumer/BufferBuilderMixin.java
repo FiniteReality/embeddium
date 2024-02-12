@@ -52,7 +52,7 @@ public abstract class BufferBuilderMixin implements VertexBufferWriter {
     }
 
     @Override
-    public boolean isFullWriter() {
+    public boolean canUseIntrinsics() {
         return true;
     }
 
