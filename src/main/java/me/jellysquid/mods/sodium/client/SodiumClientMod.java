@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.packs.PackType;
 import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
+import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,8 @@ public class SodiumClientMod implements ClientModInitializer {
         oculusLoaded = FabricLoader.getInstance().isModLoaded("iris");
 
         MOD_VERSION = FabricLoader.getInstance().getModContainer(MODID).get().getMetadata().getVersion().toString();
+
+        TaintDetector.init();
 
         try {
             updateFingerprint();

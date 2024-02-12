@@ -88,8 +88,12 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     }
 
     private static String mixinClassify(Path baseFolder, Path path) {
-        String className = baseFolder.relativize(path).toString().replace('/', '.');
-        return className.substring(0, className.length() - 6);
+        try {
+            String className = baseFolder.relativize(path).toString().replace('/', '.');
+            return className.substring(0, className.length() - 6);
+        } catch(RuntimeException e) {
+            throw new IllegalStateException("Error relativizing " + path + " to " + baseFolder, e);
+        }
     }
 
     private static Path findPathInMod(ModContainer modFile, String... pathComponents) {
@@ -108,7 +112,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
         for(String basePackage : new String[] { "core", "modcompat" }) {
             Path mixinPackagePath = findPathInMod(modFile, "me", "jellysquid", "mods", "sodium", "mixin", basePackage);
             if(mixinPackagePath != null && Files.exists(mixinPackagePath)) {
-                rootPaths.add(mixinPackagePath.getParent());
+                rootPaths.add(mixinPackagePath.getParent().toAbsolutePath());
             }
         }
 
@@ -122,6 +126,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
                 continue;
             }
             mixinStream
+                    .map(Path::toAbsolutePath)
                     .filter(MixinClassValidator::isMixinClass)
                     .map(path -> mixinClassify(rootPath, path))
                     .filter(this::isMixinEnabled)
