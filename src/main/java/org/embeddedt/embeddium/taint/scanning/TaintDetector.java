@@ -6,11 +6,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import me.jellysquid.mods.sodium.mixin.MixinClassValidator;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.moddiscovery.ModFile;
-import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.ClassNode;
@@ -23,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TaintDetector {
     private static final String TAINT_MODE = System.getProperty("embeddium.taint_scan");
@@ -32,7 +30,7 @@ public class TaintDetector {
             "me/jellysquid/mods/sodium"
     );
 
-    private static final Multimap<ModFileInfo, TargetingClass> DISCOVERED_MODS = ArrayListMultimap.create();
+    private static final Multimap<ModContainer, TargetingClass> DISCOVERED_MODS = ArrayListMultimap.create();
 
     private static final Set<String> EXCLUDED_MOD_IDS = ImmutableSet.of("embeddium");
 
@@ -65,18 +63,20 @@ public class TaintDetector {
 
     private static void scanMods() {
         List<Path> classPaths = new ArrayList<>();
-        ModFileInfo self = FMLLoader.getLoadingModList().getModFileById("embeddium");
+        ModContainer self = FabricLoader.getInstance().getModContainer("embeddium").orElseThrow();
         Objects.requireNonNull(self, "Embeddium mod file does not exist");
-        for (ModFileInfo file : FMLLoader.getLoadingModList().getModFiles()) {
+        for (ModContainer file : FabricLoader.getInstance().getAllMods()) {
             // Skip scanning files that provide a mod we know and trust
-            if (file.getMods().stream().anyMatch(modInfo -> EXCLUDED_MOD_IDS.contains(modInfo.getModId()))) {
+            if (EXCLUDED_MOD_IDS.contains(file.getMetadata().getId())) {
                 continue;
             }
 
             classPaths.clear();
-            file.getFile().scanFile(path -> {
-                if(path.getFileName().toString().endsWith(".class")) {
-                   classPaths.add(path);
+            file.getRootPaths().forEach(rootPath -> {
+                try(Stream<Path> pathStream = Files.find(rootPath, Integer.MAX_VALUE, (p, a) -> a.isRegularFile() && p.getFileName().toString().endsWith("class"))) {
+                    pathStream.forEach(classPaths::add);
+                } catch(IOException e) {
+                    LOGGER.error("Exception scanning root path {}", rootPath, e);
                 }
             });
             for(Path path : classPaths) {
@@ -118,9 +118,9 @@ public class TaintDetector {
         theResults.append(DISCOVERED_MODS.keySet().size()).append(" mods were found that reference Embeddium internals:\n");
         DISCOVERED_MODS.asMap().forEach((file, listClass) -> {
             theResults
-                    .append("Mod file '").append(file.getFile().getFileName())
+                    .append("Mod file '").append(file.getOrigin().toString())
                     .append("' providing mods [")
-                    .append(file.getMods().stream().map(IModInfo::getModId).collect(Collectors.joining(", ")))
+                    .append(file.getMetadata().getId())
                     .append("] with ")
                     .append(listClass.size())
                     .append(" classes\n");
