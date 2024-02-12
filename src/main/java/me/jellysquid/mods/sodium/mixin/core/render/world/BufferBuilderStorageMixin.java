@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(RenderBuffers.class)
-public class giBufferBuilderStorageMixin {
+public class BufferBuilderStorageMixin {
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SectionBufferBuilderPool;allocate(I)Lnet/minecraft/client/renderer/SectionBufferBuilderPool;"))
     private SectionBufferBuilderPool sodium$doNotAllocateChunks(int i) {
         return new NonStoringBuilderPool();
