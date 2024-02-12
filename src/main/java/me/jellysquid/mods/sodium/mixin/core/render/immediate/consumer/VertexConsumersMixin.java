@@ -8,7 +8,6 @@ import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -24,16 +23,16 @@ public class VertexConsumersMixin {
         @Final
         private VertexConsumer second;
 
-        private boolean canUseIntrinsics;
+        private boolean isFullWriter;
 
         @Inject(method = "<init>", at = @At("RETURN"))
         private void checkFullStatus(CallbackInfo ci) {
-            this.canUseIntrinsics = VertexBufferWriter.tryOf(this.first) != null && VertexBufferWriter.tryOf(this.second) != null;
+            this.isFullWriter = VertexBufferWriter.tryOf(this.first) != null && VertexBufferWriter.tryOf(this.second) != null;
         }
 
         @Override
         public boolean canUseIntrinsics() {
-            return this.canUseIntrinsics;
+            return this.isFullWriter;
         }
 
         @Override
@@ -49,27 +48,23 @@ public class VertexConsumersMixin {
         @Final
         private VertexConsumer[] delegates;
 
-        private boolean canUseIntrinsics;
+        private boolean isFullWriter;
 
         @Inject(method = "<init>", at = @At("RETURN"))
         private void checkFullStatus(CallbackInfo ci) {
-            this.canUseIntrinsics = allDelegatesSupportIntrinsics();
-        }
-
-        @Unique
-        private boolean allDelegatesSupportIntrinsics() {
-            for (var delegate : this.delegates) {
-                if (VertexBufferWriter.tryOf(delegate) == null) {
-                    return false;
+            boolean notWriter = false;
+            for(var delegate : this.delegates) {
+                if(VertexBufferWriter.tryOf(delegate) == null) {
+                    notWriter = true;
+                    break;
                 }
             }
-
-            return true;
+            this.isFullWriter = !notWriter;
         }
 
         @Override
         public boolean canUseIntrinsics() {
-            return this.canUseIntrinsics;
+            return this.isFullWriter;
         }
 
         @Override

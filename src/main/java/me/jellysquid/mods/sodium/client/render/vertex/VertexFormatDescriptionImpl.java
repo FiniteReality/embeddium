@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.vertex;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import me.jellysquid.mods.sodium.mixin.core.render.VertexFormatAccessor;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.CommonVertexAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
@@ -8,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.NoSuchElementException;
 
 public class VertexFormatDescriptionImpl implements VertexFormatDescription {
@@ -20,12 +22,30 @@ public class VertexFormatDescriptionImpl implements VertexFormatDescription {
 
     private final int[] offsets;
 
+    private final boolean isSimple;
+
     public VertexFormatDescriptionImpl(VertexFormat format, int id) {
         this.format = format;
         this.id = id;
         this.stride = format.getVertexSize();
 
         this.offsets = getOffsets(format);
+        this.isSimple = checkSimple(format);
+    }
+
+    private static boolean checkSimple(VertexFormat format) {
+        EnumSet<CommonVertexAttribute> attributeSet = EnumSet.noneOf(CommonVertexAttribute.class);
+        var elementList = format.getElements();
+
+        for (int elementIndex = 0; elementIndex < elementList.size(); elementIndex++) {
+            var element = elementList.get(elementIndex);
+            var commonType = CommonVertexAttribute.getCommonType(element);
+            if (element != DefaultVertexFormat.ELEMENT_PADDING && (commonType == null || !attributeSet.add(commonType))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static int[] getOffsets(VertexFormat format) {
@@ -77,5 +97,10 @@ public class VertexFormatDescriptionImpl implements VertexFormatDescription {
     @Deprecated
     public VertexFormat format() {
         return this.format;
+    }
+
+    @Override
+    public boolean isSimpleFormat() {
+        return this.isSimple;
     }
 }
