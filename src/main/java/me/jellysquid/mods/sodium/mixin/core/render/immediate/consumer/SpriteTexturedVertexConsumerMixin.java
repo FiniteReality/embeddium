@@ -43,7 +43,7 @@ public class SpriteTexturedVertexConsumerMixin implements VertexBufferWriter {
     }
 
     @Override
-    public boolean isFullWriter() {
+    public boolean canUseIntrinsics() {
         return this.isFullWriter;
     }
 

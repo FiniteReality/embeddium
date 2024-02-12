@@ -32,7 +32,7 @@ public interface VertexBufferWriter extends net.caffeinemc.mods.sodium.api.verte
         push(stack, ptr, count, VertexFormatDescription.translateModern(format));
     }
 
-    default boolean isFullWriter() {
+    default boolean canUseIntrinsics() {
         return true;
     }
 }

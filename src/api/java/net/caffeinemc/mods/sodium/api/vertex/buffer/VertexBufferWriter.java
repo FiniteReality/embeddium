@@ -63,8 +63,13 @@ public interface VertexBufferWriter {
      */
     void push(MemoryStack stack, long ptr, int count, VertexFormatDescription format);
 
+    @Deprecated
     default boolean isFullWriter() {
         return true;
+    }
+
+    default boolean canUseIntrinsics() {
+        return isFullWriter();
     }
 
     /**

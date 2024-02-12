@@ -31,7 +31,7 @@ public class VertexConsumersMixin {
         }
 
         @Override
-        public boolean isFullWriter() {
+        public boolean canUseIntrinsics() {
             return this.isFullWriter;
         }
 
@@ -63,7 +63,7 @@ public class VertexConsumersMixin {
         }
 
         @Override
-        public boolean isFullWriter() {
+        public boolean canUseIntrinsics() {
             return this.isFullWriter;
         }
 
