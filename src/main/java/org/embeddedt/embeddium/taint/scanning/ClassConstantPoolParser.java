@@ -43,6 +43,7 @@ public class ClassConstantPoolParser {
     private static final int IMETH = 11;
     private static final int NAME_TYPE = 12;
     private static final int HANDLE = 15;
+    private static final int CONDY = 17;
     private static final int INDY = 18;
 
     private final ArrayList<byte[]> BYTES_TO_SEARCH;
@@ -74,10 +75,6 @@ public class ClassConstantPoolParser {
         if (basicClass == null || basicClass.length == 0) {
             return false;
         }
-        // checks the class version
-        if (readShort(6, basicClass) > Opcodes.V1_8) {
-            return false;
-        }
         // parses the constant pool
         final int n = readUnsignedShort(8, basicClass);
         int index = 10;
@@ -91,6 +88,7 @@ public class ClassConstantPoolParser {
                 case FLOAT:
                 case NAME_TYPE:
                 case INDY:
+                case CONDY:
                     size = 5;
                     break;
                 case LONG:
