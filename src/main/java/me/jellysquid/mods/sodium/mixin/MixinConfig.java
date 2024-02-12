@@ -187,7 +187,13 @@ public class MixinConfig {
             return;
         }
 
-        if (!(value instanceof Boolean enabled)) {
+        boolean enabled;
+
+        if (value instanceof Boolean) {
+            enabled = (Boolean)value;
+        } else if (value instanceof CustomValue cv && cv.getType() == CustomValue.CvType.BOOLEAN) {
+            enabled = cv.getAsBoolean();
+        } else {
             LOGGER.warn("Mod '{}' attempted to override option '{}' with an invalid value, ignoring", modid, name);
             return;
         }
