@@ -24,7 +24,7 @@ public class BufferSourceMixin {
         }
     }
 
-    @ModifyVariable(method = "lambda$endBatch$0", at = @At(value = "LOAD", ordinal = 0))
+    @ModifyVariable(method = "method_24213", at = @At(value = "LOAD", ordinal = 0))
     private VertexConsumer changeComparedVertexConsumer(VertexConsumer input) {
         if (input instanceof SodiumBufferBuilder replacement) {
             return replacement.getOriginalBufferBuilder();
