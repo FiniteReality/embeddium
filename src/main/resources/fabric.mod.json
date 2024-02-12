@@ -50,6 +50,7 @@
       "me.jellysquid.mods.sodium.client.SodiumClientMod"
     ],
     "preLaunch": [
+      "org.embeddedt.embeddium.taint.incompats.SupersededModDetector",
       "me.jellysquid.mods.sodium.client.SodiumPreLaunch"
     ]
   },
