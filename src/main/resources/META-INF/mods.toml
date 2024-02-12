@@ -27,6 +27,6 @@ side = "CLIENT"
 [[dependencies.embeddium]]
 modId = "oculus"
 type = "optional"
-versionRange = "[1.6.15,)"
+versionRange = "(1.6.15,)"
 ordering = "BEFORE"
 side = "CLIENT"

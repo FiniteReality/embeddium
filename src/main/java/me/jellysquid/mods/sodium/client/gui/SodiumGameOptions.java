@@ -144,12 +144,17 @@ public class SodiumGameOptions {
         return ConfigMigrator.handleConfigMigration(name);
     }
 
+    @Deprecated
     public void writeChanges() throws IOException {
-        if (this.isReadOnly()) {
+        writeToDisk(this);
+    }
+
+    public static void writeToDisk(SodiumGameOptions config) throws IOException {
+        if (config.isReadOnly()) {
             throw new IllegalStateException("Config file is read-only");
         }
 
-        Path dir = this.configPath.getParent();
+        Path dir = config.configPath.getParent();
 
         if (!Files.exists(dir)) {
             Files.createDirectories(dir);
@@ -158,13 +163,13 @@ public class SodiumGameOptions {
         }
 
         // Use a temporary location next to the config's final destination
-        Path tempPath = this.configPath.resolveSibling(this.configPath.getFileName() + ".tmp");
+        Path tempPath = config.configPath.resolveSibling(config.configPath.getFileName() + ".tmp");
 
         // Write the file to our temporary location
-        Files.writeString(tempPath, GSON.toJson(this));
+        Files.writeString(tempPath, GSON.toJson(config));
 
         // Atomically replace the old config file (if it exists) with the temporary file
-        Files.move(tempPath, this.configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        Files.move(tempPath, config.configPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
     }
 
     public boolean isReadOnly() {
