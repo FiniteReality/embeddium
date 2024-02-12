@@ -12,6 +12,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkConstants;
 
 import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
+import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,8 @@ public class SodiumClientMod {
 
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+
+        TaintDetector.init();
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
 
