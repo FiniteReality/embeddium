@@ -24,6 +24,6 @@ Stub, to allow mods detecting Rubidium to function as expected.
 [[dependencies.embeddium]]
 modId = "oculus"
 mandatory = false
-versionRange = "[1.6.15,)"
+versionRange = "(1.6.15,)"
 ordering = "BEFORE"
 side = "CLIENT"

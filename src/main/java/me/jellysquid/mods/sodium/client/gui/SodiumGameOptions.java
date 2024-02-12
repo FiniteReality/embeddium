@@ -144,7 +144,6 @@ public class SodiumGameOptions {
         return ConfigMigrator.handleConfigMigration(name);
     }
 
-    // TODO: Also delegate to the new name on Forge once we get Oculus to not require exactly one name present
     @Deprecated
     public void writeChanges() throws IOException {
         writeToDisk(this);
