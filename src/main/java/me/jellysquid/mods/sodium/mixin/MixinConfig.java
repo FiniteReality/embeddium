@@ -62,6 +62,7 @@ public class MixinConfig {
 
         this.addMixinRule("features.render.immediate", true);
         this.addMixinRule("features.render.immediate.buffer_builder", true);
+        this.addMixinRule("features.render.immediate.buffer_builder.fast_delegate", true);
         this.addMixinRule("features.render.immediate.matrix_stack", false);
 
         this.addMixinRule("features.render.model", true);
