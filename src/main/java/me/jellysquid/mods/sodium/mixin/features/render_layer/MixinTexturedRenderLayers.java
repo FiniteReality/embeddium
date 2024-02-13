@@ -26,7 +26,7 @@ public class MixinTexturedRenderLayers {
         if (SIGN_MATERIALS != null) {
             Material sprite = SIGN_MATERIALS.get(type);
 
-            if (type != null) {
+            if (sprite != null) {
                 ci.setReturnValue(sprite);
             }
         }
