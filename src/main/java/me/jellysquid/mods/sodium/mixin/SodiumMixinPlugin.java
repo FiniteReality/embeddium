@@ -106,7 +106,15 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
             return null;
         }
 
-        ModContainer modFile = FabricLoader.getInstance().getModContainer("embeddium").get();
+        var modFileOpt = FabricLoader.getInstance().getModContainer("embeddium");
+
+        if (modFileOpt.isEmpty()) {
+            // Probably a load error
+            logger.error("Could not find embeddium mod, there is likely a dependency error. Skipping mixin application.");
+            return null;
+        }
+
+        ModContainer modFile = modFileOpt.get();
         Set<Path> rootPaths = new HashSet<>();
         // This allows us to see it from multiple sourcesets if need be
         for(String basePackage : new String[] { "core", "modcompat" }) {
@@ -118,19 +126,16 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
         Set<String> possibleMixinClasses = new HashSet<>();
         for(Path rootPath : rootPaths) {
-            Stream<Path> mixinStream;
-            try {
-                mixinStream = Files.find(rootPath, Integer.MAX_VALUE, (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith(".class"));
+            try(Stream<Path> mixinStream = Files.find(rootPath, Integer.MAX_VALUE, (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith(".class"))) {
+                mixinStream
+                        .map(Path::toAbsolutePath)
+                        .filter(MixinClassValidator::isMixinClass)
+                        .map(path -> mixinClassify(rootPath, path))
+                        .filter(this::isMixinEnabled)
+                        .forEach(possibleMixinClasses::add);
             } catch(IOException e) {
                 e.printStackTrace();
-                continue;
             }
-            mixinStream
-                    .map(Path::toAbsolutePath)
-                    .filter(MixinClassValidator::isMixinClass)
-                    .map(path -> mixinClassify(rootPath, path))
-                    .filter(this::isMixinEnabled)
-                    .forEach(possibleMixinClasses::add);
         }
 
         return new ArrayList<>(possibleMixinClasses);
