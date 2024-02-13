@@ -126,19 +126,16 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
         Set<String> possibleMixinClasses = new HashSet<>();
         for(Path rootPath : rootPaths) {
-            Stream<Path> mixinStream;
-            try {
-                mixinStream = Files.find(rootPath, Integer.MAX_VALUE, (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith(".class"));
+            try(Stream<Path> mixinStream = Files.find(rootPath, Integer.MAX_VALUE, (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith(".class"))) {
+                mixinStream
+                        .map(Path::toAbsolutePath)
+                        .filter(MixinClassValidator::isMixinClass)
+                        .map(path -> mixinClassify(rootPath, path))
+                        .filter(this::isMixinEnabled)
+                        .forEach(possibleMixinClasses::add);
             } catch(IOException e) {
                 e.printStackTrace();
-                continue;
             }
-            mixinStream
-                    .map(Path::toAbsolutePath)
-                    .filter(MixinClassValidator::isMixinClass)
-                    .map(path -> mixinClassify(rootPath, path))
-                    .filter(this::isMixinEnabled)
-                    .forEach(possibleMixinClasses::add);
         }
 
         return new ArrayList<>(possibleMixinClasses);
