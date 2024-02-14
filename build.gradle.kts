@@ -187,7 +187,6 @@ publishMods {
     file = tasks.jar.get().archiveFile
     changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
     type = STABLE
-    modLoaders.add("forge")
     modLoaders.add("neoforge")
 
     curseforge {
