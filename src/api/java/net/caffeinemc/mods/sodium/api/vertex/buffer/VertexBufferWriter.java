@@ -15,7 +15,7 @@ public interface VertexBufferWriter {
      * @throws IllegalArgumentException If the vertex consumer does not implement the necessary interface
      */
     static VertexBufferWriter of(VertexConsumer consumer) {
-        if (consumer instanceof VertexBufferWriter writer && writer.isFullWriter()) {
+        if (consumer instanceof VertexBufferWriter writer && writer.canUseIntrinsics()) {
             return writer;
         }
 
@@ -31,7 +31,7 @@ public interface VertexBufferWriter {
      */
     @Nullable
     static VertexBufferWriter tryOf(VertexConsumer consumer) {
-        if (consumer instanceof VertexBufferWriter writer && writer.isFullWriter()) {
+        if (consumer instanceof VertexBufferWriter writer && writer.canUseIntrinsics()) {
             return writer;
         }
 
@@ -63,6 +63,9 @@ public interface VertexBufferWriter {
      */
     void push(MemoryStack stack, long ptr, int count, VertexFormatDescription format);
 
+    /**
+     * Do not call this method, use canUseIntrinsics instead.
+     */
     @Deprecated
     default boolean isFullWriter() {
         return true;
