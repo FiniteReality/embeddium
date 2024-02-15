@@ -18,14 +18,18 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 
 /**
- * A allocation-free {@link IVertexBuilder} implementation
- * which pipes vertices into a {@link ModelVertexSink}.
+ * A {@link VertexConsumer} implementation which amortizes allocations
+ * and pipes vertices into Sodium's meshing system.
  *
- * @author KitsuneAlex
+ * @author KitsuneAlex, embeddedt
  */
 @OnlyIn(Dist.CLIENT)
 public final class SinkingVertexBuilder implements VertexConsumer {
-    private final ByteBuffer buffer = ByteBuffer.allocateDirect(2097152).order(ByteOrder.nativeOrder());
+    private static final int VERTEX_SIZE_BYTES = 32;
+    private static final int INITIAL_CAPACITY = 16384; // Seems to generally be enough for your average subchunk
+    private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
+    private ByteBuffer buffer = EMPTY_BUFFER;
+
     private final int[] sideCount = new int[ModelQuadFacing.VALUES.length];
     private int currentVertex;
 
@@ -44,6 +48,16 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     private boolean hasFixedColor = false;
 
     private final ChunkVertexEncoder.Vertex[] sodiumVertexArray = ChunkVertexEncoder.Vertex.uninitializedQuad();
+
+    private static ByteBuffer reallocDirect(ByteBuffer old, int capacity) {
+        ByteBuffer newBuf = ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder());
+        int oldPos = old.position();
+        old.rewind();
+        newBuf.put(old);
+        newBuf.position(Math.min(capacity, oldPos));
+        old.position(oldPos);
+        return newBuf;
+    }
 
     @Nonnull
     @Override
@@ -107,6 +121,17 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     public void endVertex() {
         final Direction dir = Direction.fromDelta((int) nx, (int) ny, (int) nz);
         final int normal = dir != null ? dir.ordinal() : -1;
+
+        // Make sure there is enough space for a new vertex
+        if ((this.buffer.capacity() - this.buffer.position()) < VERTEX_SIZE_BYTES) {
+            int newCapacity = this.buffer.capacity() * 2;
+            if (newCapacity == 0) {
+                newCapacity = INITIAL_CAPACITY;
+            }
+            this.buffer = reallocDirect(this.buffer, newCapacity);
+        }
+
+        ByteBuffer buffer = this.buffer;
 
         // Write the current quad vertex's normal, position, UVs, color and raw light values
         buffer.putInt(normal);
