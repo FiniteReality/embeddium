@@ -233,8 +233,6 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
     @Override
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
-        super.renderBackground(drawContext);
-
         this.updateControls();
 
         super.render(drawContext, this.prompt != null ? -1 : mouseX, this.prompt != null ? -1 : mouseY, delta);

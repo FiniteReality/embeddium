@@ -21,11 +21,11 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -42,9 +42,6 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     private Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress;
 
     @Shadow
-    private boolean needsFullRenderChunkUpdate;
-
-    @Shadow
     private int ticks;
 
     @Shadow
@@ -58,6 +55,10 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     private int frame;
 
     @Shadow public abstract boolean shouldShowEntityOutlines();
+
+    @Shadow
+    @Nullable
+    private ClientLevel level;
 
     @Override
     public SodiumWorldRenderer sodium$getWorldRenderer() {
@@ -91,7 +92,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      * @author JellySquid
      */
     @Overwrite
-    public int countRenderedChunks() {
+    public int countRenderedSections() {
         return this.renderer.getVisibleChunkCount();
     }
 
@@ -100,7 +101,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      * @author JellySquid
      */
     @Overwrite
-    public boolean hasRenderedAllChunks() {
+    public boolean hasRenderedAllSections() {
         return this.renderer.isTerrainRenderComplete();
     }
 
@@ -114,7 +115,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      * @author JellySquid
      */
     @Overwrite
-    private void renderChunkLayer(RenderType renderLayer, PoseStack matrices, double x, double y, double z, Matrix4f matrix) {
+    private void renderSectionLayer(RenderType renderLayer, PoseStack matrices, double x, double y, double z, Matrix4f matrix) {
         RenderDevice.enterManagedCode();
 
         try {
@@ -139,8 +140,6 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
         } finally {
             RenderDevice.exitManagedCode();
         }
-
-        this.needsFullRenderChunkUpdate = false; // We set this because third-party mods may use it (to loop themselves), even if Vanilla does not.
     }
 
     /**
@@ -184,7 +183,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      * @author JellySquid
      */
     @Overwrite
-    public boolean isChunkCompiled(BlockPos pos) {
+    public boolean isSectionCompiled(BlockPos pos) {
         return this.renderer.isSectionReady(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
     }
 
@@ -201,7 +200,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
 
     @Inject(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
     private void onRenderBlockEntities(PoseStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightmapTextureManager, Matrix4f positionMatrix, CallbackInfo ci) {
-        this.renderer.renderBlockEntities(matrices, this.renderBuffers, this.destructionProgress, camera, tickDelta);
+        this.renderer.renderBlockEntities(matrices, this.renderBuffers, this.destructionProgress, camera, this.level.tickRateManager().isFrozen() ? 1.0F : tickDelta);
     }
 
     /**
@@ -224,7 +223,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      * @author JellySquid
      */
     @Overwrite
-    public String getChunkStatistics() {
+    public String getSectionStatistics() {
         return this.renderer.getChunksDebugString();
     }
 }

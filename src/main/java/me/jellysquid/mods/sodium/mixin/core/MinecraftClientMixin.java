@@ -87,8 +87,8 @@ public class MinecraftClientMixin {
     /**
      * Check for problematic core shader resource packs after the initial game launch.
      */
-    @Inject(method = "setInitialScreen", at = @At("TAIL"))
-    private void postInit(RealmsClient realms, ReloadInstance reload, GameConfig.QuickPlayData quickPlay, CallbackInfo ci) {
+    @Inject(method = "buildInitialScreens", at = @At("TAIL"))
+    private void postInit(CallbackInfoReturnable<Runnable> cir) {
         ResourcePackScanner.checkIfCoreShaderLoaded(this.resourceManager);
     }
 

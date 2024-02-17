@@ -7,6 +7,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -33,9 +34,9 @@ public class ClientChunkManagerMixin {
                     shift = At.Shift.AFTER
             )
     )
-    private void onChunkUnloaded(int chunkX, int chunkZ, CallbackInfo ci) {
+    private void onChunkUnloaded(ChunkPos pos, CallbackInfo ci) {
         ChunkTrackerHolder.get(this.level)
-                .onChunkStatusRemoved(chunkX, chunkZ, ChunkStatus.FLAG_HAS_BLOCK_DATA);
+                .onChunkStatusRemoved(pos.x, pos.z, ChunkStatus.FLAG_HAS_BLOCK_DATA);
     }
 
     @Inject(

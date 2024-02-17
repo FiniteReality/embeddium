@@ -55,8 +55,6 @@ public class ConfigCorruptedScreen extends Screen {
 
     @Override
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
-        this.renderBackground(drawContext);
-
         super.render(drawContext, mouseX, mouseY, delta);
 
         drawContext.drawString(this.font, Component.literal("Sodium Renderer"), 32, 32, 0xffffff);

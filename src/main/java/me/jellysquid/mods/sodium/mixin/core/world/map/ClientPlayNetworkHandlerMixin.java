@@ -6,6 +6,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacketData;
+import net.minecraft.world.level.ChunkPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,7 +29,9 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "handleForgetLevelChunk", at = @At("RETURN"))
     private void onChunkUnloadPacket(ClientboundForgetLevelChunkPacket packet, CallbackInfo ci) {
+        final ChunkPos pos = packet.pos();
+        
         ChunkTrackerHolder.get(this.level)
-                .onChunkStatusRemoved(packet.getX(), packet.getZ(), ChunkStatus.FLAG_ALL);
+                .onChunkStatusRemoved(pos.x, pos.z, ChunkStatus.FLAG_ALL);
     }
 }
