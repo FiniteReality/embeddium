@@ -32,14 +32,15 @@ public class WorldRendererMixin {
      * @reason Optimize cloud rendering
      */
     @Overwrite
-    public void renderClouds(PoseStack matrices, Matrix4f projectionMatrix, float tickDelta, double x, double y, double z) {
+    public void renderClouds(PoseStack matrices, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, float tickDelta, double x, double y, double z) {
         // On Forge, 'true' is a check for whether a mod is rendering clouds itself
+        //noinspection ConstantValue
         if (true) {
             if (this.cloudRenderer == null) {
                 this.cloudRenderer = new CloudRenderer(this.minecraft.getResourceManager());
             }
 
-            this.cloudRenderer.render(this.level, this.minecraft.player, matrices, projectionMatrix, this.ticks, tickDelta, x, y, z);
+            this.cloudRenderer.render(this.level, this.minecraft.player, modelViewMatrix, projectionMatrix, this.ticks, tickDelta, x, y, z);
         }
     }
 

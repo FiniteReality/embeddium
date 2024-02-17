@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.render;
 
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
@@ -11,18 +10,15 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderMatrices;
-import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSectionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.SortedRenderLists;
 import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkStatus;
 import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTracker;
 import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTrackerHolder;
-import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
 import me.jellysquid.mods.sodium.client.render.viewport.Viewport;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
-import me.jellysquid.mods.sodium.client.util.iterator.ByteIterator;
 import me.jellysquid.mods.sodium.client.world.WorldRendererExtended;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -43,10 +39,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /**
  * Provides an extension to vanilla's {@link LevelRenderer}.
@@ -240,8 +236,8 @@ public class SodiumWorldRenderer {
     /**
      * Performs a render pass for the given {@link RenderType} and draws all visible chunks for it.
      */
-    public void drawChunkLayer(RenderType renderLayer, PoseStack matrixStack, double x, double y, double z) {
-        ChunkRenderMatrices matrices = ChunkRenderMatrices.from(matrixStack);
+    public void drawChunkLayer(RenderType renderLayer, Matrix4f normal, double x, double y, double z) {
+        ChunkRenderMatrices matrices = ChunkRenderMatrices.from(normal);
 
         if (renderLayer == RenderType.solid()) {
             this.renderSectionManager.renderLayer(matrices, DefaultTerrainRenderPasses.SOLID, x, y, z);
@@ -331,7 +327,7 @@ public class SodiumWorldRenderer {
         }
     }
 
-    public void renderBlockEntities(PoseStack matrices,
+    public void renderBlockEntities(Matrix4f pose,
                                     RenderBuffers bufferBuilders,
                                     Long2ObjectMap<SortedSet<BlockDestructionProgress>> blockBreakingProgressions,
                                     Camera camera,
@@ -347,8 +343,10 @@ public class SodiumWorldRenderer {
 
         this.blockEntityRequestedOutline = false;
 
-        this.renderBlockEntities(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
-        this.renderGlobalBlockEntities(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
+        final PoseStack poseStack = new PoseStack();
+        
+        this.renderBlockEntities(poseStack, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
+        this.renderGlobalBlockEntities(poseStack, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
     }
 
     private void renderBlockEntities(PoseStack matrices,
@@ -438,8 +436,7 @@ public class SodiumWorldRenderer {
                         .getBuffer(ModelBakery.DESTROY_TYPES.get(stage));
 
                 PoseStack.Pose entry = matrices.last();
-                VertexConsumer transformer = new SheetedDecalTextureGenerator(bufferBuilder,
-                        entry.pose(), entry.normal(), 1.0f);
+                VertexConsumer transformer = new SheetedDecalTextureGenerator(bufferBuilder, entry, 1.0f);
 
                 consumer = (layer) -> layer.affectsCrumbling() ? VertexMultiConsumer.create(transformer, immediate.getBuffer(layer)) : immediate.getBuffer(layer);
             }
