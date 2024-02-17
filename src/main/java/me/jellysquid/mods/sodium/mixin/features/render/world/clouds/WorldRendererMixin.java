@@ -32,13 +32,13 @@ public class WorldRendererMixin {
      * @reason Optimize cloud rendering
      */
     @Overwrite
-    public void renderClouds(PoseStack matrices, Matrix4f projectionMatrix, float tickDelta, double x, double y, double z) {
-        if (!this.level.effects().renderClouds(this.level, this.ticks, tickDelta, matrices, x, y, z, projectionMatrix)) {
+    public void renderClouds(PoseStack matrices, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, float tickDelta, double x, double y, double z) {
+        if (!this.level.effects().renderClouds(this.level, this.ticks, tickDelta, matrices, x, y, z, modelViewMatrix, projectionMatrix)) {
             if (this.cloudRenderer == null) {
                 this.cloudRenderer = new CloudRenderer(this.minecraft.getResourceManager());
             }
 
-            this.cloudRenderer.render(this.level, this.minecraft.player, matrices, projectionMatrix, this.ticks, tickDelta, x, y, z);
+            this.cloudRenderer.render(this.level, this.minecraft.player, modelViewMatrix, projectionMatrix, this.ticks, tickDelta, x, y, z);
         }
     }
 

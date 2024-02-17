@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.render.immediate;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -22,6 +21,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -35,7 +35,6 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
@@ -70,7 +69,7 @@ public class CloudRenderer {
         this.reloadTextures(factory);
     }
 
-    public void render(@Nullable ClientLevel world, LocalPlayer player, PoseStack matrices, Matrix4f projectionMatrix, float ticks, float tickDelta, double cameraX, double cameraY, double cameraZ) {
+    public void render(@Nullable ClientLevel world, LocalPlayer player, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, float ticks, float tickDelta, double cameraX, double cameraY, double cameraZ) {
         if (world == null) {
             return;
         }
@@ -145,36 +144,21 @@ public class CloudRenderer {
 
         RenderSystem.setShaderColor((float) color.x, (float) color.y, (float) color.z, 0.8f);
 
-        matrices.pushPose();
-
-        Matrix4f modelViewMatrix = matrices.last().pose();
+        modelViewMatrix = new Matrix4f(modelViewMatrix);
         modelViewMatrix.translate(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ);
 
         // PASS 1: Set up depth buffer
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
-        RenderSystem.colorMask(false, false, false, false);
-
+        RenderType.cloudsDepthOnly().setupRenderState();
         this.vertexBuffer.drawWithShader(modelViewMatrix, projectionMatrix, this.shader);
+        RenderType.cloudsDepthOnly().clearRenderState();
 
         // PASS 2: Render geometry
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.depthMask(false);
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthFunc(GL30C.GL_EQUAL);
-        RenderSystem.colorMask(true, true, true, true);
-
+        RenderType.clouds().setupRenderState();
         this.vertexBuffer.drawWithShader(modelViewMatrix, projectionMatrix, this.shader);
-
-        matrices.popPose();
+        RenderType.clouds().clearRenderState();
 
         VertexBuffer.unbind();
-
-        RenderSystem.disableBlend();
-        RenderSystem.depthFunc(GL30C.GL_LEQUAL);
-
-        RenderSystem.enableCull();
+        
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         RenderSystem.setShaderFogEnd(previousEnd);
