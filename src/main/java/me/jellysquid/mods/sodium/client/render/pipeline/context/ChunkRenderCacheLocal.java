@@ -7,11 +7,12 @@ import me.jellysquid.mods.sodium.client.render.pipeline.BlockRenderer;
 import me.jellysquid.mods.sodium.client.render.pipeline.ChunkRenderCache;
 import me.jellysquid.mods.sodium.client.render.pipeline.FluidRenderer;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
-import me.jellysquid.mods.sodium.client.world.WorldSliceLocal;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
+import org.embeddedt.embeddium.render.world.WorldSliceLocalGenerator;
 
 public class ChunkRenderCacheLocal extends ChunkRenderCache {
     private final ArrayLightDataCache lightDataCache;
@@ -21,7 +22,7 @@ public class ChunkRenderCacheLocal extends ChunkRenderCache {
 
     private final BlockModelShaper blockModels;
     private final WorldSlice worldSlice;
-    private WorldSliceLocal localSlice;
+    private BlockAndTintGetter localSlice;
 
     public ChunkRenderCacheLocal(Minecraft client, Level world) {
         this.worldSlice = new WorldSlice(world);
@@ -53,14 +54,14 @@ public class ChunkRenderCacheLocal extends ChunkRenderCache {
         this.worldSlice.copyData(context);
         // create the new local slice here so that it's unique whenever we copy new data
         // this is passed into mod code, since some depend on the provided BlockRenderView object being unique each time
-        this.localSlice = new WorldSliceLocal(this.worldSlice);
+        this.localSlice = WorldSliceLocalGenerator.generate(this.worldSlice);
     }
 
     public WorldSlice getWorldSlice() {
         return this.worldSlice;
     }
 
-    public WorldSliceLocal getLocalSlice() {
+    public BlockAndTintGetter getLocalSlice() {
         return this.localSlice;
     }
 }
