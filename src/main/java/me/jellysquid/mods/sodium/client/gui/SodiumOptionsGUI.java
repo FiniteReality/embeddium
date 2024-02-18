@@ -438,7 +438,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
     static {
         DONATION_PROMPT_MESSAGE = List.of(
                 FormattedText.composite(Component.literal("Hello!")),
-                FormattedText.composite(Component.literal("It seems that you've been enjoying "), Component.literal("Embeddium").setStyle(Style.EMPTY.withColor(0x27eb92)), Component.literal(", a port of Sodium for the Forge/NeoForge modloaders.")),
+                FormattedText.composite(Component.literal("It seems that you've been enjoying "), Component.literal("Embeddium").setStyle(Style.EMPTY.withColor(0x27eb92)), Component.literal(", a fork of Sodium for Minecraft.")),
                 FormattedText.composite(Component.literal("Sodium is complex, and requires "), Component.literal("thousands of hours").setStyle(Style.EMPTY.withColor(0xff6e00)), Component.literal(" of development, debugging, and tuning to create the experience that players have come to expect.")),
                 FormattedText.composite(Component.literal("If you'd like to show a token of appreciation, and support the development of Sodium in the process, then consider "), Component.literal("buying them a coffee").setStyle(Style.EMPTY.withColor(0xed49ce)), Component.literal(".")),
                 FormattedText.composite(Component.literal("And thanks again for using the mod! We hope it helps you (and your computer.)"))
