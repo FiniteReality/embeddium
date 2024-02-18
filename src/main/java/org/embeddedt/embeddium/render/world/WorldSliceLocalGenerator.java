@@ -157,7 +157,7 @@ public class WorldSliceLocalGenerator {
     private static Class<?> createWrapperClass() {
         byte[] bytes = createWrapperClassBytecode();
         try {
-            return DEFINE_CLASS.get().define(bytes, WORLD_SLICE_LOCAL_CLASS_NAME);
+            return DEFINE_CLASS.get().define(bytes, WORLD_SLICE_LOCAL_CLASS_NAME.replace('/', '.'));
         } catch(Exception e) {
             throw new RuntimeException("Error defining WorldSlice wrapper", e);
         }
