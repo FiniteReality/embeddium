@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.mixin.features.textures.mipmaps;
 import com.mojang.blaze3d.platform.NativeImage;
 import me.jellysquid.mods.sodium.client.util.NativeImageHelper;
 import me.jellysquid.mods.sodium.client.util.color.ColorSRGB;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
@@ -26,6 +27,10 @@ public class SpriteContentsMixin {
     @Final
     private NativeImage originalImage;
 
+    @Shadow
+    @Final
+    private ResourceLocation name;
+
     // While Fabric allows us to @Inject into the constructor here, that's just a specific detail of FabricMC's mixin
     // fork. Upstream Mixin doesn't allow arbitrary @Inject usage in constructor. However, we can use @ModifyVariable
     // just fine, in a way that hopefully doesn't conflict with other mods.
@@ -36,8 +41,11 @@ public class SpriteContentsMixin {
     // cross-platform.
     @Redirect(method = "<init>(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/resources/metadata/animation/FrameSize;Lcom/mojang/blaze3d/platform/NativeImage;Lnet/minecraft/client/resources/metadata/animation/AnimationMetadataSection;Lnet/minecraftforge/client/textures/ForgeTextureMetadata;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/texture/SpriteContents;originalImage:Lcom/mojang/blaze3d/platform/NativeImage;", opcode = Opcodes.PUTFIELD))
     private void sodium$beforeGenerateMipLevels(SpriteContents instance, NativeImage nativeImage, ResourceLocation identifier) {
-        // We're injecting after the "info" field has been set, so this is safe even though we're in a constructor.
-        sodium$fillInTransparentPixelColors(nativeImage);
+        // Embeddium: Only fill in transparent colors if mipmaps are on and the texture name does not contain "leaves".
+        // We're injecting after the "name" field has been set, so this is safe even though we're in a constructor.
+        if (Minecraft.getInstance().options.mipmapLevels().get() > 0 && !this.name.getPath().contains("leaves")) {
+            sodium$fillInTransparentPixelColors(nativeImage);
+        }
 
         this.originalImage = nativeImage;
     }
