@@ -1,15 +1,19 @@
 package me.jellysquid.mods.sodium.client.gui.options;
 
 import com.google.common.collect.ImmutableList;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
+import org.embeddedt.embeddium.gui.IEOptionGroup;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OptionGroup {
+public class OptionGroup extends IEOptionGroup {
     private final ImmutableList<Option<?>> options;
 
-    private OptionGroup(ImmutableList<Option<?>> options) {
+    private OptionGroup(ResourceLocation id, ImmutableList<Option<?>> options) {
+        super(id);
         this.options = options;
     }
 
@@ -21,8 +25,15 @@ public class OptionGroup {
         return this.options;
     }
 
-    public static class Builder {
+    public static class Builder extends IEOptionGroup.IEBuilder {
         private final List<Option<?>> options = new ArrayList<>();
+
+        @Override
+        public Builder setId(ResourceLocation id) {
+            this.id = id;
+
+            return this;
+        }
 
         public Builder add(Option<?> option) {
             this.options.add(option);
@@ -32,8 +43,12 @@ public class OptionGroup {
 
         public OptionGroup build() {
             Validate.notEmpty(this.options, "At least one option must be specified");
+            if (this.id == null) {
+                this.id = OptionGroup.DEFAULT_ID;
+                SodiumClientMod.logger().warn("Id must be specified in OptionGroup which contains {}, this might throw a exception on a next release", this.options.get(0).getName().getString());
+            }
 
-            return new OptionGroup(ImmutableList.copyOf(this.options));
+            return new OptionGroup(this.id, ImmutableList.copyOf(this.options));
         }
     }
 }

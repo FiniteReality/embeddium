@@ -1,11 +1,14 @@
 package me.jellysquid.mods.sodium.client.gui.options;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.binding.GenericBinding;
 import me.jellysquid.mods.sodium.client.gui.options.binding.OptionBinding;
 import me.jellysquid.mods.sodium.client.gui.options.control.Control;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
+import org.embeddedt.embeddium.gui.IEOptionImpl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +16,7 @@ import java.util.EnumSet;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class OptionImpl<S, T> implements Option<T> {
+public class OptionImpl<S, T> extends IEOptionImpl<S, T> implements Option<T> {
     private final OptionStorage<S> storage;
 
     private final OptionBinding<S, T> binding;
@@ -32,6 +35,7 @@ public class OptionImpl<S, T> implements Option<T> {
     private final boolean enabled;
 
     private OptionImpl(OptionStorage<S> storage,
+                       ResourceLocation id,
                        Component name,
                        Component tooltip,
                        OptionBinding<S, T> binding,
@@ -39,6 +43,7 @@ public class OptionImpl<S, T> implements Option<T> {
                        EnumSet<OptionFlag> flags,
                        OptionImpact impact,
                        boolean enabled) {
+        super(id);
         this.storage = storage;
         this.name = name;
         this.tooltip = tooltip;
@@ -117,7 +122,7 @@ public class OptionImpl<S, T> implements Option<T> {
         return new Builder<>(storage);
     }
 
-    public static class Builder<S, T> {
+    public static class Builder<S, T> extends IEOptionImpl.IEBuilder {
         private final OptionStorage<S> storage;
         private Component name;
         private Component tooltip;
@@ -129,6 +134,12 @@ public class OptionImpl<S, T> implements Option<T> {
 
         private Builder(OptionStorage<S> storage) {
             this.storage = storage;
+        }
+
+        @Override
+        public Builder<S, T> setId(ResourceLocation id) {
+            super.setId(id);
+            return this;
         }
 
         public Builder<S, T> setName(Component name) {
@@ -197,7 +208,12 @@ public class OptionImpl<S, T> implements Option<T> {
             Validate.notNull(this.binding, "Option binding must be specified");
             Validate.notNull(this.control, "Control must be specified");
 
-            return new OptionImpl<>(this.storage, this.name, this.tooltip, this.binding, this.control, this.flags, this.impact, this.enabled);
+            if (this.id == null) {
+                this.id = Option.DEFAULT_ID;
+                SodiumClientMod.logger().warn("Id must be specified in option '{}', this might throw a exception on a future release", this.name.getString());
+            }
+
+            return new OptionImpl<>(this.storage, this.id, this.name, this.tooltip, this.binding, this.control, this.flags, this.impact, this.enabled);
         }
     }
 }

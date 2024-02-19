@@ -36,11 +36,13 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
 public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
+    static final List<Supplier<OptionPage>> extraSodiumPages = new ArrayList<>();
     private final List<OptionPage> pages = new ArrayList<>();
 
     private final List<ControlElement<?>> controls = new ArrayList<>();
@@ -57,6 +59,14 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
     private @Nullable ScreenPrompt prompt;
 
+    public static void addOptionsPage(Supplier<OptionPage> pageSupplier) {
+        extraSodiumPages.add(pageSupplier);
+    }
+
+    public static void addOptionsPage(OptionPage page) {
+        extraSodiumPages.add(() -> page);
+    }
+
     public SodiumOptionsGUI(Screen prevScreen) {
         super(Component.translatable(MODNAME + " Options"));
 
@@ -66,8 +76,15 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
         this.pages.add(SodiumGameOptionPages.quality());
         this.pages.add(SodiumGameOptionPages.performance());
         this.pages.add(SodiumGameOptionPages.advanced());
+        this.addExtraPages();
 
         this.checkPromptTimers();
+    }
+
+    private void addExtraPages() {
+        for (Supplier<OptionPage> optionPage : extraSodiumPages) {
+            this.pages.add(optionPage.get());
+        }
     }
 
     private void checkPromptTimers() {
