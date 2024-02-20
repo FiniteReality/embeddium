@@ -212,15 +212,21 @@ public class OptionImpl<S, T> implements Option<T> {
         }
 
         public OptionImpl<S, T> build() {
-            Validate.notNull(this.name, "Name must be specified");
-            Validate.notNull(this.tooltip, "Tooltip must be specified");
-            Validate.notNull(this.binding, "Option binding must be specified");
-            Validate.notNull(this.control, "Control must be specified");
-
             if (this.id == null) {
                 this.id = Option.DEFAULT_ID;
                 SodiumClientMod.logger().warn("Id must be specified in option '{}', this might throw a exception on a future release", this.name.getString());
             }
+
+            if (this.name == null) {
+                this.name = Component.translatable(this.id.getNamespace() + ".options." + this.id.getPath() + ".name");
+            }
+
+            if (this.tooltip == null) {
+                this.tooltip = Component.translatable(this.id.getNamespace() + ".options." + this.id.getPath() + ".tooltip");
+            }
+
+            Validate.notNull(this.binding, "Option binding must be specified");
+            Validate.notNull(this.control, "Control must be specified");
 
             return new OptionImpl<>(this.storage, this.id, this.name, this.tooltip, this.binding, this.control, this.flags, this.impact, this.enabled);
         }
