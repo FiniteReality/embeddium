@@ -13,16 +13,16 @@ import java.util.function.UnaryOperator;
  * Fired when an option group is created, to allow replacing options in that group if desired. (Can be used,
  * for instance, to extend the VSync or fullscreen options.)
  *
- * Adding new options to a group is not allowed, you must use {@link OptionPageCreationEvent} and create
+ * Adding new options to a group is not allowed, you must use {@link OptionPageConstructionEvent} and create
  * a new group.
  */
-public class OptionGroupCreationEvent extends EmbeddiumEvent {
-    public static final EventHandlerRegistrar<OptionGroupCreationEvent> BUS = new EventHandlerRegistrar<>();
+public class OptionGroupConstructionEvent extends EmbeddiumEvent {
+    public static final EventHandlerRegistrar<OptionGroupConstructionEvent> BUS = new EventHandlerRegistrar<>();
 
     private final ResourceLocation id;
     private final List<Option<?>> options;
 
-    public OptionGroupCreationEvent(ResourceLocation id, List<Option<?>> options) {
+    public OptionGroupConstructionEvent(ResourceLocation id, List<Option<?>> options) {
         this.id = id;
         this.options = options;
     }

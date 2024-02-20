@@ -25,7 +25,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.fml.loading.FMLLoader;
-import org.embeddedt.embeddium.api.OptionGUICreationEvent;
+import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
@@ -68,7 +67,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
         this.pages.add(SodiumGameOptionPages.performance());
         this.pages.add(SodiumGameOptionPages.advanced());
 
-        OptionGUICreationEvent.BUS.post(new OptionGUICreationEvent(this.pages));
+        OptionGUIConstructionEvent.BUS.post(new OptionGUIConstructionEvent(this.pages));
 
         this.checkPromptTimers();
     }

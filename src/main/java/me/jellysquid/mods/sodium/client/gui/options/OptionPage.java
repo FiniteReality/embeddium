@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.embeddedt.embeddium.api.OptionPageCreationEvent;
+import org.embeddedt.embeddium.api.OptionPageConstructionEvent;
 
 import java.util.List;
 
@@ -37,8 +37,8 @@ public class OptionPage {
     }
 
     private ImmutableList<OptionGroup> collectExtraGroups(ImmutableList<OptionGroup> groups) {
-        OptionPageCreationEvent event = new OptionPageCreationEvent(this.id, this.name);
-        OptionPageCreationEvent.BUS.post(event);
+        OptionPageConstructionEvent event = new OptionPageConstructionEvent(this.id, this.name);
+        OptionPageConstructionEvent.BUS.post(event);
         List<OptionGroup> extraGroups = event.getAdditionalGroups();
         return extraGroups.isEmpty() ? groups : ImmutableList.<OptionGroup>builder().addAll(groups).addAll(extraGroups).build();
     }

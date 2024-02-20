@@ -13,14 +13,14 @@ import java.util.List;
 /**
  * Fired when an option page is created, to allow adding additional {@link OptionGroup} entries at the end of the page.
  */
-public class OptionPageCreationEvent extends EmbeddiumEvent {
-    public static final EventHandlerRegistrar<OptionPageCreationEvent> BUS = new EventHandlerRegistrar<>();
+public class OptionPageConstructionEvent extends EmbeddiumEvent {
+    public static final EventHandlerRegistrar<OptionPageConstructionEvent> BUS = new EventHandlerRegistrar<>();
 
     private final ResourceLocation id;
     private final Component name;
     private final List<OptionGroup> additionalGroups = new ArrayList<>();
 
-    public OptionPageCreationEvent(ResourceLocation id, Component name) {
+    public OptionPageConstructionEvent(ResourceLocation id, Component name) {
         this.id = id;
         this.name = name;
     }
