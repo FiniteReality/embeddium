@@ -17,6 +17,11 @@ import java.util.function.Consumer;
 
 public class ChunkBuilder {
     static final Logger LOGGER = LogManager.getLogger("ChunkBuilder");
+    /**
+     * Megabytes of heap required per chunk builder thread. This is used to cap the number of worker
+     * threads when the game is given a small heap.
+     */
+    private static final int MBS_PER_CHUNK_BUILDER = 64;
 
     private final ChunkJobQueue queue = new ChunkJobQueue();
 
@@ -119,8 +124,13 @@ public class ChunkBuilder {
         return requested == 0 ? getOptimalThreadCount() : Math.min(requested, getMaxThreadCount());
     }
 
-    private static int getMaxThreadCount() {
-        return Runtime.getRuntime().availableProcessors();
+    public static int getMaxThreadCount() {
+        int totalCores = Runtime.getRuntime().availableProcessors();
+        long memoryMb = Runtime.getRuntime().maxMemory() / (1024L * 1024L);
+        // always allow at least one builder regardless of heap size
+        int maxBuilders = Math.max(1, (int)(memoryMb / MBS_PER_CHUNK_BUILDER));
+        // choose the total CPU cores or the number of builders the heap permits, whichever is smaller
+        return Math.min(totalCores, maxBuilders);
     }
 
     public void tryStealTask(ChunkJob job) {
