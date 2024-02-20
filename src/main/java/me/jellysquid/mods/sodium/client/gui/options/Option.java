@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.Control;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -38,4 +39,12 @@ public interface Option<T> {
     void applyChanges();
 
     Collection<OptionFlag> getFlags();
+
+    /**
+     * Return the ID of the option this option replaces.
+     */
+    @Nullable
+    default ResourceLocation getReplacedId() {
+        return null;
+    }
 }

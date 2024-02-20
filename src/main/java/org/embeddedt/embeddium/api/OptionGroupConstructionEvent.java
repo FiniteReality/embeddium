@@ -38,7 +38,8 @@ public class OptionGroupConstructionEvent extends EmbeddiumEvent {
      * @param newOption a new option to use in place of the old one
      */
     public void replaceOption(Option<?> newOption) {
-        ResourceLocation replacingId = newOption.getId(); // TODO require  newOption.getReplacingId();
+        ResourceLocation replacingId = newOption.getReplacedId();
+        Objects.requireNonNull(replacingId, "Option does not replace any other option");
         options.replaceAll(option -> {
             if(replacingId.equals(option.getId())) {
                 return newOption;

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Maintains a mapping of ID -> option, used for various purposes within Embeddium.
@@ -21,8 +22,7 @@ public class OptionRegistry {
         OPTIONS_BY_ID.put(option.getId(), option);
     }
 
-    @Nullable
-    public static Option<?> getOptionById(ResourceLocation id) {
-        return OPTIONS_BY_ID.get(id);
+    public static Optional<Option<?>> getOptionById(ResourceLocation id) {
+        return Optional.ofNullable(OPTIONS_BY_ID.get(id));
     }
 }

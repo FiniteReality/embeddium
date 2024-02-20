@@ -13,6 +13,7 @@ import org.embeddedt.embeddium.client.gui.options.OptionRegistry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -36,6 +37,8 @@ public class OptionImpl<S, T> implements Option<T> {
 
     private final boolean enabled;
 
+    private final ReplacementInfo<T, ?> replacementInfo;
+
     private OptionImpl(OptionStorage<S> storage,
                        ResourceLocation id,
                        Component name,
@@ -44,7 +47,8 @@ public class OptionImpl<S, T> implements Option<T> {
                        Function<OptionImpl<S, T>, Control<T>> control,
                        EnumSet<OptionFlag> flags,
                        OptionImpact impact,
-                       boolean enabled) {
+                       boolean enabled,
+                       ReplacementInfo<T, ?> replacementInfo) {
         this.id = id;
         this.storage = storage;
         this.name = name;
@@ -54,6 +58,7 @@ public class OptionImpl<S, T> implements Option<T> {
         this.flags = flags;
         this.control = control.apply(this);
         this.enabled = enabled;
+        this.replacementInfo = replacementInfo;
 
         this.reset();
     }
@@ -91,12 +96,20 @@ public class OptionImpl<S, T> implements Option<T> {
     @Override
     public void setValue(T value) {
         this.modifiedValue = value;
+        // Delegate change to replaced option
+        if(this.replacementInfo != null) {
+            OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(option -> ((Option)option).setValue(this.replacementInfo.valueMigrator.apply(value)));
+        }
     }
 
     @Override
     public void reset() {
         this.value = this.binding.getValue(this.storage.getData());
         this.modifiedValue = this.value;
+        // Delegate change to replaced option
+        if(this.replacementInfo != null) {
+            OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(option -> ((Option)option).setValue(this.replacementInfo.valueMigrator.apply(this.value)));
+        }
     }
 
     @Override
@@ -118,6 +131,10 @@ public class OptionImpl<S, T> implements Option<T> {
     public void applyChanges() {
         this.binding.setValue(this.storage.getData(), this.modifiedValue);
         this.value = this.modifiedValue;
+        // Delegate change to replaced option
+        if(this.replacementInfo != null) {
+            OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(option -> ((Option)option).setValue(this.replacementInfo.valueMigrator.apply(this.value)));
+        }
     }
 
     @Override
@@ -127,6 +144,16 @@ public class OptionImpl<S, T> implements Option<T> {
 
     public static <S, T> OptionImpl.Builder<S, T> createBuilder(@SuppressWarnings("unused") Class<T> type, OptionStorage<S> storage) {
         return new Builder<>(storage);
+    }
+
+    private static class ReplacementInfo<T, Y> {
+        ResourceLocation replacedId;
+        Function<T, Y> valueMigrator;
+
+        public ReplacementInfo(ResourceLocation oldId, Function<T, Y>  valueMigrator) {
+            this.replacedId = oldId;
+            this.valueMigrator = valueMigrator;
+        }
     }
 
     public static class Builder<S, T> {
@@ -139,6 +166,7 @@ public class OptionImpl<S, T> implements Option<T> {
         private OptionImpact impact;
         private final EnumSet<OptionFlag> flags = EnumSet.noneOf(OptionFlag.class);
         private boolean enabled = true;
+        private ReplacementInfo<T, ?> replacementInfo;
 
         private Builder(OptionStorage<S> storage) {
             this.storage = storage;
@@ -212,10 +240,26 @@ public class OptionImpl<S, T> implements Option<T> {
             return this;
         }
 
+        /**
+         * Marks this option as replacing a built-in option.
+         * @param oldId the ID of the original option
+         * @param valueMigrator a migrator function that migrates the values set by this option to the same
+         *                      type as that of the old option
+         * @param <Y> the type of the old option
+         */
+        public <Y> Builder<S, T> replaces(ResourceLocation oldId, Function<T, Y> valueMigrator) {
+            this.replacementInfo = new ReplacementInfo<>(oldId, valueMigrator);
+            return this;
+        }
+
         public OptionImpl<S, T> build() {
             if (this.id == null) {
                 this.id = Option.DEFAULT_ID;
                 SodiumClientMod.logger().warn("Id must be specified in option '{}', this might throw a exception on a future release", this.name.getString());
+            }
+
+            if (this.replacementInfo != null && Objects.equals(this.id, this.replacementInfo.replacedId)) {
+                throw new IllegalArgumentException("Option must have a distinct ID from option it replaces");
             }
 
             if (this.name == null) {
@@ -229,7 +273,7 @@ public class OptionImpl<S, T> implements Option<T> {
             Validate.notNull(this.binding, "Option binding must be specified");
             Validate.notNull(this.control, "Control must be specified");
 
-            OptionImpl<S, T> impl = new OptionImpl<>(this.storage, this.id, this.name, this.tooltip, this.binding, this.control, this.flags, this.impact, this.enabled);
+            OptionImpl<S, T> impl = new OptionImpl<>(this.storage, this.id, this.name, this.tooltip, this.binding, this.control, this.flags, this.impact, this.enabled, this.replacementInfo);
             OptionRegistry.onOptionCreate(impl);
             return impl;
         }
