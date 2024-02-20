@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChunkBuilder {
     private static final Logger LOGGER = LogManager.getLogger("ChunkBuilder");
@@ -33,6 +34,7 @@ public class ChunkBuilder {
     private final Object jobNotifier = new Object();
 
     private final AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicInteger freeBuilders = new AtomicInteger(0);
     private final List<Thread> threads = new ArrayList<>();
     private final List<ChunkRenderCacheLocal> chunkRenderCaches = new ArrayList<>();
 
@@ -83,6 +85,8 @@ public class ChunkBuilder {
             this.threads.add(thread);
             this.chunkRenderCaches.add(context.cache);
         }
+
+        this.freeBuilders.set(this.limitThreads);
 
         LOGGER.info("Started {} worker threads", this.threads.size());
     }
@@ -229,6 +233,10 @@ public class ChunkBuilder {
         return wrappedTask;
     }
 
+    public void injectResult(ChunkBuildResult result) {
+        this.deferredResultQueue.add(result);
+    }
+
     public Iterator<ChunkBuildResult> createDeferredBuildResultDrain() {
         return new QueueDrainingIterator<>(this.deferredResultQueue);
     }
@@ -239,6 +247,14 @@ public class ChunkBuilder {
 
     public Collection<ChunkRenderCacheLocal> getChunkRenderCaches() {
         return Collections.unmodifiableList(this.chunkRenderCaches);
+    }
+
+    public int getNumAvailableBuilders() {
+        return this.freeBuilders.get();
+    }
+
+    public int getNumPendingResults() {
+        return this.deferredResultQueue.size();
     }
 
     /**
@@ -340,9 +356,13 @@ public class ChunkBuilder {
                     continue;
                 }
 
+                ChunkBuilder.this.freeBuilders.decrementAndGet();
+
                 try {
                     processJob(job, this.context);
                 } finally {
+                    ChunkBuilder.this.freeBuilders.incrementAndGet();
+
                     this.context.release();
                 }
             }

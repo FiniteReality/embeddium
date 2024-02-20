@@ -423,9 +423,7 @@ public class SodiumWorldRenderer {
     }
 
     public String getChunksDebugString() {
-        // C: visible/total
-        // TODO: add dirty and queued counts
-        return String.format("C: %s/%s", this.renderSectionManager.getVisibleChunkCount(), this.renderSectionManager.getTotalSections());
+        return this.renderSectionManager.getChunksDebugString();
     }
 
     /**

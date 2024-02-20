@@ -28,7 +28,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.passes.BlockRenderPassManag
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderBuildTask;
-import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderEmptyBuildTask;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderRebuildTask;
 import me.jellysquid.mods.sodium.client.render.chunk.tasks.ChunkRenderSortTask;
 import me.jellysquid.mods.sodium.client.util.MathUtil;
@@ -244,7 +243,7 @@ public class RenderSectionManager {
 
         PriorityQueue<RenderSection> queue = this.rebuildQueues.get(section.getPendingUpdate());
 
-        if (queue.size() >= 32) {
+        if (queue.size() >= section.getPendingUpdate().getMaximumQueueSize()) {
             return;
         }
 
@@ -484,7 +483,10 @@ public class RenderSectionManager {
         if (context != null) {
             return new ChunkRenderRebuildTask(render, context, frame).withCameraPosition(new Vec3(cameraX, cameraY, cameraZ));
         } else {
-            return new ChunkRenderEmptyBuildTask(render, frame);
+            // Skip scheduling empty build tasks, just inject an empty result to the result queue
+            this.builder.injectResult(new ChunkBuildResult(render, ChunkRenderData.EMPTY, Collections.emptyMap(), frame));
+            render.onBuildSubmitted(null);
+            return null;
         }
     }
 
@@ -695,6 +697,22 @@ public class RenderSectionManager {
 
     private RenderSection getRenderSection(int x, int y, int z) {
         return this.sections.get(SectionPos.asLong(x, y, z));
+    }
+
+    public String getChunksDebugString() {
+        // C: visible/total (occlusion) D: view-distance pC: updateQueueSize
+        int toUpdate = 0;
+        for(var queue : this.rebuildQueues.values()) {
+            toUpdate += queue.size();
+        }
+        return String.format("C: %s/%s %s D: %d pC: %d pU: %d aB: %d", this.getVisibleChunkCount(),
+                this.getTotalSections(),
+                Minecraft.getInstance().smartCull ? "(s) " : "",
+                this.renderDistance,
+                toUpdate,
+                this.builder.getNumPendingResults(),
+                this.builder.getNumAvailableBuilders()
+        );
     }
 
     public Collection<String> getDebugStrings() {

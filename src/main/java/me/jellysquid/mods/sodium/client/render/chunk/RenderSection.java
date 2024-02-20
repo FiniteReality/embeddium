@@ -17,6 +17,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
 import java.util.Map;
@@ -326,7 +328,7 @@ public class RenderSection {
         return type;
     }
 
-    public void onBuildSubmitted(ChunkBuilder.WrappedTask task) {
+    public void onBuildSubmitted(@Nullable ChunkBuilder.WrappedTask task) {
         cancelRebuildTask();
 
         this.rebuildTask = new WeakReference<>(task);
