@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.gui.options;
 import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.resources.ResourceLocation;
+import org.embeddedt.embeddium.api.OptionGroupCreationEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,8 @@ public class OptionGroup {
                 this.id = OptionGroup.DEFAULT_ID;
                 SodiumClientMod.logger().warn("Id must be specified in OptionGroup which contains {}, this might throw a exception on a next release", this.options.get(0).getName().getString());
             }
+
+            OptionGroupCreationEvent.BUS.post(new OptionGroupCreationEvent(this.id, this.options));
 
             return new OptionGroup(this.id, ImmutableList.copyOf(this.options));
         }
