@@ -4,17 +4,23 @@ import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
-import org.embeddedt.embeddium.gui.IEOptionGroup;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OptionGroup extends IEOptionGroup {
+public class OptionGroup {
+    public static final ResourceLocation DEFAULT_ID = new ResourceLocation(SodiumClientMod.MODID, "empty");
+
     private final ImmutableList<Option<?>> options;
 
+    public final ResourceLocation id;
     private OptionGroup(ResourceLocation id, ImmutableList<Option<?>> options) {
-        super(id);
+        this.id = id;
         this.options = options;
+    }
+
+    public ResourceLocation getId() {
+        return id;
     }
 
     public static Builder createBuilder() {
@@ -25,10 +31,11 @@ public class OptionGroup extends IEOptionGroup {
         return this.options;
     }
 
-    public static class Builder extends IEOptionGroup.IEBuilder {
+    public static class Builder {
         private final List<Option<?>> options = new ArrayList<>();
 
-        @Override
+        private ResourceLocation id;
+
         public Builder setId(ResourceLocation id) {
             this.id = id;
 

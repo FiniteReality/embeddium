@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.embeddedt.embeddium.gui.IEOptionPage;
 
-public class OptionPage extends IEOptionPage {
+public class OptionPage {
+    public static final ResourceLocation DEFAULT_ID = new ResourceLocation(SodiumClientMod.MODID, "empty");
+
+    private final ResourceLocation id;
     private final Component name;
     private final ImmutableList<OptionGroup> groups;
     private final ImmutableList<Option<?>> options;
@@ -18,7 +20,7 @@ public class OptionPage extends IEOptionPage {
     }
 
     public OptionPage(ResourceLocation id, Component name, ImmutableList<OptionGroup> groups) {
-        super(id);
+        this.id = id;
         this.name = name;
         this.groups = groups;
 
@@ -29,6 +31,10 @@ public class OptionPage extends IEOptionPage {
         }
 
         this.options = builder.build();
+    }
+
+    public ResourceLocation getId() {
+        return id;
     }
 
     public ImmutableList<OptionGroup> getGroups() {

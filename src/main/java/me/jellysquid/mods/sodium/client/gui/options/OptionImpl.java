@@ -8,7 +8,6 @@ import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
-import org.embeddedt.embeddium.gui.IEOptionImpl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -16,7 +15,7 @@ import java.util.EnumSet;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class OptionImpl<S, T> extends IEOptionImpl<S, T> implements Option<T> {
+public class OptionImpl<S, T> implements Option<T> {
     private final OptionStorage<S> storage;
 
     private final OptionBinding<S, T> binding;
@@ -24,6 +23,7 @@ public class OptionImpl<S, T> extends IEOptionImpl<S, T> implements Option<T> {
 
     private final EnumSet<OptionFlag> flags;
 
+    private final ResourceLocation id;
     private final Component name;
     private final Component tooltip;
 
@@ -43,7 +43,7 @@ public class OptionImpl<S, T> extends IEOptionImpl<S, T> implements Option<T> {
                        EnumSet<OptionFlag> flags,
                        OptionImpact impact,
                        boolean enabled) {
-        super(id);
+        this.id = id;
         this.storage = storage;
         this.name = name;
         this.tooltip = tooltip;
@@ -54,6 +54,11 @@ public class OptionImpl<S, T> extends IEOptionImpl<S, T> implements Option<T> {
         this.enabled = enabled;
 
         this.reset();
+    }
+
+    @Override
+    public ResourceLocation getId() {
+        return id;
     }
 
     @Override
@@ -122,8 +127,9 @@ public class OptionImpl<S, T> extends IEOptionImpl<S, T> implements Option<T> {
         return new Builder<>(storage);
     }
 
-    public static class Builder<S, T> extends IEOptionImpl.IEBuilder {
+    public static class Builder<S, T> {
         private final OptionStorage<S> storage;
+        private ResourceLocation id;
         private Component name;
         private Component tooltip;
         private OptionBinding<S, T> binding;
@@ -136,9 +142,11 @@ public class OptionImpl<S, T> extends IEOptionImpl<S, T> implements Option<T> {
             this.storage = storage;
         }
 
-        @Override
         public Builder<S, T> setId(ResourceLocation id) {
-            super.setId(id);
+            Validate.notNull(id, "Id must not be null");
+
+            this.id = id;
+
             return this;
         }
 
