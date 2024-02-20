@@ -3,7 +3,7 @@ package me.jellysquid.mods.sodium.client.gui.options;
 import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.lang3.Validate;
+import org.embeddedt.embeddium.client.gui.EmbeddiumOptionsAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +19,6 @@ public class OptionGroup {
     public static final ResourceLocation CHUNK_UPDATES = new ResourceLocation(SodiumClientMod.MODID, "chunk_updates");
     public static final ResourceLocation RENDERING_CULLING = new ResourceLocation(SodiumClientMod.MODID, "rendering_culling");
     public static final ResourceLocation CPU_SAVING = new ResourceLocation(SodiumClientMod.MODID, "cpu_saving");
-
-    private static final List<OptionModify> optionsModifiers = new ArrayList<>();
 
     private final ImmutableList<Option<?>> options;
 
@@ -54,17 +52,24 @@ public class OptionGroup {
         }
 
         public Builder add(Option<?> option) {
-            this.options.add(option);
+            if (!EmbeddiumOptionsAPI.consume(options, EmbeddiumOptionsAPI.customOptions, option)) {
+                this.options.add(option);
+            }
 
             return this;
         }
 
         public OptionGroup build() {
-            Validate.notEmpty(this.options, "At least one option must be specified");
+            if (this.options.isEmpty()) {
+                SodiumClientMod.logger().warn("OptionGroup must contains at least one option. ignoring empty group...");
+            }
+
             if (this.id == null) {
                 this.id = OptionGroup.DEFAULT_ID;
                 SodiumClientMod.logger().warn("Id must be specified in OptionGroup which contains {}, this might throw a exception on a next release", this.options.get(0).getName().getString());
             }
+
+            EmbeddiumOptionsAPI.consume(this.options, EmbeddiumOptionsAPI.customOptions);
 
             return new OptionGroup(this.id, ImmutableList.copyOf(this.options));
         }

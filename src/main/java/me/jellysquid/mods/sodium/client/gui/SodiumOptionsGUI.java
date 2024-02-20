@@ -25,6 +25,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.fml.loading.FMLLoader;
+import org.embeddedt.embeddium.client.gui.EmbeddiumOptionsAPI;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -41,7 +42,6 @@ import java.util.stream.Stream;
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
 public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
-    static final List<Supplier<OptionPage>> extraPages = new ArrayList<>();
     private final List<OptionPage> pages = new ArrayList<>();
 
     private final List<ControlElement<?>> controls = new ArrayList<>();
@@ -58,28 +58,19 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
     private @Nullable ScreenPrompt prompt;
 
-    public static void addCustomPage(Supplier<OptionPage> pageSupplier) {
-        extraPages.add(pageSupplier);
-    }
-
     public SodiumOptionsGUI(Screen prevScreen) {
         super(Component.literal(MODNAME + " Options"));
 
         this.prevScreen = prevScreen;
 
-        this.pages.add(SodiumGameOptionPages.general());
-        this.pages.add(SodiumGameOptionPages.quality());
-        this.pages.add(SodiumGameOptionPages.performance());
-        this.pages.add(SodiumGameOptionPages.advanced());
-        this.addExtraPages();
+        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages, SodiumGameOptionPages.general());
+        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages, SodiumGameOptionPages.quality());
+        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages, SodiumGameOptionPages.performance());
+        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages, SodiumGameOptionPages.advanced());
+
+        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages);
 
         this.checkPromptTimers();
-    }
-
-    private void addExtraPages() {
-        for (Supplier<OptionPage> optionPage : extraPages) {
-            this.pages.add(optionPage.get());
-        }
     }
 
     private void checkPromptTimers() {
