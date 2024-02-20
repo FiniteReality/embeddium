@@ -242,6 +242,10 @@ public class OptionImpl<S, T> implements Option<T> {
 
         /**
          * Marks this option as replacing a built-in option.
+         * <p></p>
+         * When you replace an option, setValue is still called on the old option, to allow visibility predicates
+         * observing it to work. However, its binding will not be used - you are responsible for replacing
+         * the binding yourself.
          * @param oldId the ID of the original option
          * @param valueMigrator a migrator function that migrates the values set by this option to the same
          *                      type as that of the old option
