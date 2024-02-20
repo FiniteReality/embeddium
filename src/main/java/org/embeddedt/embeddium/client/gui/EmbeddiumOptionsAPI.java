@@ -42,13 +42,13 @@ public class EmbeddiumOptionsAPI {
                     return true;
                 }
 
-                case INJECT_BEFORE: {
+                case ADD_BEFORE: {
                     optionsList.add(customOpt.getOption());
                     optionsList.add(option);
                     return true;
                 }
 
-                case INJECT_AFTER: {
+                case ADD_AFTER: {
                     optionsList.add(option);
                     optionsList.add(customOpt.getOption());
                     return true;
@@ -66,12 +66,12 @@ public class EmbeddiumOptionsAPI {
     public static <T> boolean consume(List<T> optionsList, List<CustomOption<T>> customOptionsList) {
         for (CustomOption<T> customOpt: customOptionsList) {
             switch (customOpt.mode()) {
-                case INJECT_FIRST: {
+                case HEAD: {
                     optionsList.add(0, customOpt.getOption());
                     return true;
                 }
 
-                case INJECT_LAST: {
+                case TAIL: {
                     optionsList.add(customOpt.getOption());
                     return true;
                 }

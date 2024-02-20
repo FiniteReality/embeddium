@@ -14,6 +14,6 @@ public record CustomOption<T>(Predicate<T> predicate, Mode mode, Supplier<T> opt
     }
 
     public enum Mode {
-        INJECT_BEFORE, INJECT_AFTER, INJECT_LAST, INJECT_FIRST, REPLACE, DELETE
+        HEAD, TAIL, ADD_BEFORE, ADD_AFTER, REPLACE, DELETE
     }
 }
