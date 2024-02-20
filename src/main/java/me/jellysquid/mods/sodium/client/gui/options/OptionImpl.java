@@ -108,7 +108,7 @@ public class OptionImpl<S, T> implements Option<T> {
         this.modifiedValue = this.value;
         // Delegate change to replaced option
         if(this.replacementInfo != null) {
-            OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(option -> ((Option)option).setValue(this.replacementInfo.valueMigrator.apply(this.value)));
+            OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(Option::reset);
         }
     }
 
@@ -133,7 +133,7 @@ public class OptionImpl<S, T> implements Option<T> {
         this.value = this.modifiedValue;
         // Delegate change to replaced option
         if(this.replacementInfo != null) {
-            OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(option -> ((Option)option).setValue(this.replacementInfo.valueMigrator.apply(this.value)));
+            OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(Option::reset);
         }
     }
 

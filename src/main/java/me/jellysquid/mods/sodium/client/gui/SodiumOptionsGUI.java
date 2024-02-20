@@ -215,21 +215,28 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
         int y = 28;
 
         for (OptionGroup group : this.currentPage.getGroups()) {
+            boolean optionShown = false;
             // Add each option's control element
             for (Option<?> option : group.getOptions()) {
-                Control<?> control = option.getControl();
-                ControlElement<?> element = control.createElement(new Dim2i(x, y, 200, 18));
+                if (option.isVisible()) {
+                    Control<?> control = option.getControl();
+                    ControlElement<?> element = control.createElement(new Dim2i(x, y, 200, 18));
 
-                this.addRenderableWidget(element);
+                    this.addRenderableWidget(element);
 
-                this.controls.add(element);
+                    this.controls.add(element);
 
-                // Move down to the next option
-                y += 18;
+                    // Move down to the next option
+                    y += 18;
+
+                    optionShown = true;
+                }
             }
 
-            // Add padding beneath each option group
-            y += 4;
+            if (optionShown) {
+                // Add padding beneath each option group that has at least one visible option
+                y += 4;
+            }
         }
     }
 

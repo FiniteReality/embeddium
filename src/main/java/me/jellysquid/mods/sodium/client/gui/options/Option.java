@@ -47,4 +47,11 @@ public interface Option<T> {
     default ResourceLocation getReplacedId() {
         return null;
     }
+
+    /**
+     * @return true if this option should be shown on screen
+     */
+    default boolean isVisible() {
+        return true;
+    }
 }
