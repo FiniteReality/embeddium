@@ -4,7 +4,8 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import org.embeddedt.embeddium.api.eventbus.EmbeddiumEvent;
+import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -24,7 +25,9 @@ import java.util.Objects;
  * event handler. Note that {@link MeshAppender#render(MeshAppender.Context)} will be called on a worker thread, and
  * therefore accessing the world is not safe inside the appender itself. Instead, use the provided {@link BlockAndTintGetter}.
  */
-public class ChunkMeshEvent extends Event {
+public class ChunkMeshEvent extends EmbeddiumEvent {
+    public static final EventHandlerRegistrar<ChunkMeshEvent> BUS = new EventHandlerRegistrar<>();
+
     private final Level world;
     private final SectionPos sectionOrigin;
     private List<MeshAppender> meshAppenders = null;
@@ -60,7 +63,7 @@ public class ChunkMeshEvent extends Event {
     @ApiStatus.Internal
     public static List<MeshAppender> post(Level world, SectionPos origin) {
         ChunkMeshEvent event = new ChunkMeshEvent(world, origin);
-        MinecraftForge.EVENT_BUS.post(event);
+        BUS.post(event);
         return Objects.requireNonNullElse(event.meshAppenders, Collections.emptyList());
     }
 }
