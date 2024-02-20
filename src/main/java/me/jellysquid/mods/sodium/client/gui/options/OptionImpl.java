@@ -108,7 +108,7 @@ public class OptionImpl<S, T> implements Option<T> {
         if(this.replacementInfo != null) {
             OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(option -> ((Option)option).setValue(this.replacementInfo.valueMigrator.apply(value)));
         }
-        this.hasChangedPollFlag = this.hasChanged();
+        this.hasChangedPollFlag = true;
     }
 
     @Override

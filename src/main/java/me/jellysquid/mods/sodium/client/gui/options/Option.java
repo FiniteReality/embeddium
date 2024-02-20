@@ -59,7 +59,7 @@ public interface Option<T> {
     }
 
     /**
-     * Like hasChanged, but clears the flag after being called.
+     * Returns true if setValue was called since a call to this function. Clears its flag after being called.
      */
     default boolean hasChangedSinceLastPoll() {
         return false;

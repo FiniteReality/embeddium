@@ -244,12 +244,6 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         super.renderBackground(drawContext);
 
-        // If any options changed value on this frame, rebuild the whole GUI, so that
-        // visibility predicates are tested
-        if(this.getAllOptions().anyMatch(Option::hasChangedSinceLastPoll)) {
-            this.rebuildGUI();
-        }
-
         this.updateControls();
 
         super.render(drawContext, this.prompt != null ? -1 : mouseX, this.prompt != null ? -1 : mouseY, delta);
@@ -271,6 +265,22 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
                         .filter(ControlElement::isFocused)
                         .findFirst()
                         .orElse(null));
+
+        // If any options changed value on this frame, rebuild the whole GUI, so that
+        // visibility predicates are tested
+        if(this.getAllOptions().anyMatch(Option::hasChangedSinceLastPoll)) {
+            // Save hovered/focused option
+            Option<?> originallyHoveredOption = hovered != null ? hovered.getOption() : null;
+            Option<?> originallyFocusedOption;
+            if(this.getFocused() instanceof ControlElement<?>) {
+                originallyFocusedOption = ((ControlElement<?>)this.getFocused()).getOption();
+            } else {
+                originallyFocusedOption = null;
+            }
+            this.rebuildGUI();
+            hovered = this.getActiveControls().filter(e -> e.getOption() == originallyHoveredOption).findFirst().orElse(null);
+            this.setFocused(this.getActiveControls().filter(e -> e.getOption() == originallyFocusedOption).findFirst().orElse(null));
+        }
 
         boolean hasChanges = this.getAllOptions()
                 .anyMatch(Option::hasChanged);
