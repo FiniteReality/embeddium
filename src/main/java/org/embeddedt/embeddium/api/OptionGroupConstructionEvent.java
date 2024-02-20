@@ -7,6 +7,7 @@ import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
@@ -34,13 +35,16 @@ public class OptionGroupConstructionEvent extends EmbeddiumEvent {
     /**
      * Call to replace some or all options in the group with new instances.
      * You should check if the option group ID matches what you expect first, to avoid iterating options unnecessarily.
-     * @param replacementFn should return a new option to use in place of the old one, return value must be non-null
+     * @param newOption a new option to use in place of the old one
      */
-    public void replaceOptions(UnaryOperator<Option<?>> replacementFn) {
+    public void replaceOption(Option<?> newOption) {
+        ResourceLocation replacingId = newOption.getId(); // TODO require  newOption.getReplacingId();
         options.replaceAll(option -> {
-            Option<?> newOpt = replacementFn.apply(option);
-            Objects.requireNonNull(newOpt);
-            return newOpt;
+            if(replacingId.equals(option.getId())) {
+                return newOption;
+            } else {
+                return option;
+            }
         });
     }
 }
