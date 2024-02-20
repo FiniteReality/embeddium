@@ -15,6 +15,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.CyclingControl;
 import me.jellysquid.mods.sodium.client.gui.options.control.SliderControl;
 import me.jellysquid.mods.sodium.client.gui.options.control.TickBoxControl;
 import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStorage;
+import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuilder;
 import net.minecraft.client.*;
@@ -410,11 +411,11 @@ public class SodiumGameOptionPages {
         return new OptionPage(StandardOptions.Pages.ADVANCED, Component.translatable("sodium.options.pages.advanced"), ImmutableList.copyOf(groups));
     }
 
-    public static MinecraftOptionsStorage getVanillaOpts() {
+    public static OptionStorage<Options> getVanillaOpts() {
         return vanillaOpts;
     }
 
-    public static SodiumOptionsStorage getSodiumOpts() {
+    public static OptionStorage<SodiumGameOptions> getSodiumOpts() {
         return sodiumOpts;
     }
 }
