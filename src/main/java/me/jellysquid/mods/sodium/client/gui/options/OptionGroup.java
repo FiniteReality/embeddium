@@ -50,7 +50,7 @@ public class OptionGroup {
 
         public OptionGroup build() {
             if (this.options.isEmpty()) {
-                SodiumClientMod.logger().warn("OptionGroup must contains at least one option. ignoring empty group...");
+                SodiumClientMod.logger().warn("OptionGroup must contain at least one option. ignoring empty group...");
             }
 
             if (this.id == null) {
