@@ -25,7 +25,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.fml.loading.FMLLoader;
-import org.embeddedt.embeddium.client.gui.EmbeddiumOptionsAPI;
+import org.embeddedt.embeddium.api.OptionGUICreationEvent;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -67,6 +67,8 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
         this.pages.add(SodiumGameOptionPages.quality());
         this.pages.add(SodiumGameOptionPages.performance());
         this.pages.add(SodiumGameOptionPages.advanced());
+
+        OptionGUICreationEvent.BUS.post(new OptionGUICreationEvent(this.pages));
 
         this.checkPromptTimers();
     }
