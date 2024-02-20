@@ -244,6 +244,12 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         super.renderBackground(drawContext);
 
+        // If any options changed value on this frame, rebuild the whole GUI, so that
+        // visibility predicates are tested
+        if(this.getAllOptions().anyMatch(Option::hasChangedSinceLastPoll)) {
+            this.rebuildGUI();
+        }
+
         this.updateControls();
 
         super.render(drawContext, this.prompt != null ? -1 : mouseX, this.prompt != null ? -1 : mouseY, delta);

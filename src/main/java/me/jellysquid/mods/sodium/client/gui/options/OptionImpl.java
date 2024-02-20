@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.gui.options;
 
+import com.google.common.base.Predicates;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.binding.GenericBinding;
 import me.jellysquid.mods.sodium.client.gui.options.binding.OptionBinding;
@@ -16,6 +17,7 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class OptionImpl<S, T> implements Option<T> {
 
@@ -39,6 +41,10 @@ public class OptionImpl<S, T> implements Option<T> {
 
     private final ReplacementInfo<T, ?> replacementInfo;
 
+    private final Predicate<Option<T>> visibilityPredicate;
+
+    private boolean hasChangedPollFlag = false;
+
     private OptionImpl(OptionStorage<S> storage,
                        ResourceLocation id,
                        Component name,
@@ -48,7 +54,8 @@ public class OptionImpl<S, T> implements Option<T> {
                        EnumSet<OptionFlag> flags,
                        OptionImpact impact,
                        boolean enabled,
-                       ReplacementInfo<T, ?> replacementInfo) {
+                       ReplacementInfo<T, ?> replacementInfo,
+                       Predicate<Option<T>> visibilityPredicate) {
         this.id = id;
         this.storage = storage;
         this.name = name;
@@ -59,6 +66,7 @@ public class OptionImpl<S, T> implements Option<T> {
         this.control = control.apply(this);
         this.enabled = enabled;
         this.replacementInfo = replacementInfo;
+        this.visibilityPredicate = visibilityPredicate;
 
         this.reset();
     }
@@ -100,6 +108,7 @@ public class OptionImpl<S, T> implements Option<T> {
         if(this.replacementInfo != null) {
             OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(option -> ((Option)option).setValue(this.replacementInfo.valueMigrator.apply(value)));
         }
+        this.hasChangedPollFlag = this.hasChanged();
     }
 
     @Override
@@ -110,6 +119,7 @@ public class OptionImpl<S, T> implements Option<T> {
         if(this.replacementInfo != null) {
             OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(Option::reset);
         }
+        this.hasChangedPollFlag = false;
     }
 
     @Override
@@ -135,11 +145,24 @@ public class OptionImpl<S, T> implements Option<T> {
         if(this.replacementInfo != null) {
             OptionRegistry.getOptionById(this.replacementInfo.replacedId).ifPresent(Option::reset);
         }
+        this.hasChangedPollFlag = false;
     }
 
     @Override
     public Collection<OptionFlag> getFlags() {
         return this.flags;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return this.visibilityPredicate.test(this);
+    }
+
+    @Override
+    public boolean hasChangedSinceLastPoll() {
+        boolean bl = this.hasChangedPollFlag;
+        this.hasChangedPollFlag = false;
+        return bl;
     }
 
     public static <S, T> OptionImpl.Builder<S, T> createBuilder(@SuppressWarnings("unused") Class<T> type, OptionStorage<S> storage) {
@@ -167,6 +190,7 @@ public class OptionImpl<S, T> implements Option<T> {
         private final EnumSet<OptionFlag> flags = EnumSet.noneOf(OptionFlag.class);
         private boolean enabled = true;
         private ReplacementInfo<T, ?> replacementInfo;
+        private Predicate<Option<T>> visibilityPredicate = Predicates.alwaysTrue();
 
         private Builder(OptionStorage<S> storage) {
             this.storage = storage;
@@ -240,6 +264,14 @@ public class OptionImpl<S, T> implements Option<T> {
             return this;
         }
 
+        public Builder<S, T> setVisibilityPredicate(Predicate<Option<T>> visibilityPredicate) {
+            Validate.notNull(id, "Visibility predicate must not be null");
+
+            this.visibilityPredicate = visibilityPredicate;
+
+            return this;
+        }
+
         /**
          * Marks this option as replacing a built-in option.
          * <p></p>
@@ -277,7 +309,8 @@ public class OptionImpl<S, T> implements Option<T> {
             Validate.notNull(this.binding, "Option binding must be specified");
             Validate.notNull(this.control, "Control must be specified");
 
-            OptionImpl<S, T> impl = new OptionImpl<>(this.storage, this.id, this.name, this.tooltip, this.binding, this.control, this.flags, this.impact, this.enabled, this.replacementInfo);
+            OptionImpl<S, T> impl = new OptionImpl<>(this.storage, this.id, this.name, this.tooltip, this.binding, this.control,
+                    this.flags, this.impact, this.enabled, this.replacementInfo, this.visibilityPredicate);
             OptionRegistry.onOptionCreate(impl);
             return impl;
         }

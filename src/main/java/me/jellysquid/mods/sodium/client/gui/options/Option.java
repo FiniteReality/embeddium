@@ -34,6 +34,9 @@ public interface Option<T> {
 
     boolean isAvailable();
 
+    /**
+     * @return true if the option has a value change waiting to be applied by clicking "Applied"
+     */
     boolean hasChanged();
 
     void applyChanges();
@@ -53,5 +56,12 @@ public interface Option<T> {
      */
     default boolean isVisible() {
         return true;
+    }
+
+    /**
+     * Like hasChanged, but clears the flag after being called.
+     */
+    default boolean hasChangedSinceLastPoll() {
+        return false;
     }
 }
