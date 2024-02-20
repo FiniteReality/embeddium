@@ -7,8 +7,6 @@ import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 /**
  * Fired when an option group is created, to allow replacing options in that group if desired. (Can be used,
