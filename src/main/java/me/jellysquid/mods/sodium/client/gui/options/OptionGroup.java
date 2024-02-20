@@ -3,22 +3,12 @@ package me.jellysquid.mods.sodium.client.gui.options;
 import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.resources.ResourceLocation;
-import org.embeddedt.embeddium.client.gui.EmbeddiumOptionsAPI;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class OptionGroup {
     public static final ResourceLocation DEFAULT_ID = new ResourceLocation(SodiumClientMod.MODID, "empty");
-
-    public static final ResourceLocation RENDERING = new ResourceLocation("minecraft", "rendering");
-    public static final ResourceLocation WINDOW = new ResourceLocation("minecraft", "window");
-    public static final ResourceLocation INDICATORS = new ResourceLocation("minecraft", "indicators");
-    public static final ResourceLocation GRAPHICS = new ResourceLocation("minecraft", "graphics");
-    public static final ResourceLocation DETAILS = new ResourceLocation("minecraft", "details");
-    public static final ResourceLocation CHUNK_UPDATES = new ResourceLocation(SodiumClientMod.MODID, "chunk_updates");
-    public static final ResourceLocation RENDERING_CULLING = new ResourceLocation(SodiumClientMod.MODID, "rendering_culling");
-    public static final ResourceLocation CPU_SAVING = new ResourceLocation(SodiumClientMod.MODID, "cpu_saving");
 
     private final ImmutableList<Option<?>> options;
 

@@ -4,18 +4,9 @@ import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.embeddedt.embeddium.client.gui.EmbeddiumOptionsAPI;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class OptionPage {
     public static final ResourceLocation DEFAULT_ID = new ResourceLocation(SodiumClientMod.MODID, "empty");
-
-    public static final ResourceLocation GENERAL = new ResourceLocation(SodiumClientMod.MODID, "general");
-    public static final ResourceLocation QUALITY = new ResourceLocation(SodiumClientMod.MODID, "quality");
-    public static final ResourceLocation PERFORMANCE = new ResourceLocation(SodiumClientMod.MODID, "performance");
-    public static final ResourceLocation ADVANCED = new ResourceLocation(SodiumClientMod.MODID, "advanced");
 
     private final ResourceLocation id;
     private final Component name;
