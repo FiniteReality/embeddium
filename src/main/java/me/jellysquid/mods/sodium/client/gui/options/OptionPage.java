@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.embeddedt.embeddium.api.OptionPageCreationEvent;
+
+import java.util.List;
 
 public class OptionPage {
     public static final ResourceLocation DEFAULT_ID = new ResourceLocation(SodiumClientMod.MODID, "empty");
@@ -22,15 +25,22 @@ public class OptionPage {
     public OptionPage(ResourceLocation id, Component name, ImmutableList<OptionGroup> groups) {
         this.id = id;
         this.name = name;
-        this.groups = groups;
+        this.groups = collectExtraGroups(groups);
 
         ImmutableList.Builder<Option<?>> builder = ImmutableList.builder();
 
-        for (OptionGroup group : groups) {
+        for (OptionGroup group : this.groups) {
             builder.addAll(group.getOptions());
         }
 
         this.options = builder.build();
+    }
+
+    private ImmutableList<OptionGroup> collectExtraGroups(ImmutableList<OptionGroup> groups) {
+        OptionPageCreationEvent event = new OptionPageCreationEvent(this.id, this.name);
+        OptionPageCreationEvent.BUS.post(event);
+        List<OptionGroup> extraGroups = event.getAdditionalGroups();
+        return extraGroups.isEmpty() ? groups : ImmutableList.<OptionGroup>builder().addAll(groups).addAll(extraGroups).build();
     }
 
     public ResourceLocation getId() {
