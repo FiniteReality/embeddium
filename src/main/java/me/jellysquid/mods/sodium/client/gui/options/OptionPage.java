@@ -31,31 +31,15 @@ public class OptionPage {
     public OptionPage(ResourceLocation id, Component name, ImmutableList<OptionGroup> groups) {
         this.id = id;
         this.name = name;
+        this.groups = groups;
 
-        List<Option<?>> optionsBuilder = new ArrayList<>();
-        List<OptionGroup> groupsBuilder = new ArrayList<>();
+        ImmutableList.Builder<Option<?>> builder = ImmutableList.builder();
 
-        for (int i = 0; i < groups.size(); i++) {
-            final OptionGroup group = groups.get(i);
-
-            if (group.getOptions().isEmpty()) {
-                continue; // ignore empty groups
-            }
-
-            if (!EmbeddiumOptionsAPI.consume(groupsBuilder, EmbeddiumOptionsAPI.customOptionGroups, group)) {
-                groupsBuilder.add(group);
-                optionsBuilder.addAll(group.getOptions());
-            } else {
-                if (groupsBuilder.get(i) == group) { // check if was added and add options too.
-                    optionsBuilder.addAll(group.getOptions());
-                }
-            }
+        for (OptionGroup group : groups) {
+            builder.addAll(group.getOptions());
         }
 
-        EmbeddiumOptionsAPI.consume(groupsBuilder, EmbeddiumOptionsAPI.customOptionGroups);
-
-        this.groups = ImmutableList.copyOf(groupsBuilder);
-        this.options = ImmutableList.copyOf(optionsBuilder);
+        this.options = builder.build();
     }
 
     public ResourceLocation getId() {

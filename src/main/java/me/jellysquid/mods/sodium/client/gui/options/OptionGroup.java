@@ -52,9 +52,7 @@ public class OptionGroup {
         }
 
         public Builder add(Option<?> option) {
-            if (!EmbeddiumOptionsAPI.consume(options, EmbeddiumOptionsAPI.customOptions, option)) {
-                this.options.add(option);
-            }
+            this.options.add(option);
 
             return this;
         }
@@ -68,8 +66,6 @@ public class OptionGroup {
                 this.id = OptionGroup.DEFAULT_ID;
                 SodiumClientMod.logger().warn("Id must be specified in OptionGroup which contains {}, this might throw a exception on a next release", this.options.get(0).getName().getString());
             }
-
-            EmbeddiumOptionsAPI.consume(this.options, EmbeddiumOptionsAPI.customOptions);
 
             return new OptionGroup(this.id, ImmutableList.copyOf(this.options));
         }

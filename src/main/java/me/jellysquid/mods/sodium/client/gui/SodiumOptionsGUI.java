@@ -63,12 +63,10 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
         this.prevScreen = prevScreen;
 
-        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages, SodiumGameOptionPages.general());
-        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages, SodiumGameOptionPages.quality());
-        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages, SodiumGameOptionPages.performance());
-        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages, SodiumGameOptionPages.advanced());
-
-        EmbeddiumOptionsAPI.consume(this.pages, EmbeddiumOptionsAPI.customPages);
+        this.pages.add(SodiumGameOptionPages.general());
+        this.pages.add(SodiumGameOptionPages.quality());
+        this.pages.add(SodiumGameOptionPages.performance());
+        this.pages.add(SodiumGameOptionPages.advanced());
 
         this.checkPromptTimers();
     }
