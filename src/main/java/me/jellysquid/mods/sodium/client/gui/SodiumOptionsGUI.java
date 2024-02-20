@@ -12,7 +12,6 @@ import me.jellysquid.mods.sodium.client.gui.prompt.ScreenPrompt;
 import me.jellysquid.mods.sodium.client.gui.prompt.ScreenPromptable;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -42,7 +41,7 @@ import java.util.stream.Stream;
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
 public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
-    static final List<Supplier<OptionPage>> extraSodiumPages = new ArrayList<>();
+    static final List<Supplier<OptionPage>> extraPages = new ArrayList<>();
     private final List<OptionPage> pages = new ArrayList<>();
 
     private final List<ControlElement<?>> controls = new ArrayList<>();
@@ -59,16 +58,12 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
     private @Nullable ScreenPrompt prompt;
 
-    public static void addOptionsPage(Supplier<OptionPage> pageSupplier) {
-        extraSodiumPages.add(pageSupplier);
-    }
-
-    public static void addOptionsPage(OptionPage page) {
-        extraSodiumPages.add(() -> page);
+    public static void addCustomPage(Supplier<OptionPage> pageSupplier) {
+        extraPages.add(pageSupplier);
     }
 
     public SodiumOptionsGUI(Screen prevScreen) {
-        super(Component.translatable(MODNAME + " Options"));
+        super(Component.literal(MODNAME + " Options"));
 
         this.prevScreen = prevScreen;
 
@@ -82,7 +77,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
     }
 
     private void addExtraPages() {
-        for (Supplier<OptionPage> optionPage : extraSodiumPages) {
+        for (Supplier<OptionPage> optionPage : extraPages) {
             this.pages.add(optionPage.get());
         }
     }

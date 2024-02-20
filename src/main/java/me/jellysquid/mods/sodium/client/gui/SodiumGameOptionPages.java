@@ -27,16 +27,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SodiumGameOptionPages {
-    private static final SodiumOptionsStorage sodiumOpts = new SodiumOptionsStorage();
-    private static final MinecraftOptionsStorage vanillaOpts = new MinecraftOptionsStorage();
+    public static final SodiumOptionsStorage sodiumOpts = new SodiumOptionsStorage();
+    public static final MinecraftOptionsStorage vanillaOpts = new MinecraftOptionsStorage();
 
     public static OptionPage general() {
         List<OptionGroup> groups = new ArrayList<>();
 
         groups.add(OptionGroup.createBuilder()
-                .setId(new ResourceLocation("minecraft", "rendering"))
+                .setId(OptionGroup.RENDERING)
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "render_distance"))
+                        .setId(Option.RENDER_DISTANCE)
                         .setName(Component.translatable("options.renderDistance"))
                         .setTooltip(Component.translatable("sodium.options.view_distance.tooltip"))
                         .setControl(option -> new SliderControl(option, 2, 32, 1, ControlValueFormatter.translateVariable("options.chunks")))
@@ -45,7 +45,7 @@ public class SodiumGameOptionPages {
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "simulation_distance"))
+                        .setId(Option.SIMULATION_DISTANCE)
                         .setName(Component.translatable("options.simulationDistance"))
                         .setTooltip(Component.translatable("sodium.options.simulation_distance.tooltip"))
                         .setControl(option -> new SliderControl(option, 5, 32, 1, ControlValueFormatter.translateVariable("options.chunks")))
@@ -54,7 +54,7 @@ public class SodiumGameOptionPages {
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "brightness"))
+                        .setId(Option.BRIGHTNESS)
                         .setName(Component.translatable("options.gamma"))
                         .setTooltip(Component.translatable("sodium.options.brightness.tooltip"))
                         .setControl(opt -> new SliderControl(opt, 0, 100, 1, ControlValueFormatter.brightness()))
@@ -63,9 +63,9 @@ public class SodiumGameOptionPages {
                 .build());
 
         groups.add(OptionGroup.createBuilder()
-                .setId(new ResourceLocation("minecraft", "window"))
+                .setId(OptionGroup.WINDOW)
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "gui_scale"))
+                        .setId(Option.GUI_SCALE)
                         .setName(Component.translatable("options.guiScale"))
                         .setTooltip(Component.translatable("sodium.options.gui_scale.tooltip"))
                         .setControl(option -> new SliderControl(option, 0, MuiGuiScaleHook.getMaxGuiScale(), 1, ControlValueFormatter.guiScale()))
@@ -77,7 +77,7 @@ public class SodiumGameOptionPages {
                         }, opts -> opts.guiScale().get())
                         .build())
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "fullscreen"))
+                        .setId(Option.FULLSCREEN)
                         .setName(Component.translatable("options.fullscreen"))
                         .setTooltip(Component.translatable("sodium.options.fullscreen.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -96,7 +96,7 @@ public class SodiumGameOptionPages {
                         }, (opts) -> opts.fullscreen().get())
                         .build())
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "vsync"))
+                        .setId(Option.VSYNC)
                         .setName(Component.translatable("options.vsync"))
                         .setTooltip(Component.translatable("sodium.options.v_sync.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -104,7 +104,7 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.VARIES)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "max_frame_rate"))
+                        .setId(Option.MAX_FRAMERATE)
                         .setName(Component.translatable("options.framerateLimit"))
                         .setTooltip(Component.translatable("sodium.options.fps_limit.tooltip"))
                         .setControl(option -> new SliderControl(option, 10, 260, 10, ControlValueFormatter.fpsLimit()))
@@ -116,23 +116,23 @@ public class SodiumGameOptionPages {
                 .build());
 
         groups.add(OptionGroup.createBuilder()
-                .setId(new ResourceLocation("minecraft", "indicators"))
+                .setId(OptionGroup.INDICATORS)
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "view_bobbing"))
+                        .setId(Option.VIEW_BOBBING)
                         .setName(Component.translatable("options.viewBobbing"))
                         .setTooltip(Component.translatable("sodium.options.view_bobbing.tooltip"))
                         .setControl(TickBoxControl::new)
                         .setBinding(new VanillaBooleanOptionBinding(Minecraft.getInstance().options.bobView()))
                         .build())
                 .add(OptionImpl.createBuilder(AttackIndicatorStatus.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "attack_indicator"))
+                        .setId(Option.ATTACK_INDICATOR)
                         .setName(Component.translatable("options.attackIndicator"))
                         .setTooltip(Component.translatable("sodium.options.attack_indicator.tooltip"))
                         .setControl(opts -> new CyclingControl<>(opts, AttackIndicatorStatus.class, new Component[] { Component.translatable("options.off"), Component.translatable("options.attack.crosshair"), Component.translatable("options.attack.hotbar") }))
                         .setBinding((opts, value) -> opts.attackIndicator().set(value), (opts) -> opts.attackIndicator().get())
                         .build())
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "autosave_indicator"))
+                        .setId(Option.AUTOSAVE_INDICATOR)
                         .setName(Component.translatable("options.autosaveIndicator"))
                         .setTooltip(Component.translatable("sodium.options.autosave_indicator.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -140,16 +140,16 @@ public class SodiumGameOptionPages {
                         .build())
                 .build());
 
-        return new OptionPage(new ResourceLocation(SodiumClientMod.MODID, "general"), Component.translatable("stat.generalButton"), ImmutableList.copyOf(groups));
+        return new OptionPage(OptionPage.GENERAL, Component.translatable("stat.generalButton"), ImmutableList.copyOf(groups));
     }
 
     public static OptionPage quality() {
         List<OptionGroup> groups = new ArrayList<>();
 
         groups.add(OptionGroup.createBuilder()
-                .setId(new ResourceLocation("minecraft", "graphics"))
+                .setId(OptionGroup.GRAPHICS)
                 .add(OptionImpl.createBuilder(GraphicsStatus.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "graphics_mode"))
+                        .setId(Option.GRAPHICS_MODE)
                         .setName(Component.translatable("options.graphics"))
                         .setTooltip(Component.translatable("sodium.options.graphics_quality.tooltip"))
                         .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy"), Component.translatable("options.graphics.fabulous") }))
@@ -162,9 +162,9 @@ public class SodiumGameOptionPages {
                 .build());
 
         groups.add(OptionGroup.createBuilder()
-                .setId(new ResourceLocation("minecraft", "details"))
+                .setId(OptionGroup.DETAILS)
                 .add(OptionImpl.createBuilder(CloudStatus.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "clouds"))
+                        .setId(Option.CLOUDS)
                         .setName(Component.translatable("options.renderClouds"))
                         .setTooltip(Component.translatable("sodium.options.clouds_quality.tooltip"))
                         .setControl(option -> new CyclingControl<>(option, CloudStatus.class, new Component[] { Component.translatable("options.off"), Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy") }))
@@ -181,7 +181,7 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.LOW)
                         .build())
                 .add(OptionImpl.createBuilder(SodiumGameOptions.GraphicsQuality.class, sodiumOpts)
-                        .setId(new ResourceLocation("minecraft", "weather"))
+                        .setId(Option.WEATHER)
                         .setName(Component.translatable("soundCategory.weather"))
                         .setTooltip(Component.translatable("sodium.options.weather_quality.tooltip"))
                         .setControl(option -> new CyclingControl<>(option, SodiumGameOptions.GraphicsQuality.class))
@@ -189,7 +189,7 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.MEDIUM)
                         .build())
                 .add(OptionImpl.createBuilder(SodiumGameOptions.GraphicsQuality.class, sodiumOpts)
-                        .setId(new ResourceLocation("minecraft", "leaves"))
+                        .setId(Option.LEAVES)
                         .setName(Component.translatable("sodium.options.leaves_quality.name"))
                         .setTooltip(Component.translatable("sodium.options.leaves_quality.tooltip"))
                         .setControl(option -> new CyclingControl<>(option, SodiumGameOptions.GraphicsQuality.class))
@@ -198,7 +198,7 @@ public class SodiumGameOptionPages {
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .add(OptionImpl.createBuilder(ParticleStatus.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "particles"))
+                        .setId(Option.PARTICLES)
                         .setName(Component.translatable("options.particles"))
                         .setTooltip(Component.translatable("sodium.options.particle_quality.tooltip"))
                         .setControl(option -> new CyclingControl<>(option, ParticleStatus.class, new Component[] { Component.translatable("options.particles.all"), Component.translatable("options.particles.decreased"), Component.translatable("options.particles.minimal") }))
@@ -206,7 +206,7 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.MEDIUM)
                         .build())
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "smooth_lighting"))
+                        .setId(Option.SMOOTH_LIGHT)
                         .setName(Component.translatable("options.ao"))
                         .setTooltip(Component.translatable("sodium.options.smooth_lighting.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -215,7 +215,7 @@ public class SodiumGameOptionPages {
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "biome_blend"))
+                        .setId(Option.BIOME_BLEND)
                         .setName(Component.translatable("options.biomeBlendRadius"))
                         .setTooltip(Component.translatable("sodium.options.biome_blend.tooltip"))
                         .setControl(option -> new SliderControl(option, 1, 7, 1, ControlValueFormatter.biomeBlend()))
@@ -224,7 +224,7 @@ public class SodiumGameOptionPages {
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "entity_distance"))
+                        .setId(Option.ENTITY_DISTANCE)
                         .setName(Component.translatable("options.entityDistanceScaling"))
                         .setTooltip(Component.translatable("sodium.options.entity_distance.tooltip"))
                         .setControl(option -> new SliderControl(option, 50, 500, 25, ControlValueFormatter.percentage()))
@@ -233,7 +233,7 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "entity_shadows"))
+                        .setId(Option.ENTITY_SHADOWS)
                         .setName(Component.translatable("options.entityShadows"))
                         .setTooltip(Component.translatable("sodium.options.entity_shadows.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -241,7 +241,7 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.LOW)
                         .build())
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation("minecraft", "vignette"))
+                        .setId(Option.VIGNETTE)
                         .setName(Component.translatable("sodium.options.vignette.name"))
                         .setTooltip(Component.translatable("sodium.options.vignette.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -254,7 +254,7 @@ public class SodiumGameOptionPages {
         groups.add(OptionGroup.createBuilder()
                 .setId(new ResourceLocation("minecraft", "mipmaps"))
                 .add(OptionImpl.createBuilder(int.class, vanillaOpts)
-                        .setId(new ResourceLocation("minecraft", "mipmap_levels"))
+                        .setId(Option.MIPMAP_LEVEL)
                         .setName(Component.translatable("options.mipmapLevels"))
                         .setTooltip(Component.translatable("sodium.options.mipmap_levels.tooltip"))
                         .setControl(option -> new SliderControl(option, 0, 4, 1, ControlValueFormatter.multiplier()))
@@ -265,16 +265,16 @@ public class SodiumGameOptionPages {
                 .build());
 
 
-        return new OptionPage(new ResourceLocation(SodiumClientMod.MODID, "quality"), Component.translatable("sodium.options.pages.quality"), ImmutableList.copyOf(groups));
+        return new OptionPage(OptionPage.QUALITY, Component.translatable("sodium.options.pages.quality"), ImmutableList.copyOf(groups));
     }
 
     public static OptionPage performance() {
         List<OptionGroup> groups = new ArrayList<>();
 
         groups.add(OptionGroup.createBuilder()
-                .setId(new ResourceLocation(SodiumClientMod.MODID, "chunk_updates"))
+                .setId(OptionGroup.CHUNK_UPDATES)
                 .add(OptionImpl.createBuilder(int.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "chunk_update_threads"))
+                        .setId(Option.CHUNK_UPDATE_THREADS)
                         .setName(Component.translatable("sodium.options.chunk_update_threads.name"))
                         .setTooltip(Component.translatable("sodium.options.chunk_update_threads.tooltip"))
                         .setControl(o -> new SliderControl(o, 0, ChunkBuilder.getMaxThreadCount(), 1, ControlValueFormatter.quantityOrDisabled("threads", "Default")))
@@ -284,7 +284,7 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "defer_chunk_updates"))
+                        .setId(Option.DEFFER_CHUNK_UPDATES)
                         .setName(Component.translatable("sodium.options.always_defer_chunk_updates.name"))
                         .setTooltip(Component.translatable("sodium.options.always_defer_chunk_updates.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -296,9 +296,9 @@ public class SodiumGameOptionPages {
         );
 
         groups.add(OptionGroup.createBuilder()
-                .setId(new ResourceLocation(SodiumClientMod.MODID, "rendering_culling"))
+                .setId(OptionGroup.RENDERING_CULLING)
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "block_face_culling"))
+                        .setId(Option.BLOCK_FACE_CULLING)
                         .setName(Component.translatable("sodium.options.use_block_face_culling.name"))
                         .setTooltip(Component.translatable("sodium.options.use_block_face_culling.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -308,7 +308,7 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "compact_vertex_format"))
+                        .setId(Option.COMPACT_VERTEX_FORMAT)
                         .setName(Component.translatable("sodium.options.use_compact_vertex_format.name"))
                         .setTooltip(Component.translatable("sodium.options.use_compact_vertex_format.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -321,7 +321,7 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "fog_occlusion"))
+                        .setId(Option.FOG_OCCLUSION)
                         .setName(Component.translatable("sodium.options.use_fog_occlusion.name"))
                         .setTooltip(Component.translatable("sodium.options.use_fog_occlusion.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -331,7 +331,7 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "entity_culling"))
+                        .setId(Option.ENTITY_CULLING)
                         .setName(Component.translatable("sodium.options.use_entity_culling.name"))
                         .setTooltip(Component.translatable("sodium.options.use_entity_culling.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -340,7 +340,7 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "animate_only_visible_textures"))
+                        .setId(Option.ANIMATE_VISIBLE_TEXTURES)
                         .setName(Component.translatable("sodium.options.animate_only_visible_textures.name"))
                         .setTooltip(Component.translatable("sodium.options.animate_only_visible_textures.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -350,9 +350,9 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "no_error_context"))
-                        .setName(Component.translatable("sodium.options.use_no_error_conComponent.name"))
-                        .setTooltip(Component.translatable("sodium.options.use_no_error_conComponent.tooltip"))
+                        .setId(Option.NO_ERROR_CONTEXT)
+                        .setName(Component.translatable("sodium.options.use_no_error_context.name"))
+                        .setTooltip(Component.translatable("sodium.options.use_no_error_context.tooltip"))
                         .setControl(TickBoxControl::new)
                         .setImpact(OptionImpact.LOW)
                         .setBinding((opts, value) -> opts.performance.useNoErrorGLContext = value, opts -> opts.performance.useNoErrorGLContext)
@@ -361,7 +361,7 @@ public class SodiumGameOptionPages {
                         .build())
                 .build());
 
-        return new OptionPage(new ResourceLocation(SodiumClientMod.MODID, "performance"), Component.translatable("sodium.options.pages.performance"), ImmutableList.copyOf(groups));
+        return new OptionPage(OptionPage.PERFORMANCE, Component.translatable("sodium.options.pages.performance"), ImmutableList.copyOf(groups));
     }
 
     private static boolean supportsNoErrorContext() {
@@ -374,9 +374,9 @@ public class SodiumGameOptionPages {
         List<OptionGroup> groups = new ArrayList<>();
 
         groups.add(OptionGroup.createBuilder()
-                .setId(new ResourceLocation(SodiumClientMod.MODID, "cpu_saving"))
+                .setId(OptionGroup.CPU_SAVING)
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "persistent_mapping"))
+                        .setId(Option.PERSISTENT_MAPPING)
                         .setName(Component.translatable("sodium.options.use_persistent_mapping.name"))
                         .setTooltip(Component.translatable("sodium.options.use_persistent_mapping.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -387,7 +387,7 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(int.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "cpu_render_ahead_limit"))
+                        .setId(Option.CPU_FRAMES_AHEAD)
                         .setName(Component.translatable("sodium.options.cpu_render_ahead_limit.name"))
                         .setTooltip(Component.translatable("sodium.options.cpu_render_ahead_limit.tooltip"))
                         .setControl(opt -> new SliderControl(opt, 0, 9, 1, ControlValueFormatter.translateVariable("sodium.options.cpu_render_ahead_limit.value")))
@@ -395,7 +395,7 @@ public class SodiumGameOptionPages {
                         .build()
                 )
                 .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(new ResourceLocation(SodiumClientMod.MODID, "translucent_face_sorting"))
+                        .setId(Option.TRANSLUCENT_FACE_SORTING)
                         .setName(Component.translatable("sodium.options.translucent_face_sorting.name"))
                         .setTooltip(Component.translatable("sodium.options.translucent_face_sorting.tooltip"))
                         .setControl(TickBoxControl::new)
@@ -406,14 +406,6 @@ public class SodiumGameOptionPages {
                 )
                 .build());
 
-        return new OptionPage(new ResourceLocation(SodiumClientMod.MODID, "advanced"), Component.translatable("sodium.options.pages.advanced"), ImmutableList.copyOf(groups));
-    }
-
-    private static SodiumOptionsStorage getSodiumOptionsStorage() {
-        return sodiumOpts;
-    }
-
-    private static MinecraftOptionsStorage getMinecraftOptionsStorage() {
-        return vanillaOpts;
+        return new OptionPage(OptionPage.ADVANCED, Component.translatable("sodium.options.pages.advanced"), ImmutableList.copyOf(groups));
     }
 }
