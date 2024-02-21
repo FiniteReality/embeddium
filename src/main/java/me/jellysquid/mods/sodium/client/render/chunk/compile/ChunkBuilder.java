@@ -28,6 +28,13 @@ public class ChunkBuilder {
      * threads when the game is given a small heap.
      */
     private static final int MBS_PER_CHUNK_BUILDER = 64;
+    /**
+     * The number of tasks to allow in the queue per available worker thread. This value should be kept conservative
+     * to avoid the threads becoming backlogged and failing to keep up with changes in chunk visibility (e.g.
+     * camera movement). However, it also needs to be large enough that the thread is not spending part of the
+     * frame doing nothing. 2 seems to be a decent value, and is what Sodium 0.2 used.
+     */
+    private static final int TASK_QUEUE_LIMIT_PER_WORKER = 2;
 
     private final Deque<WrappedTask> buildQueue = new ConcurrentLinkedDeque<>();
 
@@ -58,7 +65,7 @@ public class ChunkBuilder {
      * spawn more tasks than the budget allows, it will block until resources become available.
      */
     public int getSchedulingBudget() {
-        return Math.max(0, this.limitThreads - this.buildQueue.size());
+        return Math.max(0, (this.limitThreads * TASK_QUEUE_LIMIT_PER_WORKER) - this.buildQueue.size());
     }
 
     /**
