@@ -114,7 +114,7 @@ public class BlockRenderer {
                 mStack = EMPTY_STACK;
 
             indigoRenderContext.reset();
-            indigoRenderContext.render(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), mStack, null, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY);
+            indigoRenderContext.renderEmbeddium(ctx, mStack, random);
             indigoRenderContext.flush(buffers, ctx.origin());
             return;
         }
