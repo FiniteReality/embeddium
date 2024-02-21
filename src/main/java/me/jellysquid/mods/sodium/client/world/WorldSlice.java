@@ -175,7 +175,11 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
         Objects.requireNonNull(section, "Chunk section must be non-null");
 
-        this.unpackBlockData(this.blockArrays[sectionIndex], context, section);
+        try {
+            this.unpackBlockData(this.blockArrays[sectionIndex], context, section);
+        } catch(RuntimeException e) {
+            throw new IllegalStateException("Exception copying block data for section: " + section.getPosition(), e);
+        }
 
         this.lightArrays[sectionIndex][LightLayer.BLOCK.ordinal()] = section.getLightArray(LightLayer.BLOCK);
         this.lightArrays[sectionIndex][LightLayer.SKY.ordinal()] = section.getLightArray(LightLayer.SKY);
