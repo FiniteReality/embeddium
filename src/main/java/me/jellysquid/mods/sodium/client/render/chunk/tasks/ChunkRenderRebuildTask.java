@@ -31,7 +31,6 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 import org.embeddedt.embeddium.model.ModelDataSnapshotter;
@@ -195,7 +194,7 @@ public class ChunkRenderRebuildTask extends ChunkRenderBuildTask {
         renderData.setOcclusionData(occluder.resolve());
         renderData.setBounds(bounds.build(this.render.getChunkPos()));
 
-        MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
+        ChunkDataBuiltEvent.BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildResult(this.render, renderData.build(), meshes, this.frame);
     }
