@@ -16,6 +16,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.TickBoxControl;
 import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.Workarounds;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuilder;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.GraphicsStatus;
@@ -250,7 +251,7 @@ public class SodiumGameOptionPages {
                 .add(OptionImpl.createBuilder(int.class, sodiumOpts)
                         .setName(Component.translatable("sodium.options.chunk_update_threads.name"))
                         .setTooltip(Component.translatable("sodium.options.chunk_update_threads.tooltip"))
-                        .setControl(o -> new SliderControl(o, 0, Runtime.getRuntime().availableProcessors(), 1, ControlValueFormatter.quantityOrDisabled("threads", "Default")))
+                        .setControl(o -> new SliderControl(o, 0, ChunkBuilder.getMaxThreadCount(), 1, ControlValueFormatter.quantityOrDisabled("threads", "Default")))
                         .setImpact(OptionImpact.HIGH)
                         .setBinding((opts, value) -> opts.performance.chunkBuilderThreads = value, opts -> opts.performance.chunkBuilderThreads)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)

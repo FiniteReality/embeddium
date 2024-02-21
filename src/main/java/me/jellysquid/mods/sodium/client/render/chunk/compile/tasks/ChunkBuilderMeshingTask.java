@@ -33,7 +33,6 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.NeoForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 
@@ -183,7 +182,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
         renderData.setOcclusionData(occluder.resolve());
 
-        NeoForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
+        ChunkDataBuiltEvent.BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildOutput(this.render, renderData.build(), meshes, this.buildTime);
     }
