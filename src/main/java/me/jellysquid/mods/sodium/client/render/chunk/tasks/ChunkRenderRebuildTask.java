@@ -35,7 +35,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
-import net.minecraftforge.common.MinecraftForge;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.model.ModelDataSnapshotter;
 
@@ -186,7 +185,7 @@ public class ChunkRenderRebuildTask<T extends ChunkGraphicsState> extends ChunkR
         renderData.setOcclusionData(occluder.resolve());
         renderData.setBounds(bounds.build(this.render.getChunkPos()));
 
-        MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
+        ChunkDataBuiltEvent.BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildResult<>(this.render, renderData.build());
     }
