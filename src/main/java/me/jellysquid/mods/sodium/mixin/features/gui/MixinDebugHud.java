@@ -11,57 +11,48 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import org.apache.commons.lang3.Validate;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(DebugScreenOverlay.class)
-public abstract class MixinDebugHud {
+@Mixin(ForgeGui.class)
+public abstract class MixinDebugHud extends Gui {
     @Shadow
-    @Final
-    private Minecraft minecraft;
-
-    @Shadow
-    @Final
     private Font font;
 
-    private List<String> capturedList = null;
-
-    @Redirect(method = { "drawGameInformation", "drawSystemInformation" }, at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
-    private int preRenderText(List<String> list) {
-        // Capture the list to be rendered later
-        this.capturedList = list;
-
-        return 0; // Prevent the rendering of any text
+    public MixinDebugHud(Minecraft p_232355_, ItemRenderer p_232356_) {
+        super(p_232355_, p_232356_);
     }
 
-    @Inject(method = "drawGameInformation", at = @At("RETURN"))
-    public void renderLeftText(PoseStack matrixStack, CallbackInfo ci) {
-        this.renderCapturedText(matrixStack, false);
+    /**
+     * @author embeddedt
+     * @reason take over rendering of the actual list contents
+     */
+    @Inject(method = "renderHUDText", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, remap = false)
+    private void embeddium$renderTextFast(int width, int height, PoseStack poseStack, CallbackInfo ci, ArrayList<String> listL, ArrayList<String> listR, CustomizeGuiOverlayEvent.DebugText event) {
+        ci.cancel();
+
+        renderForgeList(poseStack, listL, false);
+        renderForgeList(poseStack, listR, true);
+
+        minecraft.getProfiler().pop();
     }
 
-    @Inject(method = "drawSystemInformation", at = @At("RETURN"))
-    public void renderRightText(PoseStack matrixStack, CallbackInfo ci) {
-        this.renderCapturedText(matrixStack, true);
-    }
-
-    private void renderCapturedText(PoseStack matrixStack, boolean right) {
-        Validate.notNull(this.capturedList, "Failed to capture string list");
-
-        this.renderBackdrop(matrixStack, this.capturedList, right);
-        this.renderStrings(matrixStack, this.capturedList, right);
-
-        this.capturedList = null;
+    private void renderForgeList(PoseStack matrixStack, List<String> list, boolean right) {
+        renderBackdrop(matrixStack, list, right);
+        renderStrings(matrixStack, list, right);
     }
 
     private void renderStrings(PoseStack matrixStack, List<String> list, boolean right) {
