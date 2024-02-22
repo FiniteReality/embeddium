@@ -11,6 +11,7 @@ import net.minecraftforge.network.NetworkConstants;
 
 import java.io.IOException;
 
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
 import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 import org.slf4j.Logger;
@@ -25,13 +26,9 @@ public class SodiumClientMod {
 
     public static final String MODID = "embeddium";
 
-    public static boolean oculusLoaded = false;
-
     public SodiumClientMod() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
-
-        oculusLoaded = ModList.get().isLoaded("oculus");
 
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 
@@ -97,6 +94,6 @@ public class SodiumClientMod {
     }
 
     public static boolean canUseVanillaVertices() {
-        return !SodiumClientMod.options().performance.useCompactVertexFormat && !oculusLoaded;
+        return !SodiumClientMod.options().performance.useCompactVertexFormat && !ShaderModBridge.areShadersEnabled();
     }
 }

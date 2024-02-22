@@ -7,6 +7,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Objects;
+
 @Mixin(SimpleBitStorage.class)
 public class MixinPackedIntegerArray implements PackedIntegerArrayExtended {
     @Shadow
@@ -37,7 +39,7 @@ public class MixinPackedIntegerArray implements PackedIntegerArrayExtended {
             long l = word;
 
             for (int j = 0; j < this.valuesPerLong; ++j) {
-                out[idx] = palette.get((int) (l & this.mask));
+                out[idx] = Objects.requireNonNull(palette.get((int) (l & this.mask)), "Palette does not contain entry for value in storage");
                 l >>= this.bits;
 
                 if (++idx >= this.size) {

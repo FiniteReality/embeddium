@@ -37,6 +37,7 @@ import org.embeddedt.embeddium.api.MeshAppender;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Takes a slice of world state (block states, biome and light data arrays) and copies the data for use in off-thread
@@ -184,10 +185,14 @@ public class WorldSlice implements BlockAndTintGetter {
     }
 
     private void unpackBlockData(BlockState[] states, ClonedChunkSection section, BoundingBox box) {
-        if (this.origin.equals(section.getPosition()))  {
-            this.unpackBlockData(states, section);
-        } else {
-            this.unpackBlockDataSlow(states, section, box);
+        try {
+            if (this.origin.equals(section.getPosition()))  {
+                this.unpackBlockData(states, section);
+            } else {
+                this.unpackBlockDataSlow(states, section, box);
+            }
+        } catch(RuntimeException e) {
+            throw new IllegalStateException("Exception copying block data for section: " + section.getPosition(), e);
         }
     }
 
@@ -212,7 +217,7 @@ public class WorldSlice implements BlockAndTintGetter {
                     int blockIdx = getLocalBlockIndex(x & 15, y & 15, z & 15);
                     int value = intArray.get(blockIdx);
 
-                    states[blockIdx] = palette.get(value);
+                    states[blockIdx] = Objects.requireNonNull(palette.get(value), "Palette does not contain entry for value in storage");
                 }
             }
         }

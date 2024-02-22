@@ -25,6 +25,7 @@ import net.minecraft.client.Option;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -281,7 +282,7 @@ public class SodiumGameOptionPages {
                         .setName(new TranslatableComponent("sodium.options.use_compact_vertex_format.name"))
                         .setTooltip(new TranslatableComponent("sodium.options.use_compact_vertex_format.tooltip"))
                         .setControl(TickBoxControl::new)
-                        .setEnabled(!SodiumClientMod.oculusLoaded)
+                        .setEnabled(!ShaderModBridge.areShadersEnabled())
                         .setImpact(OptionImpact.MEDIUM)
                         .setBinding((opts, value) -> {
                             opts.performance.useCompactVertexFormat = value;
