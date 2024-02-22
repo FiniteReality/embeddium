@@ -17,6 +17,18 @@ import java.util.function.Consumer;
 
 public class ChunkBuilder {
     static final Logger LOGGER = LogManager.getLogger("ChunkBuilder");
+    /**
+     * Megabytes of heap required per chunk builder thread. This is used to cap the number of worker
+     * threads when the game is given a small heap.
+     */
+    private static final int MBS_PER_CHUNK_BUILDER = 64;
+    /**
+     * The number of tasks to allow in the queue per available worker thread. This value should be kept conservative
+     * to avoid the threads becoming backlogged and failing to keep up with changes in chunk visibility (e.g.
+     * camera movement). However, it also needs to be large enough that the thread is not spending part of the
+     * frame doing nothing. 2 seems to be a decent value, and is what Sodium 0.2 used.
+     */
+    private static final int TASK_QUEUE_LIMIT_PER_WORKER = 2;
 
     private final ChunkJobQueue queue = new ChunkJobQueue();
 
@@ -51,7 +63,7 @@ public class ChunkBuilder {
      * spawn more tasks than the budget allows, it will block until resources become available.
      */
     public int getSchedulingBudget() {
-        return Math.max(0, this.threads.size() - this.queue.size());
+        return Math.max(0, (this.threads.size() * TASK_QUEUE_LIMIT_PER_WORKER) - this.queue.size());
     }
 
     /**
@@ -119,8 +131,13 @@ public class ChunkBuilder {
         return requested == 0 ? getOptimalThreadCount() : Math.min(requested, getMaxThreadCount());
     }
 
-    private static int getMaxThreadCount() {
-        return Runtime.getRuntime().availableProcessors();
+    public static int getMaxThreadCount() {
+        int totalCores = Runtime.getRuntime().availableProcessors();
+        long memoryMb = Runtime.getRuntime().maxMemory() / (1024L * 1024L);
+        // always allow at least one builder regardless of heap size
+        int maxBuilders = Math.max(1, (int)(memoryMb / MBS_PER_CHUNK_BUILDER));
+        // choose the total CPU cores or the number of builders the heap permits, whichever is smaller
+        return Math.min(totalCores, maxBuilders);
     }
 
     public void tryStealTask(ChunkJob job) {
