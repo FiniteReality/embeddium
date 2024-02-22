@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.packs.PackType;
 import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +26,8 @@ public class SodiumClientMod implements ClientModInitializer {
 
     private static String MOD_VERSION;
 
-    public static boolean oculusLoaded = false;
-
     @Override
     public void onInitializeClient() {
-        oculusLoaded = FabricLoader.getInstance().isModLoaded("iris");
-
         MOD_VERSION = FabricLoader.getInstance().getModContainer(MODID).get().getMetadata().getVersion().toString();
 
         TaintDetector.init();
@@ -122,6 +119,6 @@ public class SodiumClientMod implements ClientModInitializer {
     }
 
     public static boolean canUseVanillaVertices() {
-        return !SodiumClientMod.options().performance.useCompactVertexFormat && !oculusLoaded;
+        return !SodiumClientMod.options().performance.useCompactVertexFormat && !ShaderModBridge.areShadersEnabled();
     }
 }
