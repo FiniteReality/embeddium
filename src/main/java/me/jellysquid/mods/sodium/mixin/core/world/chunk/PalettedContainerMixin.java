@@ -62,7 +62,7 @@ public abstract class PalettedContainerMixin<T> implements ReadableContainerExte
                     int paletteIndex = storage.get(localBlockIndex);
                     var paletteValue =  palette.valueFor(paletteIndex);
 
-                    values[localBlockIndex] = paletteValue;
+                    values[localBlockIndex] = Objects.requireNonNull(paletteValue, "Palette does not contain entry for value in storage");
                 }
             }
         }

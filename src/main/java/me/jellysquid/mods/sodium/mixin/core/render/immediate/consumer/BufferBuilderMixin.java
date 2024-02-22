@@ -68,7 +68,7 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer impleme
 
     @Override
     public boolean canUseIntrinsics() {
-        return true;
+        return this.format != null && this.format.isSimpleFormat();
     }
 
     @Override

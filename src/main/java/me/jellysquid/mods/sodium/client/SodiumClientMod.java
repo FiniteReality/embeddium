@@ -10,6 +10,7 @@ import me.jellysquid.mods.sodium.client.data.fingerprint.FingerprintMeasure;
 import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
 import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 import org.slf4j.Logger;
@@ -19,7 +20,6 @@ import java.io.IOException;
 
 @Mod(SodiumClientMod.MODID)
 public class SodiumClientMod {
-
     public static final String MODID = "embeddium";
     public static final String MODNAME = "Embeddium";
 
@@ -28,11 +28,7 @@ public class SodiumClientMod {
 
     private static String MOD_VERSION;
 
-    public static boolean oculusLoaded = false;
-
     public SodiumClientMod() {
-        oculusLoaded = ModList.get().isLoaded("oculus");
-
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "embeddium", (a, b) -> true));
 
@@ -129,6 +125,6 @@ public class SodiumClientMod {
     }
 
     public static boolean canUseVanillaVertices() {
-        return !SodiumClientMod.options().performance.useCompactVertexFormat && !oculusLoaded;
+        return !SodiumClientMod.options().performance.useCompactVertexFormat && !ShaderModBridge.areShadersEnabled();
     }
 }
