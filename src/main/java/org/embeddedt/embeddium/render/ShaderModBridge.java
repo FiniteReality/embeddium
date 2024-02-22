@@ -20,9 +20,13 @@ public class ShaderModBridge {
     }
 
     public static boolean areShadersEnabled() {
-        try {
-            return (boolean)SHADERS_ENABLED.invokeExact();
-        } catch (Throwable e) {
+        if(SHADERS_ENABLED != null) {
+            try {
+                return (boolean)SHADERS_ENABLED.invokeExact();
+            } catch (Throwable e) {
+                return false;
+            }
+        } else {
             return false;
         }
     }
