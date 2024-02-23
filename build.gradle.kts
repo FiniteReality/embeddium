@@ -237,7 +237,7 @@ publishing {
 publishMods {
 	file = remapJar.archiveFile
 	changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
-	type = BETA
+	type = STABLE
     modLoaders.add("fabric")
 
 	curseforge {
