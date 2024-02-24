@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import java.util.Collections;
 import java.util.Map;
 
-@Mixin(ModelData.Builder.class)
+@Mixin(value = ModelData.Builder.class, remap = false)
 public class ModelDataBuilderMixin {
     /**
      * @author embeddedt
