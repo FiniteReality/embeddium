@@ -1,6 +1,6 @@
 plugins {
     id("idea")
-    id("net.neoforged.gradle.userdev") version("7.0.88")
+    id("net.neoforged.gradle.userdev") version("7.0.94")
     id("maven-publish")
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
