@@ -6,7 +6,6 @@ import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import me.jellysquid.mods.sodium.common.util.DirectionUtil;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import repack.joml.Vector3f;
 
 /**
  * Provides some utilities and constants for interacting with vanilla's model quad vertex format.
@@ -102,9 +101,7 @@ public class ModelQuadUtil {
     }
 
     public static ModelQuadFacing findNormalFace(float x, float y, float z) {
-        Vector3f normal = new Vector3f(x, y, z);
-
-        if (!normal.isFinite()) {
+        if (!Float.isFinite(x) || !Float.isFinite(y) || !Float.isFinite(z)) {
             return ModelQuadFacing.UNASSIGNED;
         }
 
@@ -112,7 +109,7 @@ public class ModelQuadUtil {
         Direction closestFace = null;
 
         for (Direction face : DirectionUtil.ALL_DIRECTIONS) {
-            float dot = normal.dot(face.getStepX(), face.getStepY(), face.getStepZ());
+            float dot = (x * face.getStepX()) + (y * face.getStepY()) + (z * face.getStepZ());
 
             if (dot > maxDot) {
                 maxDot = dot;
