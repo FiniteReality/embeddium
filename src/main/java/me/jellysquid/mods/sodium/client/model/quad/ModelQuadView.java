@@ -70,5 +70,5 @@ public interface ModelQuadView {
         return this.getColorIndex() != -1;
     }
 
-    boolean hasAmbientOcclusion();
+    default boolean hasAmbientOcclusion() { return true; }
 }

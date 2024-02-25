@@ -1,11 +1,14 @@
 package me.jellysquid.mods.sodium.client.compat.ccl;
 
+import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
+import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -36,9 +39,6 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     private float x;
     private float y;
     private float z;
-    private float nx;
-    private float ny;
-    private float nz;
     private float u;
     private float v;
     private int color;
@@ -48,6 +48,77 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     private boolean hasFixedColor = false;
 
     private final ChunkVertexEncoder.Vertex[] sodiumVertexArray = ChunkVertexEncoder.Vertex.uninitializedQuad();
+    private final ModelQuadView previousQuad = new ModelQuadView() {
+
+        /**
+         * @param idx the index of the desired vertex
+         * @param offset the offset into that vertex, as an integer
+         * @return appropriate byte offset
+         */
+        private int getBaseIndex(int idx, int offset) {
+            return (currentVertex - 4 + idx) * VERTEX_SIZE_BYTES + (offset * 4);
+        }
+
+        @Override
+        public float getX(int idx) {
+            return buffer.getFloat(getBaseIndex(idx, 1));
+        }
+
+        @Override
+        public float getY(int idx) {
+            return buffer.getFloat(getBaseIndex(idx, 2));
+        }
+
+        @Override
+        public float getZ(int idx) {
+            return buffer.getFloat(getBaseIndex(idx, 3));
+        }
+
+        @Override
+        public int getColor(int idx) {
+            return buffer.getInt(getBaseIndex(idx, 4));
+        }
+
+        @Override
+        public float getTexU(int idx) {
+            return buffer.getFloat(getBaseIndex(idx, 5));
+        }
+
+        @Override
+        public float getTexV(int idx) {
+            return buffer.getFloat(getBaseIndex(idx, 6));
+        }
+
+        @Override
+        public int getLight(int idx) {
+            return buffer.getInt(getBaseIndex(idx, 7));
+        }
+
+        @Override
+        public int getFlags() {
+            return 0;
+        }
+
+        @Override
+        public int getColorIndex() {
+            return 0;
+        }
+
+        @Override
+        public TextureAtlasSprite getSprite() {
+            return null;
+        }
+
+        @Override
+        public Direction getLightFace() {
+            return null;
+        }
+
+        @Override
+        public int getForgeNormal(int idx) {
+            return 0;
+        }
+    };
 
     private static ByteBuffer reallocDirect(ByteBuffer old, int capacity) {
         ByteBuffer newBuf = ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder());
@@ -111,17 +182,11 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     @Nonnull
     @Override
     public VertexConsumer normal(float x, float y, float z) {
-        nx = x;
-        ny = y;
-        nz = z;
         return this;
     }
 
     @Override
     public void endVertex() {
-        final Direction dir = Direction.fromDelta((int) nx, (int) ny, (int) nz);
-        final int normal = dir != null ? dir.ordinal() : -1;
-
         // Make sure there is enough space for a new vertex
         if ((this.buffer.capacity() - this.buffer.position()) < VERTEX_SIZE_BYTES) {
             int newCapacity = this.buffer.capacity() * 2;
@@ -134,7 +199,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         ByteBuffer buffer = this.buffer;
 
         // Write the current quad vertex's normal, position, UVs, color and raw light values
-        buffer.putInt(normal);
+        buffer.putInt(-1);
         buffer.putFloat(x);
         buffer.putFloat(y);
         buffer.putFloat(z);
@@ -146,6 +211,16 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
         resetCurrentVertex(); // Reset the current vertex values
         currentVertex++;
+        if((currentVertex % 4) == 0) {
+            recalculateNormals();
+        }
+    }
+
+    private void recalculateNormals() {
+        // Look through the last 4 vertex positions, and compute a proper normal
+        ModelQuadFacing normal = ModelQuadUtil.findNormalFace(ModelQuadUtil.calculateNormal(this.previousQuad));
+        // Store this in the position for the first vertex of the quad
+        buffer.putInt((currentVertex - 4) * VERTEX_SIZE_BYTES, normal.ordinal());
     }
 
     public void reset() {
@@ -168,9 +243,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
         for (int quadIdx = 0; quadIdx < numQuads; quadIdx++) {
             final int normal = buffer.getInt((quadIdx << 2) << 5);
-            final Direction dir = normal != -1 ? DirectionUtil.ALL_DIRECTIONS[normal] : null;
-            final ModelQuadFacing facing = dir != null ? ModelQuadFacing.fromDirection(dir) : ModelQuadFacing.UNASSIGNED;
-            sideCount[facing.ordinal()]++;
+            sideCount[normal]++;
         }
 
         /*
@@ -191,8 +264,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
         while (buffer.position() < byteSize) {
             final int normal = buffer.getInt(); // Fetch first normal for pre-selecting the vertex sink
-            final Direction dir = normal != -1 ? DirectionUtil.ALL_DIRECTIONS[normal] : null;
-            final ModelQuadFacing facing = dir != null ? ModelQuadFacing.fromDirection(dir) : ModelQuadFacing.UNASSIGNED;
+            final ModelQuadFacing facing = ModelQuadFacing.VALUES[normal];
             final int facingIdx = facing.ordinal();
 
             final ChunkMeshBufferBuilder sink = buffers.getVertexBuffer(facing);
@@ -223,7 +295,6 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
     private void resetCurrentVertex() {
         x = y = z = 0F;
-        nx = ny = nz = 0F;
         u = v = 0F;
         color = 0xFFFF_FFFF;
         light = 0;
