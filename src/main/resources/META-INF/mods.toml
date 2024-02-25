@@ -20,7 +20,7 @@ authors="embeddedt"
 modId = "neoforge" #mandatory
 type = "required" #mandatory
 mandatory = true
-versionRange = "[20.4.151-beta,)" #mandatory
+versionRange = "[20.4.182,)" #mandatory
 ordering = "NONE"
 side = "CLIENT"
 
