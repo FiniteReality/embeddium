@@ -101,7 +101,7 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
 
     @Unique
     private void putPositionAttribute(float x, float y, float z) {
-        if (this.attributeOffsetPosition == ATTRIBUTE_NOT_PRESENT) {
+        if (this.attributeOffsetPosition == ATTRIBUTE_NOT_PRESENT || (this.writtenAttributes & ATTRIBUTE_POSITION_BIT) != 0) {
             return;
         }
 
@@ -114,7 +114,7 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
 
     @Unique
     private void putColorAttribute(int rgba) {
-        if (this.attributeOffsetColor == ATTRIBUTE_NOT_PRESENT) {
+        if (this.attributeOffsetColor == ATTRIBUTE_NOT_PRESENT || (this.writtenAttributes & ATTRIBUTE_COLOR_BIT) != 0) {
             return;
         }
 
@@ -126,7 +126,7 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
 
     @Unique
     private void putTextureAttribute(float u, float v) {
-        if (this.attributeOffsetTexture == ATTRIBUTE_NOT_PRESENT) {
+        if (this.attributeOffsetTexture == ATTRIBUTE_NOT_PRESENT || (this.writtenAttributes & ATTRIBUTE_TEXTURE_BIT) != 0) {
             return;
         }
 
@@ -138,7 +138,7 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
 
     @Unique
     private void putOverlayAttribute(int uv) {
-        if (this.attributeOffsetOverlay == ATTRIBUTE_NOT_PRESENT) {
+        if (this.attributeOffsetOverlay == ATTRIBUTE_NOT_PRESENT || (this.writtenAttributes & ATTRIBUTE_OVERLAY_BIT) != 0) {
             return;
         }
 
@@ -150,7 +150,7 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
 
     @Unique
     private void putLightAttribute(int uv) {
-        if (this.attributeOffsetLight == ATTRIBUTE_NOT_PRESENT) {
+        if (this.attributeOffsetLight == ATTRIBUTE_NOT_PRESENT || (this.writtenAttributes & ATTRIBUTE_LIGHT_BIT) != 0) {
             return;
         }
 
@@ -162,7 +162,7 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
 
     @Unique
     private void putNormalAttribute(int normal) {
-        if (this.attributeOffsetNormal == ATTRIBUTE_NOT_PRESENT) {
+        if (this.attributeOffsetNormal == ATTRIBUTE_NOT_PRESENT || (this.writtenAttributes & ATTRIBUTE_NORMAL_BIT) != 0) {
             return;
         }
 
