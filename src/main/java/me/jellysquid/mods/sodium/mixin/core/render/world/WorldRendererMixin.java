@@ -52,7 +52,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Final
     private Minecraft minecraft;
 
-    @Shadow
+    @Shadow(remap = false)
     public Frustum getFrustum() {
         return null;
     }
