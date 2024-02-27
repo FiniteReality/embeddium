@@ -1,11 +1,10 @@
 package me.jellysquid.mods.sodium.mixin.features.world.biome;
 
-import java.util.Optional;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeColorMaps;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.biome.BiomeSpecialEffects.GrassColorModifier;
+import org.embeddedt.embeddium.chunk.biome.ExtendedBiomeSpecialEffects;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,36 +21,10 @@ public abstract class BiomeMixin {
     private Biome.ClimateSettings climateSettings;
 
     @Unique
-    private boolean hasCustomGrassColor;
-
-    @Unique
-    private int customGrassColor;
-
-    @Unique
-    private boolean hasCustomFoliageColor;
-
-    @Unique
-    private int customFoliageColor;
-
-    @Unique
     private int defaultColorIndex;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void setupColors(CallbackInfo ci) {
-        var grassColor = this.specialEffects.getGrassColorOverride();
-
-        if (grassColor.isPresent()) {
-            this.hasCustomGrassColor = true;
-            this.customGrassColor = grassColor.get();
-        }
-
-        var foliageColor = this.specialEffects.getFoliageColorOverride();
-
-        if (foliageColor.isPresent()) {
-            this.hasCustomFoliageColor = true;
-            this.customFoliageColor = foliageColor.get();
-        }
-
         this.defaultColorIndex = this.getDefaultColorIndex();
     }
 
@@ -63,8 +36,8 @@ public abstract class BiomeMixin {
     public int getGrassColor(double x, double z) {
         int color;
 
-        if (this.hasCustomGrassColor) {
-            color = this.customGrassColor;
+        if (((ExtendedBiomeSpecialEffects)this.specialEffects).embeddium$hasCustomGrass()) {
+            color = ((ExtendedBiomeSpecialEffects)this.specialEffects).embeddium$getCustomGrass();
         } else {
             color = BiomeColorMaps.getGrassColor(this.defaultColorIndex);
         }
@@ -86,8 +59,8 @@ public abstract class BiomeMixin {
     public int getFoliageColor() {
         int color;
 
-        if (this.hasCustomFoliageColor) {
-            color = this.customFoliageColor;
+        if (((ExtendedBiomeSpecialEffects)this.specialEffects).embeddium$hasCustomFoliage()) {
+            color = ((ExtendedBiomeSpecialEffects)this.specialEffects).embeddium$getCustomFoliage();
         } else {
             color = BiomeColorMaps.getFoliageColor(this.defaultColorIndex);
         }
