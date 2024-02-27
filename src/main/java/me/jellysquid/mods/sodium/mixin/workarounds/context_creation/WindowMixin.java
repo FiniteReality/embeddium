@@ -32,7 +32,7 @@ public class WindowMixin {
     private long wglPrevContext = MemoryUtil.NULL;
 
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"))
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/glfw/GLFW;glfwCreateWindow(IILjava/lang/CharSequence;JJ)J", remap = false))
     private long wrapGlfwCreateWindow(int width, int height, CharSequence title, long monitor, long share) {
         final boolean applyNvidiaWorkarounds = Workarounds.isWorkaroundEnabled(Workarounds.Reference.NVIDIA_THREADED_OPTIMIZATIONS);
 
@@ -58,7 +58,7 @@ public class WindowMixin {
         }
     }
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL;createCapabilities()Lorg/lwjgl/opengl/GLCapabilities;", shift = At.Shift.AFTER))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL;createCapabilities()Lorg/lwjgl/opengl/GLCapabilities;", remap = false, shift = At.Shift.AFTER))
     private void postWindowCreated(CallbackInfo ci) {
         // Capture the current WGL context so that we can detect it being replaced later.
         if (Util.getPlatform() == Util.OS.WINDOWS) {
@@ -71,7 +71,7 @@ public class WindowMixin {
         ModuleScanner.checkModules();
     }
 
-    @Inject(method = "updateDisplay", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;flipFrame(J)V", shift = At.Shift.AFTER))
+    @Inject(method = "updateDisplay", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;flipFrame(J)V", remap = false, shift = At.Shift.AFTER))
     private void preSwapBuffers(CallbackInfo ci) {
         if (this.wglPrevContext == MemoryUtil.NULL) {
             // There is no prior recorded context.

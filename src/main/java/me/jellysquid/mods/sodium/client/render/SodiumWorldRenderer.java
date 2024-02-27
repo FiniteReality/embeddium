@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
+import me.jellysquid.mods.sodium.client.model.quad.blender.BlendedColorProvider;
 import me.jellysquid.mods.sodium.client.render.chunk.ChunkRenderMatrices;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSectionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList;
@@ -274,6 +275,8 @@ public class SodiumWorldRenderer {
         var window = Minecraft.getInstance().getWindow();
         if(window != null)
             window.updateVsync(Minecraft.getInstance().options.enableVsync().get());
+
+        BlendedColorProvider.checkBlendingEnabled();
     }
 
     // We track whether a block entity uses custom block outline rendering, so that the outline postprocessing

@@ -5,14 +5,28 @@ import me.jellysquid.mods.sodium.client.model.color.ColorProvider;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.api.util.ColorMixer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 
+import java.util.Arrays;
+
 public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
+    private static boolean shouldUseVertexBlending;
+
+    public static void checkBlendingEnabled() {
+        shouldUseVertexBlending = Minecraft.getInstance().options.biomeBlendRadius().get() > 0;
+    }
+
     @Override
     public void getColors(WorldSlice view, BlockPos pos, T state, ModelQuadView quad, int[] output) {
-        for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++) {
-            output[vertexIndex] = this.getVertexColor(view, pos, quad, vertexIndex);
+        if (shouldUseVertexBlending) {
+            for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++) {
+                output[vertexIndex] = this.getVertexColor(view, pos, quad, vertexIndex);
+            }
+        } else {
+            // Just sample the exact position of that block (like vanilla), and use the same color on all vertices
+            Arrays.fill(output, ColorARGB.toABGR(this.getColor(view, pos.getX(), pos.getY(), pos.getZ())));
         }
     }
 

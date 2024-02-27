@@ -176,8 +176,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
         renderData.setOcclusionData(occluder.resolve());
 
-        // TODO port
-        //MinecraftForge.EVENT_BUS.post(new ChunkDataBuiltEvent(renderData));
+        ChunkDataBuiltEvent.BUS.post(new ChunkDataBuiltEvent(renderData));
 
         return new ChunkBuildOutput(this.render, renderData.build(), meshes, this.buildTime);
     }

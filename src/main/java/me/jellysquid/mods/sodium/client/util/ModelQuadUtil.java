@@ -6,7 +6,6 @@ import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import org.joml.Vector3f;
 
 /**
  * Provides some utilities and constants for interacting with vanilla's model quad vertex format.
@@ -42,9 +41,7 @@ public class ModelQuadUtil {
     }
 
     public static ModelQuadFacing findNormalFace(float x, float y, float z) {
-        Vector3f normal = new Vector3f(x, y, z);
-
-        if (!normal.isFinite()) {
+        if (!Float.isFinite(x) || !Float.isFinite(y) || !Float.isFinite(z)) {
             return ModelQuadFacing.UNASSIGNED;
         }
 
@@ -52,7 +49,7 @@ public class ModelQuadUtil {
         Direction closestFace = null;
 
         for (Direction face : DirectionUtil.ALL_DIRECTIONS) {
-            float dot = normal.dot(face.step());
+            float dot = (x * face.getStepX()) + (y * face.getStepY()) + (z * face.getStepZ());
 
             if (dot > maxDot) {
                 maxDot = dot;

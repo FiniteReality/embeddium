@@ -54,7 +54,7 @@ public class BlockRenderer {
     private final boolean useAmbientOcclusion;
     private final boolean useForgeExperimentalLightingPipeline;
 
-    private final IndigoBlockRenderContext indigoRenderContext = new IndigoBlockRenderContext();
+    private final IndigoBlockRenderContext indigoRenderContext;
 
     private final int[] quadColors = new int[4];
 
@@ -72,6 +72,7 @@ public class BlockRenderer {
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
         // TODO: Expose config option and use this as a way to unconditionally delegate to the vanilla renderer
         this.useForgeExperimentalLightingPipeline = false; // ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+        this.indigoRenderContext = new IndigoBlockRenderContext(this.occlusionCache);
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -114,7 +115,7 @@ public class BlockRenderer {
                 mStack = EMPTY_STACK;
 
             indigoRenderContext.reset();
-            indigoRenderContext.render(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), mStack, null, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY);
+            indigoRenderContext.renderEmbeddium(ctx, mStack, random);
             indigoRenderContext.flush(buffers, ctx.origin());
             return;
         }
