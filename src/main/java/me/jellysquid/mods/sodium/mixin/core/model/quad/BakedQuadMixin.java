@@ -39,7 +39,7 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     @Final
     private boolean shade;
 
-    @Shadow
+    @Shadow(remap = false)
     @Final
     private boolean hasAmbientOcclusion;
 
