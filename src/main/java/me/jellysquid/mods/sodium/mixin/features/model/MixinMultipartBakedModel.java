@@ -4,7 +4,9 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.MultiPartBakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
 
@@ -28,16 +30,7 @@ public class MixinMultipartBakedModel {
     @Final
     private List<Pair<Predicate<BlockState>, BakedModel>> selectors;
 
-    /**
-     * @author JellySquid
-     * @reason Avoid expensive allocations and replace bitfield indirection
-     */
-    @Overwrite
-    public List<BakedQuad> getQuads(BlockState state, Direction face, Random random, IModelData modelData) {
-        if (state == null) {
-            return Collections.emptyList();
-        }
-
+    private BakedModel[] getModelComponents(BlockState state) {
         BakedModel[] models;
 
         long readStamp = this.lock.readLock();
@@ -65,6 +58,21 @@ public class MixinMultipartBakedModel {
             }
         }
 
+        return models;
+    }
+
+    /**
+     * @author JellySquid
+     * @reason Avoid expensive allocations and replace bitfield indirection
+     */
+    @Overwrite(remap = false)
+    public List<BakedQuad> getQuads(BlockState state, Direction face, Random random, IModelData modelData) {
+        if (state == null) {
+            return Collections.emptyList();
+        }
+
+        BakedModel[] models = getModelComponents(state);
+
         List<BakedQuad> quads = new ArrayList<>();
         long seed = random.nextLong();
 
@@ -74,6 +82,29 @@ public class MixinMultipartBakedModel {
         }
 
         return quads;
+    }
+
+    /**
+     * @author embeddedt
+     * @reason use our selector system, avoid creating multipart model data if no submodels use it
+     */
+    @Overwrite(remap = false)
+    public IModelData getModelData(BlockAndTintGetter world, BlockPos pos, BlockState state, IModelData tileModelData) {
+        BakedModel[] models = getModelComponents(state);
+
+        MultipartModelData multipartModelData = null;
+
+        for(BakedModel model : models) {
+            IModelData data = model.getModelData(world, pos, state, tileModelData);
+            if(data != tileModelData) {
+                if(multipartModelData == null) {
+                    multipartModelData = new MultipartModelData(tileModelData);
+                }
+                multipartModelData.setPartData(model, data);
+            }
+        }
+
+        return multipartModelData == null ? tileModelData : multipartModelData;
     }
 
 }
