@@ -29,7 +29,6 @@ public class MixinConfig {
         // Defines the default rules which can be configured by the user or other mods.
         // You must manually add a rule for any new mixins not covered by an existing package rule.
         this.addMixinRule("core", true); // TODO: Don't actually allow the user to disable this
-        this.addMixinRule("core.checks", false); // Embeddium: disable checks module until upstream tests it
 
         this.addMixinRule("features", true);
 
