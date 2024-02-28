@@ -56,7 +56,7 @@ public class BakedModelEncoder {
         return ModelQuadUtil.mixARGBColors(colorA, colorB);
     }
 
-    public static void writeQuadVertices(VertexBufferWriter writer, PoseStack.Pose matrices, ModelQuadView quad, float r, float g, float b, float[] brightnessTable, boolean colorize, int[] light, int overlay) {
+    public static void writeQuadVertices(VertexBufferWriter writer, PoseStack.Pose matrices, ModelQuadView quad, float r, float g, float b, float a, float[] brightnessTable, boolean colorize, int[] light, int overlay) {
         Matrix3f matNormal = matrices.normal();
         Matrix4f matPosition = matrices.pose();
 
@@ -100,7 +100,7 @@ public class BakedModelEncoder {
                     fB = brightness * b;
                 }
 
-                int color = ColorABGR.pack(fR, fG, fB, 1.0F);
+                int color = ColorABGR.pack(fR, fG, fB, a);
 
                 ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light[i]), mergeNormalAndMult(quad.getForgeNormal(i), normal, matNormal));
                 ptr += ModelVertex.STRIDE;
