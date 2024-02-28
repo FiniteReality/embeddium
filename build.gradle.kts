@@ -1,6 +1,10 @@
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RemapSourcesJarTask
 
+object Constants {
+    const val IS_SNAPSHOT: Boolean = true
+}
+
 plugins {
     id("fabric-loom") version("1.5.7")
 
@@ -237,21 +241,27 @@ publishing {
 publishMods {
 	file = remapJar.archiveFile
 	changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
-	type = STABLE
+    type = if(Constants.IS_SNAPSHOT) {
+        ALPHA
+    } else {
+        STABLE
+    }
     modLoaders.add("fabric")
 
-	curseforge {
-		projectId = "908741"
-		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-		minecraftVersions.add("minecraft_version"())
+    if(!Constants.IS_SNAPSHOT) {
+        curseforge {
+            projectId = "908741"
+            accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+            minecraftVersions.add("minecraft_version"())
 
-		incompatible {
-			slug = "sodium"
-		}
-		incompatible {
-			slug = "indium"
-		}
-	}
+            incompatible {
+                slug = "sodium"
+            }
+            incompatible {
+                slug = "indium"
+            }
+        }
+    }
 	modrinth {
 		projectId = "sk9rgfiA"
 		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
