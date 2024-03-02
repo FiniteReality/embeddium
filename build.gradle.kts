@@ -129,7 +129,6 @@ dependencies {
 
     // Mods
     compatCompileOnly("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
-    compatCompileOnly("blusunrize.immersiveengineering:ImmersiveEngineering:${"ie_fileid"()}:api")
 }
 
 tasks.processResources {
