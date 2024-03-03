@@ -80,6 +80,8 @@ repositories {
         }
     }
     maven("https://maven.covers1624.net/")
+    // for snapshots
+    mavenLocal()
 }
 
 minecraft {
