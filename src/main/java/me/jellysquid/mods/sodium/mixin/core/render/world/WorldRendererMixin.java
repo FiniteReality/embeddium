@@ -140,7 +140,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
             RenderDevice.exitManagedCode();
         }
 
-        ClientHooks.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), matrices, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.getFrustum());
+        ClientHooks.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), pose, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.getFrustum());
     }
 
     /**
