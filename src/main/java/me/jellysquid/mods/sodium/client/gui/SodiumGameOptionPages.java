@@ -135,13 +135,13 @@ public class SodiumGameOptionPages {
         List<OptionGroup> groups = new ArrayList<>();
 
         groups.add(OptionGroup.createBuilder()
-                .add(OptionImpl.createBuilder(me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.class, vanillaOpts)
+                .add(OptionImpl.createBuilder(GraphicsStatus.class, vanillaOpts)
                         .setName(Component.translatable("options.graphics"))
                         .setTooltip(Component.translatable("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy") }))
+                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy"), Component.translatable("options.graphics.fabulous") }))
                         .setBinding(
-                                (opts, value) -> opts.graphicsMode().set(value == me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.FANCY ? GraphicsStatus.FANCY : GraphicsStatus.FAST),
-                                opts -> opts.graphicsMode().get() == GraphicsStatus.FANCY ? me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.FANCY : me.jellysquid.mods.sodium.client.gui.misc.GraphicsMode.FAST)
+                                (opts, value) -> opts.graphicsMode().set(value),
+                                opts -> opts.graphicsMode().get())
                         .setImpact(OptionImpact.HIGH)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
