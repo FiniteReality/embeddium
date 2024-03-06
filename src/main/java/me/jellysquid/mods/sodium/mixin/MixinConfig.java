@@ -110,6 +110,7 @@ public class MixinConfig {
         // The fast entity renderer prevents their mixins from applying:
         // https://github.com/KosmX/bendy-lib/tree/1.19.4/common/src/main/java/io/github/kosmx/bendylib/mixin
         this.disableIfModPresent("bendylib", "features.render.entity.fast_render");
+        this.disableIfModPresent("bendy-lib", "features.render.entity.fast_render");
     }
 
     private void disableIfModPresent(String modId, String option) {
