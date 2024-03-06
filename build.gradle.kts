@@ -140,7 +140,7 @@ fun DependencyHandlerScope.compatCompileOnly(dependency: Dependency) {
 }
 
 dependencies {
-    minecraft("net.minecraftforge:forge:${"minecraft_version"()}-${"forge_version"()}")
+    minecraft("net.neoforged:forge:${"minecraft_version"()}-${"forge_version"()}")
 
     // Mods
     compatCompileOnly(fg.deobf("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}"))
