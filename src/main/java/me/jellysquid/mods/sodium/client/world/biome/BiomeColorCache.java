@@ -31,7 +31,7 @@ public class BiomeColorCache {
 
     public BiomeColorCache(BiomeSlice biomeData, int blendRadius, boolean is3D) {
         this.biomeData = biomeData;
-        this.blendRadius = blendRadius;
+        this.blendRadius = Math.min(7, blendRadius);
         this.uses3DBiomes = is3D;
 
         this.sizeXZ = 16 + ((NEIGHBOR_BLOCK_RADIUS + this.blendRadius) * 2);
