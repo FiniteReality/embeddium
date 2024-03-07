@@ -14,9 +14,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 public class VertexConsumerTracker {
     private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-VertexConsumerTracker");
     private static final ReferenceSet<Class<? extends VertexConsumer>> BAD_CONSUMERS = ReferenceSets.synchronize(new ReferenceOpenHashSet<>());
+    private static final boolean WARN_NON_VBW_CONSUMERS = Boolean.getBoolean("embeddium.logBadVertexConsumers");
 
     public static void logBadConsumer(VertexConsumer consumer) {
-        if (BAD_CONSUMERS.add(consumer.getClass())) {
+        if (WARN_NON_VBW_CONSUMERS && BAD_CONSUMERS.add(consumer.getClass())) {
             LOGGER.warn("Class {} does not support optimized vertex writing code paths, which may cause reduced rendering performance",
                     consumer.getClass().getName());
         }
