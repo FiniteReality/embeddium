@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 @Mixin(VertexBuffer.class)
 public class VertexBufferMixin {
     private static final int NUM_SAMPLERS = 12;
-    private static String[] SAMPLER_IDS = IntStream.range(0, NUM_SAMPLERS).mapToObj(i -> "Sampler" + i).toArray(String[]::new);
+    private static final String[] SAMPLER_IDS = IntStream.range(0, NUM_SAMPLERS).mapToObj(i -> "Sampler" + i).toArray(String[]::new);
 
     /**
      * @author embeddedt
