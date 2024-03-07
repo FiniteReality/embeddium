@@ -62,7 +62,7 @@ public class MixinConfig {
         this.addMixinRule("features.render.immediate", true);
         this.addMixinRule("features.render.immediate.buffer_builder", true);
         this.addMixinRule("features.render.immediate.buffer_builder.fast_delegate", true);
-        this.addMixinRule("features.render.immediate.matrix_stack", false);
+        this.addMixinRule("features.render.immediate.matrix_stack", true);
 
         this.addMixinRule("features.render.model", true);
         this.addMixinRule("features.render.model.block", true);
@@ -110,6 +110,7 @@ public class MixinConfig {
         // The fast entity renderer prevents their mixins from applying:
         // https://github.com/KosmX/bendy-lib/tree/1.19.4/common/src/main/java/io/github/kosmx/bendylib/mixin
         this.disableIfModPresent("bendylib", "features.render.entity.fast_render");
+        this.disableIfModPresent("bendy-lib", "features.render.entity.fast_render");
     }
 
     private void disableIfModPresent(String modId, String option) {

@@ -8,10 +8,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Collections;
 import java.util.List;
 import net.minecraft.client.renderer.ShaderInstance;
 
@@ -30,6 +29,9 @@ public class ShaderProgramMixin {
     @Final
     private int programId;
 
+    @Shadow
+    @Final
+    private List<Uniform> uniforms;
     @Unique
     private Object2IntMap<String> uniformCache;
 
@@ -53,5 +55,15 @@ public class ShaderProgramMixin {
         }
 
         return location;
+    }
+
+    @Redirect(method = "apply", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/ShaderInstance;uniforms:Ljava/util/List;", ordinal = 0))
+    private List<Uniform> uploadUniforms(ShaderInstance instance) {
+        List<Uniform> uniforms = this.uniforms;
+        //noinspection ForLoopReplaceableByForEach
+        for(int i = 0; i < uniforms.size(); i++) {
+            uniforms.get(i).upload();
+        }
+        return Collections.emptyList();
     }
 }

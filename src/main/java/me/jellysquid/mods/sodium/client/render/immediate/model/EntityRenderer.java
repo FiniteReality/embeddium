@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.immediate.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import org.embeddedt.embeddium.render.matrix_stack.CachingPoseStack;
 import net.caffeinemc.mods.sodium.api.math.MatrixHelper;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.common.ModelVertex;
@@ -93,6 +94,8 @@ public class EntityRenderer {
             return;
         }
 
+        ((CachingPoseStack)matrixStack).embeddium$setCachingEnabled(true);
+
         matrixStack.pushPose();
 
         part.translateAndRotate(matrixStack);
@@ -104,6 +107,8 @@ public class EntityRenderer {
         renderChildren(matrixStack, writer, light, overlay, color, children);
 
         matrixStack.popPose();
+
+        ((CachingPoseStack)matrixStack).embeddium$setCachingEnabled(false);
     }
 
     private static void renderChildren(PoseStack matrices, VertexBufferWriter writer, int light, int overlay, int color, ModelPart[] children) {
