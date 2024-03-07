@@ -224,10 +224,16 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     public void reset() {
-        buffer.rewind();
-        currentVertex = 0;
-        Arrays.fill(sideCount, 0);
+        if(currentVertex != 0) {
+            buffer.rewind();
+            currentVertex = 0;
+            Arrays.fill(sideCount, 0);
+        }
         resetCurrentVertex();
+    }
+
+    public boolean isEmpty() {
+        return currentVertex == 0;
     }
 
     public boolean flush(@NotNull ChunkModelBuilder buffers, Material material, Vector3fc origin) {

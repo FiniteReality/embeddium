@@ -82,6 +82,9 @@ public class IndigoBlockRenderContext extends BlockRenderContext {
      */
     public void flush(ChunkBuildBuffers buffers, Vector3fc origin) {
         vertexBuilderMap.forEach((renderType, sinkingVertexBuilder) -> {
+            if(sinkingVertexBuilder.isEmpty()) {
+                return;
+            }
             var material = DefaultMaterials.forRenderLayer(renderType);
             var builder = buffers.get(material);
             sinkingVertexBuilder.flush(builder, material, origin);
