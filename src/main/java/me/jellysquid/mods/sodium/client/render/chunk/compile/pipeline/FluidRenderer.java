@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -171,9 +172,10 @@ public class FluidRenderer {
 
         boolean isWater = fluidState.is(FluidTags.WATER);
 
-        final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid);
+        final FluidRenderHandler handler = getFluidRenderHandler(fluidState);
+        final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid, handler);
 
-        TextureAtlasSprite[] sprites = FluidRenderHandlerRegistry.INSTANCE.get(fluid).getFluidSprites(world, blockPos, fluidState);
+        TextureAtlasSprite[] sprites = handler.getFluidSprites(world, blockPos, fluidState);
 
         float fluidHeight = this.fluidHeight(world, fluid, blockPos, Direction.UP);
         float northWestHeight, southWestHeight, southEastHeight, northEastHeight;
@@ -409,14 +411,25 @@ public class FluidRenderer {
         }
     }
 
-    private ColorProvider<FluidState> getColorProvider(Fluid fluid) {
+    private ColorProvider<FluidState> getColorProvider(Fluid fluid, FluidRenderHandler handler) {
         var override = this.colorProviderRegistry.getColorProvider(fluid);
 
         if (override != null) {
             return override;
         }
         
-        return DefaultColorProviders.adapt(FluidRenderHandlerRegistry.INSTANCE.get(fluid));
+        return DefaultColorProviders.adapt(handler);
+    }
+
+    private static FluidRenderHandler getFluidRenderHandler(FluidState fluidState) {
+        FluidRenderHandler handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getType());
+
+        // Match the vanilla FluidRenderer's behavior if the handler is null
+        if (handler == null) {
+            boolean isLava = fluidState.is(FluidTags.LAVA);
+            handler = FluidRenderHandlerRegistry.INSTANCE.get(isLava ? Fluids.LAVA : Fluids.WATER);
+        }
+        return handler;
     }
 
     private void updateQuad(ModelQuadView quad, WorldSlice world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness,
