@@ -68,6 +68,17 @@ public class MixinMultipartBakedModel {
     @Overwrite(remap = false)
     public List<BakedQuad> getQuads(BlockState state, Direction face, Random random, IModelData modelData) {
         if (state == null) {
+            // Embeddium: There needs to be Map#get() and Map#put() calls in this method in order for FerriteCore 1.18
+            // and older mixins to work. This if statement is rarely hit, and the JIT should hopefully optimize away the
+            // redundant call.
+            //noinspection RedundantOperationOnEmptyContainer
+            if(Collections.emptyMap().get(null) != null) {
+                // This must be a local so that the put() call is an interface dispatch instead of being invoked
+                // on HashMap directly
+                Map<Object, Object> fakeMap = new HashMap<>();
+                fakeMap.put(null, null);
+            }
+
             return Collections.emptyList();
         }
 
