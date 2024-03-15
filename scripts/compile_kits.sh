@@ -16,5 +16,6 @@ if [[ $MC_VERSION == *"w"** ]]; then
     git clone -q -b ${branch} --depth 1 https://github.com/neoforged/NeoForge Kits >/dev/null
     cd Kits
     echo "Compiling Kits"
-    ./gradlew neoforge:setup neoforge:publishToMavenLocal
+    ./gradlew neoforge:setup
+    ./gradlew neoforge:publishToMavenLocal
 fi
