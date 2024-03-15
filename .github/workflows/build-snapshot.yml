@@ -31,6 +31,8 @@ jobs:
           key: ${{ runner.os }}-build-snapshot-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-build-snapshot-
+      - name: Handle Minecraft snapshot
+        run: ./scripts/compile_kits.sh
       - name: Build artifacts
         run: ./gradlew jar
       - name: Upload artifacts
