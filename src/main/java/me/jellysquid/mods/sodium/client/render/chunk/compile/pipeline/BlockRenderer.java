@@ -38,6 +38,7 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeConfig;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
+import org.embeddedt.embeddium.api.model.EmbeddiumBakedModelExtension;
 
 import java.util.Arrays;
 import java.util.List;
@@ -236,7 +237,8 @@ public class BlockRenderer {
     }
 
     private LightMode getLightingMode(BlockState state, BakedModel model, BlockAndTintGetter world, BlockPos pos, RenderType renderLayer) {
-        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, renderLayer) && state.getLightEmission(world, pos) == 0) {
+        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, renderLayer)
+                && (((EmbeddiumBakedModelExtension)model).useAmbientOcclusionWithLightEmission(state, renderLayer) || state.getLightEmission(world, pos) == 0)) {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;
