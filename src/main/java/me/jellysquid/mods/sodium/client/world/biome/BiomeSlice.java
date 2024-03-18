@@ -22,9 +22,19 @@ public class BiomeSlice {
 
     private int worldX, worldY, worldZ;
 
+    private final boolean is3D;
+
+    public BiomeSlice() {
+        this(true);
+    }
+
+    public BiomeSlice(boolean is3D) {
+        this.is3D = is3D;
+    }
+
     public void update(ClientLevel world, ChunkRenderContext context) {
         this.worldX = context.getOrigin().minBlockX() - 16;
-        this.worldY = context.getOrigin().minBlockY() - 16;
+        this.worldY = (this.is3D ? context.getOrigin().minBlockY() : 0) - 16;
         this.worldZ = context.getOrigin().minBlockZ() - 16;
 
         this.biomeSeed = ((ClientWorldExtended) world).getBiomeSeed();
@@ -136,6 +146,10 @@ public class BiomeSlice {
     }
 
     public Biome getBiome(int x, int y, int z) {
+        if (!this.is3D) {
+            y = 0;
+        }
+
         int relX = x - this.worldX;
         int relY = y - this.worldY;
         int relZ = z - this.worldZ;

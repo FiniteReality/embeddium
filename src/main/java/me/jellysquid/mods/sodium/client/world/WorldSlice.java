@@ -143,9 +143,10 @@ public class WorldSlice implements BlockAndTintGetter, BiomeManager.NoiseBiomeSo
         this.sections = new ClonedChunkSection[SECTION_TABLE_ARRAY_SIZE];
         this.blockStatesArrays = new BlockState[SECTION_TABLE_ARRAY_SIZE][];
 
-        this.biomeSlice = new BiomeSlice();
+        boolean is3DBiomes = ((AccessorBiomeManager)this.world.getBiomeManager()).getZoomer() != FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE;
+        this.biomeSlice = new BiomeSlice(is3DBiomes);
         int biomeBlendRadius = Minecraft.getInstance().options.biomeBlendRadius;
-        this.biomeColors = new BiomeColorCache(this.biomeSlice, biomeBlendRadius, ((AccessorBiomeManager)this.world.getBiomeManager()).getZoomer() != FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE);
+        this.biomeColors = new BiomeColorCache(this.biomeSlice, biomeBlendRadius, is3DBiomes);
 
         for (int x = 0; x < SECTION_LENGTH; x++) {
             for (int y = 0; y < SECTION_LENGTH; y++) {
