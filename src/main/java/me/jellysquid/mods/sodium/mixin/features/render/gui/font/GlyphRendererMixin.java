@@ -52,13 +52,17 @@ public class GlyphRendererMixin {
      * @author JellySquid
      */
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void drawFast(boolean italic, float x, float y, Matrix4f matrix, VertexConsumer vertexConsumer, float red, float green, float blue, float alpha, int light, CallbackInfo ci) {
+    private void renderFast(boolean italic, float x, float y, Matrix4f matrix, VertexConsumer vertexConsumer, float red, float green, float blue, float alpha, int light, CallbackInfo ci) {
+        if(drawFast(italic, x, y, matrix, vertexConsumer, red, green, blue, alpha, light)) {
+            ci.cancel();
+        }
+    }
+
+    private boolean drawFast(boolean italic, float x, float y, Matrix4f matrix, VertexConsumer vertexConsumer, float red, float green, float blue, float alpha, int light) {
         var writer = VertexBufferWriter.tryOf(vertexConsumer);
 
         if (writer == null)
-            return;
-
-        ci.cancel();
+            return false;
 
         float x1 = x + this.left;
         float x2 = x + this.right;
@@ -89,6 +93,8 @@ public class GlyphRendererMixin {
 
             writer.push(stack, buffer, 4, GlyphVertex.FORMAT);
         }
+
+        return true;
     }
 
     @Unique
