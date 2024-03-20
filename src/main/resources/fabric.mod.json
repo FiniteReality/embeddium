@@ -6,10 +6,10 @@
   "description": "Embeddium is a fork of Sodium which focuses on mod compatibility",
   "authors": [
     {
-      "name": "@embeddedt"
+      "name": "embeddedt"
     },
     {
-      "name": "@jellysquid3",
+      "name": "jellysquid3",
       "contact": {
         "email": "jellysquid@pm.me",
         "homepage": "https://jellysquid.me"
