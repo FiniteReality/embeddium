@@ -82,7 +82,7 @@ public class BlockRenderer {
 
         ColorProvider<BlockState> colorizer = this.colorProviderRegistry.getColorProvider(ctx.state().getBlock());
 
-        LightMode mode = this.getLightingMode(ctx.state(), ctx.model(), ctx.localSlice(), ctx.pos(), ctx.renderLayer());
+        LightMode mode = this.getLightingMode(ctx);
         LightPipeline lighter = this.lighters.getLighter(mode);
         Vec3 renderOffset;
         
@@ -234,11 +234,14 @@ public class BlockRenderer {
         vertexBuffer.push(vertices, material);
     }
 
-    private LightMode getLightingMode(BlockState state, BakedModel model, BlockAndTintGetter world, BlockPos pos, RenderType renderLayer) {
-        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, renderLayer) && state.getLightEmission(world, pos) == 0) {
-            return LightMode.SMOOTH;
-        } else {
-            return LightMode.FLAT;
-        }
+    private LightMode getLightingMode(BlockRenderContext ctx) {
+        var model = ctx.model();
+        var state = ctx.state();
+        boolean canBeSmooth = this.useAmbientOcclusion && switch(model.useAmbientOcclusion(state, ctx.modelData(), ctx.renderLayer())) {
+            case TRUE -> true;
+            case DEFAULT -> state.getLightEmission(ctx.localSlice(), ctx.pos()) == 0;
+            case FALSE -> false;
+        };
+        return canBeSmooth ? LightMode.SMOOTH : LightMode.FLAT;
     }
 }

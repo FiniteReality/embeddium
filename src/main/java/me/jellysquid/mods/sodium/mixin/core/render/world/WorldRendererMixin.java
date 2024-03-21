@@ -140,7 +140,10 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
             RenderDevice.exitManagedCode();
         }
 
+        // TODO: Avoid setting up and clearing the state a second time
+        renderLayer.setupRenderState();
         ClientHooks.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), pose, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.getFrustum());
+        renderLayer.clearRenderState();
     }
 
     /**
