@@ -126,8 +126,11 @@ public abstract class MixinWorldRenderer implements WorldRendererExtended {
         } finally {
             RenderDevice.exitManagedCode();
         }
-        
+
+        // TODO: Avoid setting up and clearing the state a second time
+        renderLayer.setupRenderState();
         ForgeHooksClient.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), matrices, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), (this.capturedFrustum != null) ? this.capturedFrustum : this.cullingFrustum);
+        renderLayer.clearRenderState();
     }
 
     /**
