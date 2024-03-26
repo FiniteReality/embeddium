@@ -35,6 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
+import org.embeddedt.embeddium.model.UnwrappableBakedModel;
 
 import java.util.Map;
 
@@ -118,6 +119,12 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                             ModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, slice.getModelDataManager().getAtOrEmpty(blockPos));
 
                             long seed = blockState.getSeed(blockPos);
+                            random.setSeed(seed);
+
+                            // Embeddium: Ideally we'd do this before the call to getModelData, but that requires an
+                            // LVT reordering to move "long seed" further up. We will have to do this in 21.
+                            model = UnwrappableBakedModel.unwrapIfPossible(model, random);
+
                             random.setSeed(seed);
 
                             for (RenderType layer : model.getRenderTypes(blockState, random, modelData)) {
