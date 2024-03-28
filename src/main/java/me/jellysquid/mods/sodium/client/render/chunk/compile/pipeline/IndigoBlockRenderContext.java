@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
@@ -11,16 +10,15 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import org.embeddedt.embeddium.render.type.RenderTypeExtended;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
-
-import java.util.Map;
 
 /**
  * Adaptation of Indigo's {@link BlockRenderContext} that delegates back to the Sodium renderer.
  */
 public class IndigoBlockRenderContext extends BlockRenderContext {
-    private final Map<RenderType, SinkingVertexBuilder> vertexBuilderMap = new Object2ObjectOpenHashMap<>();
+    private final SinkingVertexBuilder[] vertexBuilderMap = new SinkingVertexBuilder[RenderType.chunkBufferLayers().size()];
 
     private me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext currentContext;
     private final BlockOcclusionCache occlusionCache;
@@ -55,11 +53,24 @@ public class IndigoBlockRenderContext extends BlockRenderContext {
 
     @Override
     protected VertexConsumer getVertexConsumer(RenderType layer) {
-        return vertexBuilderMap.computeIfAbsent(layer, k -> new SinkingVertexBuilder());
+        int id = ((RenderTypeExtended)layer).embeddium$getChunkLayerId();
+        if(id < 0) {
+            throw new UnsupportedOperationException("Unsupported render type: " + layer);
+        }
+        SinkingVertexBuilder builder = vertexBuilderMap[id];
+        if(builder == null) {
+            builder = new SinkingVertexBuilder();
+            vertexBuilderMap[id] = builder;
+        }
+        return builder;
     }
 
     public void reset() {
-        vertexBuilderMap.values().forEach(SinkingVertexBuilder::reset);
+        for(SinkingVertexBuilder builder : vertexBuilderMap) {
+            if(builder != null) {
+                builder.reset();
+            }
+        }
         cullChecked = 0;
         cullValue = 0;
     }
@@ -81,13 +92,14 @@ public class IndigoBlockRenderContext extends BlockRenderContext {
      * @param origin The origin of this block
      */
     public void flush(ChunkBuildBuffers buffers, Vector3fc origin) {
-        vertexBuilderMap.forEach((renderType, sinkingVertexBuilder) -> {
-            if(sinkingVertexBuilder.isEmpty()) {
+        for(int i = 0; i < vertexBuilderMap.length; i++) {
+            var sinkingVertexBuilder = vertexBuilderMap[i];
+            if(sinkingVertexBuilder == null || sinkingVertexBuilder.isEmpty()) {
                 return;
             }
-            var material = DefaultMaterials.forRenderLayer(renderType);
+            var material = DefaultMaterials.forRenderLayer(RenderType.chunkBufferLayers().get(i));
             var builder = buffers.get(material);
             sinkingVertexBuilder.flush(builder, material, origin);
-        });
+        }
     }
 }

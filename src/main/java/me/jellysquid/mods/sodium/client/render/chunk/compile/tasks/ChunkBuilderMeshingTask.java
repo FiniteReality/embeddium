@@ -35,6 +35,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
+import org.embeddedt.embeddium.model.UnwrappableBakedModel;
 
 import java.util.Map;
 
