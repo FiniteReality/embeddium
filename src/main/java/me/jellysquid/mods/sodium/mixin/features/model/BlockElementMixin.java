@@ -10,13 +10,13 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(BlockElement.class)
 public class BlockElementMixin {
-    @ModifyVariable(method = "<init>(Lorg/joml/Vector3f;Lorg/joml/Vector3f;Ljava/util/Map;Lnet/minecraft/client/renderer/block/model/BlockElementRotation;ZLnet/minecraftforge/client/model/ForgeFaceData;)V",
+    @ModifyVariable(method = "<init>(Lorg/joml/Vector3f;Lorg/joml/Vector3f;Ljava/util/Map;Lnet/minecraft/client/renderer/block/model/BlockElementRotation;ZLnet/neoforged/neoforge/client/model/ExtraFaceData;)V",
         at = @At("HEAD"), argsOnly = true, index = 1)
     private static Vector3f epsilonizeFrom(Vector3f vector) {
         return embeddium$epsilonize(vector);
     }
 
-    @ModifyVariable(method = "<init>(Lorg/joml/Vector3f;Lorg/joml/Vector3f;Ljava/util/Map;Lnet/minecraft/client/renderer/block/model/BlockElementRotation;ZLnet/minecraftforge/client/model/ForgeFaceData;)V",
+    @ModifyVariable(method = "<init>(Lorg/joml/Vector3f;Lorg/joml/Vector3f;Ljava/util/Map;Lnet/minecraft/client/renderer/block/model/BlockElementRotation;ZLnet/neoforged/neoforge/client/model/ExtraFaceData;)V",
             at = @At("HEAD"), argsOnly = true, index = 2)
     private static Vector3f epsilonizeTo(Vector3f vector) {
         return embeddium$epsilonize(vector);
