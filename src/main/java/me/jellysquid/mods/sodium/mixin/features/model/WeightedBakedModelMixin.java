@@ -35,7 +35,7 @@ public class WeightedBakedModelMixin {
         WeightedEntry.Wrapper<BakedModel> quad = getAt(this.list, Math.abs((int) random.nextLong()) % this.totalWeight);
 
         if (quad != null) {
-            return quad.getData()
+            return quad.data()
                     .getQuads(state, face, random, modelData, renderLayer);
         }
 
@@ -51,7 +51,7 @@ public class WeightedBakedModelMixin {
         WeightedEntry.Wrapper<BakedModel> quad = getAt(this.list, Math.abs((int) rand.nextLong()) % this.totalWeight);
 
         if (quad != null) {
-            return quad.getData().getRenderTypes(state, rand, data);
+            return quad.data().getRenderTypes(state, rand, data);
         }
 
         return ChunkRenderTypeSet.none();
