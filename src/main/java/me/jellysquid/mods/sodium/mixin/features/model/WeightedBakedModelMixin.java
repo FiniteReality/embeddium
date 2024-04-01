@@ -33,7 +33,7 @@ public class WeightedBakedModelMixin implements UnwrappableBakedModel {
         WeightedEntry.Wrapper<BakedModel> quad = getAt(this.list, Math.abs((int) random.nextLong()) % this.totalWeight);
 
         if (quad != null) {
-            return quad.data()
+            return quad.getData()
                     .getQuads(state, face, random);
         }
 
@@ -63,8 +63,8 @@ public class WeightedBakedModelMixin implements UnwrappableBakedModel {
     public @Nullable BakedModel embeddium$getInnerModel(RandomSource rand) {
         WeightedEntry.Wrapper<BakedModel> quad = getAt(this.list, Math.abs((int) rand.nextLong()) % this.totalWeight);
 
-        if (quad != null && quad.data().getClass() == SimpleBakedModel.class) {
-            return quad.data();
+        if (quad != null && quad.getData().getClass() == SimpleBakedModel.class) {
+            return quad.getData();
         }
 
         return null;

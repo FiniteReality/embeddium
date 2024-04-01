@@ -356,6 +356,11 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
     }
 
     @Override
+    public boolean isPotato() {
+        return this.world.isPotato();
+    }
+
+    @Override
     public @Nullable Object getBlockEntityRenderData(BlockPos pos) {
         if (!this.volume.isInside(pos.getX(), pos.getY(), pos.getZ())) {
             return null;

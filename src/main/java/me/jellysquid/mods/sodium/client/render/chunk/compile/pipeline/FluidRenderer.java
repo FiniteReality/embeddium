@@ -115,7 +115,7 @@ public class FluidRenderer {
         // TODO move to a separate class
         boolean overridesRenderFluid = handlersUsingCustomRenderer.computeIfAbsent(handler.getClass(), (Predicate<? super Class<? extends FluidRenderHandler>>)handlerClass -> {
             try {
-                var method = handlerClass.getMethod("renderFluid", BlockPos.class, BlockAndTintGetter.class, VertexConsumer.class, BlockState.class, FluidState.class);
+                var method = handlerClass.getMethod("renderFluid", BlockPos.class, BlockAndTintGetter.class, VertexConsumer.class, BlockState.class, FluidState.class, double.class, double.class, double.class);
                 return method.getDeclaringClass() != FluidRenderHandler.class;
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException("Unable to find renderFluid method. Possibly a mismatched Fabric API version?", e);
@@ -129,7 +129,7 @@ public class FluidRenderer {
 
         // Call vanilla fluid renderer and capture the results
         fluidVertexBuilder.reset();
-        handler.renderFluid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState);
+        handler.renderFluid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState, blockPos.getX() & 15, blockPos.getY() & 15, blockPos.getZ() & 15);
         fluidVertexBuilder.flush(buffers, material, 0, 0, 0);
 
         // Mark fluid sprites as being used in rendering
