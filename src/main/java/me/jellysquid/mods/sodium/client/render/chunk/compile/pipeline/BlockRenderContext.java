@@ -4,8 +4,10 @@ import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import org.embeddedt.embeddium.model.UnwrappableBakedModel;
 import org.embeddedt.embeddium.render.world.WorldSliceLocalGenerator;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -97,5 +99,10 @@ public class BlockRenderContext {
      */
     public RenderType renderLayer() {
         return this.renderLayer;
+    }
+
+    void maybeUnwrapModel(RandomSource random) {
+        random.setSeed(this.seed);
+        this.model = UnwrappableBakedModel.unwrapIfPossible(this.model, random);
     }
 }

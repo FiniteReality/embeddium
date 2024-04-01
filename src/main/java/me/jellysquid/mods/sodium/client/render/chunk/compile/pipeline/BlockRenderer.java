@@ -120,6 +120,10 @@ public class BlockRenderer {
             return;
         }
 
+        // Try to unwrap the model now
+
+        ctx.maybeUnwrapModel(random);
+
         for (Direction face : DirectionUtil.ALL_DIRECTIONS) {
             List<BakedQuad> quads = this.getGeometry(ctx, face);
 

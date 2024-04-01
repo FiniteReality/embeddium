@@ -2,34 +2,98 @@ package me.jellysquid.mods.sodium.mixin.features.render.world;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.RandomSupport;
+import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.WritableLevelData;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-@Mixin(ClientLevel.class)
-public class ClientLevelMixin {
+// Use a very low priority so most injects into doAnimateTick will still work
+@Mixin(value = ClientLevel.class, priority = 500)
+public abstract class ClientLevelMixin extends Level {
+    protected ClientLevelMixin(WritableLevelData p_270739_, ResourceKey<Level> p_270683_, RegistryAccess p_270200_, Holder<DimensionType> p_270240_, Supplier<ProfilerFiller> p_270692_, boolean p_270904_, boolean p_270470_, long p_270248_, int p_270466_) {
+        super(p_270739_, p_270683_, p_270200_, p_270240_, p_270692_, p_270904_, p_270470_, p_270248_, p_270466_);
+    }
+
     @Shadow
     private void method_24462(BlockPos.MutableBlockPos pos, AmbientParticleSettings settings) {
         throw new AssertionError();
     }
 
+    @Shadow
+    protected abstract void trySpawnDripParticles(BlockPos p_104690_, BlockState p_104691_, ParticleOptions p_104692_, boolean p_104693_);
+
     /**
      * @author embeddedt
-     * @reason Avoid allocating a capturing lambda for each ticked block position. The original allocated method arg
-     * is discarded by the JIT.
+     * @reason Use singlethreaded random to avoid AtomicLong overhead
      */
-    @Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Ljava/util/Optional;ifPresent(Ljava/util/function/Consumer;)V"))
-    private void addBiomeParticleWithoutAlloc(Optional<AmbientParticleSettings> particleSettings, Consumer<AmbientParticleSettings> allocatedLambda, int p_233613_, int p_233614_, int p_233615_, int p_233616_, RandomSource p_233617_, Block p_233618_, BlockPos.MutableBlockPos p_233619_) {
-        //noinspection OptionalIsPresent
-        if(particleSettings.isPresent()) {
-            method_24462(p_233619_, particleSettings.get());
+    @Redirect(method = "animateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;create()Lnet/minecraft/util/RandomSource;"))
+    private RandomSource createLocal() {
+        return new SingleThreadedRandomSource(RandomSupport.generateUniqueSeed());
+    }
+
+    /**
+     * @author embeddedt
+     * @reason Avoid allocations & do some misc optimizations. Partially based on old Sodium 0.2 mixin
+     */
+    @Overwrite
+    public void doAnimateTick(int xCenter, int yCenter, int zCenter, int radius, RandomSource random, @Nullable Block markerBlock, BlockPos.MutableBlockPos pos) {
+        int x = xCenter + (random.nextInt(radius) - random.nextInt(radius));
+        int y = yCenter + (random.nextInt(radius) - random.nextInt(radius));
+        int z = zCenter + (random.nextInt(radius) - random.nextInt(radius));
+
+        pos.set(x, y, z);
+
+        BlockState blockState = this.getBlockState(pos);
+
+        if (!blockState.isAir()) {
+            blockState.getBlock().animateTick(blockState, this, pos, random);
+        }
+
+        FluidState fluidState = blockState.getFluidState();
+
+        if (!fluidState.isEmpty()) {
+            fluidState.animateTick(this, pos, random);
+            ParticleOptions particleoptions = fluidState.getDripParticle();
+            if (particleoptions != null && random.nextInt(10) == 0) {
+                boolean flag = blockState.isFaceSturdy(this, pos, Direction.DOWN);
+                BlockPos blockpos = pos.below();
+                this.trySpawnDripParticles(blockpos, this.getBlockState(blockpos), particleoptions, flag);
+            }
+        }
+
+        if (blockState.getBlock() == markerBlock) {
+            this.addParticle(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, blockState), (double)xCenter + 0.5D, (double)yCenter + 0.5D, (double)zCenter + 0.5D, 0.0D, 0.0D, 0.0D);
+        }
+
+        if (!blockState.isCollisionShapeFullBlock(this, pos)) {
+            var particleOpt = this.getBiome(pos).value().getAmbientParticle();
+
+            //noinspection OptionalIsPresent
+            if(particleOpt.isPresent()) {
+                method_24462(pos, particleOpt.get());
+            }
         }
     }
 }
