@@ -151,14 +151,18 @@ public class MixinMultipartBakedModel {
 
         BakedModel[] models = getModelComponents(state);
 
-        LinkedList<ChunkRenderTypeSet> renderTypeSets = new LinkedList<>();
-
-        for (BakedModel model : models) {
-            random.setSeed(seed);
-            renderTypeSets.add(model.getRenderTypes(state, random, data));
+        if (models.length == 0) {
+            return ChunkRenderTypeSet.none();
         }
 
-        return ChunkRenderTypeSet.union(renderTypeSets);
+        ChunkRenderTypeSet[] sets = new ChunkRenderTypeSet[models.length];
+
+        for (int i = 0; i < models.length; i++) {
+            random.setSeed(seed);
+            sets[i] = models[i].getRenderTypes(state, random, data);
+        }
+
+        return ChunkRenderTypeSet.union(sets);
     }
 
 }

@@ -83,7 +83,7 @@ public abstract class MixinClientLevel extends Level {
         }
 
         if (blockState.getBlock() == markerBlock) {
-            this.addParticle(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, blockState), (double)xCenter + 0.5D, (double)yCenter + 0.5D, (double)zCenter + 0.5D, 0.0D, 0.0D, 0.0D);
+            this.addParticle(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, blockState), (double)x + 0.5D, (double)y + 0.5D, (double)z + 0.5D, 0.0D, 0.0D, 0.0D);
         }
 
         if (!blockState.isCollisionShapeFullBlock(this, pos)) {
