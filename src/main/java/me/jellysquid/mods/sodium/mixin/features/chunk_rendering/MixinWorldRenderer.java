@@ -120,9 +120,13 @@ public abstract class MixinWorldRenderer implements WorldRendererExtended {
         }
         Frustum frustrum = this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum;
         Camera camera = this.minecraft.gameRenderer.getMainCamera();
+
+        // TODO: Avoid setting up and clearing the state a second time
+        renderLayer.setupRenderState();
         ForgeHooksClient.dispatchRenderStage(
                 renderLayer, (LevelRenderer) (Object) this, matrices, matrix, this.ticks, camera, frustrum
         );
+        renderLayer.clearRenderState();
     }
 
     /**

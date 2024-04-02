@@ -2,12 +2,13 @@ package me.jellysquid.mods.sodium.mixin.features.model;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.client.resources.model.WeightedBakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.IModelData;
-
+import org.embeddedt.embeddium.model.UnwrappableBakedModel;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.*;
 
 @Mixin(WeightedBakedModel.class)
-public class MixinWeightedBakedModel {
+public class MixinWeightedBakedModel implements UnwrappableBakedModel {
     @Shadow
     @Final
     private List<WeightedEntry.Wrapper<BakedModel>> list;
@@ -58,5 +59,16 @@ public class MixinWeightedBakedModel {
         } while (totalWeight >= 0);
 
         return weighted;
+    }
+
+    @Override
+    public @Nullable BakedModel embeddium$getInnerModel(Random rand) {
+        WeightedEntry.Wrapper<BakedModel> quad = getAt(this.list, Math.abs((int) rand.nextLong()) % this.totalWeight);
+
+        if (quad != null && quad.getData().getClass() == SimpleBakedModel.class) {
+            return quad.getData();
+        }
+
+        return null;
     }
 }

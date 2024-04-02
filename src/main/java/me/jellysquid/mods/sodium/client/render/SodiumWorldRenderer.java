@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.extensions.IForgeBlockEntity;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +53,8 @@ import java.util.stream.Stream;
  * Provides an extension to vanilla's {@link LevelRenderer}.
  */
 public class SodiumWorldRenderer {
+    private static final boolean ENABLE_BLOCKENTITY_CULLING = FMLLoader.getLoadingModList().getModFileById("valkyrienskies") == null;
+
     private final Minecraft client;
 
     private ClientLevel world;
@@ -268,6 +271,9 @@ public class SodiumWorldRenderer {
     }
 
     private boolean checkBEVisibility(BlockEntity entity) {
+        if(!ENABLE_BLOCKENTITY_CULLING) {
+            return true;
+        }
         AABB box = entity.getRenderBoundingBox();
         if(box.equals(IForgeBlockEntity.INFINITE_EXTENT_AABB))
             return true;
