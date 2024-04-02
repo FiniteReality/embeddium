@@ -178,7 +178,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
             BuiltSectionMeshParts mesh = buffers.createMesh(pass);
 
             if (mesh != null) {
-                if(pass.isReverseOrder() && SodiumClientMod.options().performance.useTranslucentFaceSorting) {
+                if(pass.isReverseOrder() && SodiumClientMod.canApplyTranslucencySorting()) {
                     ChunkBufferSorter.sort(
                             new ChunkBufferSorter.SortBuffer(mesh.getVertexData().getDirectBuffer(), buffers.getVertexType(), mesh.getVertexRanges()),
                             (float)camera.x - minX,
