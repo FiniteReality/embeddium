@@ -2,9 +2,9 @@
 
 # Embeddium
 
+![Modrinth Downloads](https://img.shields.io/modrinth/dt/sk9rgfiA?label=Modrinth&labelColor=%232D2D2D)
 [![](http://cf.way2muchnoise.eu/short_embeddium_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/embeddium)
 [![](http://cf.way2muchnoise.eu/versions/Available%20for_embeddium_full.svg)](https://www.curseforge.com/minecraft/mc-mods/embeddium/files)
-
 Embeddium is an unofficial fork of Sodium, with additional changes and bugfixes to integrate it with the Forge modding
 ecosystem.
 
