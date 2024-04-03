@@ -19,7 +19,7 @@ public class ModelDataBuilderMixin {
      * which should be a bit faster than IdentityHashMap.
      */
     @Redirect(method = "build", at = @At(value = "INVOKE", target = "Ljava/util/Collections;unmodifiableMap(Ljava/util/Map;)Ljava/util/Map;"))
-    private Map<ModelProperty<?>, Object> useSingletonEmptyIfPossible(Map<ModelProperty<?>, Object> properties) {
+    private Map<ModelProperty<?>, Object> useEfficientMap(Map<ModelProperty<?>, Object> properties) {
         int size = properties.size();
         if(size >= 4) {
             return new Reference2ReferenceOpenHashMap<>(properties);
