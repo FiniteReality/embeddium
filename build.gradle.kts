@@ -40,8 +40,8 @@ tasks.processResources {
 // this fixes some edge cases with special characters not displaying correctly
 // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
 tasks.withType<JavaCompile> {
-    sourceCompatibility = JavaVersion.VERSION_17.majorVersion
-    targetCompatibility = JavaVersion.VERSION_17.majorVersion
+    sourceCompatibility = JavaVersion.VERSION_21.majorVersion
+    targetCompatibility = JavaVersion.VERSION_21.majorVersion
     options.encoding = "UTF-8"
 }
 

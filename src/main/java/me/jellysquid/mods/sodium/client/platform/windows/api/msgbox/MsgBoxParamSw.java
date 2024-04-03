@@ -61,6 +61,11 @@ public class MsgBoxParamSw extends Struct {
     }
 
     @Override
+    protected MsgBoxParamSw create(long l, ByteBuffer byteBuffer) {
+        return new MsgBoxParamSw(l, byteBuffer);
+    }
+
+    @Override
     public int sizeof() {
         return SIZEOF;
     }
