@@ -95,7 +95,7 @@ public class IndigoBlockRenderContext extends BlockRenderContext {
         for(int i = 0; i < vertexBuilderMap.length; i++) {
             var sinkingVertexBuilder = vertexBuilderMap[i];
             if(sinkingVertexBuilder == null || sinkingVertexBuilder.isEmpty()) {
-                return;
+                continue;
             }
             var material = DefaultMaterials.forRenderLayer(RenderType.chunkBufferLayers().get(i));
             var builder = buffers.get(material);
