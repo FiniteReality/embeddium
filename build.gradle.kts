@@ -1,6 +1,6 @@
 plugins {
     id("idea")
-    id("net.neoforged.gradle.userdev") version("7.0.94")
+    id("net.neoforged.gradle.userdev") version("7.0.105")
     id("maven-publish")
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
@@ -15,8 +15,8 @@ operator fun String.invoke(): String {
 }
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = JavaVersion.VERSION_17.majorVersion
-    targetCompatibility = JavaVersion.VERSION_17.majorVersion
+    sourceCompatibility = JavaVersion.VERSION_21.majorVersion
+    targetCompatibility = JavaVersion.VERSION_21.majorVersion
     options.encoding = "UTF-8"
 }
 
@@ -27,8 +27,8 @@ base {
     archivesName = "archives_base_name"()
 }
 
-// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+// Mojang ships Java 21 to end users in 1.20.5+, so your mod should target Java 21.
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 sourceSets {
     val main = getByName("main")
@@ -81,7 +81,7 @@ repositories {
     }
     maven("https://maven.covers1624.net/")
     // for snapshots
-    maven("https://prmaven.neoforged.net/NeoForge/pr752") {
+    maven("https://prmaven.neoforged.net/NeoForge/pr794") {
         content {
             includeModule("net.neoforged", "neoforge")
             includeModule("net.neoforged", "testframework")
@@ -147,7 +147,7 @@ tasks.processResources {
 }
 
 tasks.withType<JavaCompile> {
-    options.release = 17
+    options.release = 21
 }
 
 
