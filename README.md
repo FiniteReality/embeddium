@@ -2,8 +2,10 @@
 
 # Embeddium
 
-![Modrinth Downloads](https://img.shields.io/modrinth/dt/sk9rgfiA?label=Modrinth&labelColor=%232D2D2D)
-![Modrinth Version](https://img.shields.io/modrinth/v/sk9rgfiA?label=Latest%20version&labelColor=%232D2D2D)
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/sk9rgfiA?label=Modrinth&labelColor=%232D2D2D?link=https://modrinth.com/mod/embeddium)](https://img.shields.io/modrinth/v/sk9rgfiA?label=Latest%20version&labelColor=%232d2d2d&link=https%3A%2F%2Fmodrinth.com%2Fmod%2Fembeddium%2Fversions
+)
+[![Modrinth Version](https://img.shields.io/modrinth/v/sk9rgfiA?label=Latest%20version&labelColor=%232D2D2D?link=https://modrinth.com/mod/embeddium/versions)](https://img.shields.io/modrinth/v/sk9rgfiA?label=Latest%20version&labelColor=%232d2d2d&link=https%3A%2F%2Fmodrinth.com%2Fmod%2Fembeddium%2Fversions
+)
 [![](http://cf.way2muchnoise.eu/short_embeddium_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/embeddium)
 [![](http://cf.way2muchnoise.eu/versions/Available%20for_embeddium_full.svg)](https://www.curseforge.com/minecraft/mc-mods/embeddium/files)
 
