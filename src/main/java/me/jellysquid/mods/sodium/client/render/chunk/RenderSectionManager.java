@@ -127,7 +127,7 @@ public class RenderSectionManager {
             this.rebuildLists.put(type, new ArrayDeque<>());
         }
 
-        this.translucencySorting = SodiumClientMod.options().performance.useTranslucentFaceSorting;
+        this.translucencySorting = SodiumClientMod.canApplyTranslucencySorting();
         this.translucencyBlockRenderDistance = Math.min(9216, (renderDistance << 4) * (renderDistance << 4));
     }
 

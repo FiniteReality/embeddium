@@ -45,6 +45,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.fml.loading.FMLLoader;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.SortedSet;
@@ -54,6 +56,8 @@ import java.util.function.Consumer;
  * Provides an extension to vanilla's {@link LevelRenderer}.
  */
 public class SodiumWorldRenderer {
+    private static final boolean ENABLE_BLOCKENTITY_CULLING = FMLLoader.getLoadingModList().getModFileById("valkyrienskies") == null;
+
     private final Minecraft client;
 
     private ClientLevel world;
@@ -397,7 +401,7 @@ public class SodiumWorldRenderer {
                 }
 
                 for (BlockEntity blockEntity : blockEntities) {
-                    if(!isBlockEntityRendererVisible(blockEntityRenderer, blockEntity))
+                    if(ENABLE_BLOCKENTITY_CULLING && !isBlockEntityRendererVisible(blockEntityRenderer, blockEntity))
                         continue;
 
                     if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
@@ -427,7 +431,7 @@ public class SodiumWorldRenderer {
             }
 
             for (var blockEntity : blockEntities) {
-                if(!isBlockEntityRendererVisible(blockEntityRenderer, blockEntity))
+                if(ENABLE_BLOCKENTITY_CULLING && !isBlockEntityRendererVisible(blockEntityRenderer, blockEntity))
                     continue;
 
                 if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
