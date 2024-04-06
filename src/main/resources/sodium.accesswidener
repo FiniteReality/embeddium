@@ -14,6 +14,7 @@ accessible class net/minecraft/client/renderer/texture/Stitcher$Holder
 accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
 
 accessible method com/mojang/blaze3d/vertex/PoseStack$Pose <init> (Lorg/joml/Matrix4f;Lorg/joml/Matrix3f;)V
+accessible field com/mojang/blaze3d/vertex/PoseStack$Pose trustedNormals Z
 accessible class net/minecraft/client/gui/font/FontSet$GlyphInfoFilter
 
 accessible field net/minecraft/world/level/GrassColor pixels [I
