@@ -1,21 +1,21 @@
 <img src="src/main/resources/icon.png" width="128">
 
-# Embeddium
+# Nolijium
 
-[![Modrinth Downloads](https://img.shields.io/modrinth/dt/sk9rgfiA?label=Modrinth&labelColor=%232D2D2D)](https://modrinth.com/mod/embeddium)
-[![Modrinth Version](https://img.shields.io/modrinth/v/sk9rgfiA?label=Latest%20version&labelColor=%232D2D2D)](https://modrinth.com/mod/embeddium/versions)
-[![](http://cf.way2muchnoise.eu/short_embeddium_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/embeddium)
-[![](http://cf.way2muchnoise.eu/versions/Available%20for_embeddium_full.svg)](https://www.curseforge.com/minecraft/mc-mods/embeddium/files)
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/sk9rgfiA?label=Modrinth&labelColor=%232D2D2D)](https://modrinth.com/mod/nolijium)
+[![Modrinth Version](https://img.shields.io/modrinth/v/sk9rgfiA?label=Latest%20version&labelColor=%232D2D2D)](https://modrinth.com/mod/nolijium/versions)
+[![](http://cf.way2muchnoise.eu/short_nolijium_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/nolijium)
+[![](http://cf.way2muchnoise.eu/versions/Available%20for_nolijium_full.svg)](https://www.curseforge.com/minecraft/mc-mods/nolijium/files)
 
-Embeddium is an unofficial fork of Sodium, with additional changes and bugfixes to integrate it with the Forge modding
+Nolijium is an unofficial fork of Sodium, with additional changes and bugfixes to integrate it with the Forge modding
 ecosystem.
 
-Embeddium is **not supported by CaffeineMC**. Do not report issues encountered with it to their bug tracker or in their
+Nolijium is **not supported by CaffeineMC**. Do not report issues encountered with it to their bug tracker or in their
 Discord. I have my own [Discord server](https://discord.gg/rN9Y7caguP) for my mods.
 
 ## Compatibility
 
-Generally, Embeddium should work out of the box with many more mods than Rubidium. However, given the scope of changes
+Generally, Nolijium should work out of the box with many more mods than Rubidium. However, given the scope of changes
 it makes to the renderer, it may have compatibility issues with some mods that use advanced rendering. Please open an
 issue if you experience problems. Some issues may require changes to be made in the other mod but it's good to have
 them documented.
@@ -30,7 +30,7 @@ Oculus if you do not need shaders.
 
 ## Mod integration
 
-If you're looking to add Embeddium to your development environment, please take a look at the [dedicated wiki page](https://github.com/embeddedt/embeddium/wiki/For-Developers).
+If you're looking to add Nolijium to your development environment, please take a look at the [dedicated wiki page](https://github.com/embeddedt/nolijium/wiki/For-Developers).
 
 ## Credits
 
@@ -42,4 +42,4 @@ If you're looking to add Embeddium to your development environment, please take 
 
 ## License
 
-Embeddium currently follows the license of upstream Sodium (LGPL-3.0).
+Nolijium currently follows the license of upstream Sodium (LGPL-3.0).
