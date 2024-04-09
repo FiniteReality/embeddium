@@ -11,9 +11,9 @@ jobs:
     steps:
       - name: "DCO Assistant"
         if: (
-              github.event.comment.body == "recheck" || 
-              github.event.comment.body == "I have read, and hereby affirm the entire contents of the Developer Certificate of Origin."
-            ) || github.event_name == "pull_request_target"
+              github.event.comment.body == 'recheck' || 
+              github.event.comment.body == 'I have read, and hereby affirm the entire contents of the Developer Certificate of Origin.'
+            ) || github.event_name == 'pull_request_target'
         uses: cla-assistant/github-action@v2.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
