@@ -31,7 +31,7 @@ jobs:
           signed-commit-message: "Add $contributorName to the DCO signature list"
           custom-notsigned-prcomment:
             "Before we can merge your submission, we require that you read and affirm the contents of the 
-            [Developer Certificate of Origin]($pathToCLADocument) by adding a comment containing the below text. 
+            [Developer Certificate of Origin](https://github.com/embeddedt/embeddium/blob/dco/DCO.txt) by adding a comment containing the below text. 
             Otherwise, please close this PR."
           custom-pr-sign-comment: "I have read, and hereby affirm the entire contents of the Developer Certificate of Origin."
           custom-allsigned-prcomment: "All contributors have read and affirmed the entire contents of the Developer Certificate of Origin."
