@@ -1,0 +1,32 @@
+name: "DCO Assistant"
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, closed, synchronize]
+
+jobs:
+  DCO:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "DCO Assistant"
+        if: (
+              github.event.comment.body == "recheck" || 
+              github.event.comment.body == "I have read, and hereby affirm the entire contents of the Developer Certificate of Origin."
+            ) || github.event_name == "pull_request_target"
+        uses: cla-assistant/github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path-to-signatures: "signatures.json"
+          path-to-document: "https://github.com/embeddedt/embeddium/blob/dco/DCO.txt"
+          branch: "dco"
+          create-file-commit-message: "Create DCO signature list"
+          signed-commit-message: "Add $contributorName to the DCO signature list"
+          custom-notsigned-prcomment:
+            "Before we can merge your submission, we require that you read and affirm the contents of the 
+            [Developer Certificate of Origin]($pathToCLADocument) by adding a comment containing the below text. 
+            Otherwise, please close this PR."
+          custom-pr-sign-comment: "I have read, and hereby affirm the entire contents of the Developer Certificate of Origin."
+          custom-allsigned-prcomment: "All contributors have read and affirmed the entire contents of the Developer Certificate of Origin."
+          use-dco-flag: true
