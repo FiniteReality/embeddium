@@ -277,9 +277,9 @@ public class GlBufferArena {
         // If we weren't able to upload some buffers, they will have been left behind in the queue
         if (!queue.isEmpty()) {
             // Calculate the amount of memory needed for the remaining uploads
-            int remainingElements = queue.stream()
-                    .mapToInt(upload -> upload.getDataBuffer().getLength())
-                    .sum();
+            int remainingElements = (int)(queue.stream()
+                    .mapToLong(upload -> upload.getDataBuffer().getLength())
+                    .sum() / this.stride);
 
             // Ask the arena to grow to accommodate the remaining uploads
             // This will force a re-allocation and compaction, which will leave us a continuous free segment
