@@ -117,7 +117,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
 
             int slices;
 
-            if (useBlockFaceCulling && (!pass.isReverseOrder() || !SodiumClientMod.options().performance.useTranslucentFaceSorting)) {
+            if (useBlockFaceCulling && (!pass.isReverseOrder() || !SodiumClientMod.canApplyTranslucencySorting())) {
                 slices = getVisibleFaces(camera.intX, camera.intY, camera.intZ, chunkX, chunkY, chunkZ);
             } else {
                 slices = ModelQuadFacing.ALL;

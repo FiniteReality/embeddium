@@ -26,6 +26,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.neoforged.fml.loading.FMLLoader;
+import org.embeddedt.embeddium.util.PlatformUtil;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -41,6 +42,9 @@ import java.util.stream.Stream;
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
 public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
+    // Donation prompt should not be shown with Controllable present (as it's impossible to exit) or in a dev env.
+    private static final boolean IS_POPUP_SAFE = !PlatformUtil.modPresent("controllable") && !PlatformUtil.isDevelopmentEnvironment();
+
     private final List<OptionPage> pages = new ArrayList<>();
 
     private final List<ControlElement<?>> controls = new ArrayList<>();
@@ -71,8 +75,8 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
     }
 
     private void checkPromptTimers() {
-        // Never show the prompt in developer workspaces.
-        if (!FMLLoader.isProduction()) {
+        // Don't show the donation prompt in situations where we know it causes problems.
+        if (!IS_POPUP_SAFE) {
             return;
         }
 
