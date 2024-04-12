@@ -12,11 +12,15 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class OcclusionCuller {
     private final Long2ReferenceMap<RenderSection> sections;
     private final Level world;
 
     private final DoubleBufferedQueue<RenderSection> queue = new DoubleBufferedQueue<>();
+
+    private boolean isCameraInUnloadedSection;
 
     public OcclusionCuller(Long2ReferenceMap<RenderSection> sections, Level world) {
         this.sections = sections;
@@ -32,7 +36,11 @@ public class OcclusionCuller {
         final var queues = this.queue;
         queues.reset();
 
+        this.isCameraInUnloadedSection = false;
         this.init(visitor, queues.write(), viewport, searchDistance, useOcclusionCulling, frame);
+        if(this.isCameraInUnloadedSection) {
+            useOcclusionCulling = false;
+        }
 
         while (queues.flip()) {
             processQueue(visitor, viewport, searchDistance, useOcclusionCulling, frame, queues.read(), queues.write());
@@ -197,11 +205,16 @@ public class OcclusionCuller {
         if (origin.getY() < this.world.getMinSection()) {
             // below the world
             this.initOutsideWorldHeight(queue, viewport, searchDistance, frame,
-                    this.world.getMinSection(), GraphDirection.DOWN);
+                    this.world.getMinSection(), GraphDirectionSet.of(GraphDirection.DOWN));
         } else if (origin.getY() >= this.world.getMaxSection()) {
             // above the world
             this.initOutsideWorldHeight(queue, viewport, searchDistance, frame,
-                    this.world.getMaxSection() - 1, GraphDirection.UP);
+                    this.world.getMaxSection() - 1, GraphDirectionSet.of(GraphDirection.UP));
+        } else if(this.getRenderSection(origin.getX(), origin.getY(), origin.getZ()) == null) {
+            // inside the world height-wise, but in an unloaded section
+            this.initOutsideWorldHeight(queue, viewport, searchDistance, frame,
+                    origin.getY(), GraphDirectionSet.of(GraphDirection.UP) | GraphDirectionSet.of(GraphDirection.DOWN));
+            this.isCameraInUnloadedSection = true;
         } else {
             this.initWithinWorld(visitor, queue, viewport, useOcclusionCulling, frame);
         }
@@ -211,9 +224,7 @@ public class OcclusionCuller {
         var origin = viewport.getChunkCoord();
         var section = this.getRenderSection(origin.getX(), origin.getY(), origin.getZ());
 
-        if (section == null) {
-            return;
-        }
+        Objects.requireNonNull(section);
 
         section.setLastVisibleFrame(frame);
         section.setIncomingDirections(GraphDirectionSet.NONE);
@@ -296,7 +307,7 @@ public class OcclusionCuller {
             return;
         }
 
-        visitNode(queue, section, GraphDirectionSet.of(direction), frame);
+        visitNode(queue, section, direction, frame);
     }
 
     private RenderSection getRenderSection(int x, int y, int z) {
