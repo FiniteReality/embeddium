@@ -41,7 +41,7 @@ public class GlBufferArena {
         this.head.setFree(true);
 
         this.arenaBuffer = commands.createMutableBuffer();
-        commands.allocateStorage(this.arenaBuffer, this.capacity * stride, BUFFER_USAGE);
+        commands.allocateStorage(this.arenaBuffer, (long)this.capacity * stride, BUFFER_USAGE);
 
         this.stagingBuffer = stagingBuffer;
     }
@@ -121,13 +121,13 @@ public class GlBufferArena {
         GlMutableBuffer srcBufferObj = this.arenaBuffer;
         GlMutableBuffer dstBufferObj = commandList.createMutableBuffer();
 
-        commandList.allocateStorage(dstBufferObj, capacity * this.stride, BUFFER_USAGE);
+        commandList.allocateStorage(dstBufferObj, (long)capacity * this.stride, BUFFER_USAGE);
 
         for (PendingBufferCopyCommand cmd : list) {
             commandList.copyBufferSubData(srcBufferObj, dstBufferObj,
-                    cmd.readOffset * this.stride,
-                    cmd.writeOffset * this.stride,
-                    cmd.length * this.stride);
+                    (long)cmd.readOffset * this.stride,
+                    (long)cmd.writeOffset * this.stride,
+                    (long)cmd.length * this.stride);
         }
 
         commandList.deleteBuffer(srcBufferObj);
@@ -153,12 +153,22 @@ public class GlBufferArena {
         return used;
     }
 
+    @Deprecated
     public int getDeviceUsedMemory() {
         return this.used * this.stride;
     }
 
+    @Deprecated
     public int getDeviceAllocatedMemory() {
         return this.capacity * this.stride;
+    }
+
+    public long getDeviceUsedMemoryL() {
+        return (long)this.used * this.stride;
+    }
+
+    public long getDeviceAllocatedMemoryL() {
+        return (long)this.capacity * this.stride;
     }
 
     private GlBufferSegment alloc(int size) {
@@ -306,7 +316,7 @@ public class GlBufferArena {
         }
 
         // Copy the data into our staging buffer, then copy it into the arena's buffer
-        this.stagingBuffer.enqueueCopy(commandList, data, this.arenaBuffer, dst.getOffset() * this.stride);
+        this.stagingBuffer.enqueueCopy(commandList, data, this.arenaBuffer, (long)dst.getOffset() * this.stride);
 
         upload.setResult(dst);
 
@@ -316,7 +326,7 @@ public class GlBufferArena {
     public void ensureCapacity(CommandList commandList, int elementCount) {
         // Re-sizing the arena results in a compaction, so any free space in the arena will be
         // made into one contiguous segment, joined with the new segment of free space we're asking for
-        // We calculate the number of free elements in our arena and then subtract that from the total requested
+        // We calculate the number of free elements in our arena and then subtract that frozm the total requested
         int elementsNeeded = elementCount - (this.capacity - this.used);
 
         // Try to allocate some extra buffer space unless this is an unusually large allocation
