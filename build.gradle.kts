@@ -149,9 +149,7 @@ java {
 }
 
 tasks.jar {
-    from("LICENSE") {
-        rename { "${it}_${"archives_base_name"()}"}
-    }
+    from("COPYING", "COPYING.LESSER")
     from(sourceSets["compat"].output.classesDirs)
     from(sourceSets["compat"].output.resourcesDir)
     from(sourceSets["api"].output.classesDirs)
