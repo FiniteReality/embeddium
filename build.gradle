@@ -171,9 +171,7 @@ java {
 }
 
 tasks.named('jar', Jar).configure {
-	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
-	}
+	from("COPYING", "COPYING.LESSER")
 	from sourceSets.compat.output.classesDirs
 	from sourceSets.compat.output.resourcesDir
 
