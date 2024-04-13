@@ -32,6 +32,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -75,14 +76,32 @@ public class FluidRenderer {
     }
 
     private boolean isFluidOccluded(BlockAndTintGetter world, int x, int y, int z, Direction dir, Fluid fluid) {
+        // Check if the fluid adjacent to us in the given direction is the same
+        if (world.getFluidState(this.scratchPos.set(x + dir.getStepX(), y + dir.getStepY(), z + dir.getStepZ())).getType().isSame(fluid)) {
+            return true;
+        }
+
+        // Stricter than vanilla: check whether the containing block can occlude, has a sturdy face on the given side,
+        // and has a solid occlusion shape. If so, assume the fluid inside is not visible on that side.
+        // This avoids rendering the top face of water inside an upper waterlogged slab, for instance.
         BlockPos pos = this.scratchPos.set(x, y, z);
         BlockState blockState = world.getBlockState(pos);
-        BlockPos adjPos = this.scratchPos.set(x + dir.getStepX(), y + dir.getStepY(), z + dir.getStepZ());
 
-        if (blockState.canOcclude()) {
-            return world.getFluidState(adjPos).getType().isSame(fluid) || blockState.isFaceSturdy(world, pos, dir, SupportType.FULL);
+        if (!blockState.canOcclude() || !blockState.isFaceSturdy(world, pos, dir, SupportType.FULL)) {
+            return false;
         }
-        return world.getFluidState(adjPos).getType().isSame(fluid);
+
+        VoxelShape sideShape = blockState.getFaceOcclusionShape(world, pos, dir);
+        if (sideShape == Shapes.block()) {
+            // The face fills the 1x1 area, so the fluid is occluded
+            return true;
+        } else if (sideShape == Shapes.empty()) {
+            // The face does not exist, so the fluid is not occluded
+            return false;
+        } else {
+            // Check if the face fills the 1x1 area
+            return Block.isShapeFullBlock(sideShape);
+        }
     }
 
     private boolean isSideExposed(BlockAndTintGetter world, int x, int y, int z, Direction dir, float height) {
