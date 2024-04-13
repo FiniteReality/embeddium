@@ -24,8 +24,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 // Use a very low priority so most injects into doAnimateTick will still work
@@ -39,6 +39,9 @@ public abstract class MixinClientLevel extends Level {
     private void lambda$doAnimateTick$8(BlockPos.MutableBlockPos pos, AmbientParticleSettings settings) {
         throw new AssertionError();
     }
+
+    private BlockPos.MutableBlockPos embeddium$particlePos;
+    private final Consumer<AmbientParticleSettings> embeddium$particleSettingsConsumer = settings -> lambda$doAnimateTick$8(embeddium$particlePos, settings);
 
     @Shadow
     protected abstract void trySpawnDripParticles(BlockPos p_104690_, BlockState p_104691_, ParticleOptions p_104692_, boolean p_104693_);
@@ -87,12 +90,10 @@ public abstract class MixinClientLevel extends Level {
         }
 
         if (!blockState.isCollisionShapeFullBlock(this, pos)) {
-            var particleOpt = this.getBiome(pos).value().getAmbientParticle();
-
-            //noinspection OptionalIsPresent
-            if(particleOpt.isPresent()) {
-                lambda$doAnimateTick$8(pos, particleOpt.get());
-            }
+            // This dance looks ridiculous over just calling the lambda, but it's needed because mod mixins target the ifPresent call.
+            // The important part (skipping the allocation) still happens.
+            embeddium$particlePos = pos;
+            this.getBiome(pos).value().getAmbientParticle().ifPresent(embeddium$particleSettingsConsumer);
         }
     }
 }
