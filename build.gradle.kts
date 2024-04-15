@@ -133,6 +133,7 @@ tasks.build {
 }
 
 tasks.jar {
+    from("COPYING", "COPYING.LESSER")
     from(sourceSets["api"].output.classesDirs)
     from(sourceSets["api"].output.resourcesDir)
     from(sourceSets["legacy"].output.classesDirs)
