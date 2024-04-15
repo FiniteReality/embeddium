@@ -66,8 +66,6 @@ public class ChunkBuildBuffers {
 
         int vertexCount = 0;
 
-        boolean singleRange = pass.isReverseOrder() && SodiumClientMod.options().performance.useTranslucentFaceSorting;
-
         for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
             var buffer = builder.getVertexBuffer(facing);
 

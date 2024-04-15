@@ -127,7 +127,7 @@ public class RenderSectionManager {
             this.rebuildLists.put(type, new ArrayDeque<>());
         }
 
-        this.translucencySorting = SodiumClientMod.options().performance.useTranslucentFaceSorting;
+        this.translucencySorting = SodiumClientMod.canApplyTranslucencySorting();
         this.translucencyBlockRenderDistance = Math.min(9216, (renderDistance << 4) * (renderDistance << 4));
     }
 
@@ -646,8 +646,8 @@ public class RenderSectionManager {
 
             var buffer = resources.getGeometryArena();
 
-            deviceUsed += buffer.getDeviceUsedMemory();
-            deviceAllocated += buffer.getDeviceAllocatedMemory();
+            deviceUsed += buffer.getDeviceUsedMemoryL();
+            deviceAllocated += buffer.getDeviceAllocatedMemoryL();
 
             count++;
         }

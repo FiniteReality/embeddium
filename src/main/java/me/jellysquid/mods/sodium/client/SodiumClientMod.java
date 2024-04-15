@@ -121,4 +121,8 @@ public class SodiumClientMod implements ClientModInitializer {
     public static boolean canUseVanillaVertices() {
         return !SodiumClientMod.options().performance.useCompactVertexFormat && !ShaderModBridge.areShadersEnabled();
     }
+
+    public static boolean canApplyTranslucencySorting() {
+        return SodiumClientMod.options().performance.useTranslucentFaceSorting && !ShaderModBridge.isNvidiumEnabled();
+    }
 }

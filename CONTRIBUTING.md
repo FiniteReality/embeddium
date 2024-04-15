@@ -1,5 +1,11 @@
 ## Contribution Guidelines
 
+### Developer Certificate of Origin
+
+We require contributors to Embeddium to acknowledge they have followed the terms of the [Developer Certificate of Origin](https://github.com/embeddedt/embeddium/blob/dco/DCO.txt) when making contributions. This is a simple mechanism for us to ensure all contributions are appropriately licensed and attributed.
+
+When you open a PR, our CI will automatically check if you have previously affirmed the DCO, and if you have not, give you a prompt to read & acknowledge it.
+
 ### Code Style
 
 When contributing source code to the project, ensure that you make consistent use of our code style guidelines. These
