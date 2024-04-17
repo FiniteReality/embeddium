@@ -6,7 +6,9 @@ import me.jellysquid.mods.sodium.client.compatibility.checks.LateDriverScanner;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.Workarounds;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.nvidia.NvidiaWorkarounds;
 import net.minecraft.Util;
+import net.minecraftforge.fml.loading.FMLConfig;
 import net.minecraftforge.fml.loading.ImmediateWindowHandler;
+import org.embeddedt.embeddium.bootstrap.EmbeddiumEarlyWindowHacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
@@ -22,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Objects;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -56,6 +59,12 @@ public class WindowMixin {
         if (SodiumClientMod.options().performance.useNoErrorGLContext &&
                 !Workarounds.isWorkaroundEnabled(Workarounds.Reference.NO_ERROR_CONTEXT_UNSUPPORTED)) {
             GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_NO_ERROR, GLFW.GLFW_TRUE);
+        }
+
+        // If the user has opted to delegate creation of the early window to us (needed for the above calls to have an
+        // effect) create it now.
+        if (FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_CONTROL) && Objects.equals(FMLConfig.getConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_PROVIDER), "embeddium")) {
+            EmbeddiumEarlyWindowHacks.createEarlyLaunchWindow(width, height);
         }
 
         try {
