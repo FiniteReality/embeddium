@@ -9,6 +9,8 @@ plugins {
     id("org.ajoberstar.grgit") version("5.0.0")
 
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
+
+    id("org.parchmentmc.librarian.forgegradle") version("1.2.0.7-dev-SNAPSHOT")
 }
 
 operator fun String.invoke(): String {
@@ -85,7 +87,11 @@ repositories {
 
 
 minecraft {
-    mappings("official", "minecraft_version"())
+    if(rootProject.properties.containsKey("parchment_version")) {
+        mappings("parchment", "parchment_version"())
+    } else {
+        mappings("official", "minecraft_version"())
+    }
     copyIdeResources = true
     accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
     runs {
