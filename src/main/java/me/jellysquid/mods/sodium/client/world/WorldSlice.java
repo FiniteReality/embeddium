@@ -25,8 +25,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.client.model.data.ModelDataManager;
-import net.neoforged.neoforge.client.model.data.ModelDataManager.Snapshot;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
@@ -88,17 +87,20 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
     // (Local Section -> Block Entity) table.
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
 
+    // (Local Section -> Model Data) table.
+    private final @Nullable Int2ReferenceMap<ModelData>[] modelDataArrays;
+
     // (Local Section -> Aux Light) table.
     private final @Nullable AuxiliaryLightManager[] auxLightArrays;
-
-    // Local model data snapshot
-    private ModelDataManager.Snapshot modelDataSnapshot;
 
     // The starting point from which this slice captures blocks
     private int originX, originY, originZ;
     
     // The volume that this WorldSlice contains
     private BoundingBox volume;
+
+    // Flag to make model data lookups fast if none of the sections in the slice have it
+    private boolean hasModelData;
 
     public static ChunkRenderContext prepare(Level world, SectionPos origin, ClonedChunkSectionCache sectionCache) {
         LevelChunk chunk = world.getChunk(origin.getX(), origin.getZ());
@@ -141,16 +143,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
             }
         }
 
-        var snapshot = world.getModelDataManager().snapshotSectionRegion(
-                minChunkX,
-                minChunkY,
-                minChunkZ,
-                maxChunkX,
-                maxChunkY,
-                maxChunkZ
-        );
-
-        return new ChunkRenderContext(origin, sections, volume).withMeshAppenders(meshAppenders).withModelDataSnapshot(snapshot);
+        return new ChunkRenderContext(origin, sections, volume).withMeshAppenders(meshAppenders);
     }
 
     @SuppressWarnings("unchecked")
@@ -162,6 +155,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
         this.auxLightArrays = new AuxiliaryLightManager[SECTION_ARRAY_SIZE];
 
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
+        this.modelDataArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
@@ -177,6 +171,8 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
         this.originZ = (context.getOrigin().getZ() - NEIGHBOR_CHUNK_RADIUS) << 4;
         this.volume = context.getVolume();
 
+        this.hasModelData = false;
+
         for (int x = 0; x < SECTION_ARRAY_LENGTH; x++) {
             for (int y = 0; y < SECTION_ARRAY_LENGTH; y++) {
                 for (int z = 0; z < SECTION_ARRAY_LENGTH; z++) {
@@ -187,8 +183,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
         this.biomeSlice.update(this.world, context);
         this.biomeColors.update(context);
-
-        this.modelDataSnapshot = context.getModelDataSnapshot();
     }
 
     private void copySectionData(ChunkRenderContext context, int sectionIndex) {
@@ -206,6 +200,10 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
         this.lightArrays[sectionIndex][LightLayer.SKY.ordinal()] = section.getLightArray(LightLayer.SKY);
 
         this.blockEntityArrays[sectionIndex] = section.getBlockEntityMap();
+        this.modelDataArrays[sectionIndex] = section.getModelDataMap();
+        if(this.modelDataArrays[sectionIndex] != null) {
+            this.hasModelData = true;
+        }
         this.auxLightArrays[sectionIndex] = section.getAuxLightManager();
     }
 
@@ -247,9 +245,8 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
             Arrays.fill(this.lightArrays[sectionIndex], null);
 
             this.blockEntityArrays[sectionIndex] = null;
+            this.modelDataArrays[sectionIndex] = null;
         }
-
-        this.modelDataSnapshot = null;
     }
 
     @Override
@@ -381,8 +378,22 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
     }
 
     @Override
-    public ModelDataManager.Snapshot getModelDataManager() {
-        return this.modelDataSnapshot;
+    public ModelData getModelData(BlockPos pos) {
+        if (!this.hasModelData || !this.volume.isInside(pos)) {
+            return ModelData.EMPTY;
+        }
+
+        int relX = pos.getX() - this.originX;
+        int relY = pos.getY() - this.originY;
+        int relZ = pos.getZ() - this.originZ;
+
+        var modelData = this.modelDataArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
+
+        if (modelData == null) {
+            return ModelData.EMPTY;
+        }
+
+        return modelData.get(getLocalBlockIndex(relX & 15, relY & 15, relZ & 15));
     }
 
     @Override

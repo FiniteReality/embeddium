@@ -11,7 +11,7 @@ version="${version}"
 displayName="Embeddium"
 logoFile="icon.png"
 description='''
-Embeddium is a fork of Rubidium, a fork of Sodium with patches for Forge
+Embeddium is a performance mod for Minecraft based on the last open-source version of Sodium
 '''
 credits="embeddedt, NanoLive, CaffeineMC"
 authors="embeddedt"

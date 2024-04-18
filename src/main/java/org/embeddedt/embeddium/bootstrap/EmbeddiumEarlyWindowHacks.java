@@ -3,10 +3,10 @@ package org.embeddedt.embeddium.bootstrap;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.neoforged.fml.StartupMessageManager;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.ImmediateWindowHandler;
 import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.progress.StartupNotificationManager;
 import net.neoforged.neoforgespi.earlywindow.ImmediateWindowProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,7 @@ public class EmbeddiumEarlyWindowHacks {
 
         var modInfo = LoadingModList.get().getModFileById(SodiumClientMod.MODID);
         String ourVersion = modInfo != null ? modInfo.versionString() : "unknown";
-        StartupMessageManager.modLoaderConsumer().ifPresent(c -> c.accept("Embeddium " + ourVersion));
+        StartupNotificationManager.modLoaderConsumer().ifPresent(c -> c.accept("Embeddium " + ourVersion));
         ImmediateWindowHandler.acceptGameLayer(Launcher.INSTANCE.findLayerManager().orElseThrow().getLayer(IModuleLayerManager.Layer.GAME).orElseThrow());
 
         // Workaround for Forge bug: make sure windowTick is actually populated before continuing

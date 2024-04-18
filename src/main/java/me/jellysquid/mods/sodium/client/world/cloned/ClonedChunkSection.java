@@ -3,8 +3,11 @@ package me.jellysquid.mods.sodium.client.world.cloned;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMaps;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
@@ -22,6 +25,7 @@ import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.PalettedContainerRO;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +40,7 @@ public class ClonedChunkSection {
     private final SectionPos pos;
 
     private final @Nullable Int2ReferenceMap<BlockEntity> blockEntityMap;
+    private final @Nullable Int2ReferenceMap<ModelData> modelDataMap;
 
     private final @Nullable DataLayer[] lightDataArrays;
 
@@ -54,6 +59,7 @@ public class ClonedChunkSection {
         PalettedContainerRO<Holder<Biome>> biomeData = null;
 
         Int2ReferenceMap<BlockEntity> blockEntityMap = null;
+        Int2ReferenceMap<ModelData> modelDataMap = null;
 
         if (section != null) {
             if (!section.hasOnlyAir()) {
@@ -63,6 +69,7 @@ public class ClonedChunkSection {
                     blockData = constructDebugWorldContainer(pos);
                 }
                 blockEntityMap = copyBlockEntities(chunk, pos);
+                modelDataMap = copyModelData(world, pos);
             }
 
             biomeData = ReadableContainerExtended.clone(section.getBiomes());
@@ -72,6 +79,7 @@ public class ClonedChunkSection {
         this.biomeData = biomeData;
 
         this.blockEntityMap = blockEntityMap;
+        this.modelDataMap = modelDataMap;
 
         this.lightDataArrays = copyLightData(world, pos);
 
@@ -143,6 +151,25 @@ public class ClonedChunkSection {
     }
 
     @Nullable
+    private static Int2ReferenceMap<ModelData> copyModelData(Level level, SectionPos chunkCoord) {
+        var forgeMap = level.getModelDataManager().getAt(chunkCoord);
+
+        if (forgeMap.isEmpty()) {
+            return null;
+        }
+
+        Int2ReferenceOpenHashMap<ModelData> modelData = new Int2ReferenceOpenHashMap<>();
+        modelData.defaultReturnValue(ModelData.EMPTY);
+
+        for(Long2ObjectMap.Entry<ModelData> entry : Long2ObjectMaps.fastIterable(forgeMap)) {
+            long key = entry.getLongKey();
+            modelData.put(WorldSlice.getLocalBlockIndex(BlockPos.getX(key) & 15, BlockPos.getY(key) & 15, BlockPos.getZ(key) & 15), entry.getValue());
+        }
+
+        return modelData;
+    }
+
+    @Nullable
     private static Int2ReferenceMap<BlockEntity> copyBlockEntities(LevelChunk chunk, SectionPos chunkCoord) {
         BoundingBox box = new BoundingBox(chunkCoord.minBlockX(), chunkCoord.minBlockY(), chunkCoord.minBlockZ(),
                 chunkCoord.maxBlockX(), chunkCoord.maxBlockY(), chunkCoord.maxBlockZ());
@@ -184,6 +211,10 @@ public class ClonedChunkSection {
 
     public @Nullable Int2ReferenceMap<BlockEntity> getBlockEntityMap() {
         return this.blockEntityMap;
+    }
+
+    public @Nullable Int2ReferenceMap<ModelData> getModelDataMap() {
+        return this.modelDataMap;
     }
 
     public AuxiliaryLightManager getAuxLightManager() {
