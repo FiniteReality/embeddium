@@ -646,8 +646,8 @@ public class RenderSectionManager {
 
             var buffer = resources.getGeometryArena();
 
-            deviceUsed += buffer.getDeviceUsedMemory();
-            deviceAllocated += buffer.getDeviceAllocatedMemory();
+            deviceUsed += buffer.getDeviceUsedMemoryL();
+            deviceAllocated += buffer.getDeviceAllocatedMemoryL();
 
             count++;
         }
