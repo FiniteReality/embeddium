@@ -187,6 +187,6 @@ public class MultipartBakedModelMixin {
             }
         }
 
-        return dataMap == null ? tileModelData : tileModelData.derive().with(MultipartModelData.PROPERTY, MultipartModelDataAccessor.create(dataMap)).build();
+        return dataMap == null ? tileModelData : tileModelData.derive().with(MultipartModelDataAccessor.getProperty(), dataMap).build();
     }
 }
