@@ -61,6 +61,9 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
     // The size of the (Local Section -> Resource) arrays.
     private static final int SECTION_ARRAY_SIZE = SECTION_ARRAY_LENGTH * SECTION_ARRAY_LENGTH * SECTION_ARRAY_LENGTH;
 
+    // The number of blocks on each axis of this slice.
+    private static final int BLOCK_ARRAY_LENGTH = SECTION_ARRAY_LENGTH * 16;
+
     // The number of bits needed for each local X/Y/Z coordinate.
     private static final int LOCAL_XYZ_BITS = 4;
 
@@ -234,13 +237,13 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
     }
 
     public BlockState getBlockState(int x, int y, int z) {
-        if (!this.volume.isInside(x, y, z)) {
-            return EMPTY_BLOCK_STATE;
-        }
-
         int relX = x - this.originX;
         int relY = y - this.originY;
         int relZ = z - this.originZ;
+
+        if (!isInside(relX, relY, relZ)) {
+            return EMPTY_BLOCK_STATE;
+        }
 
         return this.blockArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)]
                 [getLocalBlockIndex(relX & 15, relY & 15, relZ & 15)];
@@ -270,13 +273,13 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
     @Override
     public int getBrightness(LightLayer type, BlockPos pos) {
-        if (!this.volume.isInside(pos.getX(), pos.getY(), pos.getZ())) {
-            return 0;
-        }
-
         int relX = pos.getX() - this.originX;
         int relY = pos.getY() - this.originY;
         int relZ = pos.getZ() - this.originZ;
+
+        if (!isInside(relX, relY, relZ)) {
+            return 0;
+        }
 
         var lightArray = this.lightArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)][type.ordinal()];
 
@@ -290,13 +293,13 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
     @Override
     public int getRawBrightness(BlockPos pos, int ambientDarkness) {
-        if (!this.volume.isInside(pos.getX(), pos.getY(), pos.getZ())) {
-            return 0;
-        }
-
         int relX = pos.getX() - this.originX;
         int relY = pos.getY() - this.originY;
         int relZ = pos.getZ() - this.originZ;
+
+        if (!isInside(relX, relY, relZ)) {
+            return 0;
+        }
 
         var lightArrays = this.lightArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
 
@@ -319,13 +322,13 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
     }
 
     public BlockEntity getBlockEntity(int x, int y, int z) {
-        if (!this.volume.isInside(x, y, z)) {
-            return null;
-        }
-
         int relX = x - this.originX;
         int relY = y - this.originY;
         int relZ = z - this.originZ;
+
+        if (!isInside(relX, relY, relZ)) {
+            return null;
+        }
 
         var blockEntities = this.blockEntityArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
 
@@ -367,5 +370,9 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
     public static int getLocalSectionIndex(int x, int y, int z) {
         return (y * SECTION_ARRAY_LENGTH * SECTION_ARRAY_LENGTH) + (z * SECTION_ARRAY_LENGTH) + x;
+    }
+
+    private boolean isInside(int relX, int relY, int relZ) {
+        return relX >= 0 && relX < BLOCK_ARRAY_LENGTH && relZ >= 0 && relZ < BLOCK_ARRAY_LENGTH && relY >= 0 && relY < BLOCK_ARRAY_LENGTH;
     }
 }
