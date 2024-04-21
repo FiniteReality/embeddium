@@ -31,7 +31,7 @@ base {
 }
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+// java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 sourceSets {
     val main = getByName("main")
