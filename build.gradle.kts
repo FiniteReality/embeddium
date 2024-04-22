@@ -145,6 +145,17 @@ fun DependencyHandlerScope.compatCompileOnly(dependency: Dependency) {
     "compatCompileOnly"(dependency)
 }
 
+// Force LWJGL 3.3.3 for Java 21 compat
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            when (requested.group.toString()) {
+                "org.lwjgl" -> useVersion("3.3.3")
+            }
+        }
+    }
+}
+
 dependencies {
     minecraft("net.neoforged:forge:${"minecraft_version"()}-${"forge_version"()}")
 
