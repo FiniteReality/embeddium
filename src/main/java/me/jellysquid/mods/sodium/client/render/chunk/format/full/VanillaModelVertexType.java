@@ -18,13 +18,9 @@ public class VanillaModelVertexType implements ChunkVertexType<VanillaLikeChunkM
     public static final GlVertexFormat<VanillaLikeChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(VanillaLikeChunkMeshAttribute.class, 28)
             .addElement(VanillaLikeChunkMeshAttribute.POSITION, 0, GlVertexAttributeFormat.FLOAT, 3, false, false)
             .addElement(VanillaLikeChunkMeshAttribute.COLOR, 12, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true, false)
-            .addElement(VanillaLikeChunkMeshAttribute.BLOCK_TEX_ID, 16, GlVertexAttributeFormat.UNSIGNED_SHORT, 4, false, false)
-            .addElement(VanillaLikeChunkMeshAttribute.LIGHT, 24, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, true, true)
+            .addElement(VanillaLikeChunkMeshAttribute.BLOCK_TEX_ID, 16, GlVertexAttributeFormat.FLOAT, 2, false, false)
+            .addElement(VanillaLikeChunkMeshAttribute.LIGHT, 24, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
             .build();
-
-    private static final int TEXTURE_MAX_VALUE = 65536;
-
-    private static final float TEXTURE_SCALE = (1.0f / TEXTURE_MAX_VALUE);
 
     @Override
     public ModelVertexSink createFallbackWriter(VertexConsumer consumer) {
@@ -48,11 +44,17 @@ public class VanillaModelVertexType implements ChunkVertexType<VanillaLikeChunkM
 
     @Override
     public float getTextureScale() {
-        return TEXTURE_SCALE;
+        return 1f;
     }
 
-    static short encodeBlockTexture(float value) {
-        return (short) (Math.min(0.99999997F, value) * TEXTURE_MAX_VALUE);
+    static float encodeBlockTexture(float value) {
+        return Math.min(0.99999997F, value);
+    }
+
+    static int encodeLight(int light) {
+        int block = light & 0xFF;
+        int sky = (light >> 16) & 0xFF;
+        return ((block << 0) | (sky << 8));
     }
 
     @Override

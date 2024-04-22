@@ -4,6 +4,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferView;
 import me.jellysquid.mods.sodium.client.model.vertex.buffer.VertexBufferWriterNio;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkModelVertexFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
@@ -22,11 +23,11 @@ public class VanillaModelVertexBufferWriterNio extends VertexBufferWriterNio imp
         buffer.putFloat(i + 8, posZ);
         buffer.putInt(i + 12, color);
 
-        buffer.putShort(i + 16, VanillaModelVertexType.encodeBlockTexture(u));
-        buffer.putShort(i + 18, VanillaModelVertexType.encodeBlockTexture(v));
-        buffer.putShort(i + 20, (short) chunkId);
+        buffer.putFloat(i + 16, VanillaModelVertexType.encodeBlockTexture(u));
+        buffer.putFloat(i + 20, VanillaModelVertexType.encodeBlockTexture(v));
 
-        buffer.putInt(i + 24, light);
+        buffer.putInt(i + 24, (VanillaModelVertexType.encodeLight(light) << 16) | (chunkId & 0xFF));
+
 
         this.advance();
     }

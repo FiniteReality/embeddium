@@ -39,16 +39,19 @@ void _vert_init() {
 #else
 in vec3 a_PosId;
 in vec4 a_Color;
-in vec4 a_TexCoord;
-in ivec2 a_LightCoord;
+in vec2 a_TexCoord;
+in uint a_LightCoord;
 
 void _vert_init() {
     _vert_position = a_PosId;
-    _vert_tex_diffuse_coord = (a_TexCoord.xy * VERT_TEX_SCALE);
-    _vert_tex_light_coord = a_LightCoord;
+    _vert_tex_diffuse_coord = a_TexCoord;
     _vert_color = a_Color;
 
-    _draw_id = uint(a_TexCoord.z);
+    // Vertex Mesh ID
+    _draw_id  = a_LightCoord & 0xFFu;
+
+    // Vertex Light
+    _vert_tex_light_coord = ivec2((uvec2((a_LightCoord >> 16) & 0xFFFFu) >> uvec2(0, 8)) & uvec2(0xFFu));
 }
 #endif
 

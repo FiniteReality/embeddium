@@ -20,11 +20,11 @@ public class VanillaModelVertexBufferWriterUnsafe extends VertexBufferWriterUnsa
         MemoryUtil.memPutFloat(i + 8, posZ);
         MemoryUtil.memPutInt(i + 12, color);
 
-        MemoryUtil.memPutShort(i + 16, VanillaModelVertexType.encodeBlockTexture(u));
-        MemoryUtil.memPutShort(i + 18, VanillaModelVertexType.encodeBlockTexture(v));
-        MemoryUtil.memPutShort(i + 20, (short) chunkId);
+        MemoryUtil.memPutFloat(i + 16, VanillaModelVertexType.encodeBlockTexture(u));
+        MemoryUtil.memPutFloat(i + 20, VanillaModelVertexType.encodeBlockTexture(v));
 
-        MemoryUtil.memPutInt(i + 24, light);
+        // Light, draw ID
+        MemoryUtil.memPutInt(i + 24, (VanillaModelVertexType.encodeLight(light) << 16) | (chunkId & 0xFF));
 
         this.advance();
     }
