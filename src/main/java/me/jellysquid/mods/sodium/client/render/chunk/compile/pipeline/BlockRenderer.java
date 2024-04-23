@@ -57,6 +57,7 @@ public class BlockRenderer {
     private final ChunkVertexEncoder.Vertex[] vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
 
     private final boolean useAmbientOcclusion;
+    @Deprecated(forRemoval = true)
     private final boolean useForgeExperimentalLightingPipeline;
 
     private final ForgeBlockRenderer forgeBlockRenderer = new ForgeBlockRenderer();
@@ -75,7 +76,7 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
-        this.useForgeExperimentalLightingPipeline = ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+        this.useForgeExperimentalLightingPipeline = false;
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
