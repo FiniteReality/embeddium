@@ -2,7 +2,7 @@ import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RemapSourcesJarTask
 
 object Constants {
-    const val IS_SNAPSHOT: Boolean = true
+    const val IS_SNAPSHOT: Boolean = false
 }
 
 plugins {
