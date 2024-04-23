@@ -80,13 +80,6 @@ repositories {
         }
     }
     maven("https://maven.covers1624.net/")
-    // for snapshots
-    maven("https://prmaven.neoforged.net/NeoForge/pr794") {
-        content {
-            includeModule("net.neoforged", "neoforge")
-            includeModule("net.neoforged", "testframework")
-        }
-    }
 }
 
 minecraft {
