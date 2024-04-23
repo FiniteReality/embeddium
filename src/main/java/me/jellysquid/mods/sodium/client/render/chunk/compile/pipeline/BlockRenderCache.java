@@ -14,6 +14,7 @@ public class BlockRenderCache {
 
     private final BlockRenderer blockRenderer;
     private final FluidRenderer fluidRenderer;
+    private final LightPipelineProvider lightPipelineProvider;
 
     private final BlockModelShaper blockModels;
     private final WorldSlice worldSlice;
@@ -28,6 +29,7 @@ public class BlockRenderCache {
 
         this.blockRenderer = new BlockRenderer(colorRegistry, lightPipelineProvider);
         this.fluidRenderer = new FluidRenderer(colorRegistry, lightPipelineProvider);
+        this.lightPipelineProvider = lightPipelineProvider;
 
         this.blockModels = client.getModelManager().getBlockModelShaper();
     }
@@ -46,6 +48,7 @@ public class BlockRenderCache {
 
     public void init(ChunkRenderContext context) {
         this.lightDataCache.reset(context.getOrigin());
+        this.lightPipelineProvider.reset();
         this.worldSlice.copyData(context);
     }
 
