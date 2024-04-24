@@ -382,13 +382,20 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
     @Override
     public ModelData getModelData(BlockPos pos) {
-        if (!this.hasModelData || !this.volume.isInside(pos)) {
+        // Short-circuit immediately if we don't have model data arrays for any section. This method is called
+        // for every single block being rendered, so it's worth making it as fast as possible to minimize
+        // the speed penalty compared to vanilla.
+        if (!this.hasModelData) {
             return ModelData.EMPTY;
         }
 
         int relX = pos.getX() - this.originX;
         int relY = pos.getY() - this.originY;
         int relZ = pos.getZ() - this.originZ;
+
+        if (!isInside(relX, relY, relZ)) {
+            return ModelData.EMPTY;
+        }
 
         var modelData = this.modelDataArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
 
