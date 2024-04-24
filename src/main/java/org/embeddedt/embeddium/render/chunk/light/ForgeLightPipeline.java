@@ -95,7 +95,7 @@ public class ForgeLightPipeline implements LightPipeline {
         // This should always override the exact overload called in QuadLighter#process. We use it to capture the
         // brightness and lightmap.
         @Override
-        public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightness, float r, float g, float b, int[] lm, int overlay, boolean colorize) {
+        public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightness, float r, float g, float b, float a, int[] lm, int overlay, boolean colorize) {
             this.brightness = brightness;
             this.lm = lm;
         }
