@@ -69,7 +69,7 @@ public class CloudRenderer {
         this.reloadTextures(factory);
     }
 
-    public void render(@Nullable ClientLevel world, LocalPlayer player, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, float ticks, float tickDelta, double cameraX, double cameraY, double cameraZ) {
+    public void render(@Nullable ClientLevel world, LocalPlayer player, PoseStack stack, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, float ticks, float tickDelta, double cameraX, double cameraY, double cameraZ) {
         if (world == null) {
             return;
         }
