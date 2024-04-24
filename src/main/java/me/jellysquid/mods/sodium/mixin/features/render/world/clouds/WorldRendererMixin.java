@@ -40,7 +40,7 @@ public class WorldRendererMixin {
                 this.cloudRenderer = new CloudRenderer(this.minecraft.getResourceManager());
             }
 
-            this.cloudRenderer.render(this.level, this.minecraft.player, modelViewMatrix, projectionMatrix, this.ticks, tickDelta, x, y, z);
+            this.cloudRenderer.render(this.level, this.minecraft.player, matrices, modelViewMatrix, projectionMatrix, this.ticks, tickDelta, x, y, z);
         }
     }
 
