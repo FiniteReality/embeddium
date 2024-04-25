@@ -68,7 +68,6 @@ configurations {
 sourceSets {
     val main = getByName("main")
     val api = create("api")
-    val legacy = create("legacy")
     val compat = create("compat")
     
     api.apply {
@@ -81,13 +80,6 @@ sourceSets {
         java {
             compileClasspath += api.output
             runtimeClasspath += api.output
-        }
-    }
-
-    legacy.apply {
-        java {
-            compileClasspath += main.compileClasspath
-            compileClasspath += main.output
         }
     }
 
@@ -136,8 +128,6 @@ tasks.jar {
     from("COPYING", "COPYING.LESSER")
     from(sourceSets["api"].output.classesDirs)
     from(sourceSets["api"].output.resourcesDir)
-    from(sourceSets["legacy"].output.classesDirs)
-    from(sourceSets["legacy"].output.resourcesDir)
     from(sourceSets["compat"].output.classesDirs)
     from(sourceSets["compat"].output.resourcesDir)
 }
