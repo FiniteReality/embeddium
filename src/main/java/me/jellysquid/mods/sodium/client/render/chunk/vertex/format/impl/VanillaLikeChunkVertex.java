@@ -15,13 +15,14 @@ import org.lwjgl.system.MemoryUtil;
  * compatible with mods & resource packs that need high precision for models.
  */
 public class VanillaLikeChunkVertex implements ChunkVertexType {
-    public static final int STRIDE = 28;
+    public static final int STRIDE = 32;
 
     public static final GlVertexFormat<ChunkMeshAttribute> VERTEX_FORMAT = GlVertexFormat.builder(ChunkMeshAttribute.class, STRIDE)
             .addElement(ChunkMeshAttribute.POSITION_MATERIAL_MESH, 0, GlVertexAttributeFormat.FLOAT, 3, false, false)
             .addElement(ChunkMeshAttribute.COLOR_SHADE, 12, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true, false)
             .addElement(ChunkMeshAttribute.BLOCK_TEXTURE, 16, GlVertexAttributeFormat.FLOAT, 2, false, false)
             .addElement(ChunkMeshAttribute.LIGHT_TEXTURE, 24, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
+            //.addElement(ChunkMeshAttribute.NORMAL, 28, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
             .build();
 
     @Override
@@ -50,10 +51,12 @@ public class VanillaLikeChunkVertex implements ChunkVertexType {
             MemoryUtil.memPutFloat(ptr + 0, vertex.x);
             MemoryUtil.memPutFloat(ptr + 4, vertex.y);
             MemoryUtil.memPutFloat(ptr + 8, vertex.z);
-            MemoryUtil.memPutInt(ptr + 12, vertex.color);
+            MemoryUtil.memPutInt(ptr + 12, ColorABGR.withAlpha(vertex.color, 255));
             MemoryUtil.memPutFloat(ptr + 16, encodeTexture(vertex.u));
             MemoryUtil.memPutFloat(ptr + 20, encodeTexture(vertex.v));
-            MemoryUtil.memPutInt(ptr + 24, (encodeDrawParameters(material, sectionIndex) << 0) | (encodeLight(vertex.light) << 16));
+            // TODO
+            MemoryUtil.memPutInt(ptr + 24, vertex.light);
+            MemoryUtil.memPutInt(ptr + 28, encodeDrawParameters(material, sectionIndex));
 
             return ptr + STRIDE;
         };
