@@ -59,4 +59,27 @@ public class ColorMixer {
         // Pack the components
         return (c0 <<  0) | (c1 <<  8) | (c2 << 16) | (c3 << 24);
     }
+
+    /**
+     * Multiplies all channels of a 32-bit color with an 8-bit value.
+     * <p>
+     * The order of the channels within the packed color does not matter, and the output color will always
+     * have the same ordering as the input color.
+     *
+     * @param a The first color to multiply
+     * @param val The 8-bit value to multiply by
+     * @return The multiplied color in packed 32-bit format
+     */
+    public static int mulSingle(int a, int val) {
+        val &= 0xFF;
+        // Take each 8-bit component pair, multiply them together to create intermediate 16-bit integers,
+        // and then shift the high half of each 16-bit integer into 8-bit integers.
+        int c0 = (((a >>  0) & 0xFF) * val) >> 8;
+        int c1 = (((a >>  8) & 0xFF) * val) >> 8;
+        int c2 = (((a >> 16) & 0xFF) * val) >> 8;
+        int c3 = (((a >> 24) & 0xFF) * val) >> 8;
+
+        // Pack the components
+        return (c0 <<  0) | (c1 <<  8) | (c2 << 16) | (c3 << 24);
+    }
 }

@@ -7,6 +7,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshAttr
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
+import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.caffeinemc.mods.sodium.api.util.ColorU8;
 import org.lwjgl.system.MemoryUtil;
 
@@ -21,7 +22,7 @@ public class VanillaLikeChunkVertex implements ChunkVertexType {
             .addElement(ChunkMeshAttribute.POSITION_MATERIAL_MESH, 0, GlVertexAttributeFormat.FLOAT, 3, false, false)
             .addElement(ChunkMeshAttribute.COLOR_SHADE, 12, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true, false)
             .addElement(ChunkMeshAttribute.BLOCK_TEXTURE, 16, GlVertexAttributeFormat.FLOAT, 2, false, false)
-            .addElement(ChunkMeshAttribute.LIGHT_TEXTURE, 24, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
+            .addElement(ChunkMeshAttribute.LIGHT_TEXTURE, 24, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, false, true)
             //.addElement(ChunkMeshAttribute.NORMAL, 28, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
             .build();
 
@@ -51,7 +52,10 @@ public class VanillaLikeChunkVertex implements ChunkVertexType {
             MemoryUtil.memPutFloat(ptr + 0, vertex.x);
             MemoryUtil.memPutFloat(ptr + 4, vertex.y);
             MemoryUtil.memPutFloat(ptr + 8, vertex.z);
-            MemoryUtil.memPutInt(ptr + 12, ColorABGR.withAlpha(vertex.color, 255));
+
+            // Unpack brightness and apply it to the other three color values to match vanilla format
+            int c = vertex.color;
+            MemoryUtil.memPutInt(ptr + 12, ColorABGR.withAlpha(ColorMixer.mulSingle(c, ColorABGR.unpackAlpha(c)), 255));
             MemoryUtil.memPutFloat(ptr + 16, encodeTexture(vertex.u));
             MemoryUtil.memPutFloat(ptr + 20, encodeTexture(vertex.v));
             // TODO
