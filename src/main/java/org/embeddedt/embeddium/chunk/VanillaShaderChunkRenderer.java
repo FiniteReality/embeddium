@@ -17,6 +17,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexTy
 import me.jellysquid.mods.sodium.client.render.viewport.CameraTransform;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL30C;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -28,7 +29,7 @@ public class VanillaShaderChunkRenderer extends DefaultChunkRenderer {
     }
 
     private boolean isVanillaPass(TerrainRenderPass pass) {
-        return true;
+        return SodiumClientMod.canUseVanillaVertices();
     }
 
     @Override
@@ -43,7 +44,7 @@ public class VanillaShaderChunkRenderer extends DefaultChunkRenderer {
     @Override
     protected void end(TerrainRenderPass pass) {
         if(isVanillaPass(pass)) {
-
+            pass.endDrawing();
         } else {
             super.end(pass);
         }
@@ -115,6 +116,9 @@ public class VanillaShaderChunkRenderer extends DefaultChunkRenderer {
 
         boolean useBlockFaceCulling = SodiumClientMod.options().performance.useBlockFaceCulling;
 
+        var batch = this.batch;
+        var indexBuffer = this.sharedIndexBuffer;
+
         while(sectionIterator.hasNext()) {
             int sectionIndex = sectionIterator.nextByteAsInt();
 
@@ -125,8 +129,7 @@ public class VanillaShaderChunkRenderer extends DefaultChunkRenderer {
             var pMeshData = storage.getDataPointer(sectionIndex);
 
             if (chunkOffset != null) {
-                chunkOffset.set((float)((double)originX - camera.x), (float)((double)originY - camera.y), (float)((double)originZ - camera.z));
-                chunkOffset.upload();
+                GL30C.glUniform3f(chunkOffset.getLocation(), (float)((double)(originX << 4) - camera.x), (float)((double)(originY << 4) - camera.y), (float)((double)(originZ << 4) - camera.z));
             }
 
             int slices;
@@ -139,14 +142,14 @@ public class VanillaShaderChunkRenderer extends DefaultChunkRenderer {
 
             slices &= SectionRenderDataUnsafe.getSliceMask(pMeshData);
 
-            // Set up the draw commands for this batch
             if (slices != 0) {
+                // Draw this section
                 addDrawCommands(batch, pMeshData, slices);
+                indexBuffer.ensureCapacity(commandList, batch.getIndexBufferSize());
+                var tessellation = this.prepareTessellation(commandList, region);
+                executeDrawBatch(commandList, tessellation, batch);
+                batch.clear();
             }
-
-            this.sharedIndexBuffer.ensureCapacity(commandList, this.batch.getIndexBufferSize());
-            var tessellation = this.prepareTessellation(commandList, region);
-            executeDrawBatch(commandList, tessellation, this.batch);
         }
     }
 
@@ -170,6 +173,7 @@ public class VanillaShaderChunkRenderer extends DefaultChunkRenderer {
 
             if(chunkOffset != null) {
                 chunkOffset.set(0f, 0f, 0f);
+                GL30C.glUniform3f(chunkOffset.getLocation(), 0f, 0f, 0f);
             }
 
             shaderinstance.clear();
