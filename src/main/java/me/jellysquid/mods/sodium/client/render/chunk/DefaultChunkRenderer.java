@@ -29,9 +29,9 @@ import org.lwjgl.system.MemoryUtil;
 import java.util.Iterator;
 
 public class DefaultChunkRenderer extends ShaderChunkRenderer {
-    private final MultiDrawBatch batch;
+    protected final MultiDrawBatch batch;
 
-    private final SharedQuadIndexBuffer sharedIndexBuffer;
+    protected final SharedQuadIndexBuffer sharedIndexBuffer;
 
     private final GlVertexAttributeBinding[] vertexAttributeBindings;
 
@@ -132,7 +132,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
     }
 
     @SuppressWarnings("IntegerMultiplicationImplicitCastToLong")
-    private static void addDrawCommands(MultiDrawBatch batch, long pMeshData, int mask) {
+    protected static void addDrawCommands(MultiDrawBatch batch, long pMeshData, int mask) {
         final var pBaseVertex = batch.pBaseVertex;
         final var pElementCount = batch.pElementCount;
 
@@ -157,7 +157,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
     private static final int MODEL_NEG_Y      = ModelQuadFacing.NEG_Y.ordinal();
     private static final int MODEL_NEG_Z      = ModelQuadFacing.NEG_Z.ordinal();
 
-    private static int getVisibleFaces(int originX, int originY, int originZ, int chunkX, int chunkY, int chunkZ) {
+    protected static int getVisibleFaces(int originX, int originY, int originZ, int chunkX, int chunkY, int chunkZ) {
         // This is carefully written so that we can keep everything branch-less.
         //
         // Normally, this would be a ridiculous way to handle the problem. But the Hotspot VM's
@@ -211,7 +211,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
         return (chunkBlockPos - cameraBlockPos) - cameraPos;
     }
 
-    private GlTessellation prepareTessellation(CommandList commandList, RenderRegion region) {
+    protected final GlTessellation prepareTessellation(CommandList commandList, RenderRegion region) {
         var resources = region.getResources();
         var tessellation = resources.getTessellation();
 
@@ -257,7 +257,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
         });
     }
 
-    private static void executeDrawBatch(CommandList commandList, GlTessellation tessellation, MultiDrawBatch batch) {
+    protected static void executeDrawBatch(CommandList commandList, GlTessellation tessellation, MultiDrawBatch batch) {
         try (DrawCommandList drawCommandList = commandList.beginTessellating(tessellation)) {
             drawCommandList.multiDrawElementsBaseVertex(batch, GlIndexType.UNSIGNED_INT);
         }
