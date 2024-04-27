@@ -64,6 +64,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RenderSectionManager {
+    private static final boolean USE_CORE_SHADERS = Boolean.getBoolean("embeddium.useVanillaCoreShaders");
+
     private final ChunkBuilder builder;
 
     private final Thread renderThread = Thread.currentThread();
@@ -104,9 +106,17 @@ public class RenderSectionManager {
     private final int translucencyBlockRenderDistance;
 
     public RenderSectionManager(ClientLevel world, int renderDistance, CommandList commandList) {
-        ChunkVertexType vertexType = SodiumClientMod.canUseVanillaVertices() ? ChunkMeshFormats.VANILLA_LIKE : ChunkMeshFormats.COMPACT;
+        ChunkVertexType vertexType;
 
-        this.chunkRenderer = new DefaultChunkRenderer(RenderDevice.INSTANCE, vertexType);
+        if (USE_CORE_SHADERS) {
+            vertexType = ChunkMeshFormats.VANILLA;
+        } else if (SodiumClientMod.canUseVanillaVertices()) {
+            vertexType = ChunkMeshFormats.VANILLA_LIKE;
+        } else {
+            vertexType = ChunkMeshFormats.COMPACT;
+        }
+
+        this.chunkRenderer = USE_CORE_SHADERS ? new VanillaShaderChunkRenderer(RenderDevice.INSTANCE, vertexType) : new DefaultChunkRenderer(RenderDevice.INSTANCE, vertexType);
 
         this.vertexType = vertexType;
 
