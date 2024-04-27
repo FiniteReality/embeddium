@@ -116,7 +116,7 @@ public class RenderSectionManager {
             vertexType = ChunkMeshFormats.COMPACT;
         }
 
-        this.chunkRenderer = USE_CORE_SHADERS ? new VanillaShaderChunkRenderer(RenderDevice.INSTANCE, vertexType) : new DefaultChunkRenderer(RenderDevice.INSTANCE, vertexType);
+        this.chunkRenderer = USE_CORE_SHADERS ? new VanillaShaderChunkRenderer(RenderDevice.INSTANCE) : new DefaultChunkRenderer(RenderDevice.INSTANCE, vertexType);
 
         this.vertexType = vertexType;
 

@@ -10,6 +10,8 @@ import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import org.lwjgl.system.MemoryUtil;
 
+import java.util.List;
+
 /**
  * This vertex format uses the same format as {@link com.mojang.blaze3d.vertex.DefaultVertexFormat#BLOCK}. It is not
  * intended to be used with Embeddium's shaders.
@@ -59,17 +61,18 @@ public class VanillaChunkVertex implements ChunkVertexType {
             MemoryUtil.memPutFloat(ptr + 20, encodeTexture(vertex.v));
             // TODO
             MemoryUtil.memPutInt(ptr + 24, vertex.light);
-            MemoryUtil.memPutInt(ptr + 28, encodeDrawParameters(material, sectionIndex));
+            MemoryUtil.memPutInt(ptr + 28, 0);
 
             return ptr + STRIDE;
         };
     }
 
-    private static int encodeDrawParameters(Material material, int sectionIndex) {
-        return (((sectionIndex & 0xFF) << 8) | ((material.bits() & 0xFF) << 0));
-    }
-
     private static float encodeTexture(float value) {
         return Math.min(0.99999997F, value);
+    }
+
+    @Override
+    public List<String> getShaderDefines() {
+        return List.of();
     }
 }

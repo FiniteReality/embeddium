@@ -13,6 +13,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.SectionRenderDataUnsaf
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList;
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderListIterable;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshFormats;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.viewport.CameraTransform;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -24,12 +25,12 @@ import java.util.Objects;
 
 public class VanillaShaderChunkRenderer extends DefaultChunkRenderer {
 
-    public VanillaShaderChunkRenderer(RenderDevice device, ChunkVertexType vertexType) {
-        super(device, vertexType);
+    public VanillaShaderChunkRenderer(RenderDevice device) {
+        super(device, ChunkMeshFormats.VANILLA);
     }
 
     private boolean isVanillaPass(TerrainRenderPass pass) {
-        return SodiumClientMod.canUseVanillaVertices();
+        return true;
     }
 
     @Override
