@@ -22,7 +22,7 @@ public class VanillaModelVertexType implements ChunkVertexType<VanillaLikeChunkM
             .addElement(VanillaLikeChunkMeshAttribute.LIGHT, 24, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, true)
             .build();
 
-    private static final int TEXTURE_MAX_VALUE = 65536;
+    private static final int TEXTURE_MAX_VALUE = 32768;
 
     private static final float TEXTURE_SCALE = (1.0f / TEXTURE_MAX_VALUE);
 
