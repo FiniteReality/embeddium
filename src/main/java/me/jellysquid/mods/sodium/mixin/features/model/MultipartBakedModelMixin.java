@@ -69,13 +69,23 @@ public class MultipartBakedModelMixin {
 
         BakedModel[] models = getModelComponents(state);
 
-        List<BakedQuad> quads = new ArrayList<>();
+        List<BakedQuad> quads = null;
         long seed = random.nextLong();
 
         for (BakedModel model : models) {
             random.setSeed(seed);
 
-            quads.addAll(model.getQuads(state, face, random));
+            List<BakedQuad> submodelQuads = model.getQuads(state, face, random);
+            if(models.length == 1) {
+                // Nobody else will return quads, so no need to make a wrapper list
+                return submodelQuads;
+            } else {
+                // Allocate a list to merge all the inner lists together
+                if(quads == null) {
+                    quads = new ArrayList<>();
+                }
+                quads.addAll(submodelQuads);
+            }
         }
 
         return quads;
