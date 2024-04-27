@@ -42,4 +42,7 @@ If you're looking to add Embeddium to your development environment, please take 
 
 ## License
 
-Embeddium currently follows the license of upstream Sodium (LGPL-3.0).
+Embeddium is licensed under the Lesser GNU General Public License version 3.
+
+Portions of the option screen code are based on Reese's Sodium Options by FlashyReese, and are used under the terms of
+the [MIT license](https://opensource.org/license/mit), located in `src/main/resources/licenses/rso.txt`. 
