@@ -91,6 +91,11 @@ public class SmoothLightPipeline implements LightPipeline {
         this.applySidedBrightness(out, face, shade);
     }
 
+    @Override
+    public void reset() {
+        this.cachedPos = Long.MIN_VALUE;
+    }
+
     /**
      * Quickly calculates the light data for a full grid-aligned quad. This represents the most common case (outward
      * facing quads on a full-block model) and avoids interpolation between neighbors as each corner will only ever

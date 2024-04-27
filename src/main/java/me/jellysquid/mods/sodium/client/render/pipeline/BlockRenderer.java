@@ -92,7 +92,7 @@ public class BlockRenderer {
         }
 
         // Delegate to Forge render pipeline if enabled
-        if(ForgeBlockRenderer.useForgeLightingPipeline()) {
+        if(false) {
             PoseStack mStack;
             if(offset != Vec3.ZERO) {
                 mStack = new PoseStack();
