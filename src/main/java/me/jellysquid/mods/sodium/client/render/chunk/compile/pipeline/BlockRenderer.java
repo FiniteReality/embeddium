@@ -24,6 +24,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEn
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
+import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -231,6 +232,8 @@ public class BlockRenderer {
             out.v = quad.getTexV(srcIndex);
 
             out.light = ModelQuadUtil.mergeBakedLight(quad.getLight(srcIndex), light.lm[srcIndex]);
+
+            out.normal = NormI8.FOR_DIRECTIONS[quad.getLightFace().ordinal()];
         }
 
         var vertexBuffer = builder.getVertexBuffer(normalFace);

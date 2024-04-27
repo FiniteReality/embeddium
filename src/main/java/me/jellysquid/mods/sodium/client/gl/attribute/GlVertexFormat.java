@@ -98,11 +98,9 @@ public class GlVertexFormat<T extends Enum<T>> {
             for (T key : this.type.getEnumConstants()) {
                 GlVertexAttribute attribute = this.attributes.get(key);
 
-                if (attribute == null) {
-                    throw new NullPointerException("Generic attribute not assigned to enumeration " + key.name());
+                if (attribute != null) {
+                    size = Math.max(size, attribute.getPointer() + attribute.getSize());
                 }
-
-                size = Math.max(size, attribute.getPointer() + attribute.getSize());
             }
 
             // The stride must be large enough to cover all attributes. This still allows for additional padding

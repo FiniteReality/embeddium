@@ -1,7 +1,9 @@
 package me.jellysquid.mods.sodium.client.render.chunk.vertex.format.impl;
 
+import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeBinding;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeFormat;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
+import me.jellysquid.mods.sodium.client.render.chunk.shader.ChunkShaderBindingPoints;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
@@ -24,7 +26,7 @@ public class VanillaChunkVertex implements ChunkVertexType {
             .addElement(ChunkMeshAttribute.COLOR_SHADE, 12, GlVertexAttributeFormat.UNSIGNED_BYTE, 4, true, false)
             .addElement(ChunkMeshAttribute.BLOCK_TEXTURE, 16, GlVertexAttributeFormat.FLOAT, 2, false, false)
             .addElement(ChunkMeshAttribute.LIGHT_TEXTURE, 24, GlVertexAttributeFormat.UNSIGNED_SHORT, 2, false, true)
-            //.addElement(ChunkMeshAttribute.NORMAL, 28, GlVertexAttributeFormat.UNSIGNED_INT, 1, false, true)
+            .addElement(ChunkMeshAttribute.NORMAL, 28, GlVertexAttributeFormat.SIGNED_BYTE, 3, true, false)
             .build();
 
     @Override
@@ -59,11 +61,26 @@ public class VanillaChunkVertex implements ChunkVertexType {
             MemoryUtil.memPutInt(ptr + 12, ColorABGR.withAlpha(ColorMixer.mulSingle(c, ColorABGR.unpackAlpha(c)), 255));
             MemoryUtil.memPutFloat(ptr + 16, encodeTexture(vertex.u));
             MemoryUtil.memPutFloat(ptr + 20, encodeTexture(vertex.v));
-            // TODO
             MemoryUtil.memPutInt(ptr + 24, vertex.light);
-            MemoryUtil.memPutInt(ptr + 28, 0);
+            MemoryUtil.memPutInt(ptr + 28, vertex.normal);
 
             return ptr + STRIDE;
+        };
+    }
+
+    @Override
+    public GlVertexAttributeBinding[] getAttributeBindings() {
+        return new GlVertexAttributeBinding[] {
+                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_POSITION_ID,
+                        VERTEX_FORMAT.getAttribute(ChunkMeshAttribute.POSITION_MATERIAL_MESH)),
+                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_COLOR,
+                        VERTEX_FORMAT.getAttribute(ChunkMeshAttribute.COLOR_SHADE)),
+                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_BLOCK_TEXTURE,
+                        VERTEX_FORMAT.getAttribute(ChunkMeshAttribute.BLOCK_TEXTURE)),
+                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_LIGHT_TEXTURE,
+                        VERTEX_FORMAT.getAttribute(ChunkMeshAttribute.LIGHT_TEXTURE)),
+                new GlVertexAttributeBinding(ChunkShaderBindingPoints.ATTRIBUTE_NORMAL,
+                        VERTEX_FORMAT.getAttribute(ChunkMeshAttribute.NORMAL))
         };
     }
 

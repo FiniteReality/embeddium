@@ -1,5 +1,8 @@
 package net.caffeinemc.mods.sodium.api.util;
 
+import net.minecraft.Util;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import org.joml.Vector3f;
 
@@ -26,6 +29,14 @@ public class NormI8 {
      * multiplication is slightly faster than a floating point division, and this code is a hot path which justifies it.
      */
     private static final float NORM = 1.0f / COMPONENT_RANGE;
+
+    public static final int[] FOR_DIRECTIONS = Util.make(new int[Direction.values().length], arr -> {
+        Direction[] directions = Direction.values();
+        for(int i = 0; i < directions.length; i++) {
+            Vec3i normal = directions[i].getNormal();
+            arr[i] = NormI8.pack(normal.getX(), normal.getY(), normal.getZ());
+        }
+    });
 
     public static int pack(Vector3f normal) {
         return pack(normal.x(), normal.y(), normal.z());
