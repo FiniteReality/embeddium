@@ -72,7 +72,16 @@ public class EarlyDriverScanner {
                 var version = WindowsDriverStoreVersion.parse(adapter.version());
 
                 if (version.driverModel() == 10 && version.featureLevel() == 18 && version.major() == 10) {
-                    return version;
+                    if (version.minor() >= 5161) {
+                        // On https://www.intel.com/content/www/us/en/support/articles/000005654/graphics.html, we are told that
+                        // there are two versioning schemes that can be used - one from Intel and one from Windows. The one
+                        // from Windows will label the new driver (15.33.53.5161) as 10.18.10.5161. This causes us to falsely
+                        // flag it as incompatible. To solve this problem, if we see the 10.18.10 prefix, we check if the build
+                        // number is at least 5161, and if so, we assume the driver is new enough.
+                        return null;
+                    } else {
+                        return version;
+                    }
                 }
             } catch (WindowsDriverStoreVersion.ParseException ignored) { }
         }
