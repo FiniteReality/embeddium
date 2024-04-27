@@ -115,8 +115,7 @@ public class MixinMultipartBakedModel {
 
         BakedModel[] models = getModelComponents(state);
 
-        List<BakedQuad> quads = new ArrayList<>();
-
+        List<BakedQuad> quads = null;
         long seed = random.nextLong();
 
         boolean checkSubmodelTypes = this.embeddium$hasCustomRenderTypes;
@@ -126,8 +125,19 @@ public class MixinMultipartBakedModel {
 
             // Embeddium: Filter render types as Forge does, but only if we actually need to do so. This avoids
             // the overhead of getRenderTypes() for all vanilla models.
-            if (!checkSubmodelTypes || renderLayer == null || model.getRenderTypes(state, random, modelData).contains(renderLayer))
-                quads.addAll(model.getQuads(state, face, random, MultipartModelData.resolve(modelData, model), renderLayer));
+            if (!checkSubmodelTypes || renderLayer == null || model.getRenderTypes(state, random, modelData).contains(renderLayer)) {
+                List<BakedQuad> submodelQuads = model.getQuads(state, face, random, MultipartModelData.resolve(modelData, model), renderLayer);
+                if(models.length == 1) {
+                    // Nobody else will return quads, so no need to make a wrapper list
+                    return submodelQuads;
+                } else {
+                    // Allocate a list to merge all the inner lists together
+                    if(quads == null) {
+                        quads = new ArrayList<>();
+                    }
+                    quads.addAll(submodelQuads);
+                }
+            }
         }
 
         return quads;
