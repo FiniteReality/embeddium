@@ -8,6 +8,7 @@ import me.jellysquid.mods.sodium.client.model.vertex.type.BlittableVertexType;
 import me.jellysquid.mods.sodium.client.model.vertex.type.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ChunkMeshAttribute;
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import net.minecraftforge.fml.ModList;
 
 /**
  * Simple vertex format which uses single-precision floating point numbers to represent position and texture
@@ -22,7 +23,10 @@ public class ModelVertexType implements ChunkVertexType<ChunkMeshAttribute> {
             .build();
 
     private static final int POSITION_MAX_VALUE = 65536;
-    private static final int TEXTURE_MAX_VALUE = 65536;
+
+    private static final boolean USE_LEGACY_SCALING = ModList.get().isLoaded("oculus");
+    // FIXME The old scale must be used with Oculus present since it hardcodes the value
+    private static final int TEXTURE_MAX_VALUE = USE_LEGACY_SCALING ? 65536 : 32768;
 
     private static final float MODEL_ORIGIN = 8.0f;
     private static final float MODEL_RANGE = 32.0f;
@@ -68,7 +72,11 @@ public class ModelVertexType implements ChunkVertexType<ChunkMeshAttribute> {
     }
 
     static short encodeBlockTexture(float value) {
-        return (short) (Math.min(0.99999997F, value) * TEXTURE_MAX_VALUE);
+        if(USE_LEGACY_SCALING) {
+            return (short) (Math.min(0.99999997F, value) * TEXTURE_MAX_VALUE);
+        } else {
+            return (short) (Math.round(value * TEXTURE_MAX_VALUE) & 0xFFFF);
+        }
     }
 
     static short encodePosition(float v) {
