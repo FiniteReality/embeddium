@@ -19,6 +19,8 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.SectionRenderDataStora
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion.DeviceResources;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshFormats;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -27,9 +29,16 @@ public class RenderRegionManager {
     private final Long2ReferenceOpenHashMap<RenderRegion> regions = new Long2ReferenceOpenHashMap<>();
 
     private final StagingBuffer stagingBuffer;
+    private final ChunkVertexType vertexType;
 
+    @Deprecated
     public RenderRegionManager(CommandList commandList) {
+        this(commandList, ChunkMeshFormats.COMPACT);
+    }
+
+    public RenderRegionManager(CommandList commandList, ChunkVertexType type) {
         this.stagingBuffer = createStagingBuffer(commandList);
+        this.vertexType = type;
     }
 
     public void update() {
@@ -86,7 +95,7 @@ public class RenderRegionManager {
             return;
         }
 
-        var resources = region.createResources(commandList);
+        var resources = region.createResources(commandList, vertexType);
         var arena = resources.getGeometryArena();
 
         boolean bufferChanged = arena.upload(commandList, uploads.stream()

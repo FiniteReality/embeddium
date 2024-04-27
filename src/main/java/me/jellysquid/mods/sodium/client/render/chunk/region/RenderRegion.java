@@ -13,9 +13,12 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.SectionRenderDataStora
 import me.jellysquid.mods.sodium.client.render.chunk.lists.ChunkRenderList;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkMeshFormats;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.impl.CompactChunkVertex;
 import me.jellysquid.mods.sodium.client.util.MathUtil;
 import net.minecraft.core.SectionPos;
 import org.apache.commons.lang3.Validate;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -182,9 +185,14 @@ public class RenderRegion {
         return this.resources;
     }
 
+    @Deprecated
     public DeviceResources createResources(CommandList commandList) {
+        return createResources(commandList, ChunkMeshFormats.COMPACT);
+    }
+
+    public DeviceResources createResources(CommandList commandList, ChunkVertexType type) {
         if (this.resources == null) {
-            this.resources = new DeviceResources(commandList, this.stagingBuffer);
+            this.resources = new DeviceResources(commandList, this.stagingBuffer, type);
         }
 
         return this.resources;
@@ -205,13 +213,14 @@ public class RenderRegion {
         private final GlBufferArena geometryArena;
         private GlTessellation tessellation;
 
-        public DeviceResources(CommandList commandList, StagingBuffer stagingBuffer) {
+        public DeviceResources(CommandList commandList, StagingBuffer stagingBuffer, ChunkVertexType type) {
             int stride;
-            if(!SodiumClientMod.canUseVanillaVertices()) {
-                // this line must be left unchanged for the Oculus mixin to apply
+            // TODO - remove this when Iris isn't supported anymore
+            if(ShaderModBridge.areShadersEnabled()) {
+                // Iris redirects the COMPACT field access here to its own vertex type
                 stride = ChunkMeshFormats.COMPACT.getVertexFormat().getStride();
             } else {
-                stride = ChunkMeshFormats.VANILLA_LIKE.getVertexFormat().getStride();
+                stride = type.getVertexFormat().getStride();
             }
             this.geometryArena = new GlBufferArena(commandList, REGION_SIZE * 756, stride, stagingBuffer);
         }

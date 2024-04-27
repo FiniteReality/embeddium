@@ -106,7 +106,7 @@ public class RenderSectionManager {
     public RenderSectionManager(ClientLevel world, int renderDistance, CommandList commandList) {
         ChunkVertexType vertexType = SodiumClientMod.canUseVanillaVertices() ? ChunkMeshFormats.VANILLA_LIKE : ChunkMeshFormats.COMPACT;
 
-        this.chunkRenderer = new VanillaShaderChunkRenderer(RenderDevice.INSTANCE, vertexType);
+        this.chunkRenderer = new DefaultChunkRenderer(RenderDevice.INSTANCE, vertexType);
 
         this.vertexType = vertexType;
 
@@ -116,7 +116,7 @@ public class RenderSectionManager {
         this.needsUpdate = true;
         this.renderDistance = renderDistance;
 
-        this.regions = new RenderRegionManager(commandList);
+        this.regions = new RenderRegionManager(commandList, vertexType);
         this.sectionCache = new ClonedChunkSectionCache(this.world);
 
         this.renderLists = SortedRenderLists.empty();

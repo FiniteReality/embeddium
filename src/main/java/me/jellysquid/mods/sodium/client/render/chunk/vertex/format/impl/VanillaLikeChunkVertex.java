@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.vertex.format.impl;
 
+import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeBinding;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexAttributeFormat;
 import me.jellysquid.mods.sodium.client.gl.attribute.GlVertexFormat;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
@@ -9,6 +10,8 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexTy
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorU8;
 import org.lwjgl.system.MemoryUtil;
+
+import java.util.List;
 
 /**
  * This vertex format is less performant and uses more VRAM than {@link CompactChunkVertex}, but should be completely
@@ -71,5 +74,10 @@ public class VanillaLikeChunkVertex implements ChunkVertexType {
 
     private static float encodeTexture(float value) {
         return Math.min(0.99999997F, value);
+    }
+
+    @Override
+    public List<String> getShaderDefines() {
+        return List.of();
     }
 }

@@ -23,10 +23,7 @@ public record ChunkShaderOptions(ChunkFogMode fog, TerrainRenderPass pass, Chunk
             constants.add("USE_FRAGMENT_DISCARD");
         }
 
-        // Embeddium: indicate whether compact vertex format is disabled to shaders
-        if(this.vertexType != ChunkMeshFormats.VANILLA_LIKE) {
-            constants.add("USE_VERTEX_COMPRESSION");
-        }
+        constants.addAll(this.vertexType.getShaderDefines());
 
         constants.add("VERT_POS_SCALE", String.valueOf(this.vertexType.getPositionScale()));
         constants.add("VERT_POS_OFFSET", String.valueOf(this.vertexType.getPositionOffset()));
