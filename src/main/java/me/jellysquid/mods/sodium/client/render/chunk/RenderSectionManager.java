@@ -55,6 +55,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.ArrayUtils;
 import org.embeddedt.embeddium.chunk.VanillaShaderChunkRenderer;
+import org.embeddedt.embeddium.render.chunk.ChunkVertexTypeManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,7 +65,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RenderSectionManager {
-    private static final boolean USE_CORE_SHADERS = Boolean.getBoolean("embeddium.useVanillaCoreShaders");
+    public static final boolean USE_CORE_SHADERS = Boolean.getBoolean("embeddium.useVanillaCoreShaders");
 
     private final ChunkBuilder builder;
 
@@ -106,15 +107,7 @@ public class RenderSectionManager {
     private final int translucencyBlockRenderDistance;
 
     public RenderSectionManager(ClientLevel world, int renderDistance, CommandList commandList) {
-        ChunkVertexType vertexType;
-
-        if (USE_CORE_SHADERS) {
-            vertexType = ChunkMeshFormats.VANILLA;
-        } else if (SodiumClientMod.canUseVanillaVertices()) {
-            vertexType = ChunkMeshFormats.VANILLA_LIKE;
-        } else {
-            vertexType = ChunkMeshFormats.COMPACT;
-        }
+        ChunkVertexType vertexType = ChunkVertexTypeManager.getType();
 
         this.chunkRenderer = USE_CORE_SHADERS ? new VanillaShaderChunkRenderer(RenderDevice.INSTANCE) : new DefaultChunkRenderer(RenderDevice.INSTANCE, vertexType);
 
@@ -126,7 +119,7 @@ public class RenderSectionManager {
         this.needsUpdate = true;
         this.renderDistance = renderDistance;
 
-        this.regions = new RenderRegionManager(commandList, vertexType);
+        this.regions = new RenderRegionManager(commandList);
         this.sectionCache = new ClonedChunkSectionCache(this.world);
 
         this.renderLists = SortedRenderLists.empty();

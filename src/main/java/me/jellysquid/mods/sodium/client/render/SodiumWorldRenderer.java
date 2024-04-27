@@ -45,6 +45,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fml.loading.FMLLoader;
+import org.embeddedt.embeddium.render.chunk.ChunkVertexTypeManager;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -270,6 +271,8 @@ public class SodiumWorldRenderer {
             this.renderSectionManager.destroy();
             this.renderSectionManager = null;
         }
+
+        ChunkVertexTypeManager.updateType();
 
         this.renderDistance = this.client.options.getEffectiveRenderDistance();
 

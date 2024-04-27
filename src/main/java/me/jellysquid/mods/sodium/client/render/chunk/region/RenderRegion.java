@@ -19,6 +19,7 @@ import me.jellysquid.mods.sodium.client.util.MathUtil;
 import net.minecraft.core.SectionPos;
 import org.apache.commons.lang3.Validate;
 import org.embeddedt.embeddium.render.ShaderModBridge;
+import org.embeddedt.embeddium.render.chunk.ChunkVertexTypeManager;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -185,14 +186,9 @@ public class RenderRegion {
         return this.resources;
     }
 
-    @Deprecated
     public DeviceResources createResources(CommandList commandList) {
-        return createResources(commandList, ChunkMeshFormats.COMPACT);
-    }
-
-    public DeviceResources createResources(CommandList commandList, ChunkVertexType type) {
         if (this.resources == null) {
-            this.resources = new DeviceResources(commandList, this.stagingBuffer, type);
+            this.resources = new DeviceResources(commandList, this.stagingBuffer);
         }
 
         return this.resources;
@@ -213,14 +209,14 @@ public class RenderRegion {
         private final GlBufferArena geometryArena;
         private GlTessellation tessellation;
 
-        public DeviceResources(CommandList commandList, StagingBuffer stagingBuffer, ChunkVertexType type) {
+        public DeviceResources(CommandList commandList, StagingBuffer stagingBuffer) {
             int stride;
             // TODO - remove this when Iris isn't supported anymore
             if(ShaderModBridge.areShadersEnabled()) {
                 // Iris redirects the COMPACT field access here to its own vertex type
                 stride = ChunkMeshFormats.COMPACT.getVertexFormat().getStride();
             } else {
-                stride = type.getVertexFormat().getStride();
+                stride = ChunkVertexTypeManager.getType().getVertexFormat().getStride();
             }
             this.geometryArena = new GlBufferArena(commandList, REGION_SIZE * 756, stride, stagingBuffer);
         }
