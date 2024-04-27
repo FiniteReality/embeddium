@@ -52,6 +52,7 @@ public class BlockRenderer {
     private final ChunkVertexEncoder.Vertex[] vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
 
     private final boolean useAmbientOcclusion;
+    @Deprecated(forRemoval = true)
     private final boolean useForgeExperimentalLightingPipeline;
 
     private final IndigoBlockRenderContext indigoRenderContext;
@@ -70,8 +71,7 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
-        // TODO: Expose config option and use this as a way to unconditionally delegate to the vanilla renderer
-        this.useForgeExperimentalLightingPipeline = false; // ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get();
+        this.useForgeExperimentalLightingPipeline = false;
         this.indigoRenderContext = new IndigoBlockRenderContext(this.occlusionCache);
     }
 
