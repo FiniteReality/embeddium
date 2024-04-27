@@ -36,8 +36,7 @@ public class ForgeLightPipeline implements LightPipeline {
 
     public ForgeLightPipeline(LightDataAccess cache, QuadLighter forgeLighter) {
         this.forgeLighter = forgeLighter;
-        // TODO remove this ugly cast and pass a level to the constructor properly
-        this.level = ((ArrayLightDataCache)cache).getLevel();
+        this.level = cache.getWorld();
     }
 
     public static ForgeLightPipeline smooth(LightDataAccess cache) {
