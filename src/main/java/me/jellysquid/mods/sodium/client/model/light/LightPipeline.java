@@ -20,4 +20,11 @@ public interface LightPipeline {
      * @param shade True if the block is shaded by ambient occlusion
      */
     void calculate(ModelQuadView quad, BlockPos pos, QuadLightData out, Direction cullFace, Direction lightFace, boolean shade);
+
+    /**
+     * Reset any cached data for this pipeline.
+     */
+    default void reset() {
+
+    }
 }

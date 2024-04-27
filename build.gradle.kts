@@ -147,6 +147,9 @@ repositories {
             includeGroup("curse.maven")
         }
     }
+    maven("https://maven.parchmentmc.org") {
+
+    }
 }
 
 dependencies {
@@ -161,7 +164,13 @@ dependencies {
     
     //to change the versions see the gradle.properties file
     minecraft("com.mojang:minecraft:${"minecraft_version"()}")
-    mappings(loom.officialMojangMappings())
+    mappings(loom.layered {
+        officialMojangMappings()
+        if(rootProject.properties.containsKey("parchment_version")) {
+            val parchment_version = "parchment_version"().split("-")
+            parchment("org.parchmentmc.data:parchment-${parchment_version[1]}:${parchment_version[0]}@zip")
+        }
+    })
     modImplementation("net.fabricmc:fabric-loader:${"loader_version"()}")
 
     // Fabric API

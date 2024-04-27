@@ -23,4 +23,10 @@ public class LightPipelineProvider {
 
         return pipeline;
     }
+
+    public void reset() {
+        for (LightPipeline pipeline : this.lighters.values()) {
+            pipeline.reset();
+        }
+    }
 }
