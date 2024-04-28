@@ -31,13 +31,15 @@ public abstract class ForgeGuiMixin extends Gui {
     /**
      * @author embeddedt
      * @reason Use the vanilla code to render lines, which fills all backgrounds first before drawing text, so that
-     * batching works correctly.
+     * batching works correctly. Also, rendre
      */
     @Inject(method = "renderHUDText", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z", shift = At.Shift.AFTER, remap = false), remap = false)
     private void renderLinesVanilla(int width, int height, GuiGraphics guiGraphics, CallbackInfo ci, @Local(ordinal = 0) ArrayList<String> listL, @Local(ordinal = 1) ArrayList<String> listR) {
         DebugScreenOverlayAccessor accessor = (DebugScreenOverlayAccessor)embeddium$debugOverlay;
-        accessor.invokeRenderLines(guiGraphics, listL, true);
-        accessor.invokeRenderLines(guiGraphics, listR, false);
+        guiGraphics.drawManaged(() -> {
+            accessor.invokeRenderLines(guiGraphics, listL, true);
+            accessor.invokeRenderLines(guiGraphics, listR, false);
+        });
         // Prevent Forge from rendering any lines
         listL.clear();
         listR.clear();
