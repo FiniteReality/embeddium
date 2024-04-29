@@ -9,10 +9,14 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.resource.PathPackResources;
-import net.minecraftforge.resource.ResourcePackLoader;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.resource.ResourcePackLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,11 +33,9 @@ public class TabHeaderWidget extends FlatButtonWidget {
         Optional<String> logoFile = erroredLogos.contains(modId) ? Optional.empty() : ModList.get().getModContainerById(modId).flatMap(c -> c.getModInfo().getLogoFile());
         ResourceLocation texture = null;
         if(logoFile.isPresent()) {
-            final PathPackResources resourcePack = ResourcePackLoader.getPackFor(modId)
-                    .orElse(ResourcePackLoader.getPackFor("forge").
-                            orElseThrow(()->new RuntimeException("Can't find forge, WHAT!")));
-            try {
-                IoSupplier<InputStream> logoResource = resourcePack.getRootResource(logoFile.get());
+            final Pack.ResourcesSupplier supplier = ResourcePackLoader.getPackFor(modId).orElse(ResourcePackLoader.getPackFor("neoforge").orElseThrow(()->new RuntimeException("Can't find neoforge, WHAT!")));
+            try(PackResources pack = supplier.openPrimary(new PackLocationInfo("mod:" + modId, Component.empty(), PackSource.BUILT_IN, Optional.empty()))) {
+                IoSupplier<InputStream> logoResource = pack.getRootResource(logoFile.get());
                 if (logoResource != null) {
                     NativeImage logo = NativeImage.read(logoResource.get());
                     if(logo.getWidth() != logo.getHeight()) {

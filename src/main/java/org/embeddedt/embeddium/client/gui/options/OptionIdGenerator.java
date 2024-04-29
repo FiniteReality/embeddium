@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.client.gui.options;
 
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 import java.net.URI;
 import java.net.URISyntaxException;
