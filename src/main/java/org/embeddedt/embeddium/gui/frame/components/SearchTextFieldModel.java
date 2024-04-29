@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import org.embeddedt.embeddium.gui.EmbeddiumVideoOptionsScreen;
 import org.embeddedt.embeddium.util.StringUtils;
 
@@ -58,7 +59,7 @@ public class SearchTextFieldModel {
         int i = Math.min(this.selectionStart, this.selectionEnd);
         int j = Math.max(this.selectionStart, this.selectionEnd);
         int k = this.maxLength - this.text.length() - (i - j);
-        String string = SharedConstants.filterText(text);
+        String string = StringUtil.filterText(text);
         int l = string.length();
         if (k < l) {
             string = string.substring(0, k);
