@@ -129,7 +129,7 @@ tasks.build {
 }
 
 tasks.jar {
-    from("COPYING", "COPYING.LESSER")
+    from("COPYING", "COPYING.LESSER", "README.md")
     from(sourceSets["api"].output.classesDirs)
     from(sourceSets["api"].output.resourcesDir)
     from(sourceSets["compat"].output.classesDirs)

@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.console.Console;
@@ -12,8 +13,6 @@ import me.jellysquid.mods.sodium.client.gui.prompt.ScreenPrompt;
 import me.jellysquid.mods.sodium.client.gui.prompt.ScreenPromptable;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.caffeinemc.mods.sodium.api.util.ColorMixer;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -26,6 +25,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
+import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
+import org.embeddedt.embeddium.gui.EmbeddiumVideoOptionsScreen;
 import org.embeddedt.embeddium.util.PlatformUtil;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -41,6 +42,7 @@ import java.util.stream.Stream;
 
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
+@Deprecated(forRemoval = true)
 public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
     // Donation prompt should not be shown with Controllable present (as it's impossible to exit) or in a dev env.
     private static final boolean IS_POPUP_SAFE = !PlatformUtil.modPresent("controllable") && !PlatformUtil.isDevelopmentEnvironment();
@@ -61,8 +63,10 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
     private @Nullable ScreenPrompt prompt;
 
+    private boolean forceOldScreen;
+
     public SodiumOptionsGUI(Screen prevScreen) {
-        super(Component.translatable(MODNAME + " Options"));
+        super(Component.literal(MODNAME + " Options"));
 
         this.prevScreen = prevScreen;
 
@@ -71,7 +75,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
         this.pages.add(SodiumGameOptionPages.performance());
         this.pages.add(SodiumGameOptionPages.advanced());
 
-        this.checkPromptTimers();
+        OptionGUIConstructionEvent.BUS.post(new OptionGUIConstructionEvent(this.pages));
     }
 
     private void checkPromptTimers() {
@@ -141,6 +145,15 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
 
         if (this.prompt != null) {
             this.prompt.init();
+        }
+
+        // Jump to the modern screen unless SHIFT+S is pressed. We're keeping a neutered copy of the old screen around
+        // so injecting new pages still works on old mods. Mods will be required to migrate to the API at the next
+        // breaking changes window.
+        if(!forceOldScreen && (!Screen.hasShiftDown() || !InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), InputConstants.KEY_S))) {
+            this.minecraft.setScreen(new EmbeddiumVideoOptionsScreen(this.prevScreen, this.pages));
+        } else {
+            forceOldScreen = true;
         }
     }
 
@@ -230,7 +243,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
                 y += 18;
             }
 
-            // Add padding beneath each option group
+            // Add padding beneath each option group that has at least one visible option
             y += 4;
         }
     }
@@ -435,7 +448,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
         return new Dim2i(0, 0, this.width, this.height);
     }
 
-    private static final List<FormattedText> DONATION_PROMPT_MESSAGE;
+    public static final List<FormattedText> DONATION_PROMPT_MESSAGE;
 
     static {
         DONATION_PROMPT_MESSAGE = List.of(

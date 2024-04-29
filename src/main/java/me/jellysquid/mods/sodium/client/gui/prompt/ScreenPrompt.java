@@ -14,6 +14,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
+@Deprecated(forRemoval = true)
 public class ScreenPrompt implements GuiEventListener, Renderable {
     private final ScreenPromptable parent;
     private final List<FormattedText> text;
