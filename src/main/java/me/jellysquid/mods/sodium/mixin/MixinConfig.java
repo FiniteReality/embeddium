@@ -57,6 +57,7 @@ public class MixinConfig {
         this.addMixinRule("features.render.entity.shadow", true);
 
         this.addMixinRule("features.render.gui", true);
+        this.addMixinRule("features.render.gui.debug", true);
         this.addMixinRule("features.render.gui.font", true);
         this.addMixinRule("features.render.gui.outlines", true);
 

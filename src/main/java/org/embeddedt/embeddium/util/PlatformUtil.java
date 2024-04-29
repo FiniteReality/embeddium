@@ -11,6 +11,10 @@ public class PlatformUtil {
         return FabricLoader.getInstance().isModLoaded(modid);
     }
 
+    public static String getModName(String modId) {
+        return FabricLoader.getInstance().getModContainer(modId).map(container -> container.getMetadata().getName()).orElse(modId);
+    }
+
     public static boolean isDevelopmentEnvironment() {
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
