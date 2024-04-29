@@ -149,7 +149,7 @@ java {
 }
 
 tasks.jar {
-    from("COPYING", "COPYING.LESSER")
+    from("COPYING", "COPYING.LESSER", "README.md")
     from(sourceSets["compat"].output.classesDirs)
     from(sourceSets["compat"].output.resourcesDir)
     from(sourceSets["api"].output.classesDirs)
