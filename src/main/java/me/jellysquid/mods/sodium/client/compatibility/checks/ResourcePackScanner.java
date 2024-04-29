@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.compatibility.checks;
 
+import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import me.jellysquid.mods.sodium.client.gui.console.Console;
 import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
 import net.minecraft.network.chat.Component;
@@ -62,10 +63,11 @@ public class ResourcePackScanner {
     private static void printToasts(Collection<ScannedResourcePack> resourcePacks) {
         var incompatibleResourcePacks = resourcePacks.stream()
                 .filter((pack) -> !pack.shaderPrograms.isEmpty())
-                .toList();
+                .collect(Collectors.toCollection(ReferenceLinkedOpenHashSet::new));
 
         var likelyIncompatibleResourcePacks = resourcePacks.stream()
                 .filter((pack) -> !pack.shaderIncludes.isEmpty())
+                .filter(pack -> !incompatibleResourcePacks.contains(pack))
                 .toList();
 
         boolean shown = false;
