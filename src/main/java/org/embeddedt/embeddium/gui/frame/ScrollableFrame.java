@@ -179,8 +179,8 @@ public class ScrollableFrame extends AbstractFrame {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double verticalAmount) {
-        return super.mouseScrolled(applyOffset(this.horizontalScrollBar, mouseX, false), applyOffset(this.verticalScrollBar, mouseY, false), verticalAmount) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseScrolled(mouseX, mouseY, verticalAmount)) || (this.canScrollVertical && this.verticalScrollBar.mouseScrolled(mouseX, mouseY, verticalAmount));
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        return super.mouseScrolled(applyOffset(this.horizontalScrollBar, mouseX, false), applyOffset(this.verticalScrollBar, mouseY, false), horizontalAmount, verticalAmount) || (this.canScrollHorizontal && this.horizontalScrollBar.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) || (this.canScrollVertical && this.verticalScrollBar.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount));
     }
 
     public static class Builder {

@@ -191,8 +191,8 @@ public class TabFrame extends AbstractFrame {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double verticalAmount) {
-        return super.mouseScrolled(mouseX, mouseY, verticalAmount);
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     public static class Builder {

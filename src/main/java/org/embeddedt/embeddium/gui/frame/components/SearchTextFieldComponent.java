@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -130,7 +131,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (!this.isActive()) {
             return false;
         }
-        if (SharedConstants.isAllowedChatCharacter(chr)) {
+        if (StringUtil.isAllowedChatCharacter(chr)) {
             if (this.model.editable) {
                 this.model.write(Character.toString(chr));
             }

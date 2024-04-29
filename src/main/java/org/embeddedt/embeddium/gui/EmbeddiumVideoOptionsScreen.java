@@ -287,8 +287,8 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics gfx) {
-        super.renderBackground(gfx);
+    public void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(gfx, mouseX, mouseY, partialTick);
 
         // Render watermarks
         gfx.setColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
@@ -306,7 +306,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
     @Override
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
-        this.renderBackground(drawContext);
+        this.renderBackground(drawContext, mouseX, mouseY, delta);
         this.updateControls();
         this.frame.render(drawContext, mouseX, mouseY, delta);
     }
