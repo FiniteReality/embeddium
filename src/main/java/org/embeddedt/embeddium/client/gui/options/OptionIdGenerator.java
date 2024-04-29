@@ -1,6 +1,7 @@
 package org.embeddedt.embeddium.client.gui.options;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.ModOrigin;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,8 +35,11 @@ public class OptionIdGenerator {
 
     static {
         for(var info : FabricLoader.getInstance().getAllMods()) {
-            for(Path rootPath : info.getRootPaths()) {
-                MOD_ID_FROM_URL_CACHE.put(rootPath, info.getMetadata().getId());
+            var origin = info.getOrigin();
+            if(origin.getKind() == ModOrigin.Kind.PATH) {
+                for(Path rootPath : origin.getPaths()) {
+                    MOD_ID_FROM_URL_CACHE.put(rootPath, info.getMetadata().getId());
+                }
             }
         }
     }
