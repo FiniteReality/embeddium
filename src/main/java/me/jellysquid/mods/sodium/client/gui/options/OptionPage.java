@@ -23,13 +23,18 @@ public class OptionPage {
         OptionIdentifier<Void> id;
         if(name.getContents() instanceof TranslatableContents translatableContents) {
             String key = translatableContents.getKey();
-            id = switch(key) {
-                case "stat.generalButton" -> StandardOptions.Pages.GENERAL;
-                case "sodium.options.pages.quality" -> StandardOptions.Pages.QUALITY;
-                case "sodium.options.pages.advanced" -> StandardOptions.Pages.ADVANCED;
-                case "sodium.options.pages.performance" -> StandardOptions.Pages.PERFORMANCE;
-                default -> OptionIdGenerator.generateId(key);
-            };
+            if(name.getSiblings().isEmpty()) {
+                // Detect our own tabs
+                id = switch(key) {
+                    case "stat.generalButton" -> StandardOptions.Pages.GENERAL;
+                    case "sodium.options.pages.quality" -> StandardOptions.Pages.QUALITY;
+                    case "sodium.options.pages.advanced" -> StandardOptions.Pages.ADVANCED;
+                    case "sodium.options.pages.performance" -> StandardOptions.Pages.PERFORMANCE;
+                    default -> OptionIdGenerator.generateId(key);
+                };
+            } else {
+                id = OptionIdGenerator.generateId(key);
+            }
         } else {
             id = OptionIdGenerator.generateId(name.getString());
         }
