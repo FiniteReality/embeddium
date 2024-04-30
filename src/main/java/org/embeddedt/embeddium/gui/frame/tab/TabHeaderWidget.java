@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
@@ -28,8 +29,16 @@ public class TabHeaderWidget extends FlatButtonWidget {
     private static final Set<String> erroredLogos = new HashSet<>();
     private final ResourceLocation logoTexture;
 
-    public TabHeaderWidget(Dim2i dim, String modId, Component label) {
-        super(dim, label, () -> {});
+    public static MutableComponent getLabel(String modId) {
+        return (switch(modId) {
+            // TODO handle long mod names better, this is the only one we know of right now
+            case "sspb" -> Component.literal("SSPB");
+            default -> Tab.idComponent(modId);
+        }).withStyle(s -> s.withUnderlined(true));
+    }
+
+    public TabHeaderWidget(Dim2i dim, String modId) {
+        super(dim, getLabel(modId), () -> {});
         Optional<String> logoFile = erroredLogos.contains(modId) ? Optional.empty() : ModList.get().getModContainerById(modId).flatMap(c -> c.getModInfo().getLogoFile());
         ResourceLocation texture = null;
         if(logoFile.isPresent()) {

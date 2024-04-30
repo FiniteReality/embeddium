@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class TabFrame extends AbstractFrame {
+    private static final int TAB_OPTION_INDENT = 5;
 
     private Dim2i tabSection;
     private final Dim2i frameSection;
@@ -35,8 +36,8 @@ public class TabFrame extends AbstractFrame {
         this.tabs = ImmutableListMultimap.copyOf(tabs);
         int tabSectionY = (this.tabs.size() + this.tabs.keySet().size()) * 18;
         Optional<Integer> result = Stream.concat(
-                tabs.keys().stream().map(id -> this.getStringWidth(Tab.idComponent(id)) + 10),
-                tabs.values().stream().map(tab -> this.getStringWidth(tab.title()))
+                tabs.keys().stream().map(id -> this.getStringWidth(TabHeaderWidget.getLabel(id)) + 10),
+                tabs.values().stream().map(tab -> this.getStringWidth(tab.title()) + TAB_OPTION_INDENT)
         ).max(Integer::compareTo);
 
         this.tabSection = new Dim2i(this.dim.x(), this.dim.y(), result.map(integer -> integer + (24)).orElseGet(() -> (int) (this.dim.width() * 0.35D)), this.dim.height());
@@ -91,12 +92,11 @@ public class TabFrame extends AbstractFrame {
             int width = tabSection.width() - 4;
             int height = 18;
 
-            int tabIndent = 5;
             for (var modEntry : tabs.asMap().entrySet()) {
                 // Add a "button" as the header
                 Dim2i modHeaderDim = new Dim2i(0, offsetY, width, height).withParentOffset(tabSection);
                 offsetY += height;
-                TabHeaderWidget headerButton = new TabHeaderWidget(modHeaderDim, modEntry.getKey(), Tab.idComponent(modEntry.getKey()));
+                TabHeaderWidget headerButton = new TabHeaderWidget(modHeaderDim, modEntry.getKey());
                 headerButton.setLeftAligned(true);
                 this.children.add(headerButton);
 
@@ -111,7 +111,7 @@ public class TabFrame extends AbstractFrame {
                     }) {
                         @Override
                         protected int getLeftAlignedTextOffset() {
-                            return tabIndent + super.getLeftAlignedTextOffset();
+                            return TAB_OPTION_INDENT + super.getLeftAlignedTextOffset();
                         }
                     };
 
