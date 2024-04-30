@@ -25,6 +25,7 @@ tasks.withType<JavaCompile> {
 
 version = getModVersion()
 group = "maven_group"()
+println("Embeddium: $version")
 
 base {
     archivesName = "archives_base_name"()
@@ -273,16 +274,17 @@ fun getModVersion(): String {
     }
 
     // Increment patch version
-    val versionParts = baseVersion.split(".")
-    baseVersion = "${versionParts[0]}.${versionParts[1]}.${versionParts[2].toInt() + 1}"
+    baseVersion = baseVersion.split(".").mapIndexed {
+        index, s -> if(index == 2) (s.toInt() + 1) else s
+    }.joinToString(separator = ".")
 
     val head = grgit.head()
     var id = head.abbreviatedId
 
     // Flag the build if the build tree is not clean
     if (!grgit.status().isClean) {
-        id += ".dirty"
+        id += "-dirty"
     }
 
-    return baseVersion + "-git.${id}" + mcMetadata
+    return baseVersion + "-git-${id}" + mcMetadata
 }
