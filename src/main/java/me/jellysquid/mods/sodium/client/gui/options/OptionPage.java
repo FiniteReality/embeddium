@@ -7,6 +7,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import org.embeddedt.embeddium.api.OptionPageConstructionEvent;
 import org.embeddedt.embeddium.client.gui.options.OptionIdGenerator;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
+import org.embeddedt.embeddium.client.gui.options.StandardOptions;
 
 import java.util.List;
 
@@ -21,7 +22,14 @@ public class OptionPage {
     private static OptionIdentifier<Void> tryMakeId(Component name) {
         OptionIdentifier<Void> id;
         if(name.getContents() instanceof TranslatableContents translatableContents) {
-            id = OptionIdGenerator.generateId(translatableContents.getKey());
+            String key = translatableContents.getKey();
+            id = switch(key) {
+                case "stat.generalButton" -> StandardOptions.Pages.GENERAL;
+                case "sodium.options.pages.quality" -> StandardOptions.Pages.QUALITY;
+                case "sodium.options.pages.advanced" -> StandardOptions.Pages.ADVANCED;
+                case "sodium.options.pages.performance" -> StandardOptions.Pages.PERFORMANCE;
+                default -> OptionIdGenerator.generateId(key);
+            };
         } else {
             id = OptionIdGenerator.generateId(name.getString());
         }
