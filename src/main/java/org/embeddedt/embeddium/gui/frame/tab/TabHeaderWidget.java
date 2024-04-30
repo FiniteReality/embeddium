@@ -24,8 +24,16 @@ public class TabHeaderWidget extends FlatButtonWidget {
     private static final Set<String> erroredLogos = new HashSet<>();
     private final ResourceLocation logoTexture;
 
-    public TabHeaderWidget(Dim2i dim, String modId, Component label) {
-        super(dim, label, () -> {});
+    private static Component getLabel(String modId) {
+        return switch(modId) {
+            // TODO handle long mod names better, this is the only one we know of right now
+            case "sspb" -> Component.literal("SSPB");
+            default -> Tab.idComponent(modId);
+        };
+    }
+
+    public TabHeaderWidget(Dim2i dim, String modId) {
+        super(dim, getLabel(modId), () -> {});
         Optional<String> logoFile = erroredLogos.contains(modId) ? Optional.empty() : ModList.get().getModContainerById(modId).flatMap(c -> c.getModInfo().getLogoFile());
         ResourceLocation texture = null;
         if(logoFile.isPresent()) {
