@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
@@ -23,12 +24,12 @@ public class TabHeaderWidget extends FlatButtonWidget {
     private static final Set<String> erroredLogos = new HashSet<>();
     private final ResourceLocation logoTexture;
 
-    public static Component getLabel(String modId) {
-        return switch(modId) {
+    public static MutableComponent getLabel(String modId) {
+        return (switch(modId) {
             // TODO handle long mod names better, this is the only one we know of right now
             case "sspb" -> Component.literal("SSPB");
             default -> Tab.idComponent(modId);
-        };
+        }).withStyle(s -> s.withUnderlined(true));
     }
 
     public TabHeaderWidget(Dim2i dim, String modId) {
