@@ -96,7 +96,7 @@ public class TabFrame extends AbstractFrame {
                 // Add a "button" as the header
                 Dim2i modHeaderDim = new Dim2i(0, offsetY, width, height).withParentOffset(tabSection);
                 offsetY += height;
-                TabHeaderWidget headerButton = new TabHeaderWidget(modHeaderDim, modEntry.getKey(), Tab.idComponent(modEntry.getKey()));
+                TabHeaderWidget headerButton = new TabHeaderWidget(modHeaderDim, modEntry.getKey());
                 headerButton.setLeftAligned(true);
                 this.children.add(headerButton);
 
