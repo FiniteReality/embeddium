@@ -207,6 +207,8 @@ public class SodiumWorldRenderer {
         this.lastCameraYaw = yaw;
         this.lastFogDistance = fogDistance;
 
+        this.renderSectionManager.runAsyncTasks();
+
         profiler.popPush("chunk_update");
 
         this.renderSectionManager.updateChunks(updateChunksImmediately);
