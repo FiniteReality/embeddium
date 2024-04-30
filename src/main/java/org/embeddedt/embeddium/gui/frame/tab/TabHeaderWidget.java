@@ -23,7 +23,7 @@ public class TabHeaderWidget extends FlatButtonWidget {
     private static final Set<String> erroredLogos = new HashSet<>();
     private final ResourceLocation logoTexture;
 
-    private static Component getLabel(String modId) {
+    public static Component getLabel(String modId) {
         return switch(modId) {
             // TODO handle long mod names better, this is the only one we know of right now
             case "sspb" -> Component.literal("SSPB");
