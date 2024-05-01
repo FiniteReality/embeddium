@@ -1,0 +1,5 @@
+{
+  "embeddium.conflicting_mod": "Embeddium обнаружил наличие модов, которые, как известно, вызывают проблемы/вылеты с рендерингом. Рекомендуется удалить их. Смотрите список ниже.",
+  "embeddium.conflicting_mod_list": "[{2}]",
+  "embeddium.search_bar_empty": "Поиск параметров…"
+}
