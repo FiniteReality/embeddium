@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.world.cloned;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMaps;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.chunk.PalettedContainerRO;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelDataManager;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +42,7 @@ public class ClonedChunkSection {
     private final SectionPos pos;
 
     private final @Nullable Int2ReferenceMap<BlockEntity> blockEntityMap;
-    private final @Nullable Int2ReferenceMap<ModelData> modelDataMap;
+    private final @Nullable Long2ObjectFunction<ModelData> modelDataMap;
 
     private final @Nullable DataLayer[] lightDataArrays;
 
@@ -59,7 +61,7 @@ public class ClonedChunkSection {
         PalettedContainerRO<Holder<Biome>> biomeData = null;
 
         Int2ReferenceMap<BlockEntity> blockEntityMap = null;
-        Int2ReferenceMap<ModelData> modelDataMap = null;
+        Long2ObjectFunction<ModelData> modelDataMap = null;
 
         if (section != null) {
             if (!section.hasOnlyAir()) {
@@ -151,22 +153,10 @@ public class ClonedChunkSection {
     }
 
     @Nullable
-    private static Int2ReferenceMap<ModelData> copyModelData(Level level, SectionPos chunkCoord) {
-        var forgeMap = level.getModelDataManager().getAt(chunkCoord);
+    private static Long2ObjectFunction<ModelData> copyModelData(Level level, SectionPos chunkCoord) {
+        var forgeMap = level.getModelDataManager().snapshotSectionRegion(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), chunkCoord.x(), chunkCoord.y(), chunkCoord.z());
 
-        if (forgeMap.isEmpty()) {
-            return null;
-        }
-
-        Int2ReferenceOpenHashMap<ModelData> modelData = new Int2ReferenceOpenHashMap<>();
-        modelData.defaultReturnValue(ModelData.EMPTY);
-
-        for(Long2ObjectMap.Entry<ModelData> entry : Long2ObjectMaps.fastIterable(forgeMap)) {
-            long key = entry.getLongKey();
-            modelData.put(WorldSlice.getLocalBlockIndex(BlockPos.getX(key) & 15, BlockPos.getY(key) & 15, BlockPos.getZ(key) & 15), entry.getValue());
-        }
-
-        return modelData;
+        return forgeMap != ModelDataManager.EMPTY_SNAPSHOT ? forgeMap : null;
     }
 
     @Nullable
@@ -213,7 +203,7 @@ public class ClonedChunkSection {
         return this.blockEntityMap;
     }
 
-    public @Nullable Int2ReferenceMap<ModelData> getModelDataMap() {
+    public @Nullable Long2ObjectFunction<ModelData> getModelDataMap() {
         return this.modelDataMap;
     }
 

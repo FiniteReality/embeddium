@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
@@ -91,7 +92,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
 
     // (Local Section -> Model Data) table.
-    private final @Nullable Int2ReferenceMap<ModelData>[] modelDataArrays;
+    private final @Nullable Long2ObjectFunction<ModelData>[] modelDataArrays;
 
     // (Local Section -> Aux Light) table.
     private final @Nullable AuxiliaryLightManager[] auxLightArrays;
@@ -158,7 +159,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
         this.auxLightArrays = new AuxiliaryLightManager[SECTION_ARRAY_SIZE];
 
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
-        this.modelDataArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
+        this.modelDataArrays = new Long2ObjectFunction[SECTION_ARRAY_SIZE];
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
@@ -403,7 +404,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
             return ModelData.EMPTY;
         }
 
-        return modelData.get(getLocalBlockIndex(relX & 15, relY & 15, relZ & 15));
+        return modelData.get(pos.asLong());
     }
 
     @Override
