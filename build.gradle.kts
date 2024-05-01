@@ -86,6 +86,7 @@ repositories {
     maven("https://maven.covers1624.net/")
 }
 
+jarJar.enable()
 
 minecraft {
     if(rootProject.properties.containsKey("parchment_version")) {
@@ -202,7 +203,7 @@ java {
     withSourcesJar()
 }
 
-tasks.jar {
+tasks.jarJar {
     from("COPYING", "COPYING.LESSER", "README.md")
     from(sourceSets["compat"].output.classesDirs)
     from(sourceSets["compat"].output.resourcesDir)
@@ -211,7 +212,7 @@ tasks.jar {
     from(sourceSets["legacy"].output.classesDirs)
     from(sourceSets["legacy"].output.resourcesDir)
 
-    finalizedBy("reobfJar")
+    finalizedBy("reobfJarJar")
 }
 
 tasks.named<Jar>("sourcesJar").configure {
@@ -237,7 +238,7 @@ publishing {
 }
 
 publishMods {
-    file = tasks.jar.get().archiveFile
+    file = tasks.jarJar.get().archiveFile
     changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
     type = STABLE
     modLoaders.add("forge")
