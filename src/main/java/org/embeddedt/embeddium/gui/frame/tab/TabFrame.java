@@ -36,7 +36,7 @@ public class TabFrame extends AbstractFrame {
         this.tabs = ImmutableListMultimap.copyOf(tabs);
         int tabSectionY = (this.tabs.size() + this.tabs.keySet().size()) * 18;
         Optional<Integer> result = Stream.concat(
-                tabs.keys().stream().map(id -> this.getStringWidth(Tab.idComponent(id)) + 10),
+                tabs.keys().stream().map(id -> this.getStringWidth(TabHeaderWidget.getLabel(id)) + 10),
                 tabs.values().stream().map(tab -> this.getStringWidth(tab.title()) + TAB_OPTION_INDENT)
         ).max(Integer::compareTo);
 
@@ -96,7 +96,7 @@ public class TabFrame extends AbstractFrame {
                 // Add a "button" as the header
                 Dim2i modHeaderDim = new Dim2i(0, offsetY, width, height).withParentOffset(tabSection);
                 offsetY += height;
-                TabHeaderWidget headerButton = new TabHeaderWidget(modHeaderDim, modEntry.getKey(), Tab.idComponent(modEntry.getKey()));
+                TabHeaderWidget headerButton = new TabHeaderWidget(modHeaderDim, modEntry.getKey());
                 headerButton.setLeftAligned(true);
                 this.children.add(headerButton);
 
