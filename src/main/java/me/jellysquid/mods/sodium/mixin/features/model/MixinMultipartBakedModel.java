@@ -140,7 +140,7 @@ public class MixinMultipartBakedModel {
             }
         }
 
-        return quads;
+        return quads != null ? quads : Collections.emptyList();
     }
 
     /**
