@@ -22,10 +22,13 @@ import net.neoforged.neoforge.resource.ResourcePackLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 public class TabHeaderWidget extends FlatButtonWidget {
+    private static final ResourceLocation FALLBACK_LOCATION = new ResourceLocation("textures/misc/unknown_pack.png");
+
     private static final Set<String> erroredLogos = new HashSet<>();
     private final ResourceLocation logoTexture;
 
@@ -76,10 +79,9 @@ public class TabHeaderWidget extends FlatButtonWidget {
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         super.render(drawContext, mouseX, mouseY, delta);
 
-        if(this.logoTexture != null) {
-            int fontHeight = Minecraft.getInstance().font.lineHeight;
-            int imgY = this.dim.getCenterY() - (fontHeight / 2);
-            drawContext.blit(this.logoTexture, this.dim.x() + 5, imgY, 0.0f, 0.0f, fontHeight, fontHeight, fontHeight, fontHeight);
-        }
+        ResourceLocation icon = Objects.requireNonNullElse(this.logoTexture, FALLBACK_LOCATION);
+        int fontHeight = Minecraft.getInstance().font.lineHeight;
+        int imgY = this.dim.getCenterY() - (fontHeight / 2);
+        drawContext.blit(icon, this.dim.x() + 5, imgY, 0.0f, 0.0f, fontHeight, fontHeight, fontHeight, fontHeight);
     }
 }

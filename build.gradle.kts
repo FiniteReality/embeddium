@@ -20,8 +20,9 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-version = "${"mod_version"()}${getVersionMetadata()}+mc${"minecraft_version"()}"
+version = getModVersion()
 group = "maven_group"()
+println("Embeddium: $version")
 
 base {
     archivesName = "archives_base_name"()
@@ -208,19 +209,26 @@ publishMods {
     displayName = "[${"minecraft_version"()}] Embeddium ${"mod_version"()}"
 }
 
-fun getVersionMetadata(): String {
-    // CI builds only
+fun getModVersion(): String {
+    var baseVersion: String = project.properties["mod_version"].toString()
+    val mcMetadata: String = "+mc" + project.properties["minecraft_version"]
+
     if (project.hasProperty("build.release")) {
-        return "" // no tag whatsoever
+        return baseVersion + mcMetadata // no tag whatsoever
     }
+
+    // Increment patch version
+    baseVersion = baseVersion.split(".").mapIndexed {
+        index, s -> if(index == 2) (s.toInt() + 1) else s
+    }.joinToString(separator = ".")
 
     val head = grgit.head()
     var id = head.abbreviatedId
 
     // Flag the build if the build tree is not clean
     if (!grgit.status().isClean) {
-        id += ".dirty"
+        id += "-dirty"
     }
 
-    return "-git.${id}"
+    return baseVersion + "-git-${id}" + mcMetadata
 }

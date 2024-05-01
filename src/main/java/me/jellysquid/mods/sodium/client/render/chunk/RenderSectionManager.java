@@ -73,6 +73,7 @@ public class RenderSectionManager {
     private final Long2ReferenceMap<RenderSection> sectionByPosition = new Long2ReferenceOpenHashMap<>();
 
     private final ConcurrentLinkedDeque<ChunkJobResult<ChunkBuildOutput>> buildResults = new ConcurrentLinkedDeque<>();
+    private final ConcurrentLinkedDeque<Runnable> asyncSubmittedTasks = new ConcurrentLinkedDeque<>();
 
     private final ChunkRenderer chunkRenderer;
 
@@ -129,6 +130,14 @@ public class RenderSectionManager {
 
         this.translucencySorting = SodiumClientMod.canApplyTranslucencySorting();
         this.translucencyBlockRenderDistance = Math.min(9216, (renderDistance << 4) * (renderDistance << 4));
+    }
+
+    public void runAsyncTasks() {
+        Runnable task;
+
+        while ((task = this.asyncSubmittedTasks.poll()) != null) {
+            task.run();
+        }
     }
 
     public void update(Camera camera, Viewport viewport, int frame, boolean spectator) {
@@ -542,7 +551,7 @@ public class RenderSectionManager {
     }
 
     private void scheduleRebuildOffThread(int x, int y, int z, boolean important) {
-        Minecraft.getInstance().submit(() -> this.scheduleRebuild(x, y, z, important));
+        asyncSubmittedTasks.add(() -> this.scheduleRebuild(x, y, z, important));
     }
 
     public void scheduleRebuild(int x, int y, int z, boolean important) {
