@@ -92,7 +92,7 @@ public class MixinConfig {
 
         Pattern replacePattern = Pattern.compile("[^\\w]");
 
-        if (FMLLoader.getLoadingModList().getErrors().isEmpty()) {
+        if (!FMLLoader.getLoadingModList().hasErrors()) {
             for (ModInfo modInfo : FMLLoader.getLoadingModList().getMods()) {
                 // Convert anything but alphabets and numbers to _
                 String sanitizedModId = replacePattern.matcher(modInfo.getModId()).replaceAll("_");

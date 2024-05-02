@@ -5,7 +5,7 @@ import net.neoforged.fml.loading.FMLLoader;
 
 public class PlatformUtil {
     public static boolean isLoadValid() {
-        return FMLLoader.getLoadingModList().getErrors().isEmpty();
+        return !FMLLoader.getLoadingModList().hasErrors();
     }
 
     public static boolean modPresent(String modid) {
