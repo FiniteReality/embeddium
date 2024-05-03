@@ -17,8 +17,12 @@ public class ModelBakeryMixin {
         if(pLocation.getPath().startsWith("block/")) {
             BlockModel bm = cir.getReturnValue();
             if(bm != null) {
-                for(BlockElement vanillaElement : bm.getElements()) {
-                    ((EpsilonizableBlockElement)vanillaElement).embeddium$epsilonize();
+                try {
+                    for(BlockElement vanillaElement : bm.getElements()) {
+                        ((EpsilonizableBlockElement)vanillaElement).embeddium$epsilonize();
+                    }
+                } catch(Throwable ignored) {
+                    // Epsilonizing isn't critical, make sure it doesn't prevent resource reload
                 }
             }
         }
