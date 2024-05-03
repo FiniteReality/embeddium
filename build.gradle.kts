@@ -89,6 +89,16 @@ minecraft {
     }
 }
 
+if(project.hasProperty("parchment_version")) {
+    val parchment_info = "parchment_version"().split("-")
+    subsystems {
+        parchment {
+            minecraftVersion = parchment_info[1]
+            mappingsVersion = parchment_info[0]
+        }
+    }
+}
+
 runs {
     configureEach {
 
