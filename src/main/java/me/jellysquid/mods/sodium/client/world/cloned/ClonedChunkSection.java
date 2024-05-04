@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -159,6 +161,15 @@ public class ClonedChunkSection {
         return forgeMap != ModelDataManager.EMPTY_SNAPSHOT ? forgeMap : null;
     }
 
+    private static Iterable<Map.Entry<BlockPos, BlockEntity>> fastIterable(Map<BlockPos, BlockEntity> blockEntityMap) {
+        if (blockEntityMap instanceof Object2ObjectMap<BlockPos, BlockEntity> fastutilMap) {
+            //noinspection unchecked
+            return (Iterable<Map.Entry<BlockPos, BlockEntity>>)(Iterable<?>)Object2ObjectMaps.fastIterable(fastutilMap);
+        } else {
+            return blockEntityMap.entrySet();
+        }
+    }
+
     @Nullable
     private static Int2ReferenceMap<BlockEntity> copyBlockEntities(LevelChunk chunk, SectionPos chunkCoord) {
         BoundingBox box = new BoundingBox(chunkCoord.minBlockX(), chunkCoord.minBlockY(), chunkCoord.minBlockZ(),
@@ -167,7 +178,7 @@ public class ClonedChunkSection {
         Int2ReferenceOpenHashMap<BlockEntity> blockEntities = null;
 
         // Copy the block entities from the chunk into our cloned section
-        for (Map.Entry<BlockPos, BlockEntity> entry : chunk.getBlockEntities().entrySet()) {
+        for (Map.Entry<BlockPos, BlockEntity> entry : fastIterable(chunk.getBlockEntities())) {
             BlockPos pos = entry.getKey();
             BlockEntity entity = entry.getValue();
 
