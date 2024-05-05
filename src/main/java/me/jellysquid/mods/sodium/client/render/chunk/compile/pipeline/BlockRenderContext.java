@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -33,7 +34,7 @@ public class BlockRenderContext {
         this.localSlice = WorldSliceLocalGenerator.generate(world);
     }
 
-    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, RenderType renderLayer) {
+    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed) {
         this.pos.set(pos);
         this.origin.set(origin.getX(), origin.getY(), origin.getZ());
 
@@ -42,7 +43,7 @@ public class BlockRenderContext {
 
         this.seed = seed;
 
-        this.renderLayer = renderLayer;
+        this.renderLayer = ItemBlockRenderTypes.getChunkRenderType(state);
     }
 
     /**
