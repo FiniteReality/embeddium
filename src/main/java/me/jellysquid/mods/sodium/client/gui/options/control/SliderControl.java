@@ -112,7 +112,7 @@ public class SliderControl implements Control<Integer> {
             this.drawRect(drawContext, thumbX, sliderY, thumbX + (THUMB_WIDTH * 2), sliderY + sliderHeight, 0xFFFFFFFF);
             this.drawRect(drawContext, sliderX, trackY, sliderX + sliderWidth, trackY + TRACK_HEIGHT, 0xFFFFFFFF);
 
-            String label = String.valueOf(this.getIntValue());
+            String label = this.formatter.format(this.getIntValue()).getString();
 
             int labelWidth = this.font.width(label);
 
