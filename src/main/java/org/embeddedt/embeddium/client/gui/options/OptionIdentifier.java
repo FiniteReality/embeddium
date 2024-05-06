@@ -12,6 +12,11 @@ public final class OptionIdentifier<T> {
 
     private static final ObjectOpenHashSet<OptionIdentifier<?>> IDENTIFIERS = new ObjectOpenHashSet<>();
 
+    /**
+     * Constant {@link OptionIdentifier} that may be used to avoid returning null values.
+     */
+    public static final OptionIdentifier<Void> EMPTY = create("", "", Void.class);
+
     private OptionIdentifier(String modId, String path, Class<T> clz) {
         this.modId = modId;
         this.path = path;
