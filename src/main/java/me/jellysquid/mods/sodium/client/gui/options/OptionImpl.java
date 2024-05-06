@@ -222,7 +222,8 @@ public class OptionImpl<S, T> implements Option<T> {
 
         public OptionImpl<S, T> build() {
             if (this.id == null) {
-                // FIXME enforce IDs
+                // FIXME enforce IDs and make nullable
+                this.id = (OptionIdentifier<T>)OptionIdentifier.EMPTY;
                 //SodiumClientMod.logger().warn("Id must be specified in option '{}', this might throw a exception on a future release", this.name.getString());
             } else {
                 if (this.name == null) {
