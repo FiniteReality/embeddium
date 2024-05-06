@@ -25,4 +25,8 @@ public class OptionGUIConstructionEvent extends EmbeddiumEvent {
     public List<OptionPage> getPages() {
         return this.pages;
     }
+    
+    public void addPage(OptionPage page) {
+        this.pages.add(page);
+    }
 }
