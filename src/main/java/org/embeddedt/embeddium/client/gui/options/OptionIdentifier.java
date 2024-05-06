@@ -51,6 +51,15 @@ public final class OptionIdentifier<T> {
         }
         return oldIdentifier;
     }
+    
+    public boolean matches(OptionIdentifier<?> other) {
+        return this == other;
+    }
+    
+    public boolean matches(ResourceLocation other) {
+        return this.modId.equals(other.getNamespace()) && 
+               this.path.equals(other.getPath());
+    }
 
     @Override
     public String toString() {
