@@ -31,36 +31,18 @@ base {
 // Mojang ships Java 21 to end users in 1.20.5+, so your mod should target Java 21.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+val extraSourceSets = arrayOf("legacy", "compat")
+
 sourceSets {
     val main = getByName("main")
-    val api = create("api")
-    val legacy = create("legacy")
-    val compat = create("compat")
-    
-    api.apply {
-        java {
-            compileClasspath += main.compileClasspath
-        }
-    }
 
-    main.apply {
-        java {
-            compileClasspath += api.output
-            runtimeClasspath += api.output
-        }
-    }
-
-    legacy.apply {
-        java {
-            compileClasspath += main.compileClasspath
-            compileClasspath += main.output
-        }
-    }
-
-    compat.apply {
-        java {
-            compileClasspath += main.compileClasspath
-            compileClasspath += main.output
+    extraSourceSets.forEach {
+        val sourceset = create(it)
+        sourceset.apply {
+            java {
+                compileClasspath += main.compileClasspath
+                compileClasspath += main.output
+            }
         }
     }
 }
@@ -105,11 +87,8 @@ runs {
         systemProperty("forge.logging.console.level", "info")
 
         modSource(sourceSets["main"])
-        modSource(sourceSets["compat"])
-        modSource(sourceSets["api"])
-        modSource(sourceSets["legacy"])
+        extraSourceSets.forEach { modSource(sourceSets[it]) }
     }
-
     create("client")
 }
 
@@ -161,18 +140,17 @@ java {
 
 tasks.jar {
     from("COPYING", "COPYING.LESSER", "README.md")
-    from(sourceSets["compat"].output.classesDirs)
-    from(sourceSets["compat"].output.resourcesDir)
-    from(sourceSets["api"].output.classesDirs)
-    from(sourceSets["api"].output.resourcesDir)
-    from(sourceSets["legacy"].output.classesDirs)
-    from(sourceSets["legacy"].output.resourcesDir)
+
+    extraSourceSets.forEach {
+        from(sourceSets[it].output.classesDirs)
+        from(sourceSets[it].output.resourcesDir)
+    }
 }
 
 tasks.named<Jar>("sourcesJar").configure {
-    from(sourceSets["compat"].allJava)
-    from(sourceSets["api"].allJava)
-    from(sourceSets["legacy"].allJava)
+    extraSourceSets.forEach {
+        from(sourceSets[it].allJava)
+    }
 }
 
 publishing {
