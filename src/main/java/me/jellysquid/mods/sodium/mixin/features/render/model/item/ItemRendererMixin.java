@@ -92,7 +92,7 @@ public class ItemRendererMixin {
                 color = ColorARGB.toABGR(colorProvider.getColor(itemStack, quad.getColorIndex()));
             }
 
-            BakedModelEncoder.writeQuadVertices(writer, matrices, quad, color, light, overlay);
+            BakedModelEncoder.writeQuadVertices(writer, matrices, quad, color, light, overlay, true);
 
             SpriteUtil.markSpriteActive(quad.getSprite());
         }

@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.vertex.buffer;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
@@ -9,6 +10,7 @@ import net.caffeinemc.mods.sodium.api.vertex.attributes.CommonVertexAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.common.*;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Unique;
@@ -308,7 +310,7 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
         this.writtenAttributes = 0;
     }
 
-    public BufferBuilder getOriginalBufferBuilder() {
+    public final BufferBuilder getOriginalBufferBuilder() {
         return (BufferBuilder)this.builder;
     }
 
@@ -324,6 +326,23 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
     @Override
     public VertexConsumer overlayCoords(int u, int v) {
         return this.overlayCoords(packU16x2(u, v));
+    }
+
+    // Delegate putBulkData
+
+    @Override
+    public void putBulkData(PoseStack.Pose pPose, BakedQuad pQuad, float[] pBrightness, float pRed, float pGreen, float pBlue, float pAlpha, int[] pLightmap, int pPackedOverlay, boolean p_331268_) {
+        getOriginalBufferBuilder().putBulkData(pPose, pQuad, pBrightness, pRed, pGreen, pBlue, pAlpha, pLightmap, pPackedOverlay, p_331268_);
+    }
+
+    @Override
+    public void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float red, float green, float blue, float alpha, int packedLight, int packedOverlay, boolean readExistingColor) {
+        getOriginalBufferBuilder().putBulkData(pose, bakedQuad, red, green, blue, alpha, packedLight, packedOverlay, readExistingColor);
+    }
+
+    @Override
+    public void putBulkData(PoseStack.Pose pPose, BakedQuad pQuad, float pRed, float pGreen, float pBlue, float pAlpha, int pPackedLight, int pPackedOverlay) {
+        getOriginalBufferBuilder().putBulkData(pPose, pQuad, pRed, pGreen, pBlue, pAlpha, pPackedLight, pPackedOverlay);
     }
 
     @Unique
