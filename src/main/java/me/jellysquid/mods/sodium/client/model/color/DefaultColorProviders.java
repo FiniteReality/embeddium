@@ -7,6 +7,7 @@ import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -22,6 +23,7 @@ public class DefaultColorProviders {
         return new ForgeFluidAdapter();
     }
 
+    @Deprecated(forRemoval = true)
     public static class GrassColorProvider<T> extends BlendedColorProvider<T> {
         public static final ColorProvider<BlockState> BLOCKS = new GrassColorProvider<>();
 
@@ -35,6 +37,7 @@ public class DefaultColorProviders {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static class FoliageColorProvider<T> extends BlendedColorProvider<T> {
         public static final ColorProvider<BlockState> BLOCKS = new FoliageColorProvider<>();
 
@@ -48,6 +51,7 @@ public class DefaultColorProviders {
         }
     }
 
+    @Deprecated(forRemoval = true)
     public static class WaterColorProvider<T> extends BlendedColorProvider<T> {
         public static final ColorProvider<BlockState> BLOCKS = new WaterColorProvider<>();
         public static final ColorProvider<FluidState> FLUIDS = new WaterColorProvider<>();
@@ -59,6 +63,24 @@ public class DefaultColorProviders {
         @Override
         protected int getColor(WorldSlice world, int x, int y, int z) {
             return world.getColor(BiomeColorSource.WATER, x, y, z);
+        }
+    }
+
+    public static class VertexBlendedBiomeColorAdapter<T> extends BlendedColorProvider<T> {
+        private final VanillaBiomeColor vanillaGetter;
+
+        @FunctionalInterface
+        public interface VanillaBiomeColor {
+            int getAverageColor(BlockAndTintGetter getter, BlockPos pos);
+        }
+
+        public VertexBlendedBiomeColorAdapter(VanillaBiomeColor vanillaGetter) {
+            this.vanillaGetter = vanillaGetter;
+        }
+
+        @Override
+        protected int getColor(WorldSlice world, BlockPos pos) {
+            return vanillaGetter.getAverageColor(world, pos);
         }
     }
 
