@@ -92,7 +92,7 @@ public class MixinMultipartBakedModel {
             quads.addAll(model.getQuads(state, face, random, MultipartModelData.resolve(model, modelData)));
         }
 
-        return quads;
+        return quads != null ? quads : Collections.emptyList();
     }
 
     /**

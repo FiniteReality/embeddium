@@ -3,33 +3,39 @@ package me.jellysquid.mods.sodium.mixin.features.model;
 import com.mojang.math.Vector3f;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.client.renderer.block.model.BlockElement;
+import org.embeddedt.embeddium.model.EpsilonizableBlockElement;
 import org.embeddedt.embeddium.util.PlatformUtil;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockElement.class)
-public class BlockElementMixin {
-    @ModifyVariable(method = "<init>",
-        at = @At("HEAD"), argsOnly = true, index = 1)
-    private static Vector3f epsilonizeFrom(Vector3f vector) {
-        return embeddium$epsilonize(vector);
-    }
+public class BlockElementMixin implements EpsilonizableBlockElement {
+    @Shadow
+    @Final
+    public Vector3f from;
+    @Shadow
+    @Final
+    public Vector3f to;
 
-    @ModifyVariable(method = "<init>",
-            at = @At("HEAD"), argsOnly = true, index = 2)
-    private static Vector3f epsilonizeTo(Vector3f vector) {
-        return embeddium$epsilonize(vector);
-    }
+    private boolean embeddium$hasEpsilonized;
 
-    private static Vector3f embeddium$epsilonize(Vector3f v) {
-        if (v == null || !PlatformUtil.isLoadValid()  || !SodiumClientMod.options().performance.useCompactVertexFormat) {
-            return v;
+    @Override
+    public synchronized void embeddium$epsilonize() {
+        if(!embeddium$hasEpsilonized) {
+            embeddium$hasEpsilonized = true;
+            if (!PlatformUtil.isLoadValid() || !SodiumClientMod.options().performance.useCompactVertexFormat) {
+                return;
+            }
+            embeddium$epsilonize(from);
+            embeddium$epsilonize(to);
         }
+    }
+
+    private static void embeddium$epsilonize(Vector3f v) {
         v.setX(embeddium$epsilonize(v.x()));
         v.setY(embeddium$epsilonize(v.y()));
         v.setZ(embeddium$epsilonize(v.z()));
-        return v;
     }
 
     private static final float EMBEDDIUM$MINIMUM_EPSILON = 0.008f;
