@@ -25,6 +25,7 @@ import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRendering;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -68,6 +69,24 @@ public class FluidRenderer {
     private final SinkingVertexBuilder fluidVertexBuilder = new SinkingVertexBuilder();
 
     private final Reference2BooleanOpenHashMap<Class<? extends FluidRenderHandler>> handlersUsingCustomRenderer = new Reference2BooleanOpenHashMap<>();
+
+    private boolean renderingCustomFluid;
+
+    class DefaultFabricRenderer implements FluidRendering.DefaultRenderer {
+        ChunkBuildBuffers buffers;
+        BlockPos offset;
+        @Override
+        public void render(FluidRenderHandler handler, BlockAndTintGetter getter, BlockPos pos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
+            // If a mod overrides the block getter, we have to use vanilla's code since we don't support that
+            if (getter instanceof WorldSlice slice) {
+                FluidRenderer.this.render(slice, fluidState, pos, offset, buffers);
+            } else {
+                FluidRendering.DefaultRenderer.super.render(handler, getter, pos, vertexConsumer, blockState, fluidState);
+            }
+        }
+    }
+
+    private final DefaultFabricRenderer defaultFabricRenderer = new DefaultFabricRenderer();
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
@@ -128,7 +147,7 @@ public class FluidRenderer {
         return true;
     }
 
-    private boolean renderCustomFluid(WorldSlice world, FluidState fluidState, BlockPos blockPos, ChunkModelBuilder buffers, Material material) {
+    private boolean renderCustomFluid(WorldSlice world, FluidState fluidState, BlockPos blockPos, BlockPos offset, ChunkBuildBuffers buffers, Material material) {
         var handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getType());
 
         // TODO move to a separate class
@@ -142,20 +161,34 @@ public class FluidRenderer {
         });
 
         if (!overridesRenderFluid) {
-            // Use our renderer for higher performance
+            // Just use our renderer for higher performance, skip going through FAPI and the re-entrance path
             return false;
         }
 
-        // Call vanilla fluid renderer and capture the results
-        fluidVertexBuilder.reset();
-        handler.renderFluid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState);
-        fluidVertexBuilder.flush(buffers, material, 0, 0, 0);
+        var modelBuffer = buffers.get(material);
+        var defaultRenderer = defaultFabricRenderer;
+
+        defaultRenderer.offset = offset;
+        defaultRenderer.buffers = buffers;
+
+        // Set a flag so that we can re-enter the main render() method as the default renderer
+        renderingCustomFluid = true;
+        try {
+            // Call vanilla fluid renderer and capture the results
+            fluidVertexBuilder.reset();
+            FluidRendering.render(handler, world, blockPos, fluidVertexBuilder, world.getBlockState(blockPos), fluidState, defaultRenderer);
+            fluidVertexBuilder.flush(modelBuffer, material, 0, 0, 0);
+        } finally {
+            renderingCustomFluid = false;
+            defaultRenderer.offset = null;
+            defaultRenderer.buffers = null;
+        }
 
         // Mark fluid sprites as being used in rendering
         TextureAtlasSprite[] sprites = handler.getFluidSprites(world, blockPos, fluidState);
         for(TextureAtlasSprite sprite : sprites) {
             if (sprite != null) {
-                buffers.addSprite(sprite);
+                modelBuffer.addSprite(sprite);
             }
         }
 
@@ -167,7 +200,7 @@ public class FluidRenderer {
         var meshBuilder = buffers.get(material);
 
         // Embeddium: Delegate to mod's custom fluid renderer if present
-        if(renderCustomFluid(world, fluidState, blockPos, meshBuilder, material)) {
+        if(!renderingCustomFluid && renderCustomFluid(world, fluidState, blockPos, offset, buffers, material)) {
             return;
         }
 
