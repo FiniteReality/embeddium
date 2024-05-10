@@ -14,6 +14,8 @@ import java.util.Arrays;
 public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
     private static boolean shouldUseVertexBlending;
 
+    private final BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+
     public static void checkBlendingEnabled() {
         shouldUseVertexBlending = Minecraft.getInstance().options.biomeBlendRadius().get() > 0;
     }
@@ -26,7 +28,7 @@ public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
             }
         } else {
             // Just sample the exact position of that block (like vanilla), and use the same color on all vertices
-            Arrays.fill(output, ColorARGB.toABGR(this.getColor(view, pos.getX(), pos.getY(), pos.getZ())));
+            Arrays.fill(output, ColorARGB.toABGR(this.getColor(view, pos)));
         }
     }
 
@@ -48,11 +50,13 @@ public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
         final int worldIntY = blockPos.getY() + intY;
         final int worldIntZ = blockPos.getZ() + intZ;
 
+        var neighborPos = cursor;
+
         // Retrieve the color values for each neighboring block
-        final int c00 = this.getColor(world, worldIntX + 0, worldIntY, worldIntZ + 0);
-        final int c01 = this.getColor(world, worldIntX + 0, worldIntY, worldIntZ + 1);
-        final int c10 = this.getColor(world, worldIntX + 1, worldIntY, worldIntZ + 0);
-        final int c11 = this.getColor(world, worldIntX + 1, worldIntY, worldIntZ + 1);
+        final int c00 = this.getColor(world, neighborPos.set(worldIntX + 0, worldIntY, worldIntZ + 0));
+        final int c01 = this.getColor(world, neighborPos.set(worldIntX + 0, worldIntY, worldIntZ + 1));
+        final int c10 = this.getColor(world, neighborPos.set(worldIntX + 1, worldIntY, worldIntZ + 0));
+        final int c11 = this.getColor(world, neighborPos.set(worldIntX + 1, worldIntY, worldIntZ + 1));
 
         // Linear interpolation across the Z-axis
         int z0;
@@ -83,5 +87,12 @@ public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
         return ColorARGB.toABGR(x0);
     }
 
-    protected abstract int getColor(WorldSlice world, int x, int y, int z);
+    protected int getColor(WorldSlice world, BlockPos pos) {
+        return getColor(world, pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    @Deprecated(forRemoval = true)
+    protected int getColor(WorldSlice world, int x, int y, int z) {
+        throw new AssertionError("Must override one of the getColor methods");
+    }
 }

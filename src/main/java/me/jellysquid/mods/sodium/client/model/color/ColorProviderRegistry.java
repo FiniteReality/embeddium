@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.jellysquid.mods.sodium.client.model.color.interop.BlockColorsExtended;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,8 +14,6 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
-
-// TODO: Make the registry a global somewhere that is only initialized once after content load
 public class ColorProviderRegistry {
     private final Reference2ReferenceMap<Block, ColorProvider<BlockState>> blocks = new Reference2ReferenceOpenHashMap<>();
     private final Reference2ReferenceMap<Fluid, ColorProvider<FluidState>> fluids = new Reference2ReferenceOpenHashMap<>();
@@ -35,18 +34,18 @@ public class ColorProviderRegistry {
 
     // TODO: Allow mods to install their own color resolvers here
     private void installOverrides() {
-        this.registerBlocks(DefaultColorProviders.GrassColorProvider.BLOCKS,
+        this.registerBlocks(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(BiomeColors::getAverageGrassColor),
                 Blocks.GRASS_BLOCK, Blocks.FERN, Blocks.GRASS, Blocks.POTTED_FERN,
                 Blocks.PINK_PETALS, Blocks.SUGAR_CANE, Blocks.LARGE_FERN, Blocks.TALL_GRASS);
 
-        this.registerBlocks(DefaultColorProviders.FoliageColorProvider.BLOCKS,
+        this.registerBlocks(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(BiomeColors::getAverageFoliageColor),
                 Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
                 Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES);
 
-        this.registerBlocks(DefaultColorProviders.WaterColorProvider.BLOCKS,
+        this.registerBlocks(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(BiomeColors::getAverageWaterColor),
                 Blocks.WATER, Blocks.BUBBLE_COLUMN);
 
-        this.registerFluids(DefaultColorProviders.WaterColorProvider.FLUIDS,
+        this.registerFluids(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(BiomeColors::getAverageWaterColor),
                 Fluids.WATER, Fluids.FLOWING_WATER);
     }
 
