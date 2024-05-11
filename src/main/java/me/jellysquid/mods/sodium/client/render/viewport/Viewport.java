@@ -28,7 +28,7 @@ public final class Viewport {
     }
 
     public boolean isBoxVisible(AABB box) {
-        if (box.equals(IBlockEntityRendererExtension.INFINITE_EXTENT_AABB)) {
+        if (box.isInfinite()) {
             return true;
         }
 
