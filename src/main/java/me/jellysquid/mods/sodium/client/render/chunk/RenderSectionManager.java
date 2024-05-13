@@ -7,6 +7,8 @@ import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.*;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
@@ -707,11 +709,18 @@ public class RenderSectionManager {
 
         list.add(sb.toString());
 
-        RenderSection self = this.getRenderSection(Mth.floor(cameraPosition.x) >> 4, Mth.floor(cameraPosition.y) >> 4, Mth.floor(cameraPosition.z) >> 4);
-        if (self != null) {
-            var selfData = self.getTranslucencyData();
-            var level = selfData != null ? selfData.level() : TranslucentQuadAnalyzer.Level.NONE;
-            list.add("Current Section: " + level.name());
+        var cameraEntity = Minecraft.getInstance().getCameraEntity();
+        if(cameraEntity != null) {
+            var hitResult = cameraEntity.pick(20, 0, false);
+            if(hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
+                var pos = ((BlockHitResult)hitResult).getBlockPos();
+                var self = this.getRenderSection(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
+                if(self != null) {
+                    var selfData = self.getTranslucencyData();
+                    var level = selfData != null ? selfData.level() : TranslucentQuadAnalyzer.Level.NONE;
+                    list.add("Targeted Section: " + level.name());
+                }
+            }
         }
 
         return list;
