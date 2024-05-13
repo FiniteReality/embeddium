@@ -646,6 +646,10 @@ public class RenderSectionManager {
             if(listIter != null) {
                 while(listIter.hasNext()) {
                     RenderSection section = region.getSection(listIter.nextByteAsInt());
+                    // Do not count sections without translucent data
+                    if(section == null || (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) == 0) {
+                        continue;
+                    }
                     var data = section.getTranslucencyData();
                     var level = data != null ? data.level() : TranslucentQuadAnalyzer.Level.NONE;
                     sectionCounts[level.ordinal()]++;
