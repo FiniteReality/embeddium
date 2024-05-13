@@ -362,8 +362,8 @@ public class RenderSectionManager {
         this.submitRebuildTasks(updateImmediately ? blockingRebuilds : deferredRebuilds, ChunkUpdateType.REBUILD);
         this.submitRebuildTasks(updateImmediately ? blockingRebuilds : deferredRebuilds, ChunkUpdateType.INITIAL_BUILD);
 
-        // Always allow at least one sort task to be scheduled
-        var deferredSorts = new ChunkJobCollector(Math.max(1, this.builder.getSchedulingBudget()), this.buildResults::add);
+        // Count sort tasks as requiring a quarter of the resources of a mesh task
+        var deferredSorts = new ChunkJobCollector(Math.max(4, this.builder.getSchedulingBudget() * 4), this.buildResults::add);
         this.submitRebuildTasks(updateImmediately ? blockingRebuilds : deferredSorts, ChunkUpdateType.SORT);
 
         blockingRebuilds.awaitCompletion(this.builder);
