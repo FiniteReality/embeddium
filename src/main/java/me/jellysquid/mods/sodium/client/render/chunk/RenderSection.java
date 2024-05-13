@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
-import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirection;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirectionSet;
@@ -14,7 +13,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 /**
  * The render state object for a chunk section. This contains all the graphics state for each render pass along with
@@ -51,7 +49,7 @@ public class RenderSection {
     private BlockEntity @Nullable[] culledBlockEntities;
     private TextureAtlasSprite @Nullable[] animatedSprites;
 
-    private TranslucentQuadAnalyzer.SortState translucencyData;
+    private TranslucentQuadAnalyzer.SortState sortState;
 
 
     // Pending Update State
@@ -324,12 +322,16 @@ public class RenderSection {
     }
 
     @Nullable
-    public TranslucentQuadAnalyzer.SortState getTranslucencyData() {
-        return this.translucencyData;
+    public TranslucentQuadAnalyzer.SortState getSortState() {
+        return this.sortState;
     }
 
-    public void setTranslucencyData(@Nullable TranslucentQuadAnalyzer.SortState data) {
-        this.translucencyData = data != null ? data.compactForStorage() : null;
+    public boolean containsTranslucentGeometry() {
+        return (this.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0;
+    }
+
+    public void setSortState(@Nullable TranslucentQuadAnalyzer.SortState data) {
+        this.sortState = data != null ? data.compactForStorage() : null;
     }
 
     public @Nullable CancellationToken getBuildCancellationToken() {

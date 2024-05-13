@@ -175,7 +175,7 @@ public class RenderSectionManager {
                     continue;
                 }
 
-                boolean hasTranslucentData = (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0 && section.getTranslucencyData() != null && section.getTranslucencyData().requiresDynamicSorting();
+                boolean hasTranslucentData = section.containsTranslucentGeometry() && section.getSortState() != null && section.getSortState().requiresDynamicSorting();
 
                 if (!hasTranslucentData) {
                     // Sections without sortable translucent data are not relevant
@@ -430,7 +430,7 @@ public class RenderSectionManager {
     private void updateTranslucencyInfo(RenderSection render, BuiltSectionMeshParts translucencyMesh) {
         if(translucencyMesh == null)
             return;
-        render.setTranslucencyData(translucencyMesh.getSortState());
+        render.setSortState(translucencyMesh.getSortState());
     }
 
     private void updateSectionInfo(RenderSection render, BuiltSectionInfo info) {
@@ -506,7 +506,7 @@ public class RenderSectionManager {
 
                 if (!type.isSort()) {
                     // Prevent further sorts from being performed on this section
-                    section.setTranslucencyData(null);
+                    section.setSortState(null);
                 }
             } else {
                 var result = ChunkJobResult.successfully(new ChunkBuildOutput(section, BuiltSectionInfo.EMPTY, Collections.emptyMap(), frame));
@@ -532,7 +532,7 @@ public class RenderSectionManager {
 
     public ChunkBuilderSortTask createSortTask(RenderSection render, int frame) {
         Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> meshes = new Reference2ReferenceOpenHashMap<>();
-        var sortBuffer = render.getTranslucencyData();
+        var sortBuffer = render.getSortState();
         if(sortBuffer == null || !sortBuffer.requiresDynamicSorting())
             return null;
         meshes.put(DefaultTerrainRenderPasses.TRANSLUCENT, sortBuffer);
@@ -684,10 +684,10 @@ public class RenderSectionManager {
                 while(listIter.hasNext()) {
                     RenderSection section = region.getSection(listIter.nextByteAsInt());
                     // Do not count sections without translucent data
-                    if(section == null || (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) == 0) {
+                    if(section == null || !section.containsTranslucentGeometry()) {
                         continue;
                     }
-                    var data = section.getTranslucencyData();
+                    var data = section.getSortState();
                     var level = data != null ? data.level() : TranslucentQuadAnalyzer.Level.NONE;
                     sectionCounts[level.ordinal()]++;
                 }
@@ -715,8 +715,8 @@ public class RenderSectionManager {
             if(hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                 var pos = ((BlockHitResult)hitResult).getBlockPos();
                 var self = this.getRenderSection(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
-                if(self != null) {
-                    var selfData = self.getTranslucencyData();
+                if(self != null && self.containsTranslucentGeometry()) {
+                    var selfData = self.getSortState();
                     var level = selfData != null ? selfData.level() : TranslucentQuadAnalyzer.Level.NONE;
                     list.add("Targeted Section: " + level.name());
                 }
