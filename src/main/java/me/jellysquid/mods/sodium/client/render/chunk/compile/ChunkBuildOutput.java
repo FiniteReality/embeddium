@@ -36,8 +36,9 @@ public class ChunkBuildOutput {
 
     public void delete() {
         for (BuiltSectionMeshParts data : this.meshes.values()) {
-            data.getVertexData()
-                    .free();
+            data.getVertexData().free();
+            if(data.getIndexData() != null)
+                data.getIndexData().free();
         }
     }
 
