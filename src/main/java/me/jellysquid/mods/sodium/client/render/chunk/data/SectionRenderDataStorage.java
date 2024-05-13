@@ -37,7 +37,7 @@ public class SectionRenderDataStorage {
 
         int sliceMask = 0;
         int vertexOffset = allocation.getOffset();
-        int indexOffset = indexAllocation != null ? indexAllocation.getOffset() : 0;
+        int indexOffset = indexAllocation != null ? indexAllocation.getOffset() * 4 : 0;
 
         for (int facingIndex = 0; facingIndex < ModelQuadFacing.COUNT; facingIndex++) {
             VertexRange vertexRange = ranges[facingIndex];
@@ -60,7 +60,7 @@ public class SectionRenderDataStorage {
             }
 
             vertexOffset += vertexCount;
-            indexOffset += indexCount;
+            indexOffset += indexCount * 4;
         }
 
         SectionRenderDataUnsafe.setSliceMask(pMeshData, sliceMask);
@@ -96,7 +96,7 @@ public class SectionRenderDataStorage {
         var indexAllocation = this.indexAllocations[sectionIndex];
 
         var vertexOffset = allocation.getOffset();
-        var indexOffset = indexAllocation != null ? indexAllocation.getOffset() : 0;
+        var indexOffset = indexAllocation != null ? indexAllocation.getOffset() * 4 : 0;
 
         var data = this.getDataPointer(sectionIndex);
 
@@ -106,7 +106,7 @@ public class SectionRenderDataStorage {
 
             var indexCount = SectionRenderDataUnsafe.getElementCount(data, facing);
             vertexOffset += (indexCount / 6) * 4; // convert elements back into vertices
-            indexOffset += indexCount;
+            indexOffset += indexCount * 4;
         }
     }
 
