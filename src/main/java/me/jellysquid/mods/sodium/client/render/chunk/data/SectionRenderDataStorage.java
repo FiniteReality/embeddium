@@ -30,6 +30,7 @@ public class SectionRenderDataStorage {
             this.indexAllocations[localSectionIndex] = null;
         }
 
+        this.allocations[localSectionIndex] = allocation;
         this.indexAllocations[localSectionIndex] = indexAllocation;
 
         var pMeshData = this.getDataPointer(localSectionIndex);
