@@ -6,12 +6,12 @@ import it.unimi.dsi.fastutil.longs.Long2ReferenceMaps;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.*;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import me.jellysquid.mods.sodium.client.gl.arena.GlBufferArena;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter.SortBuffer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkJobResult;
@@ -397,7 +397,8 @@ public class RenderSectionManager {
         var heapBuffer = ByteBuffer.allocate(vertexBuffer.capacity()).order(ByteOrder.nativeOrder());
         heapBuffer.put(vertexBuffer);
         heapBuffer.flip();
-        render.setTranslucencyData(new ChunkBufferSorter.SortBuffer(heapBuffer, this.chunkRenderer.getVertexType(), translucencyMesh.getVertexRanges()));
+        // TODO FIX
+        render.setTranslucencyData(null); //new ChunkBufferSorter.SortBuffer(heapBuffer, this.chunkRenderer.getVertexType(), translucencyMesh.getVertexRanges()));
     }
 
     private void updateSectionInfo(RenderSection render, BuiltSectionInfo info) {
@@ -498,11 +499,11 @@ public class RenderSectionManager {
     }
 
     public ChunkBuilderSortTask createSortTask(RenderSection render, int frame) {
-        Map<TerrainRenderPass, ChunkBufferSorter.SortBuffer> meshes = new Reference2ReferenceOpenHashMap<>();
+        Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> meshes = new Reference2ReferenceOpenHashMap<>();
         var sortBuffer = render.getTranslucencyData();
         if(sortBuffer == null)
             return null;
-        meshes.put(DefaultTerrainRenderPasses.TRANSLUCENT, sortBuffer.duplicate());
+        meshes.put(DefaultTerrainRenderPasses.TRANSLUCENT, sortBuffer);
         return new ChunkBuilderSortTask(render, (float)cameraPosition.x, (float)cameraPosition.y, (float)cameraPosition.z, frame, meshes);
     }
 

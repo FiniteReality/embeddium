@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.SharedQuadIndexBuffer;
@@ -19,6 +18,7 @@ import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,6 +27,7 @@ import java.util.List;
  * shrink a buffer.
  */
 public class ChunkBuildBuffers {
+    private static final ModelQuadFacing[] ONLY_UNASSIGNED = new ModelQuadFacing[] { ModelQuadFacing.UNASSIGNED };
     private final Reference2ReferenceOpenHashMap<TerrainRenderPass, BakedChunkModelBuilder> builders = new Reference2ReferenceOpenHashMap<>();
 
     private final ChunkVertexType vertexType;
@@ -37,11 +38,17 @@ public class ChunkBuildBuffers {
         for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
             var vertexBuffers = new ChunkMeshBufferBuilder[ModelQuadFacing.COUNT];
 
-            for (int facing = 0; facing < ModelQuadFacing.COUNT; facing++) {
-                vertexBuffers[facing] = new ChunkMeshBufferBuilder(this.vertexType, 128 * 1024);
+            if(!pass.isSorted()) {
+                // Split vertex data by side
+                for (int facing = 0; facing < ModelQuadFacing.COUNT; facing++) {
+                    vertexBuffers[facing] = new ChunkMeshBufferBuilder(this.vertexType, 128 * 1024, false);
+                }
+            } else {
+                // We do not split vertex data by side
+                vertexBuffers[ModelQuadFacing.UNASSIGNED.ordinal()] = new ChunkMeshBufferBuilder(this.vertexType, 128 * 1024, true);
             }
 
-            this.builders.put(pass, new BakedChunkModelBuilder(vertexBuffers));
+            this.builders.put(pass, new BakedChunkModelBuilder(vertexBuffers, !pass.isSorted()));
         }
     }
 
@@ -53,6 +60,10 @@ public class ChunkBuildBuffers {
 
     public ChunkModelBuilder get(Material material) {
         return this.builders.get(material.pass);
+    }
+
+    public ChunkModelBuilder get(TerrainRenderPass pass) {
+        return this.builders.get(pass);
     }
 
     /**
@@ -68,7 +79,9 @@ public class ChunkBuildBuffers {
 
         int vertexCount = 0;
 
-        for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
+        ModelQuadFacing[] facingsToUpload = pass.isSorted() ? ONLY_UNASSIGNED : ModelQuadFacing.VALUES;
+
+        for (ModelQuadFacing facing : facingsToUpload) {
             var buffer = builder.getVertexBuffer(facing);
 
             if (buffer.isEmpty()) {
@@ -97,7 +110,7 @@ public class ChunkBuildBuffers {
         // Generate the canonical index buffer
         var mergedIndexBuffer = new NativeBuffer((vertexCount / 4 * 6) * 4);
         var mergedIndexBufferBuilder = mergedIndexBuffer.getDirectBuffer();
-        for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
+        for (ModelQuadFacing facing : facingsToUpload) {
             var buffer = builder.getVertexBuffer(facing);
 
             if (buffer.isEmpty()) {

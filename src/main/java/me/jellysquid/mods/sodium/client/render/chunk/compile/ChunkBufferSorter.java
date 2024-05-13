@@ -1,173 +1,70 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
 import com.google.common.primitives.Floats;
+import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.impl.CompactChunkVertex;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.impl.VanillaLikeChunkVertex;
+import me.jellysquid.mods.sodium.client.util.NativeBuffer;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
+import java.nio.*;
 import java.util.BitSet;
 
 public class ChunkBufferSorter {
-    public record SortBuffer(ByteBuffer vertexBuffer, ChunkVertexType format, VertexRange[] ranges) {
-        private static ByteBuffer cloneBuf(ByteBuffer b) {
-            ByteBuffer clone = ByteBuffer.allocate(b.capacity()).order(b.order());
-            b.rewind();//copy from the beginning
-            clone.put(b);
-            b.rewind();
-            clone.flip();
-            return clone;
+    private static final int ELEMENTS_PER_PRIMITIVE = 6;
+    private static final int VERTICES_PER_PRIMITIVE = 4;
+
+    private static NativeBuffer generateIndexBuffer(NativeBuffer indexBuffer, int[] primitiveMapping) {
+        int bufferSize = primitiveMapping.length * ELEMENTS_PER_PRIMITIVE * 4;
+        if(indexBuffer.getLength() != bufferSize) {
+            throw new IllegalStateException("Given index buffer has length " + indexBuffer.getLength() + " but we expected " + bufferSize);
+        }
+        long ptr = MemoryUtil.memAddress(indexBuffer.getDirectBuffer());
+
+        for (int primitiveIndex = 0; primitiveIndex < primitiveMapping.length; primitiveIndex++) {
+            int indexOffset = primitiveIndex * ELEMENTS_PER_PRIMITIVE;
+
+            // Map to the desired primitive
+            int vertexOffset = primitiveMapping[primitiveIndex] * VERTICES_PER_PRIMITIVE;
+
+            MemoryUtil.memPutInt(ptr + (indexOffset + 0) * 4, vertexOffset + 0);
+            MemoryUtil.memPutInt(ptr + (indexOffset + 1) * 4, vertexOffset + 1);
+            MemoryUtil.memPutInt(ptr + (indexOffset + 2) * 4, vertexOffset + 2);
+
+            MemoryUtil.memPutInt(ptr + (indexOffset + 3) * 4, vertexOffset + 2);
+            MemoryUtil.memPutInt(ptr + (indexOffset + 4) * 4, vertexOffset + 3);
+            MemoryUtil.memPutInt(ptr + (indexOffset + 5) * 4, vertexOffset + 0);
         }
 
-        public SortBuffer duplicate() {
-            if(vertexBuffer.isDirect())
-                throw new IllegalStateException("Cannot duplicate direct SortBuffer");
-            return new SortBuffer(cloneBuf(vertexBuffer), format, ranges);
-        }
-
+        return indexBuffer;
     }
 
-    public static void sort(SortBuffer chunkData, float x, float y, float z) {
-        boolean isCompact = !(chunkData.format() instanceof VanillaLikeChunkVertex);
+    public static NativeBuffer sort(NativeBuffer indexBuffer, @Nullable TranslucentQuadAnalyzer.SortState chunkData, float x, float y, float z) {
+        if (chunkData == null) {
+            return indexBuffer;
+        }
 
-        ByteBuffer buffer = chunkData.vertexBuffer();
-        int bufferLen = buffer.capacity();
-
-        // Quad stride by Float size
-        int quadStride = chunkData.format().getVertexFormat().getStride();
-
-        int quadStart = ((Buffer)buffer).position();
-        int quadCount = bufferLen/quadStride/4;
-
-        float[] distanceArray = new float[quadCount];
+        float[] centers = chunkData.centers();
+        int quadCount = centers.length / 3;
         int[] indicesArray = new int[quadCount];
-
-        if(isCompact) {
-            ShortBuffer shortBuffer = buffer.asShortBuffer();
-            int vertexSizeShort = quadStride / 2;
-            for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
-                distanceArray[quadIdx] = getDistanceSqHFP(shortBuffer, x, y, z, vertexSizeShort, quadStart + (quadIdx * quadStride * 2));
-                indicesArray[quadIdx] = quadIdx;
-            }
-        } else {
-            FloatBuffer floatBuffer = buffer.asFloatBuffer();
-            int vertexSizeInteger = quadStride / 4;
-            for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
-                distanceArray[quadIdx] = getDistanceSqSFP(floatBuffer, x, y, z, vertexSizeInteger, quadStart + (quadIdx * quadStride));
-                indicesArray[quadIdx] = quadIdx;
-            }
+        float[] distanceArray = new float[quadCount];
+        for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
+            indicesArray[quadIdx] = quadIdx;
+            int centerIdx = quadIdx * 3;
+            float qX = centers[centerIdx + 0] - x;
+            float qY = centers[centerIdx + 1] - y;
+            float qZ = centers[centerIdx + 2] - z;
+            distanceArray[quadIdx] = qX * qX + qY * qY + qZ * qZ;
         }
 
         IntArrays.mergeSort(indicesArray, (a, b) -> Floats.compare(distanceArray[b], distanceArray[a]));
 
-        rearrangeQuads(buffer, indicesArray, quadStride, quadStart);
-    }
-
-    private static void rearrangeQuads(ByteBuffer quadBuffer, int[] indicesArray, int quadStride, int quadStart) {
-        FloatBuffer floatBuffer = quadBuffer.asFloatBuffer();
-        BitSet bits = new BitSet();
-
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer tmp = stack.mallocFloat(quadStride);
-
-            for (int l = bits.nextClearBit(0); l < indicesArray.length; l = bits.nextClearBit(l + 1)) {
-                int m = indicesArray[l];
-
-                if (m != l) {
-                    sliceQuad(floatBuffer, m, quadStride, quadStart);
-                    ((Buffer)tmp).clear();
-                    tmp.put(floatBuffer);
-
-                    int n = m;
-
-                    for (int o = indicesArray[m]; n != l; o = indicesArray[o]) {
-                        sliceQuad(floatBuffer, o, quadStride, quadStart);
-                        FloatBuffer floatBuffer3 = floatBuffer.slice();
-
-                        sliceQuad(floatBuffer, n, quadStride, quadStart);
-                        floatBuffer.put(floatBuffer3);
-
-                        bits.set(n);
-                        n = o;
-                    }
-
-                    sliceQuad(floatBuffer, l, quadStride, quadStart);
-                    ((Buffer)tmp).flip();
-
-                    floatBuffer.put(tmp);
-                }
-
-                bits.set(l);
-            }
-        }
-    }
-
-    private static void sliceQuad(FloatBuffer floatBuffer, int quadIdx, int quadStride, int quadStart) {
-        int base = quadStart + (quadIdx * quadStride);
-
-        ((Buffer)floatBuffer).limit(base + quadStride);
-        ((Buffer)floatBuffer).position(base);
-    }
-
-    private static float getDistanceSqSFP(FloatBuffer buffer, float xCenter, float yCenter, float zCenter, int stride, int start) {
-        int vertexBase = start;
-        float x1 = buffer.get(vertexBase);
-        float y1 = buffer.get(vertexBase + 1);
-        float z1 = buffer.get(vertexBase + 2);
-
-        vertexBase += stride;
-        float x2 = buffer.get(vertexBase);
-        float y2 = buffer.get(vertexBase + 1);
-        float z2 = buffer.get(vertexBase + 2);
-
-        vertexBase += stride;
-        float x3 = buffer.get(vertexBase);
-        float y3 = buffer.get(vertexBase + 1);
-        float z3 = buffer.get(vertexBase + 2);
-
-        vertexBase += stride;
-        float x4 = buffer.get(vertexBase);
-        float y4 = buffer.get(vertexBase + 1);
-        float z4 = buffer.get(vertexBase + 2);
-
-        float xDist = ((x1 + x2 + x3 + x4) * 0.25F) - xCenter;
-        float yDist = ((y1 + y2 + y3 + y4) * 0.25F) - yCenter;
-        float zDist = ((z1 + z2 + z3 + z4) * 0.25F) - zCenter;
-
-        return (xDist * xDist) + (yDist * yDist) + (zDist * zDist);
-    }
-
-    private static float getDistanceSqHFP(ShortBuffer buffer, float xCenter, float yCenter, float zCenter, int stride, int start) {
-        int vertexBase = start;
-        float x1 = CompactChunkVertex.decodePosition(buffer.get(vertexBase));
-        float y1 = CompactChunkVertex.decodePosition(buffer.get(vertexBase + 1));
-        float z1 = CompactChunkVertex.decodePosition(buffer.get(vertexBase + 2));
-
-        vertexBase += stride;
-        float x2 = CompactChunkVertex.decodePosition(buffer.get(vertexBase));
-        float y2 = CompactChunkVertex.decodePosition(buffer.get(vertexBase + 1));
-        float z2 = CompactChunkVertex.decodePosition(buffer.get(vertexBase + 2));
-
-        vertexBase += stride;
-        float x3 = CompactChunkVertex.decodePosition(buffer.get(vertexBase));
-        float y3 = CompactChunkVertex.decodePosition(buffer.get(vertexBase + 1));
-        float z3 = CompactChunkVertex.decodePosition(buffer.get(vertexBase + 2));
-
-        vertexBase += stride;
-        float x4 = CompactChunkVertex.decodePosition(buffer.get(vertexBase));
-        float y4 = CompactChunkVertex.decodePosition(buffer.get(vertexBase + 1));
-        float z4 = CompactChunkVertex.decodePosition(buffer.get(vertexBase + 2));
-
-        float xDist = ((x1 + x2 + x3 + x4) * 0.25F) - xCenter;
-        float yDist = ((y1 + y2 + y3 + y4) * 0.25F) - yCenter;
-        float zDist = ((z1 + z2 + z3 + z4) * 0.25F) - zCenter;
-
-        return (xDist * xDist) + (yDist * yDist) + (zDist * zDist);
+        return generateIndexBuffer(indexBuffer, indicesArray);
     }
 }

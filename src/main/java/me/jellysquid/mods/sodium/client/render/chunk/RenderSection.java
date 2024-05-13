@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirection;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirectionSet;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.VisibilityEncoding;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.util.task.CancellationToken;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -49,7 +50,7 @@ public class RenderSection {
     private BlockEntity @Nullable[] culledBlockEntities;
     private TextureAtlasSprite @Nullable[] animatedSprites;
 
-    private ChunkBufferSorter.SortBuffer translucencyData;
+    private TranslucentQuadAnalyzer.SortState translucencyData;
 
 
     // Pending Update State
@@ -314,11 +315,11 @@ public class RenderSection {
         return this.globalBlockEntities;
     }
 
-    public ChunkBufferSorter.SortBuffer getTranslucencyData() {
+    public TranslucentQuadAnalyzer.SortState getTranslucencyData() {
         return this.translucencyData;
     }
 
-    public void setTranslucencyData(ChunkBufferSorter.SortBuffer data) {
+    public void setTranslucencyData(TranslucentQuadAnalyzer.SortState data) {
         this.translucencyData = data;
     }
 

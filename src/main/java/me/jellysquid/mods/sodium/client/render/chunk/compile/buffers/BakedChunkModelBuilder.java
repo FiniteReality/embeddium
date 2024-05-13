@@ -7,16 +7,18 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
 
 public class BakedChunkModelBuilder implements ChunkModelBuilder {
     private final ChunkMeshBufferBuilder[] vertexBuffers;
+    private final boolean splitBySide;
 
     private BuiltSectionInfo.Builder renderData;
 
-    public BakedChunkModelBuilder(ChunkMeshBufferBuilder[] vertexBuffers) {
+    public BakedChunkModelBuilder(ChunkMeshBufferBuilder[] vertexBuffers, boolean splitBySide) {
         this.vertexBuffers = vertexBuffers;
+        this.splitBySide = splitBySide;
     }
 
     @Override
     public ChunkMeshBufferBuilder getVertexBuffer(ModelQuadFacing facing) {
-        return this.vertexBuffers[facing.ordinal()];
+        return splitBySide ? this.vertexBuffers[facing.ordinal()] : this.vertexBuffers[ModelQuadFacing.UNASSIGNED.ordinal()];
     }
 
     @Override
@@ -26,7 +28,9 @@ public class BakedChunkModelBuilder implements ChunkModelBuilder {
 
     public void destroy() {
         for (ChunkMeshBufferBuilder builder : this.vertexBuffers) {
-            builder.destroy();
+            if(builder != null) {
+                builder.destroy();
+            }
         }
     }
 
@@ -34,7 +38,9 @@ public class BakedChunkModelBuilder implements ChunkModelBuilder {
         this.renderData = renderData;
 
         for (var vertexBuffer : this.vertexBuffers) {
-            vertexBuffer.start(sectionIndex);
+            if(vertexBuffer != null) {
+                vertexBuffer.start(sectionIndex);
+            }
         }
     }
 }

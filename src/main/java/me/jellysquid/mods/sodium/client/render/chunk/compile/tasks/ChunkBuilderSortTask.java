@@ -4,11 +4,11 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter.SortBuffer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionMeshParts;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import me.jellysquid.mods.sodium.client.util.task.CancellationToken;
 
@@ -20,9 +20,9 @@ public class ChunkBuilderSortTask extends ChunkBuilderTask<ChunkBuildOutput> {
     private final RenderSection render;
     private final float cameraX, cameraY, cameraZ;
     private final int frame;
-    private final Map<TerrainRenderPass, ChunkBufferSorter.SortBuffer> translucentMeshes;
+    private final Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> translucentMeshes;
 
-    public ChunkBuilderSortTask(RenderSection render, float cameraX, float cameraY, float cameraZ, int frame, Map<TerrainRenderPass, ChunkBufferSorter.SortBuffer> translucentMeshes) {
+    public ChunkBuilderSortTask(RenderSection render, float cameraX, float cameraY, float cameraZ, int frame, Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> translucentMeshes) {
         this.render = render;
         this.cameraX = cameraX;
         this.cameraY = cameraY;
@@ -40,6 +40,9 @@ public class ChunkBuilderSortTask extends ChunkBuilderTask<ChunkBuildOutput> {
 
     @Override
     public ChunkBuildOutput execute(ChunkBuildContext context, CancellationToken cancellationSource) {
+        // TODO re-enable
+        return null;
+        /*
         Map<TerrainRenderPass, BuiltSectionMeshParts> meshes = new Reference2ReferenceOpenHashMap<>();
         for(Map.Entry<TerrainRenderPass, ChunkBufferSorter.SortBuffer> entry : translucentMeshes.entrySet()) {
             var sortBuffer = entry.getValue();
@@ -53,5 +56,7 @@ public class ChunkBuilderSortTask extends ChunkBuilderTask<ChunkBuildOutput> {
         ChunkBuildOutput result = new ChunkBuildOutput(render, null, meshes, this.frame);
         result.setPartialUpload(true);
         return result;
+
+         */
     }
 }
