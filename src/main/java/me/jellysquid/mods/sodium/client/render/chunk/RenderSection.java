@@ -14,6 +14,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 /**
  * The render state object for a chunk section. This contains all the graphics state for each render pass along with
@@ -65,6 +66,9 @@ public class RenderSection {
 
     // Lifetime state
     private boolean disposed;
+
+    // Used by the translucency sorter, to determine when a section needs sorting again
+    public double lastCameraX, lastCameraY, lastCameraZ;
 
     public RenderSection(RenderRegion region, int chunkX, int chunkY, int chunkZ) {
         this.chunkX = chunkX;

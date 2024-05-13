@@ -143,35 +143,21 @@ public class RenderSectionManager {
         this.lastUpdatedFrame = frame;
     }
 
-    private float lastCameraTranslucentX, lastCameraTranslucentY, lastCameraTranslucentZ;
-
     private void checkTranslucencyChange() {
         if(!this.translucencySorting || lastCameraPosition == null)
             return;
 
-        float dx = lastCameraTranslucentX - (float)cameraPosition.x;
-        float dy = lastCameraTranslucentY - (float)cameraPosition.y;
-        float dz = lastCameraTranslucentZ - (float)cameraPosition.z;
-        if((dx * dx + dy * dy + dz * dz) > 1.0) {
-            int camSectionX = SectionPos.blockToSectionCoord(cameraPosition.x);
-            int camSectionY = SectionPos.blockToSectionCoord(cameraPosition.y);
-            int camSectionZ = SectionPos.blockToSectionCoord(cameraPosition.z);
+        int camSectionX = SectionPos.blockToSectionCoord(cameraPosition.x);
+        int camSectionY = SectionPos.blockToSectionCoord(cameraPosition.y);
+        int camSectionZ = SectionPos.blockToSectionCoord(cameraPosition.z);
 
-            boolean cameraChangedSection = camSectionX != SectionPos.blockToSectionCoord(lastCameraTranslucentX) ||
-                    camSectionY != SectionPos.blockToSectionCoord(lastCameraTranslucentY) ||
-                    camSectionZ != SectionPos.blockToSectionCoord(lastCameraTranslucentZ);
-
-            lastCameraTranslucentX = (float)cameraPosition.x;
-            lastCameraTranslucentY = (float)cameraPosition.y;
-            lastCameraTranslucentZ = (float)cameraPosition.z;
-
-            this.scheduleTranslucencyUpdates(cameraChangedSection, camSectionX, camSectionY, camSectionZ);
-        }
+        this.scheduleTranslucencyUpdates(camSectionX, camSectionY, camSectionZ);
     }
 
-    private void scheduleTranslucencyUpdates(boolean cameraChangedSection, int camSectionX, int camSectionY, int camSectionZ) {
+    private void scheduleTranslucencyUpdates(int camSectionX, int camSectionY, int camSectionZ) {
         var sortRebuildList = this.rebuildLists.get(ChunkUpdateType.SORT);
         var importantSortRebuildList = this.rebuildLists.get(ChunkUpdateType.IMPORTANT_SORT);
+        var allowImportant = allowImportantRebuilds();
         for (Iterator<ChunkRenderList> it = this.renderLists.iterator(); it.hasNext(); ) {
             ChunkRenderList entry = it.next();
             var region = entry.getRegion();
@@ -181,18 +167,48 @@ public class RenderSectionManager {
             }
             while (sectionIterator.hasNext()) {
                 var section = region.getSection(sectionIterator.nextByteAsInt());
+
                 if (section == null || !section.isBuilt()) {
+                    // Nonexistent/unbuilt sections are not relevant
                     continue;
                 }
+
                 boolean hasTranslucentData = (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0 && section.getTranslucencyData() != null && section.getTranslucencyData().requiresDynamicSorting();
-                if(hasTranslucentData && (cameraChangedSection || section.isAlignedWithSectionOnGrid(camSectionX, camSectionY, camSectionZ))) {
-                    ChunkUpdateType update = ChunkUpdateType.getPromotionUpdateType(section.getPendingUpdate(),
-                            (allowImportantRebuilds() && this.shouldPrioritizeRebuild(section)) ? ChunkUpdateType.IMPORTANT_SORT : ChunkUpdateType.SORT);
-                    if (update != null) {
-                        section.setPendingUpdate(update);
-                        // Inject it into the rebuild lists
-                        (update == ChunkUpdateType.IMPORTANT_SORT ? importantSortRebuildList : sortRebuildList).add(section);
-                    }
+
+                if (!hasTranslucentData) {
+                    // Sections without sortable translucent data are not relevant
+                    continue;
+                }
+
+                ChunkUpdateType update = ChunkUpdateType.getPromotionUpdateType(section.getPendingUpdate(), (allowImportant && this.shouldPrioritizeRebuild(section)) ? ChunkUpdateType.IMPORTANT_SORT : ChunkUpdateType.SORT);
+
+                if (update == null) {
+                    // We wouldn't be able to resort this section anyway
+                    continue;
+                }
+
+                double dx = cameraPosition.x - section.lastCameraX;
+                double dy = cameraPosition.y - section.lastCameraY;
+                double dz = cameraPosition.z - section.lastCameraZ;
+                double camDelta = (dx * dx) + (dy * dy) + (dz * dz);
+
+                if (camDelta < 1) {
+                    // Didn't move enough, ignore
+                    continue;
+                }
+
+                boolean cameraChangedSection = camSectionX != SectionPos.blockToSectionCoord(section.lastCameraX) ||
+                        camSectionY != SectionPos.blockToSectionCoord(section.lastCameraY) ||
+                        camSectionZ != SectionPos.blockToSectionCoord(section.lastCameraZ);
+
+                if (cameraChangedSection || section.isAlignedWithSectionOnGrid(camSectionX, camSectionY, camSectionZ)) {
+                    section.setPendingUpdate(update);
+                    // Inject it into the rebuild lists
+                    (update == ChunkUpdateType.IMPORTANT_SORT ? importantSortRebuildList : sortRebuildList).add(section);
+
+                    section.lastCameraX = cameraPosition.x;
+                    section.lastCameraY = cameraPosition.y;
+                    section.lastCameraZ = cameraPosition.z;
                 }
             }
         }
