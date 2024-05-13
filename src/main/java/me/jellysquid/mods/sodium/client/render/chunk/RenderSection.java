@@ -286,6 +286,10 @@ public class RenderSection {
         return this.flags;
     }
 
+    public boolean isAlignedWithSectionOnGrid(int otherX, int otherY, int otherZ) {
+        return this.chunkX == otherX || this.chunkY == otherY || this.chunkZ == otherZ;
+    }
+
     /**
      * Returns the occlusion culling data which determines this chunk's connectedness on the visibility graph.
      */

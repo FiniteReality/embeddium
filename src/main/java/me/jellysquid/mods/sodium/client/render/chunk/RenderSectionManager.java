@@ -8,14 +8,11 @@ import it.unimi.dsi.fastutil.objects.*;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
-import me.jellysquid.mods.sodium.client.gl.arena.GlBufferArena;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkJobResult;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkJobTyped;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkJobCollector;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.tasks.ChunkBuilderMeshingTask;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.tasks.ChunkBuilderSortTask;
@@ -28,7 +25,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.lists.VisibleChunkCollector
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirection;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.OcclusionCuller;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
-import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion.DeviceResources;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegionManager;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
@@ -39,7 +35,6 @@ import me.jellysquid.mods.sodium.client.render.viewport.CameraTransform;
 import me.jellysquid.mods.sodium.client.render.viewport.Viewport;
 import me.jellysquid.mods.sodium.client.util.MathUtil;
 import me.jellysquid.mods.sodium.client.util.iterator.ByteIterator;
-import me.jellysquid.mods.sodium.client.util.task.CancellationToken;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
@@ -57,8 +52,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -144,8 +137,6 @@ public class RenderSectionManager {
         this.lastCameraPosition = camera.getBlockPosition();
         this.cameraPosition = camera.getPosition();
 
-        this.scheduleTranslucencyUpdates();
-
         this.createTerrainRenderList(camera, viewport, frame, spectator);
 
         this.needsUpdate = false;
@@ -154,7 +145,7 @@ public class RenderSectionManager {
 
     private float lastCameraTranslucentX, lastCameraTranslucentY, lastCameraTranslucentZ;
 
-    private void scheduleTranslucencyUpdates() {
+    private void checkTranslucencyChange() {
         if(!this.translucencySorting || lastCameraPosition == null)
             return;
 
@@ -162,19 +153,45 @@ public class RenderSectionManager {
         float dy = lastCameraTranslucentY - (float)cameraPosition.y;
         float dz = lastCameraTranslucentZ - (float)cameraPosition.z;
         if((dx * dx + dy * dy + dz * dz) > 1.0) {
+            int camSectionX = SectionPos.blockToSectionCoord(cameraPosition.x);
+            int camSectionY = SectionPos.blockToSectionCoord(cameraPosition.y);
+            int camSectionZ = SectionPos.blockToSectionCoord(cameraPosition.z);
+
+            boolean cameraChangedSection = camSectionX != SectionPos.blockToSectionCoord(lastCameraTranslucentX) ||
+                    camSectionY != SectionPos.blockToSectionCoord(lastCameraTranslucentY) ||
+                    camSectionZ != SectionPos.blockToSectionCoord(lastCameraTranslucentZ);
+
             lastCameraTranslucentX = (float)cameraPosition.x;
             lastCameraTranslucentY = (float)cameraPosition.y;
             lastCameraTranslucentZ = (float)cameraPosition.z;
-            for (Long2ReferenceMap.Entry<RenderSection> entry : Long2ReferenceMaps.fastIterable(this.sectionByPosition)) {
-                var section = entry.getValue();
-                if(!section.isBuilt())
+
+            this.scheduleTranslucencyUpdates(cameraChangedSection, camSectionX, camSectionY, camSectionZ);
+        }
+    }
+
+    private void scheduleTranslucencyUpdates(boolean cameraChangedSection, int camSectionX, int camSectionY, int camSectionZ) {
+        var sortRebuildList = this.rebuildLists.get(ChunkUpdateType.SORT);
+        var importantSortRebuildList = this.rebuildLists.get(ChunkUpdateType.IMPORTANT_SORT);
+        for (Iterator<ChunkRenderList> it = this.renderLists.iterator(); it.hasNext(); ) {
+            ChunkRenderList entry = it.next();
+            var region = entry.getRegion();
+            ByteIterator sectionIterator = entry.sectionsWithGeometryIterator(false);
+            if (sectionIterator == null) {
+                continue;
+            }
+            while (sectionIterator.hasNext()) {
+                var section = region.getSection(sectionIterator.nextByteAsInt());
+                if (section == null || !section.isBuilt()) {
                     continue;
+                }
                 boolean hasTranslucentData = (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0 && section.getTranslucencyData() != null && section.getTranslucencyData().requiresDynamicSorting();
-                if(hasTranslucentData && section.getSquaredDistance(lastCameraPosition) < translucencyBlockRenderDistance) {
+                if(hasTranslucentData && (cameraChangedSection || section.isAlignedWithSectionOnGrid(camSectionX, camSectionY, camSectionZ))) {
                     ChunkUpdateType update = ChunkUpdateType.getPromotionUpdateType(section.getPendingUpdate(),
                             (allowImportantRebuilds() && this.shouldPrioritizeRebuild(section)) ? ChunkUpdateType.IMPORTANT_SORT : ChunkUpdateType.SORT);
-                    if(update != null) {
+                    if (update != null) {
                         section.setPendingUpdate(update);
+                        // Inject it into the rebuild lists
+                        (update == ChunkUpdateType.IMPORTANT_SORT ? importantSortRebuildList : sortRebuildList).add(section);
                     }
                 }
             }
@@ -193,6 +210,8 @@ public class RenderSectionManager {
 
         this.renderLists = visitor.createRenderLists();
         this.rebuildLists = visitor.getRebuildLists();
+
+        this.checkTranslucencyChange();
     }
 
     private float getSearchDistance() {
