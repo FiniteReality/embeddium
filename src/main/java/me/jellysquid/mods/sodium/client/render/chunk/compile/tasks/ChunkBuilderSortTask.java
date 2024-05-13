@@ -46,6 +46,7 @@ public class ChunkBuilderSortTask extends ChunkBuilderTask<ChunkBuildOutput> {
             ChunkBufferSorter.sort(entry.getValue(), cameraX - this.render.getOriginX(), cameraY - this.render.getOriginY(), cameraZ - this.render.getOriginZ());
             meshes.put(entry.getKey(), new BuiltSectionMeshParts(
                     makeNativeBuffer(sortBuffer.vertexBuffer()),
+                    null,
                     sortBuffer.ranges()
             ));
         }

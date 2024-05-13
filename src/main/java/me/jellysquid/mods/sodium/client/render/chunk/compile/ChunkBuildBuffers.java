@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
+import me.jellysquid.mods.sodium.client.render.chunk.SharedQuadIndexBuffer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.BakedChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
@@ -92,7 +93,11 @@ public class ChunkBuildBuffers {
 
         mergedBufferBuilder.flip();
 
-        return new BuiltSectionMeshParts(mergedBuffer, vertexRanges);
+        // Generate the canonical index buffer
+        var indexBuffer = new NativeBuffer((vertexCount / 4 * 6) * 4);
+        SharedQuadIndexBuffer.IndexType.INTEGER.createIndexBuffer(indexBuffer.getDirectBuffer(), vertexCount / 4);
+
+        return new BuiltSectionMeshParts(mergedBuffer, indexBuffer, vertexRanges);
     }
 
     public void destroy() {
