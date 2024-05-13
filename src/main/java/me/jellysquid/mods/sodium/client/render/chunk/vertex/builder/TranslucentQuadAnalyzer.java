@@ -9,11 +9,12 @@ import java.util.BitSet;
 
 public class TranslucentQuadAnalyzer {
     // X/Y/Z for each quad center
-    private final FloatArrayList quadCenters = new FloatArrayList();
+    private static final int EXPECTED_QUADS = 1000;
+    private final FloatArrayList quadCenters = new FloatArrayList(EXPECTED_QUADS * 3);
     private final Vector3f[] vertexPositions = new Vector3f[4];
     private final Vector3f currentNormal = new Vector3f();
     private final Vector3f globalNormal = new Vector3f();
-    private final BitSet normalSigns = new BitSet();
+    private final BitSet normalSigns = new BitSet(EXPECTED_QUADS);
     private static final BitSet EMPTY = new BitSet();
     private int currentVertex;
     private boolean hasDistinctNormals;
