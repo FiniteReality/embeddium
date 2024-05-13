@@ -323,12 +323,13 @@ public class RenderSection {
         return this.globalBlockEntities;
     }
 
+    @Nullable
     public TranslucentQuadAnalyzer.SortState getTranslucencyData() {
         return this.translucencyData;
     }
 
-    public void setTranslucencyData(TranslucentQuadAnalyzer.SortState data) {
-        this.translucencyData = data.compactForStorage();
+    public void setTranslucencyData(@Nullable TranslucentQuadAnalyzer.SortState data) {
+        this.translucencyData = data != null ? data.compactForStorage() : null;
     }
 
     public @Nullable CancellationToken getBuildCancellationToken() {

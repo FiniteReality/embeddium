@@ -8,7 +8,6 @@ import org.joml.Vector3f;
 import java.util.BitSet;
 
 public class TranslucentQuadAnalyzer {
-    private static final float NORMAL_EPSILON = 0.001f;
     // X/Y/Z for each quad center
     private final FloatArrayList quadCenters = new FloatArrayList();
     private final Vector3f[] vertexPositions = new Vector3f[4];
@@ -198,16 +197,18 @@ public class TranslucentQuadAnalyzer {
                 // No normal has been tracked thus far, choose this one
                 globalNormal.set(currentNormal);
             } else {
-                // We want to track if all quads have parallel normal vectors (as in this case, we can do a static sort.)
-                // To do this we check if current = global or current = -global. This works because the computed normal
-                // is always a unit vector.
-                if(!currentNormal.equals(globalNormal, NORMAL_EPSILON)) {
-                    currentNormal.negate();
-                    if(!currentNormal.equals(globalNormal, NORMAL_EPSILON)) {
-                        hasDistinctNormals = true;
-                    } else {
+                float dotProduct = globalNormal.dot(currentNormal);
+                // Technically, only 1 and -1 imply that the quads share a normal. However, if the dot products
+                // are very, very similar, we pretend they share a normal for optimization purposes. This is an
+                // approximation that allows very slightly slanted water in edges of underwater lakes to be counted as
+                // STATIC rather than DYNAMIC.
+                if (Math.abs(dotProduct) >= 0.98) {
+                    if (dotProduct < 0) {
+                        // Flag this quad as being flipped relative to the global normal
                         normalSigns.set(currentQuadIndex);
                     }
+                } else {
+                    hasDistinctNormals = true;
                 }
             }
         }
