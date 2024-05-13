@@ -2,10 +2,8 @@ package me.jellysquid.mods.sodium.client.render.chunk.region;
 
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap.Entry;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.gl.arena.GlBufferArena;
 import me.jellysquid.mods.sodium.client.gl.arena.PendingUpload;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.FallbackStagingBuffer;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.MappedStagingBuffer;
@@ -15,8 +13,6 @@ import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionMeshParts;
-import me.jellysquid.mods.sodium.client.render.chunk.data.SectionRenderDataStorage;
-import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion.DeviceResources;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import org.jetbrains.annotations.NotNull;
@@ -87,10 +83,13 @@ public class RenderRegionManager {
         }
 
         var resources = region.createResources(commandList);
-        var arena = resources.getGeometryArena();
+        var geometryArena = resources.getGeometryArena();
 
-        boolean bufferChanged = arena.upload(commandList, uploads.stream()
+        boolean bufferChanged = geometryArena.upload(commandList, uploads.stream()
                 .map(upload -> upload.vertexUpload));
+
+        bufferChanged |= resources.getIndexArena().upload(commandList, uploads.stream()
+                .map(upload -> upload.indexUpload).filter(Objects::nonNull));
 
         // If any of the buffers changed, the tessellation will need to be updated
         // Once invalidated the tessellation will be re-created on the next attempted use
@@ -102,7 +101,7 @@ public class RenderRegionManager {
         for (PendingSectionUpload upload : uploads) {
             var storage = region.createStorage(upload.pass);
             storage.setMeshes(upload.section.getSectionIndex(),
-                    upload.vertexUpload.getResult(), upload.meshData.getVertexRanges());
+                    upload.vertexUpload.getResult(), upload.indexUpload != null ? upload.indexUpload.getResult() : null, upload.meshData.getVertexRanges());
         }
     }
 
@@ -152,7 +151,10 @@ public class RenderRegionManager {
         return instance;
     }
 
-    private record PendingSectionUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload vertexUpload) {
+    private record PendingSectionUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload vertexUpload, PendingUpload indexUpload) {
+        private PendingSectionUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload vertexUpload) {
+            this(section, meshData, pass, vertexUpload, null);
+        }
     }
 
 

@@ -658,6 +658,13 @@ public class RenderSectionManager {
             deviceUsed += buffer.getDeviceUsedMemoryL();
             deviceAllocated += buffer.getDeviceAllocatedMemoryL();
 
+            var indexBuffer = resources.getIndexArena();
+
+            if (indexBuffer != null) {
+                deviceUsed += indexBuffer.getDeviceUsedMemoryL();
+                deviceAllocated += indexBuffer.getDeviceAllocatedMemoryL();
+            }
+
             count++;
         }
 

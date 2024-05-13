@@ -135,12 +135,14 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
     private static void addDrawCommands(MultiDrawBatch batch, long pMeshData, int mask) {
         final var pBaseVertex = batch.pBaseVertex;
         final var pElementCount = batch.pElementCount;
+        final var pElementPointer = batch.pElementPointer;
 
         int size = batch.size;
 
         for (int facing = 0; facing < ModelQuadFacing.COUNT; facing++) {
             MemoryUtil.memPutInt(pBaseVertex + (size << 2), SectionRenderDataUnsafe.getVertexOffset(pMeshData, facing));
             MemoryUtil.memPutInt(pElementCount + (size << 2), SectionRenderDataUnsafe.getElementCount(pMeshData, facing));
+            MemoryUtil.memPutInt(pElementPointer + (size << 3), SectionRenderDataUnsafe.getIndexOffset(pMeshData, facing));
 
             size += (mask >> facing) & 1;
         }
@@ -253,7 +255,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
     private GlTessellation createRegionTessellation(CommandList commandList, RenderRegion.DeviceResources resources) {
         return commandList.createTessellation(GlPrimitiveType.TRIANGLES, new TessellationBinding[] {
                 TessellationBinding.forVertexBuffer(resources.getVertexBuffer(), this.vertexAttributeBindings),
-                TessellationBinding.forElementBuffer(this.sharedIndexBuffer.getBufferObject())
+                TessellationBinding.forElementBuffer(resources.getIndexBuffer() != null ? resources.getIndexBuffer() : this.sharedIndexBuffer.getBufferObject())
         });
     }
 
