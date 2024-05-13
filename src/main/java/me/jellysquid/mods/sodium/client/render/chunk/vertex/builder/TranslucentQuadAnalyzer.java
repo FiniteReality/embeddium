@@ -5,6 +5,8 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEn
 import net.minecraft.util.Mth;
 import org.joml.Vector3f;
 
+import java.util.BitSet;
+
 public class TranslucentQuadAnalyzer {
     private static final float NORMAL_EPSILON = 0.001f;
     // X/Y/Z for each quad center
@@ -12,6 +14,8 @@ public class TranslucentQuadAnalyzer {
     private final Vector3f[] vertexPositions = new Vector3f[4];
     private final Vector3f currentNormal = new Vector3f();
     private final Vector3f globalNormal = new Vector3f();
+    private final BitSet normalSigns = new BitSet();
+    private static final BitSet EMPTY = new BitSet();
     private int currentVertex;
     private boolean hasDistinctNormals;
 
@@ -38,11 +42,27 @@ public class TranslucentQuadAnalyzer {
         }
     }
 
-    public record SortState(Level level, float[] centers) {
-        public static final SortState NONE = new SortState(Level.NONE, null);
+    public record SortState(Level level, float[] centers, BitSet normalSigns, Vector3f sharedNormal) {
+        public static final SortState NONE = new SortState(Level.NONE, null, null, null);
 
         public boolean requiresDynamicSorting() {
             return level.ordinal() >= Level.DYNAMIC.ordinal();
+        }
+
+        public SortState compactForStorage() {
+            if(requiresDynamicSorting()) {
+                return this;
+            } else {
+                return new SortState(level, null, null, null);
+            }
+        }
+    }
+
+    private static BitSet cloneBits(BitSet bits) {
+        if(bits.isEmpty()) {
+            return EMPTY;
+        } else {
+            return (BitSet)bits.clone();
         }
     }
 
@@ -90,12 +110,12 @@ public class TranslucentQuadAnalyzer {
             } else {
                 // If all quads are on the same plane we can use NONE sorting, otherwise we need to sort statically to put
                 // them in the right order
-                // TODO fix static sorting, it currently produces broken results
-                sortLevel = areAllQuadsOnSamePlane(centerArray) ? Level.NONE : Level.DYNAMIC;
+                sortLevel = areAllQuadsOnSamePlane(centerArray) ? Level.NONE : Level.STATIC;
             }
 
+            SortState finalState = sortLevel == Level.NONE ? SortState.NONE : new SortState(sortLevel, centerArray, cloneBits(normalSigns), new Vector3f(globalNormal));
             clear();
-            return sortLevel == Level.NONE ? SortState.NONE : new SortState(sortLevel, centerArray);
+            return finalState;
         }
     }
 
@@ -103,6 +123,7 @@ public class TranslucentQuadAnalyzer {
         quadCenters.clear();
         currentVertex = 0;
         globalNormal.zero();
+        normalSigns.clear();
         hasDistinctNormals = false;
     }
 
@@ -161,7 +182,10 @@ public class TranslucentQuadAnalyzer {
             totalY += vertex.y;
             totalZ += vertex.z;
         }
+
         var centers = quadCenters;
+        int currentQuadIndex = centers.size() / 3;
+
         centers.ensureCapacity(centers.size() + 3);
         centers.add(totalX / 4);
         centers.add(totalY / 4);
@@ -181,6 +205,8 @@ public class TranslucentQuadAnalyzer {
                     currentNormal.negate();
                     if(!currentNormal.equals(globalNormal, NORMAL_EPSILON)) {
                         hasDistinctNormals = true;
+                    } else {
+                        normalSigns.set(currentQuadIndex);
                     }
                 }
             }

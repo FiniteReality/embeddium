@@ -328,7 +328,7 @@ public class RenderSection {
     }
 
     public void setTranslucencyData(TranslucentQuadAnalyzer.SortState data) {
-        this.translucencyData = data;
+        this.translucencyData = data.compactForStorage();
     }
 
     public @Nullable CancellationToken getBuildCancellationToken() {

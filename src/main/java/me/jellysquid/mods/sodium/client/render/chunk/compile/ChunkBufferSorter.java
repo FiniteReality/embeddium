@@ -20,6 +20,8 @@ public class ChunkBufferSorter {
     private static final int ELEMENTS_PER_PRIMITIVE = 6;
     private static final int VERTICES_PER_PRIMITIVE = 4;
 
+    private static final int FAKE_STATIC_CAMERA_OFFSET = 1000;
+
     public static int getIndexBufferSize(int numPrimitives) {
         return numPrimitives * ELEMENTS_PER_PRIMITIVE * 4;
     }
@@ -72,8 +74,37 @@ public class ChunkBufferSorter {
         return indexBuffer;
     }
 
+    private static void buildStaticDistanceArray(float[] centers, float[] distanceArray, float x, float y, float z,
+                                                 float normX, float normY, float normZ, int quadCount, BitSet normalSigns) {
+        for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
+            int centerIdx = quadIdx * 3;
+
+            // Compute distance using projection of vector from camera->quad center onto shared normal, flipped by sign
+            // to accommodate backwards-facing quads in the same plane extensions
+
+            float qX = centers[centerIdx + 0] - x;
+            float qY = centers[centerIdx + 1] - y;
+            float qZ = centers[centerIdx + 2] - z;
+
+            distanceArray[quadIdx] = (normX * qX + normY * qY + normZ * qZ) * (normalSigns.get(quadIdx) ? 1 : -1);
+        }
+    }
+
+    private static void buildDynamicDistanceArray(float[] centers, float[] distanceArray, int quadCount, float x,
+                                                  float y, float z) {
+        // Sort using distance to camera directly
+        for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
+            int centerIdx = quadIdx * 3;
+
+            float qX = centers[centerIdx + 0] - x;
+            float qY = centers[centerIdx + 1] - y;
+            float qZ = centers[centerIdx + 2] - z;
+            distanceArray[quadIdx] = qX * qX + qY * qY + qZ * qZ;
+        }
+    }
+
     public static NativeBuffer sort(NativeBuffer indexBuffer, @Nullable TranslucentQuadAnalyzer.SortState chunkData, float x, float y, float z) {
-        if (chunkData == null || chunkData.level() == TranslucentQuadAnalyzer.Level.NONE) {
+        if (chunkData == null || chunkData.level() == TranslucentQuadAnalyzer.Level.NONE || chunkData.centers().length < 3) {
             return indexBuffer;
         }
 
@@ -81,13 +112,23 @@ public class ChunkBufferSorter {
         int quadCount = centers.length / 3;
         int[] indicesArray = new int[quadCount];
         float[] distanceArray = new float[quadCount];
+        boolean isStatic = chunkData.level() == TranslucentQuadAnalyzer.Level.STATIC;
         for (int quadIdx = 0; quadIdx < quadCount; ++quadIdx) {
             indicesArray[quadIdx] = quadIdx;
-            int centerIdx = quadIdx * 3;
-            float qX = centers[centerIdx + 0] - x;
-            float qY = centers[centerIdx + 1] - y;
-            float qZ = centers[centerIdx + 2] - z;
-            distanceArray[quadIdx] = qX * qX + qY * qY + qZ * qZ;
+        }
+
+        if (isStatic) {
+            buildStaticDistanceArray(centers, distanceArray,
+                    centers[0] + chunkData.sharedNormal().x * FAKE_STATIC_CAMERA_OFFSET,
+                    centers[1] + chunkData.sharedNormal().y * FAKE_STATIC_CAMERA_OFFSET,
+                    centers[2] + chunkData.sharedNormal().z * FAKE_STATIC_CAMERA_OFFSET,
+                    chunkData.sharedNormal().x,
+                    chunkData.sharedNormal().y,
+                    chunkData.sharedNormal().z,
+                    quadCount,
+                    chunkData.normalSigns());
+        } else {
+            buildDynamicDistanceArray(centers, distanceArray, quadCount, x, y, z);
         }
 
         IntArrays.mergeSort(indicesArray, (a, b) -> Floats.compare(distanceArray[b], distanceArray[a]));
