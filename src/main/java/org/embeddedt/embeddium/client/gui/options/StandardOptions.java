@@ -14,6 +14,7 @@ public final class StandardOptions {
         public static final ResourceLocation CHUNK_UPDATES = new ResourceLocation(SodiumClientMod.MODID, "chunk_updates");
         public static final ResourceLocation RENDERING_CULLING = new ResourceLocation(SodiumClientMod.MODID, "rendering_culling");
         public static final ResourceLocation CPU_SAVING = new ResourceLocation(SodiumClientMod.MODID, "cpu_saving");
+        public static final ResourceLocation SORTING = new ResourceLocation(SodiumClientMod.MODID, "sorting");
     }
 
     public static class Pages {
