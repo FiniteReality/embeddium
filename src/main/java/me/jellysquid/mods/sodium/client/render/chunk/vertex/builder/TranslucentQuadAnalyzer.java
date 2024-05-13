@@ -11,19 +11,39 @@ public class TranslucentQuadAnalyzer {
     private final Vector3f[] vertexPositions = new Vector3f[4];
     private int currentVertex;
 
+    public enum Level {
+        /**
+         * No sorting is required of the current section.
+         */
+        NONE,
+        /**
+         * Sorting is required once during meshing.
+         */
+        STATIC,
+        /**
+         * Sorting is required any time the camera moves.
+         */
+        DYNAMIC
+    }
+
     public TranslucentQuadAnalyzer() {
         for(int i = 0; i < 4; i++) {
             vertexPositions[i] = new Vector3f();
         }
     }
 
-    public record SortState(float[] centers) {}
+    public record SortState(Level level, float[] centers) {
+        public static final SortState NONE = new SortState(Level.NONE, null);
 
-    @Nullable
+        public boolean requiresDynamicSorting() {
+            return level.ordinal() >= Level.DYNAMIC.ordinal();
+        }
+    }
+
     public SortState getSortState() {
         var centerArray = quadCenters.toArray(new float[0]);
         clear();
-        return new SortState(centerArray);
+        return new SortState(Level.DYNAMIC, centerArray);
     }
 
     public void clear() {

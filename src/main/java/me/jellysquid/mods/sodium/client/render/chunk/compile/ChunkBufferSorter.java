@@ -50,7 +50,7 @@ public class ChunkBufferSorter {
     }
 
     public static NativeBuffer sort(NativeBuffer indexBuffer, @Nullable TranslucentQuadAnalyzer.SortState chunkData, float x, float y, float z) {
-        if (chunkData == null) {
+        if (chunkData == null || chunkData.level() == TranslucentQuadAnalyzer.Level.NONE) {
             return indexBuffer;
         }
 

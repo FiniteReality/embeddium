@@ -169,7 +169,7 @@ public class RenderSectionManager {
                 var section = entry.getValue();
                 if(!section.isBuilt())
                     continue;
-                boolean hasTranslucentData = (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0 && section.getTranslucencyData() != null;
+                boolean hasTranslucentData = (section.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0 && section.getTranslucencyData() != null && section.getTranslucencyData().requiresDynamicSorting();
                 if(hasTranslucentData && section.getSquaredDistance(lastCameraPosition) < translucencyBlockRenderDistance) {
                     ChunkUpdateType update = ChunkUpdateType.getPromotionUpdateType(section.getPendingUpdate(),
                             (allowImportantRebuilds() && this.shouldPrioritizeRebuild(section)) ? ChunkUpdateType.IMPORTANT_SORT : ChunkUpdateType.SORT);
@@ -496,7 +496,7 @@ public class RenderSectionManager {
     public ChunkBuilderSortTask createSortTask(RenderSection render, int frame) {
         Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> meshes = new Reference2ReferenceOpenHashMap<>();
         var sortBuffer = render.getTranslucencyData();
-        if(sortBuffer == null)
+        if(sortBuffer == null || !sortBuffer.requiresDynamicSorting())
             return null;
         meshes.put(DefaultTerrainRenderPasses.TRANSLUCENT, sortBuffer);
         return new ChunkBuilderSortTask(render, (float)cameraPosition.x, (float)cameraPosition.y, (float)cameraPosition.z, frame, meshes);
