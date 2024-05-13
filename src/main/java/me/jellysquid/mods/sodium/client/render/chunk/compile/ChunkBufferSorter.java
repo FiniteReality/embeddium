@@ -24,6 +24,29 @@ public class ChunkBufferSorter {
         return numPrimitives * ELEMENTS_PER_PRIMITIVE * 4;
     }
 
+    public static NativeBuffer generateSimpleIndexBuffer(NativeBuffer indexBuffer, int numPrimitives, int offset) {
+        int minimumRequiredBufferSize = getIndexBufferSize(numPrimitives) + (offset * 4);
+        if(indexBuffer.getLength() < minimumRequiredBufferSize) {
+            throw new IllegalStateException("Given index buffer has length " + indexBuffer.getLength() + " but we need " + minimumRequiredBufferSize);
+        }
+        long ptr = MemoryUtil.memAddress(indexBuffer.getDirectBuffer()) + (offset * 4L);
+
+        for (int primitiveIndex = 0; primitiveIndex < numPrimitives; primitiveIndex++) {
+            int indexOffset = primitiveIndex * ELEMENTS_PER_PRIMITIVE;
+            int vertexOffset = primitiveIndex * VERTICES_PER_PRIMITIVE;
+
+            MemoryUtil.memPutInt(ptr + (indexOffset + 0) * 4, vertexOffset + 0);
+            MemoryUtil.memPutInt(ptr + (indexOffset + 1) * 4, vertexOffset + 1);
+            MemoryUtil.memPutInt(ptr + (indexOffset + 2) * 4, vertexOffset + 2);
+
+            MemoryUtil.memPutInt(ptr + (indexOffset + 3) * 4, vertexOffset + 2);
+            MemoryUtil.memPutInt(ptr + (indexOffset + 4) * 4, vertexOffset + 3);
+            MemoryUtil.memPutInt(ptr + (indexOffset + 5) * 4, vertexOffset + 0);
+        }
+
+        return indexBuffer;
+    }
+
     private static NativeBuffer generateIndexBuffer(NativeBuffer indexBuffer, int[] primitiveMapping) {
         int bufferSize = getIndexBufferSize(primitiveMapping.length);
         if(indexBuffer.getLength() != bufferSize) {

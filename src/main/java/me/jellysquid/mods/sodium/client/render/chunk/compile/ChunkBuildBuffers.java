@@ -111,7 +111,7 @@ public class ChunkBuildBuffers {
 
         // Generate the canonical index buffer
         var mergedIndexBuffer = new NativeBuffer((vertexCount / 4 * 6) * 4);
-        var mergedIndexBufferBuilder = mergedIndexBuffer.getDirectBuffer();
+        int bufOffset = 0;
         for (ModelQuadFacing facing : facingsToUpload) {
             var buffer = builder.getVertexBuffer(facing);
 
@@ -121,13 +121,10 @@ public class ChunkBuildBuffers {
 
             int numPrimitives = buffer.count() / 4;
 
-            var indexBuffer = ByteBuffer.allocate(numPrimitives * 6 * 4).order(ByteOrder.nativeOrder());
+            ChunkBufferSorter.generateSimpleIndexBuffer(mergedIndexBuffer, numPrimitives, bufOffset);
 
-            SharedQuadIndexBuffer.IndexType.INTEGER.createIndexBuffer(indexBuffer, numPrimitives);
-            mergedIndexBufferBuilder.put(indexBuffer);
+            bufOffset += numPrimitives * 6;
         }
-
-        mergedIndexBufferBuilder.flip();
 
         return new BuiltSectionMeshParts(mergedBuffer, mergedIndexBuffer, sortState, vertexRanges);
     }
