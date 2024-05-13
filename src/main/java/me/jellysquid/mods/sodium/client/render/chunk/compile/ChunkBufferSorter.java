@@ -20,8 +20,12 @@ public class ChunkBufferSorter {
     private static final int ELEMENTS_PER_PRIMITIVE = 6;
     private static final int VERTICES_PER_PRIMITIVE = 4;
 
+    public static int getIndexBufferSize(int numPrimitives) {
+        return numPrimitives * ELEMENTS_PER_PRIMITIVE * 4;
+    }
+
     private static NativeBuffer generateIndexBuffer(NativeBuffer indexBuffer, int[] primitiveMapping) {
-        int bufferSize = primitiveMapping.length * ELEMENTS_PER_PRIMITIVE * 4;
+        int bufferSize = getIndexBufferSize(primitiveMapping.length);
         if(indexBuffer.getLength() != bufferSize) {
             throw new IllegalStateException("Given index buffer has length " + indexBuffer.getLength() + " but we expected " + bufferSize);
         }

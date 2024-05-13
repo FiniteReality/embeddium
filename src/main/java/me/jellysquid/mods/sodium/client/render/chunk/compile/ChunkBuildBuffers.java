@@ -12,6 +12,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRende
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 
@@ -80,6 +81,7 @@ public class ChunkBuildBuffers {
         int vertexCount = 0;
 
         ModelQuadFacing[] facingsToUpload = pass.isSorted() ? ONLY_UNASSIGNED : ModelQuadFacing.VALUES;
+        TranslucentQuadAnalyzer.SortState sortState = pass.isSorted() ? builder.getVertexBuffer(ModelQuadFacing.UNASSIGNED).getSortState() : null;
 
         for (ModelQuadFacing facing : facingsToUpload) {
             var buffer = builder.getVertexBuffer(facing);
@@ -127,7 +129,7 @@ public class ChunkBuildBuffers {
 
         mergedIndexBufferBuilder.flip();
 
-        return new BuiltSectionMeshParts(mergedBuffer, mergedIndexBuffer, vertexRanges);
+        return new BuiltSectionMeshParts(mergedBuffer, mergedIndexBuffer, sortState, vertexRanges);
     }
 
     public void destroy() {

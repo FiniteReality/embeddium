@@ -50,7 +50,8 @@ public class RenderRegionManager {
 
     public void uploadMeshes(CommandList commandList, Collection<ChunkBuildOutput> results) {
         for (var entry : this.createMeshUploadQueues(results)) {
-            this.uploadMeshes(commandList, entry.getKey(), entry.getValue());
+            this.uploadMeshes(commandList, entry.getKey(), entry.getValue().stream().filter(o -> !o.isIndexOnlyUpload()).toList());
+            this.uploadResorts(commandList, entry.getKey(), entry.getValue().stream().filter(ChunkBuildOutput::isIndexOnlyUpload).toList());
         }
     }
 
@@ -59,9 +60,6 @@ public class RenderRegionManager {
 
         for (ChunkBuildOutput result : results) {
             for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
-                if(result.isPartialUpload() && result.getMesh(pass) == null)
-                    continue;
-
                 var storage = region.getStorage(pass);
 
                 if (storage != null) {
@@ -102,6 +100,50 @@ public class RenderRegionManager {
             var storage = region.createStorage(upload.pass);
             storage.setMeshes(upload.section.getSectionIndex(),
                     upload.vertexUpload.getResult(), upload.indexUpload != null ? upload.indexUpload.getResult() : null, upload.meshData.getVertexRanges());
+        }
+    }
+
+    private void uploadResorts(CommandList commandList, RenderRegion region, Collection<ChunkBuildOutput> results) {
+        var uploads = new ArrayList<PendingResortUpload>();
+
+        for (ChunkBuildOutput result : results) {
+            for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
+                BuiltSectionMeshParts mesh = result.getMesh(pass);
+
+                if(mesh == null) {
+                    continue;
+                }
+
+                var storage = region.getStorage(pass);
+
+                if (storage != null) {
+                    storage.removeIndexBuffer(result.render.getSectionIndex());
+                }
+
+                uploads.add(new PendingResortUpload(result.render, mesh, pass, new PendingUpload(mesh.getIndexData())));
+            }
+        }
+
+        // If we have nothing to upload, abort!
+        if (uploads.isEmpty()) {
+            return;
+        }
+
+        var resources = region.createResources(commandList);
+
+        boolean bufferChanged = resources.getIndexArena().upload(commandList, uploads.stream()
+                .map(upload -> upload.indexUpload).filter(Objects::nonNull));
+
+        // If any of the buffers changed, the tessellation will need to be updated
+        // Once invalidated the tessellation will be re-created on the next attempted use
+        if (bufferChanged) {
+            region.refresh(commandList);
+        }
+
+        // Collect the upload results
+        for (PendingResortUpload upload : uploads) {
+            var storage = region.createStorage(upload.pass);
+            storage.replaceIndexBuffer(upload.section.getSectionIndex(), upload.indexUpload.getResult());
         }
     }
 
@@ -155,6 +197,10 @@ public class RenderRegionManager {
         private PendingSectionUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload vertexUpload) {
             this(section, meshData, pass, vertexUpload, null);
         }
+    }
+
+    private record PendingResortUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload indexUpload) {
+
     }
 
 

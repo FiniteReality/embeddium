@@ -393,12 +393,7 @@ public class RenderSectionManager {
     private void updateTranslucencyInfo(RenderSection render, BuiltSectionMeshParts translucencyMesh) {
         if(translucencyMesh == null)
             return;
-        var vertexBuffer = translucencyMesh.getVertexData().getDirectBuffer();
-        var heapBuffer = ByteBuffer.allocate(vertexBuffer.capacity()).order(ByteOrder.nativeOrder());
-        heapBuffer.put(vertexBuffer);
-        heapBuffer.flip();
-        // TODO FIX
-        render.setTranslucencyData(null); //new ChunkBufferSorter.SortBuffer(heapBuffer, this.chunkRenderer.getVertexType(), translucencyMesh.getVertexRanges()));
+        render.setTranslucencyData(translucencyMesh.getSortState());
     }
 
     private void updateSectionInfo(RenderSection render, BuiltSectionInfo info) {

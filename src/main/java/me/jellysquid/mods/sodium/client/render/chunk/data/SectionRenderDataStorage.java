@@ -74,9 +74,29 @@ public class SectionRenderDataStorage {
             SectionRenderDataUnsafe.clear(this.getDataPointer(localSectionIndex));
         }
 
+        removeIndexBuffer(localSectionIndex);
+    }
+
+    public void removeIndexBuffer(int localSectionIndex) {
         if (this.indexAllocations[localSectionIndex] != null) {
             this.indexAllocations[localSectionIndex].delete();
             this.indexAllocations[localSectionIndex] = null;
+        }
+    }
+
+    public void replaceIndexBuffer(int localSectionIndex, GlBufferSegment indexAllocation) {
+        removeIndexBuffer(localSectionIndex);
+
+        this.indexAllocations[localSectionIndex] = indexAllocation;
+
+        var pMeshData = this.getDataPointer(localSectionIndex);
+
+        int indexOffset = indexAllocation != null ? indexAllocation.getOffset() * 4 : 0;
+
+        for (int facingIndex = 0; facingIndex < ModelQuadFacing.COUNT; facingIndex++) {
+            SectionRenderDataUnsafe.setIndexOffset(pMeshData, facingIndex, indexOffset);
+            int indexCount = SectionRenderDataUnsafe.getElementCount(pMeshData, facingIndex);
+            indexOffset += indexCount * 4;
         }
     }
 

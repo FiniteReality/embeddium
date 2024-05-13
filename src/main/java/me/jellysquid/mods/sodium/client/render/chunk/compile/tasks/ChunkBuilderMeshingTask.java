@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.tasks;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
@@ -182,7 +181,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                 if(pass.isReverseOrder() && SodiumClientMod.canApplyTranslucencySorting()) {
                     ChunkBufferSorter.sort(
                             mesh.getIndexData(),
-                            buffers.get(pass).getVertexBuffer(ModelQuadFacing.UNASSIGNED).getSortState(),
+                            mesh.getSortState(),
                             (float)camera.x - minX,
                             (float)camera.y - minY,
                             (float)camera.z - minZ
