@@ -27,7 +27,9 @@ public class TranslucentQuadAnalyzer {
         /**
          * Sorting is required any time the camera moves.
          */
-        DYNAMIC
+        DYNAMIC;
+
+        public static final Level[] VALUES = values();
     }
 
     public TranslucentQuadAnalyzer() {

@@ -634,6 +634,43 @@ public class RenderSectionManager {
         return this.sectionByPosition.get(SectionPos.asLong(x, y, z));
     }
 
+    private Collection<String> getSortingStrings() {
+        List<String> list = new ArrayList<>();
+
+        int[] sectionCounts = new int[TranslucentQuadAnalyzer.Level.VALUES.length];
+
+        for (Iterator<ChunkRenderList> it = this.renderLists.iterator(); it.hasNext(); ) {
+            var renderList = it.next();
+            var region = renderList.getRegion();
+            var listIter = renderList.sectionsWithGeometryIterator(false);
+            if(listIter != null) {
+                while(listIter.hasNext()) {
+                    RenderSection section = region.getSection(listIter.nextByteAsInt());
+                    var data = section.getTranslucencyData();
+                    var level = data != null ? data.level() : TranslucentQuadAnalyzer.Level.NONE;
+                    sectionCounts[level.ordinal()]++;
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Sorting: ");
+        TranslucentQuadAnalyzer.Level[] values = TranslucentQuadAnalyzer.Level.VALUES;
+        for (int i = 0; i < values.length; i++) {
+            TranslucentQuadAnalyzer.Level level = values[i];
+            sb.append(level.name());
+            sb.append('=');
+            sb.append(sectionCounts[level.ordinal()]);
+            if((i + 1) < values.length) {
+                sb.append(", ");
+            }
+        }
+
+        list.add(sb.toString());
+
+        return list;
+    }
+
     public Collection<String> getDebugStrings() {
         List<String> list = new ArrayList<>();
 
@@ -677,6 +714,10 @@ public class RenderSectionManager {
                 this.rebuildLists.get(ChunkUpdateType.REBUILD).size(),
                 this.rebuildLists.get(ChunkUpdateType.INITIAL_BUILD).size())
         );
+
+        if(this.translucencySorting) {
+            list.addAll(getSortingStrings());
+        }
 
         return list;
     }
