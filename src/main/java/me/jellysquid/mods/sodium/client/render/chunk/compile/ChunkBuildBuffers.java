@@ -17,6 +17,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexTy
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,10 +95,26 @@ public class ChunkBuildBuffers {
         mergedBufferBuilder.flip();
 
         // Generate the canonical index buffer
-        var indexBuffer = new NativeBuffer((vertexCount / 4 * 6) * 4);
-        SharedQuadIndexBuffer.IndexType.INTEGER.createIndexBuffer(indexBuffer.getDirectBuffer(), vertexCount / 4);
+        var mergedIndexBuffer = new NativeBuffer((vertexCount / 4 * 6) * 4);
+        var mergedIndexBufferBuilder = mergedIndexBuffer.getDirectBuffer();
+        for (ModelQuadFacing facing : ModelQuadFacing.VALUES) {
+            var buffer = builder.getVertexBuffer(facing);
 
-        return new BuiltSectionMeshParts(mergedBuffer, indexBuffer, vertexRanges);
+            if (buffer.isEmpty()) {
+                continue;
+            }
+
+            int numPrimitives = buffer.count() / 4;
+
+            var indexBuffer = ByteBuffer.allocate(numPrimitives * 6 * 4).order(ByteOrder.nativeOrder());
+
+            SharedQuadIndexBuffer.IndexType.INTEGER.createIndexBuffer(indexBuffer, numPrimitives);
+            mergedIndexBufferBuilder.put(indexBuffer);
+        }
+
+        mergedIndexBufferBuilder.flip();
+
+        return new BuiltSectionMeshParts(mergedBuffer, mergedIndexBuffer, vertexRanges);
     }
 
     public void destroy() {
