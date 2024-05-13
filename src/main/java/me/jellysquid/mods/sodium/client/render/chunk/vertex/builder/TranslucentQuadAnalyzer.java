@@ -88,7 +88,10 @@ public class TranslucentQuadAnalyzer {
                 // Must use dynamic sort
                 sortLevel = Level.DYNAMIC;
             } else {
-                sortLevel = areAllQuadsOnSamePlane(centerArray) ? Level.NONE : Level.STATIC;
+                // If all quads are on the same plane we can use NONE sorting, otherwise we need to sort statically to put
+                // them in the right order
+                // TODO fix static sorting, it currently produces broken results
+                sortLevel = areAllQuadsOnSamePlane(centerArray) ? Level.NONE : Level.DYNAMIC;
             }
 
             clear();
