@@ -707,6 +707,13 @@ public class RenderSectionManager {
 
         list.add(sb.toString());
 
+        RenderSection self = this.getRenderSection(Mth.floor(cameraPosition.x) >> 4, Mth.floor(cameraPosition.y) >> 4, Mth.floor(cameraPosition.z) >> 4);
+        if (self != null) {
+            var selfData = self.getTranslucencyData();
+            var level = selfData != null ? selfData.level() : TranslucentQuadAnalyzer.Level.NONE;
+            list.add("Current Section: " + level.name());
+        }
+
         return list;
     }
 
