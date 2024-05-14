@@ -233,6 +233,10 @@ publishMods {
         incompatible {
             slug = "rubidium"
         }
+
+        incompatible {
+            slug = "textrues-embeddium-options"
+        }
     }
     modrinth {
         projectId = "sk9rgfiA"
@@ -241,6 +245,10 @@ publishMods {
 
         incompatible {
             slug = "rubidium"
+        }
+
+        incompatible {
+            slug = "textrues-embeddium-options"
         }
     }
 
