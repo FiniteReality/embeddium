@@ -729,10 +729,12 @@ public class RenderSectionManager {
     public Collection<String> getDebugStrings() {
         List<String> list = new ArrayList<>();
 
-        int count = 0;
+        int count = 0, indexCount = 0;
 
         long deviceUsed = 0;
         long deviceAllocated = 0;
+
+        long indexUsed = 0, indexAllocated = 0;
 
         for (var region : this.regions.getLoadedRegions()) {
             var resources = region.getResources();
@@ -749,14 +751,18 @@ public class RenderSectionManager {
             var indexBuffer = resources.getIndexArena();
 
             if (indexBuffer != null) {
-                deviceUsed += indexBuffer.getDeviceUsedMemoryL();
-                deviceAllocated += indexBuffer.getDeviceAllocatedMemoryL();
+                indexUsed += indexBuffer.getDeviceUsedMemoryL();
+                indexAllocated += indexBuffer.getDeviceAllocatedMemoryL();
+                indexCount++;
             }
 
             count++;
         }
 
         list.add(String.format("Geometry Pool: %d/%d MiB (%d buffers)", MathUtil.toMib(deviceUsed), MathUtil.toMib(deviceAllocated), count));
+        if (indexUsed > 0) {
+            list.add(String.format("Index Pool: %d/%d MiB (%d buffers)", MathUtil.toMib(indexUsed), MathUtil.toMib(indexAllocated), indexCount));
+        }
         list.add(String.format("Transfer Queue: %s", this.regions.getStagingBuffer().toString()));
 
         list.add(String.format("Chunk Builder: Permits=%02d | Busy=%02d | Total=%02d",
