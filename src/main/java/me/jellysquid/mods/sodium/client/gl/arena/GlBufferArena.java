@@ -21,7 +21,7 @@ public class GlBufferArena {
     /**
      * When the arena needs to be grown, it will generally attempt to increase its size by (1 / RESIZE_FACTOR).
      */
-    private static final int RESIZE_FACTOR = 6;
+    private static final int RESIZE_FACTOR = 2;
 
     private int resizeIncrement;
 
