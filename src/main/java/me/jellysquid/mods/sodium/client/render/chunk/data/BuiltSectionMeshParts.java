@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.data;
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
+import org.jetbrains.annotations.Nullable;
 
 public class BuiltSectionMeshParts {
     private final VertexRange[] ranges;
@@ -10,7 +11,7 @@ public class BuiltSectionMeshParts {
     private final NativeBuffer indexBuffer;
     private final TranslucentQuadAnalyzer.SortState sortState;
 
-    public BuiltSectionMeshParts(NativeBuffer buffer, NativeBuffer indexBuffer, TranslucentQuadAnalyzer.SortState sortState, VertexRange[] ranges) {
+    public BuiltSectionMeshParts(NativeBuffer buffer, @Nullable NativeBuffer indexBuffer, TranslucentQuadAnalyzer.SortState sortState, VertexRange[] ranges) {
         this.ranges = ranges;
         this.buffer = buffer;
         this.indexBuffer = indexBuffer;
@@ -21,6 +22,7 @@ public class BuiltSectionMeshParts {
         return this.buffer;
     }
 
+    @Nullable
     public NativeBuffer getIndexData() {
         return this.indexBuffer;
     }

@@ -120,6 +120,8 @@ public class RenderRegionManager {
                     storage.removeIndexBuffer(result.render.getSectionIndex());
                 }
 
+                Objects.requireNonNull(mesh.getIndexData());
+
                 uploads.add(new PendingResortUpload(result.render, mesh, pass, new PendingUpload(mesh.getIndexData())));
             }
         }

@@ -103,21 +103,27 @@ public class ChunkBuildBuffers {
 
         mergedBufferBuilder.flip();
 
-        // Generate the canonical index buffer
-        var mergedIndexBuffer = new NativeBuffer((vertexCount / 4 * 6) * 4);
-        int bufOffset = 0;
-        for (ModelQuadFacing facing : facingsToUpload) {
-            var buffer = builder.getVertexBuffer(facing);
+        NativeBuffer mergedIndexBuffer;
 
-            if (buffer.isEmpty()) {
-                continue;
+        if (pass.isSorted()) {
+            // Generate the canonical index buffer
+            mergedIndexBuffer = new NativeBuffer((vertexCount / 4 * 6) * 4);
+            int bufOffset = 0;
+            for (ModelQuadFacing facing : facingsToUpload) {
+                var buffer = builder.getVertexBuffer(facing);
+
+                if (buffer.isEmpty()) {
+                    continue;
+                }
+
+                int numPrimitives = buffer.count() / 4;
+
+                ChunkBufferSorter.generateSimpleIndexBuffer(mergedIndexBuffer, numPrimitives, bufOffset);
+
+                bufOffset += numPrimitives * 6;
             }
-
-            int numPrimitives = buffer.count() / 4;
-
-            ChunkBufferSorter.generateSimpleIndexBuffer(mergedIndexBuffer, numPrimitives, bufOffset);
-
-            bufOffset += numPrimitives * 6;
+        } else {
+            mergedIndexBuffer = null;
         }
 
         return new BuiltSectionMeshParts(mergedBuffer, mergedIndexBuffer, sortState, vertexRanges);

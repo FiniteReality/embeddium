@@ -39,6 +39,7 @@ import org.embeddedt.embeddium.model.ModelDataSnapshotter;
 import org.embeddedt.embeddium.model.UnwrappableBakedModel;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -178,7 +179,8 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
             BuiltSectionMeshParts mesh = buffers.createMesh(pass);
 
             if (mesh != null) {
-                if(pass.isReverseOrder() && SodiumClientMod.canApplyTranslucencySorting()) {
+                if(pass.isSorted()) {
+                    Objects.requireNonNull(mesh.getIndexData());
                     ChunkBufferSorter.sort(
                             mesh.getIndexData(),
                             mesh.getSortState(),

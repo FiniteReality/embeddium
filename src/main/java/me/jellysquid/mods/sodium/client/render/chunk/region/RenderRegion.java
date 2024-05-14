@@ -205,6 +205,7 @@ public class RenderRegion {
         private final GlBufferArena geometryArena;
         private final GlBufferArena indexArena;
         private GlTessellation tessellation;
+        private GlTessellation indexedTessellation;
 
         public DeviceResources(CommandList commandList, StagingBuffer stagingBuffer) {
             int stride;
@@ -230,10 +231,27 @@ public class RenderRegion {
             return this.tessellation;
         }
 
+        public void updateIndexedTessellation(CommandList commandList, GlTessellation tessellation) {
+            if (this.indexedTessellation != null) {
+                this.indexedTessellation.delete(commandList);
+            }
+
+            this.indexedTessellation = tessellation;
+        }
+
+        public GlTessellation getIndexedTessellation() {
+            return this.indexedTessellation;
+        }
+
         public void deleteTessellations(CommandList commandList) {
             if (this.tessellation != null) {
                 this.tessellation.delete(commandList);
                 this.tessellation = null;
+            }
+
+            if (this.indexedTessellation != null) {
+                this.indexedTessellation.delete(commandList);
+                this.indexedTessellation = null;
             }
         }
 

@@ -76,9 +76,14 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
                 continue;
             }
 
-            this.sharedIndexBuffer.ensureCapacity(commandList, this.batch.getIndexBufferSize());
+            GlTessellation tessellation;
 
-            var tessellation = this.prepareTessellation(commandList, region);
+            if (renderPass.isSorted()) {
+                tessellation = this.prepareIndexedTessellation(commandList, region);
+            } else {
+                this.sharedIndexBuffer.ensureCapacity(commandList, this.batch.getIndexBufferSize());
+                tessellation = this.prepareTessellation(commandList, region);
+            }
 
             setModelMatrixUniforms(shader, region, camera);
             executeDrawBatch(commandList, tessellation, this.batch);
@@ -106,6 +111,8 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
         int originY = renderRegion.getChunkY();
         int originZ = renderRegion.getChunkZ();
 
+        int indexPointerMask = pass.isSorted() ? 0xFFFFFFFF : 0;
+
         while (iterator.hasNext()) {
             int sectionIndex = iterator.nextByteAsInt();
 
@@ -117,7 +124,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
 
             int slices;
 
-            if (useBlockFaceCulling && (!pass.isReverseOrder() || !SodiumClientMod.canApplyTranslucencySorting())) {
+            if (useBlockFaceCulling && !pass.isSorted()) {
                 slices = getVisibleFaces(camera.intX, camera.intY, camera.intZ, chunkX, chunkY, chunkZ);
             } else {
                 slices = ModelQuadFacing.ALL;
@@ -126,13 +133,13 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
             slices &= SectionRenderDataUnsafe.getSliceMask(pMeshData);
 
             if (slices != 0) {
-                addDrawCommands(batch, pMeshData, slices);
+                addDrawCommands(batch, pMeshData, slices, indexPointerMask);
             }
         }
     }
 
     @SuppressWarnings("IntegerMultiplicationImplicitCastToLong")
-    private static void addDrawCommands(MultiDrawBatch batch, long pMeshData, int mask) {
+    private static void addDrawCommands(MultiDrawBatch batch, long pMeshData, int mask, int indexPointerMask) {
         final var pBaseVertex = batch.pBaseVertex;
         final var pElementCount = batch.pElementCount;
         final var pElementPointer = batch.pElementPointer;
@@ -142,7 +149,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
         for (int facing = 0; facing < ModelQuadFacing.COUNT; facing++) {
             MemoryUtil.memPutInt(pBaseVertex + (size << 2), SectionRenderDataUnsafe.getVertexOffset(pMeshData, facing));
             MemoryUtil.memPutInt(pElementCount + (size << 2), SectionRenderDataUnsafe.getElementCount(pMeshData, facing));
-            MemoryUtil.memPutAddress(pElementPointer + (size << 3), SectionRenderDataUnsafe.getIndexOffset(pMeshData, facing));
+            MemoryUtil.memPutAddress(pElementPointer + (size << 3), SectionRenderDataUnsafe.getIndexOffset(pMeshData, facing) & indexPointerMask);
 
             size += (mask >> facing) & 1;
         }
@@ -224,6 +231,17 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
         return tessellation;
     }
 
+    private GlTessellation prepareIndexedTessellation(CommandList commandList, RenderRegion region) {
+        var resources = region.getResources();
+        var tessellation = resources.getIndexedTessellation();
+
+        if (tessellation == null) {
+            resources.updateIndexedTessellation(commandList, tessellation = this.createRegionTessellationIndexed(commandList, resources));
+        }
+
+        return tessellation;
+    }
+
     private GlVertexAttributeBinding[] getBindingsForType() {
         if(this.vertexType == ChunkMeshFormats.COMPACT) {
             return new GlVertexAttributeBinding[] {
@@ -255,7 +273,14 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
     private GlTessellation createRegionTessellation(CommandList commandList, RenderRegion.DeviceResources resources) {
         return commandList.createTessellation(GlPrimitiveType.TRIANGLES, new TessellationBinding[] {
                 TessellationBinding.forVertexBuffer(resources.getVertexBuffer(), this.vertexAttributeBindings),
-                TessellationBinding.forElementBuffer(resources.getIndexBuffer() != null ? resources.getIndexBuffer() : this.sharedIndexBuffer.getBufferObject())
+                TessellationBinding.forElementBuffer(this.sharedIndexBuffer.getBufferObject())
+        });
+    }
+
+    private GlTessellation createRegionTessellationIndexed(CommandList commandList, RenderRegion.DeviceResources resources) {
+        return commandList.createTessellation(GlPrimitiveType.TRIANGLES, new TessellationBinding[] {
+                TessellationBinding.forVertexBuffer(resources.getVertexBuffer(), this.vertexAttributeBindings),
+                TessellationBinding.forElementBuffer(resources.getIndexBuffer())
         });
     }
 
