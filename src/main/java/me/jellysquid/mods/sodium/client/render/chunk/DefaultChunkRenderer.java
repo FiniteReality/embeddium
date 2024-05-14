@@ -35,6 +35,8 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
 
     private final GlVertexAttributeBinding[] vertexAttributeBindings;
 
+    private boolean isIndexedPass;
+
     public DefaultChunkRenderer(RenderDevice device, ChunkVertexType vertexType) {
         super(device, vertexType);
 
@@ -60,6 +62,8 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
 
         Iterator<ChunkRenderList> iterator = renderLists.iterator(renderPass.isReverseOrder());
 
+        this.isIndexedPass = renderPass.isSorted();
+
         while (iterator.hasNext()) {
             ChunkRenderList renderList = iterator.next();
 
@@ -76,14 +80,13 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
                 continue;
             }
 
-            GlTessellation tessellation;
 
-            if (renderPass.isSorted()) {
-                tessellation = this.prepareIndexedTessellation(commandList, region);
-            } else {
+
+            if (!this.isIndexedPass) {
                 this.sharedIndexBuffer.ensureCapacity(commandList, this.batch.getIndexBufferSize());
-                tessellation = this.prepareTessellation(commandList, region);
             }
+
+            var tessellation = this.prepareTessellation(commandList, region);
 
             setModelMatrixUniforms(shader, region, camera);
             executeDrawBatch(commandList, tessellation, this.batch);
@@ -222,21 +225,15 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
 
     private GlTessellation prepareTessellation(CommandList commandList, RenderRegion region) {
         var resources = region.getResources();
-        var tessellation = resources.getTessellation();
+        var tessellation = this.isIndexedPass ? resources.getIndexedTessellation() : resources.getTessellation();
 
         if (tessellation == null) {
-            resources.updateTessellation(commandList, tessellation = this.createRegionTessellation(commandList, resources));
-        }
-
-        return tessellation;
-    }
-
-    private GlTessellation prepareIndexedTessellation(CommandList commandList, RenderRegion region) {
-        var resources = region.getResources();
-        var tessellation = resources.getIndexedTessellation();
-
-        if (tessellation == null) {
-            resources.updateIndexedTessellation(commandList, tessellation = this.createRegionTessellationIndexed(commandList, resources));
+            tessellation = this.createRegionTessellation(commandList, resources);
+            if (this.isIndexedPass) {
+                resources.updateIndexedTessellation(commandList, tessellation);
+            } else {
+                resources.updateTessellation(commandList, tessellation);
+            }
         }
 
         return tessellation;
@@ -273,14 +270,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
     private GlTessellation createRegionTessellation(CommandList commandList, RenderRegion.DeviceResources resources) {
         return commandList.createTessellation(GlPrimitiveType.TRIANGLES, new TessellationBinding[] {
                 TessellationBinding.forVertexBuffer(resources.getVertexBuffer(), this.vertexAttributeBindings),
-                TessellationBinding.forElementBuffer(this.sharedIndexBuffer.getBufferObject())
-        });
-    }
-
-    private GlTessellation createRegionTessellationIndexed(CommandList commandList, RenderRegion.DeviceResources resources) {
-        return commandList.createTessellation(GlPrimitiveType.TRIANGLES, new TessellationBinding[] {
-                TessellationBinding.forVertexBuffer(resources.getVertexBuffer(), this.vertexAttributeBindings),
-                TessellationBinding.forElementBuffer(resources.getIndexBuffer())
+                TessellationBinding.forElementBuffer(this.isIndexedPass ? resources.getIndexBuffer() : this.sharedIndexBuffer.getBufferObject())
         });
     }
 
