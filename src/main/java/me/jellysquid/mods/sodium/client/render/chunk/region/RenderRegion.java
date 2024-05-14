@@ -215,7 +215,7 @@ public class RenderRegion {
                 stride = ChunkMeshFormats.VANILLA_LIKE.getVertexFormat().getStride();
             }
             this.geometryArena = new GlBufferArena(commandList, REGION_SIZE * 756, stride, stagingBuffer);
-            this.indexArena = new GlBufferArena(commandList, (REGION_SIZE * 189) / 4 * 6, 4, stagingBuffer);
+            this.indexArena = new GlBufferArena(commandList, (REGION_SIZE * 378) / 4 * 6, 4, stagingBuffer);
         }
 
         public void updateTessellation(CommandList commandList, GlTessellation tessellation) {
