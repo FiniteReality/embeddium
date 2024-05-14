@@ -39,14 +39,8 @@ public class ChunkBuildBuffers {
         for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
             var vertexBuffers = new ChunkMeshBufferBuilder[ModelQuadFacing.COUNT];
 
-            if(!pass.isSorted()) {
-                // Split vertex data by side
-                for (int facing = 0; facing < ModelQuadFacing.COUNT; facing++) {
-                    vertexBuffers[facing] = new ChunkMeshBufferBuilder(this.vertexType, 128 * 1024, false);
-                }
-            } else {
-                // We do not split vertex data by side
-                vertexBuffers[ModelQuadFacing.UNASSIGNED.ordinal()] = new ChunkMeshBufferBuilder(this.vertexType, 128 * 1024, true);
+            for (int facing = 0; facing < ModelQuadFacing.COUNT; facing++) {
+                vertexBuffers[facing] = new ChunkMeshBufferBuilder(this.vertexType, 128 * 1024, pass.isSorted() && facing == ModelQuadFacing.UNASSIGNED.ordinal());
             }
 
             this.builders.put(pass, new BakedChunkModelBuilder(vertexBuffers, !pass.isSorted()));
