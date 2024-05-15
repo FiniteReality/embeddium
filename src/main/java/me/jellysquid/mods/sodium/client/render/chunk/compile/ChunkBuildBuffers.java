@@ -11,9 +11,9 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRende
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
-import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

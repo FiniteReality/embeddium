@@ -7,9 +7,9 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionMeshParts;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
-import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import me.jellysquid.mods.sodium.client.util.task.CancellationToken;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 
 import java.nio.ByteBuffer;
 import java.util.Map;

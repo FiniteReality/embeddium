@@ -2,8 +2,8 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile;
 
 import com.google.common.primitives.Floats;
 import it.unimi.dsi.fastutil.ints.IntArrays;
-import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 

@@ -5,12 +5,12 @@ import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirection;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirectionSet;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.VisibilityEncoding;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
-import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.util.task.CancellationToken;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

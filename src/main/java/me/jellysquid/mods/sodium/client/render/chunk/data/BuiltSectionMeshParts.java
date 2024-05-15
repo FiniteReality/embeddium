@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.render.chunk.data;
 
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
-import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import org.jetbrains.annotations.Nullable;
 
 public class BuiltSectionMeshParts {
