@@ -267,6 +267,19 @@ public class SodiumGameOptionPages {
                         .build())
                 .build());
 
+        groups.add(OptionGroup.createBuilder()
+                .setId(StandardOptions.Group.SORTING)
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setId(StandardOptions.Option.TRANSLUCENT_FACE_SORTING)
+                        .setName(Component.translatable("sodium.options.translucent_face_sorting.name"))
+                        .setTooltip(Component.translatable("sodium.options.translucent_face_sorting.tooltip"))
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.VARIES)
+                        .setBinding((opts, value) -> opts.performance.useTranslucentFaceSorting = value, opts -> opts.performance.useTranslucentFaceSorting)
+                        .setEnabled(!ShaderModBridge.isNvidiumEnabled())
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build())
+                .build());
 
         return new OptionPage(Component.translatable("sodium.options.pages.quality"), ImmutableList.copyOf(groups));
     }
@@ -395,17 +408,6 @@ public class SodiumGameOptionPages {
                         .setTooltip(Component.translatable("sodium.options.cpu_render_ahead_limit.tooltip"))
                         .setControl(opt -> new SliderControl(opt, 0, 9, 1, ControlValueFormatter.translateVariable("sodium.options.cpu_render_ahead_limit.value")))
                         .setBinding((opts, value) -> opts.advanced.cpuRenderAheadLimit = value, opts -> opts.advanced.cpuRenderAheadLimit)
-                        .build()
-                )
-                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
-                        .setId(StandardOptions.Option.TRANSLUCENT_FACE_SORTING)
-                        .setName(Component.translatable("sodium.options.translucent_face_sorting.name"))
-                        .setTooltip(Component.translatable("sodium.options.translucent_face_sorting.tooltip"))
-                        .setControl(TickBoxControl::new)
-                        .setImpact(OptionImpact.VARIES)
-                        .setBinding((opts, value) -> opts.performance.useTranslucentFaceSorting = value, opts -> opts.performance.useTranslucentFaceSorting)
-                        .setEnabled(!ShaderModBridge.isNvidiumEnabled())
-                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build()
                 )
                 .build());

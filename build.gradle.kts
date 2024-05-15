@@ -227,6 +227,9 @@ publishMods {
 		incompatible {
 			slug = "indium"
 		}
+        incompatible {
+            slug = "reeses-sodium-options"
+        }
 	}
 	modrinth {
 		projectId = "sk9rgfiA"
@@ -238,6 +241,9 @@ publishMods {
 		}
         incompatible {
             slug = "indium"
+        }
+        incompatible {
+            slug = "reeses-sodium-options"
         }
 	}
 
