@@ -72,7 +72,7 @@ public class BlockRenderer {
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
         this.useForgeExperimentalLightingPipeline = false;
-        this.indigoRenderContext = new IndigoBlockRenderContext(this.occlusionCache);
+        this.indigoRenderContext = new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData());
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {

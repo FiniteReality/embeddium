@@ -236,20 +236,26 @@ publishMods {
             incompatible {
                 slug = "indium"
             }
+            incompatible {
+                slug = "reeses-sodium-options"
+            }
+        }
+        modrinth {
+            projectId = "sk9rgfiA"
+            accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+            minecraftVersions.add("minecraft_version"())
+
+            incompatible {
+                slug = "sodium"
+            }
+            incompatible {
+                slug = "indium"
+            }
+            incompatible {
+                slug = "reeses-sodium-options"
+            }
         }
     }
-	modrinth {
-		projectId = "sk9rgfiA"
-		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-		minecraftVersions.add("minecraft_version"())
-
-		incompatible {
-			slug = "sodium"
-		}
-        incompatible {
-            slug = "indium"
-        }
-	}
 
 	displayName = "[${"minecraft_version"()}] Embeddium-Fabric ${"mod_version"()}"
 }

@@ -112,10 +112,12 @@ public class ScrollableFrame extends AbstractFrame {
             if (element instanceof ControlElement<?> controlElement && this.canScrollVertical) {
                 Dim2i dim = controlElement.getDimensions();
                 int inputOffset = this.verticalScrollBar.getOffset();
-                if (dim.y() <= this.viewPortDimension.y()) {
-                    inputOffset += dim.y() - this.viewPortDimension.y();
-                } else if (dim.getLimitY() >= this.viewPortDimension.getLimitY()) {
-                    inputOffset += dim.getLimitY() - this.viewPortDimension.getLimitY();
+                int elementTop = dim.y() - inputOffset;
+                int elementBottom = dim.getLimitY() - inputOffset;
+                if (elementTop <= this.viewPortDimension.y()) {
+                    inputOffset += elementTop - this.viewPortDimension.y();
+                } else if (elementBottom >= this.viewPortDimension.getLimitY()) {
+                    inputOffset += elementBottom - this.viewPortDimension.getLimitY();
                 }
                 this.verticalScrollBar.setOffset(inputOffset);
             }

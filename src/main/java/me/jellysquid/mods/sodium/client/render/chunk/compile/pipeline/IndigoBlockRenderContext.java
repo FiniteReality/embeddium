@@ -3,13 +3,18 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
+import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
+import net.fabricmc.fabric.impl.client.indigo.renderer.aocalc.AoCalculator;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
+import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
 import org.embeddedt.embeddium.render.type.RenderTypeExtended;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
@@ -22,11 +27,29 @@ public class IndigoBlockRenderContext extends BlockRenderContext {
 
     private me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext currentContext;
     private final BlockOcclusionCache occlusionCache;
+    private final LightDataAccess lightDataAccess;
 
     private int cullChecked, cullValue;
 
-    public IndigoBlockRenderContext(BlockOcclusionCache occlusionCache) {
+    public IndigoBlockRenderContext(BlockOcclusionCache occlusionCache, LightDataAccess lightDataAccess) {
         this.occlusionCache = occlusionCache;
+        this.lightDataAccess = lightDataAccess;
+    }
+
+    @Override
+    protected AoCalculator createAoCalc(BlockRenderInfo blockInfo) {
+        return new AoCalculator(blockInfo) {
+            @Override
+            public int light(BlockPos pos, BlockState state) {
+                int data = lightDataAccess.get(pos);
+                return LightDataAccess.getLightmap(data);
+            }
+
+            @Override
+            public float ao(BlockPos pos, BlockState state) {
+                return LightDataAccess.unpackAO(lightDataAccess.get(pos));
+            }
+        };
     }
 
     @Override

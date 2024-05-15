@@ -8,10 +8,16 @@ import java.util.EnumMap;
 
 public class LightPipelineProvider {
     private final EnumMap<LightMode, LightPipeline> lighters = new EnumMap<>(LightMode.class);
+    private final LightDataAccess cache;
 
     public LightPipelineProvider(LightDataAccess cache) {
+        this.cache = cache;
         this.lighters.put(LightMode.SMOOTH, new SmoothLightPipeline(cache));
         this.lighters.put(LightMode.FLAT, new FlatLightPipeline(cache));
+    }
+
+    public LightDataAccess getLightData() {
+        return this.cache;
     }
 
     public LightPipeline getLighter(LightMode type) {

@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.terrain;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.client.renderer.RenderType;
 
 public class TerrainRenderPass {
@@ -18,6 +19,10 @@ public class TerrainRenderPass {
 
     public boolean isReverseOrder() {
         return this.useReverseOrder;
+    }
+
+    public boolean isSorted() {
+        return this.useReverseOrder && SodiumClientMod.canApplyTranslucencySorting();
     }
 
     @Deprecated
