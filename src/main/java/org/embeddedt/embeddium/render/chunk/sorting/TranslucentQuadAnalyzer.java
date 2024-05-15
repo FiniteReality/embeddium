@@ -1,4 +1,4 @@
-package me.jellysquid.mods.sodium.client.render.chunk.vertex.builder;
+package org.embeddedt.embeddium.render.chunk.sorting;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;

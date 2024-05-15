@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.data;
 
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.TranslucentQuadAnalyzer;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import org.jetbrains.annotations.Nullable;
 
