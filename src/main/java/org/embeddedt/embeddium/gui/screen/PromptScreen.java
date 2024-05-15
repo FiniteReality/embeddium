@@ -49,6 +49,11 @@ public class PromptScreen extends Screen {
         this.addRenderableWidget(this.actionButton);
     }
 
+    @Override
+    protected void renderBlurredBackground(float f) {
+        // Disable the blur
+    }
+
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
         // First, render the old screen. This gives the illusion of the prompt being on top.
         this.prevScreen.render(drawContext, -1, -1, delta);
