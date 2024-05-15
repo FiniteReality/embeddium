@@ -3,6 +3,8 @@ package me.jellysquid.mods.sodium.client.render.chunk.vertex.builder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 import java.nio.ByteBuffer;
 
@@ -11,13 +13,14 @@ public class ChunkMeshBufferBuilder {
     private final int stride;
 
     private final int initialCapacity;
+    private final TranslucentQuadAnalyzer analyzer;
 
     private ByteBuffer buffer;
     private int count;
     private int capacity;
     private int sectionIndex;
 
-    public ChunkMeshBufferBuilder(ChunkVertexType vertexType, int initialCapacity) {
+    public ChunkMeshBufferBuilder(ChunkVertexType vertexType, int initialCapacity, boolean collectSortState) {
         this.encoder = vertexType.getEncoder();
         this.stride = vertexType.getVertexFormat().getStride();
 
@@ -25,6 +28,8 @@ public class ChunkMeshBufferBuilder {
 
         this.capacity = initialCapacity;
         this.initialCapacity = initialCapacity;
+
+        this.analyzer = collectSortState ? new TranslucentQuadAnalyzer() : null;
     }
 
     public void push(ChunkVertexEncoder.Vertex[] vertices, Material material) {
@@ -36,6 +41,12 @@ public class ChunkMeshBufferBuilder {
         }
 
         long ptr = MemoryUtil.memAddress(this.buffer, this.count * this.stride);
+
+        if (this.analyzer != null) {
+            for (ChunkVertexEncoder.Vertex vertex : vertices) {
+                this.analyzer.capture(vertex);
+            }
+        }
 
         for (ChunkVertexEncoder.Vertex vertex : vertices) {
             ptr = this.encoder.write(ptr, material, vertex, this.sectionIndex);
@@ -60,8 +71,16 @@ public class ChunkMeshBufferBuilder {
     public void start(int sectionIndex) {
         this.count = 0;
         this.sectionIndex = sectionIndex;
+        if(this.analyzer != null) {
+            this.analyzer.clear();
+        }
 
         this.setBufferSize(this.initialCapacity);
+    }
+
+    @Nullable
+    public TranslucentQuadAnalyzer.SortState getSortState() {
+        return this.analyzer != null ? this.analyzer.getSortState() : null;
     }
 
     public void destroy() {

@@ -36,16 +36,20 @@ public class ChunkBuildOutput {
 
     public void delete() {
         for (BuiltSectionMeshParts data : this.meshes.values()) {
-            data.getVertexData()
-                    .free();
+            if(data.getVertexData() != null) {
+                data.getVertexData().free();
+            }
+            if(data.getIndexData() != null) {
+                data.getIndexData().free();
+            }
         }
     }
 
-    public boolean isPartialUpload() {
+    public boolean isIndexOnlyUpload() {
         return partialUpload;
     }
 
-    public void setPartialUpload(boolean flag) {
+    public void setIndexOnlyUpload(boolean flag) {
         partialUpload = flag;
     }
 }

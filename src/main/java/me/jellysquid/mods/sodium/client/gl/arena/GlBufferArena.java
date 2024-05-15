@@ -18,8 +18,12 @@ public class GlBufferArena {
     static final boolean CHECK_ASSERTIONS = false;
 
     private static final GlBufferUsage BUFFER_USAGE = GlBufferUsage.STATIC_DRAW;
+    /**
+     * When the arena needs to be grown, it will generally attempt to increase its size by (1 / RESIZE_FACTOR).
+     */
+    private static final int RESIZE_FACTOR = 2;
 
-    private final int resizeIncrement;
+    private int resizeIncrement;
 
     private final StagingBuffer stagingBuffer;
     private GlMutableBuffer arenaBuffer;
@@ -33,7 +37,7 @@ public class GlBufferArena {
 
     public GlBufferArena(CommandList commands, int initialCapacity, int stride, StagingBuffer stagingBuffer) {
         this.capacity = initialCapacity;
-        this.resizeIncrement = initialCapacity / 16;
+        this.resizeIncrement = initialCapacity / RESIZE_FACTOR;
 
         this.stride = stride;
 
@@ -134,6 +138,7 @@ public class GlBufferArena {
 
         this.arenaBuffer = dstBufferObj;
         this.capacity = capacity;
+        this.resizeIncrement = this.capacity / RESIZE_FACTOR;
     }
 
     private ArrayList<GlBufferSegment> getUsedSegments() {
