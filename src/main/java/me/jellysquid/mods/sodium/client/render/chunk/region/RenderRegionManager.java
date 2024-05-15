@@ -2,10 +2,8 @@ package me.jellysquid.mods.sodium.client.render.chunk.region;
 
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap.Entry;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.gl.arena.GlBufferArena;
 import me.jellysquid.mods.sodium.client.gl.arena.PendingUpload;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.FallbackStagingBuffer;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.MappedStagingBuffer;
@@ -15,8 +13,6 @@ import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionMeshParts;
-import me.jellysquid.mods.sodium.client.render.chunk.data.SectionRenderDataStorage;
-import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion.DeviceResources;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +50,8 @@ public class RenderRegionManager {
 
     public void uploadMeshes(CommandList commandList, Collection<ChunkBuildOutput> results) {
         for (var entry : this.createMeshUploadQueues(results)) {
-            this.uploadMeshes(commandList, entry.getKey(), entry.getValue());
+            this.uploadMeshes(commandList, entry.getKey(), entry.getValue().stream().filter(o -> !o.isIndexOnlyUpload()).toList());
+            this.uploadResorts(commandList, entry.getKey(), entry.getValue().stream().filter(ChunkBuildOutput::isIndexOnlyUpload).toList());
         }
     }
 
@@ -63,9 +60,6 @@ public class RenderRegionManager {
 
         for (ChunkBuildOutput result : results) {
             for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
-                if(result.isPartialUpload() && result.getMesh(pass) == null)
-                    continue;
-
                 var storage = region.getStorage(pass);
 
                 if (storage != null) {
@@ -76,7 +70,7 @@ public class RenderRegionManager {
 
                 if (mesh != null) {
                     uploads.add(new PendingSectionUpload(result.render, mesh, pass,
-                            new PendingUpload(mesh.getVertexData())));
+                            new PendingUpload(mesh.getVertexData()), mesh.getIndexData() != null ? new PendingUpload(mesh.getIndexData()) : null));
                 }
             }
         }
@@ -87,10 +81,13 @@ public class RenderRegionManager {
         }
 
         var resources = region.createResources(commandList);
-        var arena = resources.getGeometryArena();
+        var geometryArena = resources.getGeometryArena();
 
-        boolean bufferChanged = arena.upload(commandList, uploads.stream()
+        boolean bufferChanged = geometryArena.upload(commandList, uploads.stream()
                 .map(upload -> upload.vertexUpload));
+
+        bufferChanged |= resources.getIndexArena().upload(commandList, uploads.stream()
+                .map(upload -> upload.indexUpload).filter(Objects::nonNull));
 
         // If any of the buffers changed, the tessellation will need to be updated
         // Once invalidated the tessellation will be re-created on the next attempted use
@@ -102,7 +99,53 @@ public class RenderRegionManager {
         for (PendingSectionUpload upload : uploads) {
             var storage = region.createStorage(upload.pass);
             storage.setMeshes(upload.section.getSectionIndex(),
-                    upload.vertexUpload.getResult(), upload.meshData.getVertexRanges());
+                    upload.vertexUpload.getResult(), upload.indexUpload != null ? upload.indexUpload.getResult() : null, upload.meshData.getVertexRanges());
+        }
+    }
+
+    private void uploadResorts(CommandList commandList, RenderRegion region, Collection<ChunkBuildOutput> results) {
+        var uploads = new ArrayList<PendingResortUpload>();
+
+        for (ChunkBuildOutput result : results) {
+            for (TerrainRenderPass pass : DefaultTerrainRenderPasses.ALL) {
+                BuiltSectionMeshParts mesh = result.getMesh(pass);
+
+                if(mesh == null) {
+                    continue;
+                }
+
+                var storage = region.getStorage(pass);
+
+                if (storage != null) {
+                    storage.removeIndexBuffer(result.render.getSectionIndex());
+                }
+
+                Objects.requireNonNull(mesh.getIndexData());
+
+                uploads.add(new PendingResortUpload(result.render, mesh, pass, new PendingUpload(mesh.getIndexData())));
+            }
+        }
+
+        // If we have nothing to upload, abort!
+        if (uploads.isEmpty()) {
+            return;
+        }
+
+        var resources = region.createResources(commandList);
+
+        boolean bufferChanged = resources.getIndexArena().upload(commandList, uploads.stream()
+                .map(upload -> upload.indexUpload).filter(Objects::nonNull));
+
+        // If any of the buffers changed, the tessellation will need to be updated
+        // Once invalidated the tessellation will be re-created on the next attempted use
+        if (bufferChanged) {
+            region.refresh(commandList);
+        }
+
+        // Collect the upload results
+        for (PendingResortUpload upload : uploads) {
+            var storage = region.createStorage(upload.pass);
+            storage.replaceIndexBuffer(upload.section.getSectionIndex(), upload.indexUpload.getResult());
         }
     }
 
@@ -152,7 +195,14 @@ public class RenderRegionManager {
         return instance;
     }
 
-    private record PendingSectionUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload vertexUpload) {
+    private record PendingSectionUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload vertexUpload, PendingUpload indexUpload) {
+        private PendingSectionUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload vertexUpload) {
+            this(section, meshData, pass, vertexUpload, null);
+        }
+    }
+
+    private record PendingResortUpload(RenderSection section, BuiltSectionMeshParts meshData, TerrainRenderPass pass, PendingUpload indexUpload) {
+
     }
 
 

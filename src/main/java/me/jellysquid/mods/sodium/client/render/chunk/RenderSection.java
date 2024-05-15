@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
-import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirection;
 import me.jellysquid.mods.sodium.client.render.chunk.occlusion.GraphDirectionSet;
@@ -11,6 +10,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +49,7 @@ public class RenderSection {
     private BlockEntity @Nullable[] culledBlockEntities;
     private TextureAtlasSprite @Nullable[] animatedSprites;
 
-    private ChunkBufferSorter.SortBuffer translucencyData;
+    private TranslucentQuadAnalyzer.SortState sortState;
 
 
     // Pending Update State
@@ -64,6 +64,9 @@ public class RenderSection {
 
     // Lifetime state
     private boolean disposed;
+
+    // Used by the translucency sorter, to determine when a section needs sorting again
+    public double lastCameraX, lastCameraY, lastCameraZ;
 
     public RenderSection(RenderRegion region, int chunkX, int chunkY, int chunkZ) {
         this.chunkX = chunkX;
@@ -285,6 +288,10 @@ public class RenderSection {
         return this.flags;
     }
 
+    public boolean isAlignedWithSectionOnGrid(int otherX, int otherY, int otherZ) {
+        return this.chunkX == otherX || this.chunkY == otherY || this.chunkZ == otherZ;
+    }
+
     /**
      * Returns the occlusion culling data which determines this chunk's connectedness on the visibility graph.
      */
@@ -314,12 +321,17 @@ public class RenderSection {
         return this.globalBlockEntities;
     }
 
-    public ChunkBufferSorter.SortBuffer getTranslucencyData() {
-        return this.translucencyData;
+    @Nullable
+    public TranslucentQuadAnalyzer.SortState getSortState() {
+        return this.sortState;
     }
 
-    public void setTranslucencyData(ChunkBufferSorter.SortBuffer data) {
-        this.translucencyData = data;
+    public boolean containsTranslucentGeometry() {
+        return (this.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0;
+    }
+
+    public void setSortState(@Nullable TranslucentQuadAnalyzer.SortState data) {
+        this.sortState = data != null ? data.compactForStorage() : null;
     }
 
     public @Nullable CancellationToken getBuildCancellationToken() {

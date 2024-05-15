@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.data;
 
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import org.lwjgl.system.MemoryUtil;
 
 // This code is a terrible hack to get around the fact that we are so incredibly memory bound, and that we
@@ -14,11 +15,20 @@ import org.lwjgl.system.MemoryUtil;
 //
 // Please never try to write performance critical code in Java. This is what it will do to you. And you will still be
 // three times slower than the most naive solution in literally any other language that LLVM can compile.
+//
+// Memory layout:
+// u64 slice_mask;
+// u32 vertex_offset;
+// u32 element_count;
+// u32 index_offset;
 public class SectionRenderDataUnsafe {
     private static final long OFFSET_SLICE_MASK = 0;
     private static final long OFFSET_SLICE_RANGES = 8;
 
-    private static final long STRIDE = 64;
+    private static final long DATA_PER_FACING_SIZE = 12;
+    private static final long NUM_FACINGS = 7; // 6 directions + UNASSIGNED
+
+    private static final long STRIDE = 8 + (DATA_PER_FACING_SIZE * NUM_FACINGS);
 
     public static long allocateHeap(int count) {
         return MemoryUtil.nmemCalloc(count, STRIDE);
@@ -45,18 +55,26 @@ public class SectionRenderDataUnsafe {
     }
 
     public static void setVertexOffset(long ptr, int facing, int value) {
-        MemoryUtil.memPutInt(ptr + OFFSET_SLICE_RANGES + (facing * 8L) + 0L, value);
+        MemoryUtil.memPutInt(ptr + OFFSET_SLICE_RANGES + (facing * DATA_PER_FACING_SIZE) + 0L, value);
     }
 
     public static int getVertexOffset(long ptr, int facing) {
-        return MemoryUtil.memGetInt(ptr + OFFSET_SLICE_RANGES + (facing * 8L) + 0L);
+        return MemoryUtil.memGetInt(ptr + OFFSET_SLICE_RANGES + (facing * DATA_PER_FACING_SIZE) + 0L);
     }
 
     public static void setElementCount(long ptr, int facing, int value) {
-        MemoryUtil.memPutInt(ptr + OFFSET_SLICE_RANGES + (facing * 8L) + 4L, value);
+        MemoryUtil.memPutInt(ptr + OFFSET_SLICE_RANGES + (facing * DATA_PER_FACING_SIZE) + 4L, value);
     }
 
     public static int getElementCount(long ptr, int facing) {
-        return MemoryUtil.memGetInt(ptr + OFFSET_SLICE_RANGES + (facing * 8L) + 4L);
+        return MemoryUtil.memGetInt(ptr + OFFSET_SLICE_RANGES + (facing * DATA_PER_FACING_SIZE) + 4L);
+    }
+
+    public static void setIndexOffset(long ptr, int facing, int value) {
+        MemoryUtil.memPutInt(ptr + OFFSET_SLICE_RANGES + (facing * DATA_PER_FACING_SIZE) + 8L, value);
+    }
+
+    public static int getIndexOffset(long ptr, int facing) {
+        return MemoryUtil.memGetInt(ptr + OFFSET_SLICE_RANGES + (facing * DATA_PER_FACING_SIZE) + 8L);
     }
 }
