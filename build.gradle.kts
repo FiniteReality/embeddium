@@ -1,6 +1,6 @@
 plugins {
     id("idea")
-    id("net.neoforged.gradle.userdev") version("7.0.118")
+    id("net.neoforged.gradle.userdev") version("7.0.128")
     id("maven-publish")
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
@@ -116,6 +116,9 @@ fun DependencyHandlerScope.compatCompileOnly(dependency: String) {
 
 dependencies {
     implementation("net.neoforged:neoforge:${"forge_version"()}")
+
+    // FIXME remove when NG not loading this from NF itself is fixed
+    implementation("io.github.llamalad7:mixinextras-neoforge:0.3.5")
 
     // Mods
     compatCompileOnly("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
