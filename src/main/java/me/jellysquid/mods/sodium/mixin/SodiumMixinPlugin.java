@@ -8,6 +8,7 @@ import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.config.ConfigMigrator;
+import org.embeddedt.embeddium.taint.mixin.MixinTaintDetector;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -42,6 +43,8 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
                 this.config.getOptionCount(), this.config.getOptionOverrideCount());
 
         SodiumPreLaunch.onPreLaunch();
+
+        MixinTaintDetector.initialize();
     }
 
     @Override
