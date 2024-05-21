@@ -132,6 +132,12 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     }
 
     @Override
+    public int embeddium$getLightingNormal() {
+        int n = getForgeNormal(0);
+        return n != 0 ? n : this.normal;
+    }
+
+    @Override
     public boolean hasAmbientOcclusion() {
         return this.hasAmbientOcclusion;
     }

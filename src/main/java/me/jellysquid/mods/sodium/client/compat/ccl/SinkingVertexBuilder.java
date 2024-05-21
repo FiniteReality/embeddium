@@ -118,6 +118,11 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         public int getForgeNormal(int idx) {
             return 0;
         }
+
+        @Override
+        public int embeddium$getLightingNormal() {
+            return 0;
+        }
     };
 
     private static ByteBuffer reallocDirect(ByteBuffer old, int capacity) {

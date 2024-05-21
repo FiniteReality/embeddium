@@ -66,6 +66,8 @@ public interface ModelQuadView {
 
     int getForgeNormal(int idx);
 
+    int embeddium$getLightingNormal();
+
     default boolean hasColor() {
         return this.getColorIndex() != -1;
     }

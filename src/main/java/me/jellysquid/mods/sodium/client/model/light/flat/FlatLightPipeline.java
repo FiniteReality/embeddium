@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
+import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
@@ -48,7 +49,8 @@ public class FlatLightPipeline implements LightPipeline {
         }
 
         Arrays.fill(out.lm, lightmap);
-        Arrays.fill(out.br, this.lightCache.getWorld().getShade(lightFace, shade));
+        int n = quad.embeddium$getLightingNormal();
+        Arrays.fill(out.br, this.lightCache.getWorld().getShade(NormI8.unpackX(n), NormI8.unpackY(n), NormI8.unpackZ(n), shade));
     }
 
     /**

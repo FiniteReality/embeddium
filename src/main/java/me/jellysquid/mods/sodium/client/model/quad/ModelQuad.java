@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.model.quad;
 
 import static me.jellysquid.mods.sodium.client.util.ModelQuadUtil.*;
 
+import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 
@@ -137,6 +138,17 @@ public class ModelQuad implements ModelQuadViewMutable {
     @Override
     public Direction getLightFace() {
         return this.direction;
+    }
+
+    @Override
+    public int embeddium$getLightingNormal() {
+        int forgeNormal = getForgeNormal(0);
+        if(forgeNormal != 0) {
+            return forgeNormal;
+        } else {
+            var normal = direction.getNormal();
+            return NormI8.pack(normal.getX(), normal.getY(), normal.getZ());
+        }
     }
 
     @Override
