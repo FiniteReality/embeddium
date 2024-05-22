@@ -162,8 +162,7 @@ publishing {
     }
     publications {
         this.create<MavenPublication>("mavenJava") {
-            artifact(tasks.jar)
-            artifact(tasks.named("sourcesJar"))
+            from(components["java"])
         }
     }
 

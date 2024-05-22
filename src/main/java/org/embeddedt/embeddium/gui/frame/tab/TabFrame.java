@@ -163,13 +163,11 @@ public class TabFrame extends AbstractFrame {
 
     @Override
     public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
-        this.applyScissor(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height(), () -> {
-            for (AbstractWidget widget : this.children) {
-                if (widget != this.selectedFrame) {
-                    widget.render(drawContext, mouseX, mouseY, delta);
-                }
+        for (AbstractWidget widget : this.children) {
+            if (widget != this.selectedFrame) {
+                widget.render(drawContext, mouseX, mouseY, delta);
             }
-        });
+        }
         if(this.selectedFrame != null) {
             this.selectedFrame.render(drawContext, mouseX, mouseY, delta);
         }
