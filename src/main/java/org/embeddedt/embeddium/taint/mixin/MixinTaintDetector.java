@@ -50,7 +50,7 @@ public class MixinTaintDetector implements IExtension {
     /**
      * The enforcement level of taint detection. The default will only warn and not enforce the new requirements.
      */
-    public static final EnforceLevel ENFORCE_LEVEL = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", EnforceLevel.WARN.name()));
+    public static final EnforceLevel ENFORCE_LEVEL = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", EnforceLevel.IGNORE.name()));
     /**
      * Mods which are not subject to the new taint requirements.
      */
