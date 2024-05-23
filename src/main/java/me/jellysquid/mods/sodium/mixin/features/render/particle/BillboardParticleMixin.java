@@ -71,16 +71,16 @@ public abstract class BillboardParticleMixin extends Particle {
             long buffer = stack.nmalloc(4 * ParticleVertex.STRIDE);
             long ptr = buffer;
 
-            writeVertex(ptr, quaternion,-1.0F, -1.0F, x, y, z, maxU, maxV, color, light, size);
+            writeVertex(ptr, quaternion,1.0F, -1.0F, x, y, z, maxU, maxV, color, light, size);
             ptr += ParticleVertex.STRIDE;
 
-            writeVertex(ptr, quaternion,-1.0F, 1.0F, x, y, z, maxU, minV, color, light, size);
+            writeVertex(ptr, quaternion,1.0F, 1.0F, x, y, z, maxU, minV, color, light, size);
             ptr += ParticleVertex.STRIDE;
 
-            writeVertex(ptr, quaternion,1.0F, 1.0F, x, y, z, minU, minV, color, light, size);
+            writeVertex(ptr, quaternion,-1.0F, 1.0F, x, y, z, minU, minV, color, light, size);
             ptr += ParticleVertex.STRIDE;
 
-            writeVertex(ptr, quaternion,1.0F, -1.0F, x, y, z, minU, maxV, color, light, size);
+            writeVertex(ptr, quaternion,-1.0F, -1.0F, x, y, z, minU, maxV, color, light, size);
             ptr += ParticleVertex.STRIDE;
 
             writer.push(stack, buffer, 4, ParticleVertex.FORMAT);
