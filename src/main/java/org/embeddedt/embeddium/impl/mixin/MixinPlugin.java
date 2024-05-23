@@ -127,7 +127,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         Set<Path> rootPaths = new HashSet<>();
         // This allows us to see it from multiple sourcesets if need be
         for(String basePackage : new String[] { "core", "modcompat" }) {
-            Path mixinPackagePath = modFile.findResource("org", "embeddedt", "embeddium", "mixin", basePackage);
+            Path mixinPackagePath = modFile.findResource("org", "embeddedt", "embeddium", "impl", "mixin", basePackage);
             if(Files.exists(mixinPackagePath)) {
                 rootPaths.add(mixinPackagePath.getParent().toAbsolutePath());
             }
