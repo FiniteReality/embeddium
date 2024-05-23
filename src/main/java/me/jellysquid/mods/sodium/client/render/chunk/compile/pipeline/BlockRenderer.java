@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.model.color.ColorProvider;
 import me.jellysquid.mods.sodium.client.model.color.ColorProviderRegistry;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
@@ -16,9 +15,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder.Vertex;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
@@ -63,8 +60,6 @@ public class BlockRenderer {
 
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
-    private final SinkingVertexBuilder sinkingVertexBuilder = new SinkingVertexBuilder();
-
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
@@ -96,11 +91,12 @@ public class BlockRenderer {
 
         if(!customRenderers.isEmpty()) {
             for (BlockRendererRegistry.Renderer customRenderer : customRenderers) {
-                sinkingVertexBuilder.reset();
-                BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(ctx, random, sinkingVertexBuilder);
-                sinkingVertexBuilder.flush(meshBuilder, material, ctx.origin());
-                if (result == BlockRendererRegistry.RenderResult.OVERRIDE) {
-                    return;
+                try(var consumer = meshBuilder.asVertexConsumer(material)) {
+                    consumer.embeddium$setOffset(ctx.origin());
+                    BlockRendererRegistry.RenderResult result = customRenderer.renderBlock(ctx, random, consumer);
+                    if (result == BlockRendererRegistry.RenderResult.OVERRIDE) {
+                        return;
+                    }
                 }
             }
         }

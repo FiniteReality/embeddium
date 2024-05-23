@@ -1,13 +1,20 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.buffers;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
+import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
+import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
+import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public class BakedChunkModelBuilder implements ChunkModelBuilder {
     private final ChunkMeshBufferBuilder[] vertexBuffers;
     private final boolean splitBySide;
+    private final MojangVertexConsumer vertexConsumer = new MojangVertexConsumer();
 
     private BuiltSectionInfo.Builder renderData;
 
@@ -26,6 +33,12 @@ public class BakedChunkModelBuilder implements ChunkModelBuilder {
         this.renderData.addSprite(sprite);
     }
 
+    @Override
+    public ChunkModelVertexConsumer asVertexConsumer(Material material) {
+        this.vertexConsumer.initialize(material);
+        return this.vertexConsumer;
+    }
+
     public void destroy() {
         for (ChunkMeshBufferBuilder builder : this.vertexBuffers) {
             if(builder != null) {
@@ -41,6 +54,94 @@ public class BakedChunkModelBuilder implements ChunkModelBuilder {
             if(vertexBuffer != null) {
                 vertexBuffer.start(sectionIndex);
             }
+        }
+    }
+
+    class MojangVertexConsumer implements ChunkModelVertexConsumer {
+        private final ChunkVertexEncoder.Vertex[] vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
+        private ChunkVertexEncoder.Vertex currentVertexObj;
+        private int currentIndex;
+        private final Vector3f computedNormal = new Vector3f();
+        private Material material;
+        private float xOff, yOff, zOff;
+
+        private void initialize(Material material) {
+            this.material = material;
+            this.xOff = this.yOff = this.zOff = 0;
+            this.currentIndex = -1;
+        }
+
+        private void flushQuad() {
+            var n = computedNormal;
+            ModelQuadUtil.calculateNormal(vertices, n);
+            var facing = ModelQuadUtil.findNormalFace(n.x, n.y, n.z);
+            getVertexBuffer(facing).push(vertices, material);
+            currentIndex = -1;
+        }
+
+        private int flushLastVertex() {
+            int nextIndex = currentIndex + 1;
+            if(nextIndex == 4) {
+                flushQuad();
+                nextIndex = 0;
+            }
+            currentIndex = nextIndex;
+            return nextIndex;
+        }
+
+        @Override
+        public void embeddium$setOffset(Vector3fc offset) {
+            xOff = offset.x();
+            yOff = offset.y();
+            zOff = offset.z();
+        }
+
+        @Override
+        public void close() {
+            if(currentIndex >= 0) {
+                flushLastVertex();
+            }
+        }
+
+        @Override
+        public VertexConsumer addVertex(float x, float y, float z) {
+            int index = flushLastVertex();
+            var vertex = this.vertices[index];
+            vertex.x = xOff + x;
+            vertex.y = yOff + y;
+            vertex.z = zOff + z;
+            currentVertexObj = vertex;
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setColor(int r, int g, int b, int a) {
+            currentVertexObj.color = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv(float u, float v) {
+            var vertex = currentVertexObj;
+            vertex.u = u;
+            vertex.v = v;
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv1(int p_350815_, int p_350629_) {
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv2(int p_350859_, int p_351004_) {
+            currentVertexObj.light = (p_351004_ << 16) | (p_350859_ & 0xFFFF);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setNormal(float p_350429_, float p_350286_, float p_350836_) {
+            return this;
         }
     }
 }

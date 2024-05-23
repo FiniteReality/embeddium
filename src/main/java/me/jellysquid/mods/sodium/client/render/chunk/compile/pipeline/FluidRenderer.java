@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
-import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.light.LightPipelineProvider;
@@ -66,7 +65,6 @@ public class FluidRenderer {
     private final ColorProviderRegistry colorProviderRegistry;
 
     private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
-    private final SinkingVertexBuilder vertexBuilder = new SinkingVertexBuilder();
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
@@ -132,9 +130,10 @@ public class FluidRenderer {
         var meshBuilder = buffers.get(material);
 
         // Embeddium: Apply Forge's hook for fluid rendering
-        vertexBuilder.reset();
-        boolean skipDefaultRendering = IClientFluidTypeExtensions.of(fluidState).renderFluid(fluidState, world, blockPos, vertexBuilder, world.getBlockState(blockPos));
-        vertexBuilder.flush(meshBuilder, material, 0, 0, 0);
+        boolean skipDefaultRendering;
+        try(var consumer = meshBuilder.asVertexConsumer(material)) {
+            skipDefaultRendering = IClientFluidTypeExtensions.of(fluidState).renderFluid(fluidState, world, blockPos, consumer, world.getBlockState(blockPos));
+        }
         if(skipDefaultRendering) {
             // Animate any sprites still, since they may have been used in the custom hook
             for(TextureAtlasSprite sprite : fluidSpriteCache.getSprites(world, blockPos, fluidState)) {
