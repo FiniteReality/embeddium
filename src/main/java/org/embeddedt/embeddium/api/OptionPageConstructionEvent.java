@@ -1,10 +1,10 @@
 package org.embeddedt.embeddium.api;
 
-import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
+import org.embeddedt.embeddium.gui.options.OptionGroup;
 import net.minecraft.network.chat.Component;
 import org.embeddedt.embeddium.api.eventbus.EmbeddiumEvent;
 import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
-import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
+import org.embeddedt.embeddium.gui.options.OptionIdentifier;
 
 import java.util.ArrayList;
 import java.util.Collections;

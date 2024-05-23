@@ -40,7 +40,7 @@ public class MixinTaintDetector implements IExtension {
     /**
      * The list of class packages that are considered "internal".
      */
-    private static final List<String> TARGET_PREFIXES = List.of("me.jellysquid.mods.sodium", "org.embeddedt.embeddium");
+    private static final List<String> TARGET_PREFIXES = List.of("org.embeddedt.embeddium");
     /**
      * A method handle used to call the package-private {@link ClassInfo#getMixins()} method. We need this to find out
      * about mixins before they are applied.
@@ -48,9 +48,9 @@ public class MixinTaintDetector implements IExtension {
     private static final MethodHandle GET_MIXINS_ON_CLASS_INFO;
     private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-MixinTaintDetector");
     /**
-     * The enforcement level of taint detection. The default will only warn and not enforce the new requirements.
+     * The enforcement level of taint detection. The default as of 1.21 is to crash.
      */
-    public static final EnforceLevel ENFORCE_LEVEL = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", EnforceLevel.IGNORE.name()));
+    public static final EnforceLevel ENFORCE_LEVEL = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", EnforceLevel.CRASH.name()));
     /**
      * Mods which are not subject to the new taint requirements.
      */

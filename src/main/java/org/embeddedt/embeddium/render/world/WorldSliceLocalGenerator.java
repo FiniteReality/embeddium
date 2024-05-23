@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.render.world;
 
 import com.google.common.base.Suppliers;
-import me.jellysquid.mods.sodium.client.world.WorldSlice;
+import org.embeddedt.embeddium.world.WorldSlice;
 import net.minecraft.world.level.BlockAndTintGetter;
 import org.objectweb.asm.*;
 import org.objectweb.asm.util.CheckClassAdapter;
@@ -64,11 +64,11 @@ public class WorldSliceLocalGenerator {
     }
 
     /**
-     * Generate a delegate wrapper around {@link me.jellysquid.mods.sodium.client.world.WorldSlice}. This delegate is used
+     * Generate a delegate wrapper around {@link org.embeddedt.embeddium.world.WorldSlice}. This delegate is used
      * to provide a unique BlockAndTintGetter for each subchunk, like vanilla does, while avoiding the huge array allocations
      * associated with WorldSlice.
      *
-     * The returned object is guaranteed to implement all interfaces implemented by {@link me.jellysquid.mods.sodium.client.world.WorldSlice}.
+     * The returned object is guaranteed to implement all interfaces implemented by {@link org.embeddedt.embeddium.world.WorldSlice}.
      * @param originalSlice the backing world slice for the delegate
      * @return a unique BlockAndTintGetter guaranteed to be reference-unequal with any other one returned by this
      * method, that points to the given WorldSlice

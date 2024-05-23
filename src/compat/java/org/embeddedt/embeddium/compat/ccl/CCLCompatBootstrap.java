@@ -1,14 +1,13 @@
 package org.embeddedt.embeddium.compat.ccl;
 
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.embeddedt.embeddium.Embeddium;
 
-@EventBusSubscriber(modid = SodiumClientMod.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Embeddium.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class CCLCompatBootstrap {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {

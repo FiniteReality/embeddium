@@ -1,9 +1,9 @@
 package org.embeddedt.embeddium.gui.frame.tab;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import org.embeddedt.embeddium.Embeddium;
+import org.embeddedt.embeddium.gui.widgets.FlatButtonWidget;
+import org.embeddedt.embeddium.util.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -12,7 +12,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
@@ -54,12 +53,12 @@ public class TabHeaderWidget extends FlatButtonWidget {
                         logo.close();
                         throw new IOException("Logo " + logoFile.get() + " for " + modId + " is not square");
                     }
-                    texture = ResourceLocation.fromNamespaceAndPath(SodiumClientMod.MODID, "logo/" + modId);
+                    texture = ResourceLocation.fromNamespaceAndPath(Embeddium.MODID, "logo/" + modId);
                     Minecraft.getInstance().getTextureManager().register(texture, new DynamicTexture(logo));
                 }
             } catch(IOException e) {
                 erroredLogos.add(modId);
-                SodiumClientMod.logger().error("Exception reading logo for " + modId, e);
+                Embeddium.logger().error("Exception reading logo for " + modId, e);
             }
         }
         this.logoTexture = texture;

@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.util;
 
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
+import org.embeddedt.embeddium.gui.options.Option;
+import org.embeddedt.embeddium.gui.options.OptionPage;
 
 import java.util.ArrayList;
 import java.util.Collection;

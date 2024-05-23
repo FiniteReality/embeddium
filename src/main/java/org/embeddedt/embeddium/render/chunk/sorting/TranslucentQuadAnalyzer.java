@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.render.chunk.sorting;
 
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
+import org.embeddedt.embeddium.render.chunk.vertex.format.ChunkVertexEncoder;
 import net.minecraft.util.Mth;
 import org.joml.Vector3f;
 

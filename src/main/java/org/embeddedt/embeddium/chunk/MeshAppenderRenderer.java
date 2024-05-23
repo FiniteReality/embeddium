@@ -1,9 +1,9 @@
 package org.embeddedt.embeddium.chunk;
 
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
-import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
-import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
+import org.embeddedt.embeddium.render.chunk.compile.ChunkBuildBuffers;
+import org.embeddedt.embeddium.render.chunk.terrain.material.DefaultMaterials;
+import org.embeddedt.embeddium.render.chunk.terrain.material.Material;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import org.embeddedt.embeddium.api.MeshAppender;

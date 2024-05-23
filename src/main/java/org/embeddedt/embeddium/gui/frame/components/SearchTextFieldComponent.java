@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.gui.frame.components;
 
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import org.embeddedt.embeddium.gui.options.OptionPage;
+import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
+import org.embeddedt.embeddium.util.Dim2i;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;

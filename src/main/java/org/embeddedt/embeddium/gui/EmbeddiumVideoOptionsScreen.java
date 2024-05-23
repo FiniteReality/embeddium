@@ -2,20 +2,21 @@ package org.embeddedt.embeddium.gui;
 
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
-import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI;
-import me.jellysquid.mods.sodium.client.gui.console.Console;
-import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
-import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
-import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.caffeinemc.mods.sodium.api.util.ColorARGB;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
+import org.embeddedt.embeddium.Embeddium;
+import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
+import org.embeddedt.embeddium.data.fingerprint.HashedFingerprint;
+import org.embeddedt.embeddium.gui.console.Console;
+import org.embeddedt.embeddium.gui.console.message.MessageLevel;
+import org.embeddedt.embeddium.gui.options.Option;
+import org.embeddedt.embeddium.gui.options.OptionFlag;
+import org.embeddedt.embeddium.gui.options.OptionGroup;
+import org.embeddedt.embeddium.gui.options.OptionPage;
+import org.embeddedt.embeddium.gui.options.storage.OptionStorage;
+import org.embeddedt.embeddium.gui.widgets.FlatButtonWidget;
+import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.util.ColorARGB;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,10 +25,9 @@ import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
+import org.embeddedt.embeddium.gui.options.OptionIdentifier;
 import org.embeddedt.embeddium.gui.frame.AbstractFrame;
 import org.embeddedt.embeddium.gui.frame.BasicFrame;
-import org.embeddedt.embeddium.gui.frame.ScrollableFrame;
 import org.embeddedt.embeddium.gui.frame.components.SearchTextFieldComponent;
 import org.embeddedt.embeddium.gui.frame.components.SearchTextFieldModel;
 import org.embeddedt.embeddium.gui.frame.tab.Tab;
@@ -36,21 +36,17 @@ import org.embeddedt.embeddium.gui.screen.PromptScreen;
 import org.embeddedt.embeddium.gui.theme.DefaultColors;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.util.PlatformUtil;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class EmbeddiumVideoOptionsScreen extends Screen {
-    private static final ResourceLocation LOGO_LOCATION = ResourceLocation.fromNamespaceAndPath(SodiumClientMod.MODID, "textures/embeddium/gui/logo_transparent.png");
+    private static final ResourceLocation LOGO_LOCATION = ResourceLocation.fromNamespaceAndPath(Embeddium.MODID, "textures/embeddium/gui/logo_transparent.png");
     private static final int LOGO_SIZE = 256;
 
     private static final AtomicReference<Component> tabFrameSelectedTab = new AtomicReference<>(null);
@@ -80,13 +76,26 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         registerTextures();
     }
 
+    public static List<OptionPage> makePages() {
+        List<OptionPage> pages = new ArrayList<>();
+
+        pages.add(EmbeddiumGameOptionPages.general());
+        pages.add(EmbeddiumGameOptionPages.quality());
+        pages.add(EmbeddiumGameOptionPages.performance());
+        pages.add(EmbeddiumGameOptionPages.advanced());
+
+        OptionGUIConstructionEvent.BUS.post(new OptionGUIConstructionEvent(pages));
+
+        return List.copyOf(pages);
+    }
+
     private void checkPromptTimers() {
         // Don't show the donation prompt in situations where we know it causes problems.
         if (PlatformUtil.isDevelopmentEnvironment()) {
             return;
         }
 
-        var options = SodiumClientMod.options();
+        var options = Embeddium.options();
 
         // If the user has disabled the nags forcefully (by config), or has already seen the prompt, don't show it again.
         if (options.notifications.forceDisableDonationPrompts || options.notifications.hasSeenDonationPrompt) {
@@ -98,7 +107,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         try {
             fingerprint = HashedFingerprint.loadFromDisk();
         } catch (Throwable t) {
-            SodiumClientMod.logger()
+            Embeddium.logger()
                     .error("Failed to read the fingerprint from disk", t);
         }
 
@@ -119,17 +128,16 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
             options.notifications.hasSeenDonationPrompt = true;
 
             try {
-                SodiumGameOptions.writeToDisk(options);
+                EmbeddiumOptions.writeToDisk(options);
             } catch (IOException e) {
-                SodiumClientMod.logger()
+                Embeddium.logger()
                         .error("Failed to update config file", e);
             }
         }
     }
 
     private void openDonationPrompt() {
-        //noinspection removal
-        var prompt = new PromptScreen(this, SodiumOptionsGUI.DONATION_PROMPT_MESSAGE, 320, 190,
+        var prompt = new PromptScreen(this, DONATION_PROMPT_MESSAGE, 320, 190,
                 new PromptScreen.Action(Component.literal("Support Sodium"), this::openDonationPage));
 
         this.minecraft.setScreen(prompt);
@@ -200,12 +208,12 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         this.donateButton = new FlatButtonWidget(donateButtonDim, donationText, this::openDonationPage);
         this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, Component.literal("x"), this::hideDonationButton);
 
-        if (SodiumClientMod.options().notifications.hasClearedDonationButton) {
+        if (Embeddium.options().notifications.hasClearedDonationButton) {
             this.setDonationButtonVisibility(false);
         }
 
         Dim2i searchTextFieldDim;
-        if (SodiumClientMod.options().notifications.hasClearedDonationButton) {
+        if (Embeddium.options().notifications.hasClearedDonationButton) {
             searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width(), 20);
         } else {
             searchTextFieldDim = new Dim2i(tabFrameDim.x(), tabFrameDim.y() - 26, tabFrameDim.width() - (tabFrameDim.getLimitX() - donateButtonDim.x()) - 2, 20);
@@ -336,11 +344,11 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     }
 
     private void hideDonationButton() {
-        SodiumGameOptions options = SodiumClientMod.options();
+        EmbeddiumOptions options = Embeddium.options();
         options.notifications.hasClearedDonationButton = true;
 
         try {
-            SodiumGameOptions.writeToDisk(options);
+            EmbeddiumOptions.writeToDisk(options);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save configuration", e);
         }
@@ -425,5 +433,17 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     @Override
     public void onClose() {
         this.minecraft.setScreen(this.prevScreen);
+    }
+
+    public static final List<FormattedText> DONATION_PROMPT_MESSAGE;
+
+    static {
+        DONATION_PROMPT_MESSAGE = List.of(
+                FormattedText.composite(Component.literal("Hello!")),
+                FormattedText.composite(Component.literal("It seems that you've been enjoying "), Component.literal("Embeddium").setStyle(Style.EMPTY.withColor(0x27eb92)), Component.literal(", a fork of Sodium for Minecraft.")),
+                FormattedText.composite(Component.literal("Sodium is complex, and requires "), Component.literal("thousands of hours").setStyle(Style.EMPTY.withColor(0xff6e00)), Component.literal(" of development, debugging, and tuning to create the experience that players have come to expect.")),
+                FormattedText.composite(Component.literal("If you'd like to show a token of appreciation, and support the development of Sodium in the process, then consider "), Component.literal("buying them a coffee").setStyle(Style.EMPTY.withColor(0xed49ce)), Component.literal(".")),
+                FormattedText.composite(Component.literal("And thanks again for using the mod! We hope it helps you (and your computer.)"))
+        );
     }
 }

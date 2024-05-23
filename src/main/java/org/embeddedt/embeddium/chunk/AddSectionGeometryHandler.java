@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.chunk;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import org.embeddedt.embeddium.Embeddium;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -9,7 +9,7 @@ import net.neoforged.neoforge.client.event.AddSectionGeometryEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 
-@EventBusSubscriber(modid = SodiumClientMod.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = Embeddium.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class AddSectionGeometryHandler {
     private static final ThreadLocal<PoseStack> DUMMY_POSE_STACK = ThreadLocal.withInitial(PoseStack::new);
 

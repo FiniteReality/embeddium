@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.api;
 
-import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
+import org.embeddedt.embeddium.render.chunk.compile.ChunkBuildBuffers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;

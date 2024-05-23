@@ -1,13 +1,13 @@
 package org.embeddedt.embeddium.gui.frame;
 
 import com.google.common.base.Predicates;
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
-import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.gui.options.control.Control;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import org.embeddedt.embeddium.gui.options.Option;
+import org.embeddedt.embeddium.gui.options.OptionGroup;
+import org.embeddedt.embeddium.gui.options.OptionImpact;
+import org.embeddedt.embeddium.gui.options.OptionPage;
+import org.embeddedt.embeddium.gui.options.control.Control;
+import org.embeddedt.embeddium.gui.options.control.ControlElement;
+import org.embeddedt.embeddium.util.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;

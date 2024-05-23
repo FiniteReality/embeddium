@@ -1,10 +1,10 @@
 package org.embeddedt.embeddium.gui.frame.components;
 
 import com.google.common.base.Predicates;
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.gui.options.control.CyclingControl;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import org.embeddedt.embeddium.gui.options.Option;
+import org.embeddedt.embeddium.gui.options.OptionPage;
+import org.embeddedt.embeddium.gui.options.control.CyclingControl;
+import org.embeddedt.embeddium.util.Dim2i;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;

@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.gui.frame;
 
-import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
+import org.embeddedt.embeddium.util.Dim2i;
 import net.minecraft.client.gui.GuiGraphics;
 import org.apache.commons.lang3.Validate;
 

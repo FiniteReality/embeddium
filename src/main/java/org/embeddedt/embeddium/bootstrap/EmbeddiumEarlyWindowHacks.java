@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.bootstrap;
 
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IModuleLayerManager;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import org.embeddedt.embeddium.Embeddium;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.ImmediateWindowHandler;
 import net.neoforged.fml.loading.LoadingModList;
@@ -60,7 +60,7 @@ public class EmbeddiumEarlyWindowHacks {
                 "--height", String.valueOf(height.getAsInt())
         });
 
-        var modInfo = LoadingModList.get().getModFileById(SodiumClientMod.MODID);
+        var modInfo = LoadingModList.get().getModFileById(Embeddium.MODID);
         String ourVersion = modInfo != null ? modInfo.versionString() : "unknown";
         StartupNotificationManager.modLoaderConsumer().ifPresent(c -> c.accept("Embeddium " + ourVersion));
         ImmediateWindowHandler.acceptGameLayer(Launcher.INSTANCE.findLayerManager().orElseThrow().getLayer(IModuleLayerManager.Layer.GAME).orElseThrow());

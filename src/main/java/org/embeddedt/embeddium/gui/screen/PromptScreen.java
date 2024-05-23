@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.gui.screen;
 
-import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
-import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
+import org.embeddedt.embeddium.gui.widgets.FlatButtonWidget;
+import org.embeddedt.embeddium.util.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;

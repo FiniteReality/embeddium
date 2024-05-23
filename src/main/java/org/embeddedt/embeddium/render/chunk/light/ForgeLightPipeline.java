@@ -1,9 +1,9 @@
 package org.embeddedt.embeddium.render.chunk.light;
 
-import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
-import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
-import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import org.embeddedt.embeddium.model.light.LightPipeline;
+import org.embeddedt.embeddium.model.light.data.LightDataAccess;
+import org.embeddedt.embeddium.model.light.data.QuadLightData;
+import org.embeddedt.embeddium.model.quad.ModelQuadView;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;

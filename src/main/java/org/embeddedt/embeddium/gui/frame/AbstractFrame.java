@@ -1,9 +1,9 @@
 package org.embeddedt.embeddium.gui.frame;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
-import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import org.embeddedt.embeddium.gui.options.control.ControlElement;
+import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
+import org.embeddedt.embeddium.util.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;

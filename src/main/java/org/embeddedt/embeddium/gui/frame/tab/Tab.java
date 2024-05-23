@@ -1,12 +1,12 @@
 package org.embeddedt.embeddium.gui.frame.tab;
 
-import me.jellysquid.mods.sodium.client.gui.options.Option;
-import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
-import me.jellysquid.mods.sodium.client.util.Dim2i;
+import org.embeddedt.embeddium.gui.options.Option;
+import org.embeddedt.embeddium.gui.options.OptionPage;
+import org.embeddedt.embeddium.util.Dim2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
+import org.embeddedt.embeddium.gui.options.OptionIdentifier;
 import org.embeddedt.embeddium.gui.frame.AbstractFrame;
 import org.embeddedt.embeddium.gui.frame.OptionPageFrame;
 import org.embeddedt.embeddium.gui.frame.ScrollableFrame;
