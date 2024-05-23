@@ -26,5 +26,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 21
+      - name: Initial setup
+        run: ./gradlew setupPhi
       - name: Build artifacts
         run: ./gradlew build

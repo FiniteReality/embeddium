@@ -201,6 +201,15 @@ publishing {
     }
 }
 
+
+tasks.register<DefaultTask>("setupPhi") {
+    group = "phi"
+    description = "Run setup task in Phi if enabled"
+    if(usePhi) {
+        dependsOn(":phi:setup")
+    }
+}
+
 if(!usePhi) {
     publishMods {
         file = tasks.jar.get().archiveFile
