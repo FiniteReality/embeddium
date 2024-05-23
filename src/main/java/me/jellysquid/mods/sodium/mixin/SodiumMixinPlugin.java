@@ -31,6 +31,12 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     private final Logger logger = LogManager.getLogger(MODNAME);
     private MixinConfig config;
 
+    private static final boolean USING_PHI = Boolean.getBoolean("embeddium.phi");
+
+    private static final Set<String> BLACKLISTED_MIXINS = !USING_PHI ? Set.of() : Set.of(
+            "features.render.model.ChunkRenderTypeSetMixin"
+    );
+
     @Override
     public void onLoad(String mixinPackage) {
         try {
@@ -53,7 +59,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public boolean shouldApplyMixin(String s, String s1) {
+    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         return true;
     }
 
@@ -140,6 +146,8 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
                 e.printStackTrace();
             }
         }
+
+        possibleMixinClasses.removeAll(BLACKLISTED_MIXINS);
 
         return new ArrayList<>(possibleMixinClasses);
     }

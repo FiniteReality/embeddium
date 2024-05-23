@@ -1,0 +1,13 @@
+--- a/com/mojang/blaze3d/vertex/VertexConsumer.java
++++ b/com/mojang/blaze3d/vertex/VertexConsumer.java
+@@ -75,6 +_,10 @@
+         return this.overlayCoords(p_86009_ & 65535, p_86009_ >> 16 & 65535);
+     }
+ 
++    default void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float red, float green, float blue, float alpha, int packedLight, int packedOverlay, boolean readExistingColor) {
++        throw new AssertionError();
++    }
++
+     default void putBulkData(
+         PoseStack.Pose p_85996_, BakedQuad p_85997_, float p_85999_, float p_86000_, float p_86001_, float p_331520_, int p_86003_, int p_331548_
+     ) {

@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
-import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.model.color.ColorProvider;
 import me.jellysquid.mods.sodium.client.model.color.ColorProviderRegistry;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
@@ -58,8 +57,6 @@ public class BlockRenderer {
     @Deprecated(forRemoval = true)
     private final boolean useForgeExperimentalLightingPipeline;
 
-    private final ForgeBlockRenderer forgeBlockRenderer = new ForgeBlockRenderer();
-
     private final int[] quadColors = new int[4];
 
     private boolean useReorienting;
@@ -106,20 +103,6 @@ public class BlockRenderer {
                     return;
                 }
             }
-        }
-
-        if(this.useForgeExperimentalLightingPipeline) {
-            final PoseStack mStack;
-            if(renderOffset != Vec3.ZERO) {
-                mStack = new PoseStack();
-                mStack.translate(renderOffset.x, renderOffset.y, renderOffset.z);
-            } else
-                mStack = EMPTY_STACK;
-
-            sinkingVertexBuilder.reset();
-            forgeBlockRenderer.renderBlock(mode, ctx, sinkingVertexBuilder, mStack, this.random, this.occlusionCache, meshBuilder);
-            sinkingVertexBuilder.flush(meshBuilder, material, ctx.origin());
-            return;
         }
 
         for (Direction face : DirectionUtil.ALL_DIRECTIONS) {

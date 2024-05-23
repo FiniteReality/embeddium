@@ -1,0 +1,13 @@
+--- a/net/minecraft/client/renderer/DimensionSpecialEffects.java
++++ b/net/minecraft/client/renderer/DimensionSpecialEffects.java
+@@ -83,6 +_,10 @@
+         return this.constantAmbientLight;
+     }
+ 
++    public boolean renderClouds(net.minecraft.client.multiplayer.ClientLevel level, int ticks, float tickDelta, com.mojang.blaze3d.vertex.PoseStack matrices, double x, double y, double z, org.joml.Matrix4f modelViewMatrix, org.joml.Matrix4f projectionMatrix) {
++        return false; // Always use vanilla rendering
++    }
++
+     @OnlyIn(Dist.CLIENT)
+     public static class EndEffects extends DimensionSpecialEffects {
+         public EndEffects() {

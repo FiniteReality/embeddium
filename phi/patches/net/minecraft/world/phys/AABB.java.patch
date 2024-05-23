@@ -1,0 +1,20 @@
+--- a/net/minecraft/world/phys/AABB.java
++++ b/net/minecraft/world/phys/AABB.java
+@@ -8,6 +_,7 @@
+ import net.minecraft.world.level.levelgen.structure.BoundingBox;
+ 
+ public class AABB {
++    public static final AABB INFINITE = new AABB(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+     private static final double EPSILON = 1.0E-7;
+     public final double minX;
+     public final double minY;
+@@ -511,5 +_,9 @@
+             p_165883_.y + p_165885_ / 2.0,
+             p_165883_.z + p_165886_ / 2.0
+         );
++    }
++
++    public boolean isInfinite() {
++        return this == INFINITE;
+     }
+ }

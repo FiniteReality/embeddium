@@ -4,7 +4,6 @@ import me.jellysquid.mods.sodium.client.render.viewport.frustum.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import org.joml.Vector3d;
 
 public final class Viewport {

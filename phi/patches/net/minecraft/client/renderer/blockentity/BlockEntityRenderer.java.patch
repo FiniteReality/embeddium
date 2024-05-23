@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/blockentity/BlockEntityRenderer.java
++++ b/net/minecraft/client/renderer/blockentity/BlockEntityRenderer.java
+@@ -22,4 +_,8 @@
+     default boolean shouldRender(T p_173568_, Vec3 p_173569_) {
+         return Vec3.atCenterOf(p_173568_.getBlockPos()).closerThan(p_173569_, (double)this.getViewDistance());
+     }
++
++    default net.minecraft.world.phys.AABB getRenderBoundingBox(T entity) {
++        return net.minecraft.world.phys.AABB.INFINITE;
++    }
+ }

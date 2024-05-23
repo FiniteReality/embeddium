@@ -1,0 +1,13 @@
+--- a/net/minecraft/client/renderer/RenderType.java
++++ b/net/minecraft/client/renderer/RenderType.java
+@@ -1187,6 +_,10 @@
+         return this.asOptional;
+     }
+ 
++    public int getChunkLayerId() {
++        return 0;
++    }
++
+     @OnlyIn(Dist.CLIENT)
+     static final class CompositeRenderType extends RenderType {
+         static final BiFunction<ResourceLocation, RenderStateShard.CullStateShard, RenderType> OUTLINE = Util.memoize(

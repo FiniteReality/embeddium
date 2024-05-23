@@ -1,0 +1,37 @@
+--- a/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -527,6 +_,10 @@
+             return this.lightEmission;
+         }
+ 
++        public int getLightEmission(BlockGetter getter, BlockPos pos) {
++            return getLightEmission();
++        }
++
+         public boolean isAir() {
+             return this.isAir;
+         }
+@@ -856,6 +_,23 @@
+ 
+         public NoteBlockInstrument instrument() {
+             return this.instrument;
++        }
++
++        public boolean shouldDisplayFluidOverlay(BlockGetter world, BlockPos pos, FluidState fluidState) {
++            Block block = world.getBlockState(pos).getBlock();
++            return block instanceof net.minecraft.world.level.block.HalfTransparentBlock || block instanceof net.minecraft.world.level.block.LeavesBlock;
++        }
++
++        public boolean hidesNeighborFace(BlockGetter view, BlockPos pos, BlockState selfState, Direction opposite) {
++            return false;
++        }
++
++        public boolean supportsExternalFaceHiding() {
++            return false;
++        }
++
++        public boolean isEmpty() {
++            return isAir() && !hasBlockEntity();
+         }
+ 
+         static final class Cache {

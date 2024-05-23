@@ -55,7 +55,7 @@ public class TabHeaderWidget extends FlatButtonWidget {
                         throw new IOException("Logo " + logoFile.get() + " for " + modId + " is not square");
                     }
                     texture = new ResourceLocation(SodiumClientMod.MODID, "logo/" + modId);
-                    Minecraft.getInstance().textureManager.register(texture, new DynamicTexture(logo));
+                    Minecraft.getInstance().getTextureManager().register(texture, new DynamicTexture(logo));
                 }
             } catch(IOException e) {
                 erroredLogos.add(modId);

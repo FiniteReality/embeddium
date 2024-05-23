@@ -1,6 +1,6 @@
 plugins {
     id("idea")
-    id("net.neoforged.gradle.userdev") version("7.0.134")
+    id("net.neoforged.gradle.userdev")
     id("maven-publish")
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
@@ -32,6 +32,7 @@ base {
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 val extraSourceSets = arrayOf("legacy", "compat")
+val usePhi = rootProject.properties["use_phi"].toString().toBoolean()
 
 sourceSets {
     val main = getByName("main")
@@ -63,6 +64,9 @@ repositories {
         }
     }
     maven("https://maven.covers1624.net/")
+    if(usePhi) {
+        maven("https://nexus.gtnewhorizons.com/repository/public/")
+    }
 }
 
 minecraft {
@@ -89,7 +93,10 @@ runs {
         modSource(sourceSets["main"])
         extraSourceSets.forEach { modSource(sourceSets[it]) }
     }
-    create("client")
+    if(!usePhi) {
+        // Create the default client run
+        create("client")
+    }
 }
 
 configurations {
@@ -115,7 +122,12 @@ fun DependencyHandlerScope.compatCompileOnly(dependency: String) {
 }
 
 dependencies {
-    implementation("net.neoforged:neoforge:${"forge_version"()}")
+    if(!usePhi) {
+        implementation("net.neoforged:neoforge:${"forge_version"()}")
+    } else {
+        implementation(project(":phi"))
+        runtimeOnly(project(":phi", "clientExtra"))
+    }
 
     // FIXME remove when NG not loading this from NF itself is fixed
     implementation("io.github.llamalad7:mixinextras-neoforge:0.3.5")

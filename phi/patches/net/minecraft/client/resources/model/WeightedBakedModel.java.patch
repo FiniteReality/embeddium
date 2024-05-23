@@ -1,0 +1,19 @@
+--- a/net/minecraft/client/resources/model/WeightedBakedModel.java
++++ b/net/minecraft/client/resources/model/WeightedBakedModel.java
+@@ -70,6 +_,16 @@
+         return this.wrapped.getOverrides();
+     }
+ 
++    @Override
++    public List<BakedQuad> getQuads(@Nullable BlockState p_235039_, @Nullable Direction p_235040_, RandomSource p_235041_, net.neoforged.neoforge.client.model.data.ModelData data, net.minecraft.client.renderer.RenderType renderType) {
++        return BakedModel.super.getQuads(p_235039_, p_235040_, p_235041_, data, renderType);
++    }
++
++    @Override
++    public net.neoforged.neoforge.client.ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource source, net.neoforged.neoforge.client.model.data.ModelData modelData) {
++        return BakedModel.super.getRenderTypes(state, source, modelData);
++    }
++
+     @OnlyIn(Dist.CLIENT)
+     public static class Builder {
+         private final List<WeightedEntry.Wrapper<BakedModel>> list = Lists.newArrayList();

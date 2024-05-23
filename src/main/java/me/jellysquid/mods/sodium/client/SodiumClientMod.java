@@ -2,15 +2,11 @@ package me.jellysquid.mods.sodium.client;
 
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import me.jellysquid.mods.sodium.client.data.fingerprint.FingerprintMeasure;
 import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 
 import org.embeddedt.embeddium.render.ShaderModBridge;
-import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
-import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,19 +25,11 @@ public class SodiumClientMod {
     public SodiumClientMod() {
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
 
-        TaintDetector.init();
-
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
-
         try {
             updateFingerprint();
         } catch (Throwable t) {
             LOGGER.error("Failed to update fingerprint", t);
         }
-    }
-
-    public void onClientSetup(final FMLClientSetupEvent event) {
-        IncompatibleModManager.checkMods(event);
     }
 
     public static SodiumGameOptions options() {

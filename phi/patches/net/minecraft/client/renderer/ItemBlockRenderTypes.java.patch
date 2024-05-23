@@ -1,0 +1,11 @@
+--- a/net/minecraft/client/renderer/ItemBlockRenderTypes.java
++++ b/net/minecraft/client/renderer/ItemBlockRenderTypes.java
+@@ -398,4 +_,8 @@
+     public static void setFancy(boolean p_109292_) {
+         renderCutout = p_109292_;
+     }
++
++    public static net.neoforged.neoforge.client.ChunkRenderTypeSet getRenderLayers(BlockState state) {
++        return net.neoforged.neoforge.client.ChunkRenderTypeSet.of(getChunkRenderType(state));
++    }
+ }
