@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public class WorldSliceLocalGenerator {
     private static final Class<?> WORLD_SLICE_LOCAL_CLASS;
     private static final MethodHandle WORLD_SLICE_LOCAL_CONSTRUCTOR;
-    private static final String WORLD_SLICE_LOCAL_CLASS_NAME = "org/embeddedt/embeddium/render/world/WorldSliceLocal";
+    private static final String WORLD_SLICE_LOCAL_CLASS_NAME = "org/embeddedt/embeddium/impl/render/world/WorldSliceLocal";
     private static final String WORLD_SLICE_LOCAL_CLASS_DESC = "L" + WORLD_SLICE_LOCAL_CLASS_NAME + ";";
 
     // DEFINE_CLASS is borrowed from FerriteCore under MIT as a small utility
