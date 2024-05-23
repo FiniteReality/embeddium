@@ -20,7 +20,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.VideoSettingsScreen;
+import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class EmbeddiumVideoOptionsScreen extends Screen {
-    private static final ResourceLocation LOGO_LOCATION = new ResourceLocation(SodiumClientMod.MODID, "textures/embeddium/gui/logo_transparent.png");
+    private static final ResourceLocation LOGO_LOCATION = ResourceLocation.fromNamespaceAndPath(SodiumClientMod.MODID, "textures/embeddium/gui/logo_transparent.png");
     private static final int LOGO_SIZE = 256;
 
     private static final AtomicReference<Component> tabFrameSelectedTab = new AtomicReference<>(null);
@@ -409,7 +409,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0 && !(this.searchTextField != null && this.searchTextField.isFocused())) {
-            Minecraft.getInstance().setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance().options));
+            Minecraft.getInstance().setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance(), Minecraft.getInstance().options));
 
             return true;
         }

@@ -1,7 +1,7 @@
 --- a/com/mojang/blaze3d/vertex/VertexConsumer.java
 +++ b/com/mojang/blaze3d/vertex/VertexConsumer.java
-@@ -75,6 +_,10 @@
-         return this.overlayCoords(p_86009_ & 65535, p_86009_ >> 16 & 65535);
+@@ -68,6 +_,10 @@
+         return this.setUv1(p_350697_ & 65535, p_350697_ >> 16 & 65535);
      }
  
 +    default void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float red, float green, float blue, float alpha, int packedLight, int packedOverlay, boolean readExistingColor) {

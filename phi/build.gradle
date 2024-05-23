@@ -3,6 +3,8 @@ plugins {
     id 'maven-publish'
 }
 
+version = "1.0.0"
+
 dynamicProject {
     runtime("${project.minecraft_version}-${project.neoform_version}",
             project.layout.projectDirectory.dir('patches'),
@@ -45,6 +47,34 @@ dependencies {
     api("cpw.mods:modlauncher:${project.modlauncher_version}")
 
     implementation("com.gtnewhorizons.retrofuturabootstrap:RetroFuturaBootstrap:1.0.2")
+}
+
+runTypes {
+    client {
+        singleInstance false
+        client true
+
+        mainClass "org.embeddedt.phi.PhiBootstrap"
+
+        jvmArguments.set(["-Djava.system.class.loader=com.gtnewhorizons.retrofuturabootstrap.RfbSystemClassLoader"])
+
+        arguments.addAll '--embeddiumVersion', project.version
+        arguments.addAll '--fml.fmlVersion', project.fancy_mod_loader_version
+        arguments.addAll '--fml.mcVersion', project.minecraft_version
+        arguments.addAll '--fml.neoFormVersion', project.neoform_version
+    }
+}
+
+runs {
+    client {}
+}
+
+runs.configureEach { it ->
+    final File gameDir = project.file("run/${it.name}") as File
+    gameDir.mkdirs();
+
+    it.workingDirectory.set gameDir
+    it.programArguments.addAll '--gameDir', gameDir.absolutePath
 }
 
 installerProfile {

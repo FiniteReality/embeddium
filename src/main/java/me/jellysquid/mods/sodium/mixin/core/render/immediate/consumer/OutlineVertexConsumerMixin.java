@@ -1,8 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.core.render.immediate.consumer;
 
-import com.mojang.blaze3d.vertex.DefaultedVertexConsumer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.CommonVertexAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.common.ColorAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
@@ -17,15 +15,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(targets = "net/minecraft/client/renderer/OutlineBufferSource$EntityOutlineGenerator")
-public abstract class OutlineVertexConsumerMixin extends DefaultedVertexConsumer implements VertexBufferWriter {
+public abstract class OutlineVertexConsumerMixin implements VertexBufferWriter {
     @Shadow
     @Final
     private VertexConsumer delegate;
 
+    @Shadow
+    @Final
+    private int color;
     @Unique
     private boolean isFullWriter;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>(Lcom/mojang/blaze3d/vertex/VertexConsumer;I)V", at = @At("RETURN"))
     private void onInit(CallbackInfo ci) {
         this.isFullWriter = VertexBufferWriter.tryOf(this.delegate) != null;
     }
@@ -37,8 +38,7 @@ public abstract class OutlineVertexConsumerMixin extends DefaultedVertexConsumer
 
     @Override
     public void push(MemoryStack stack, long ptr, int count, VertexFormatDescription format) {
-        transform(ptr, count, format,
-                ColorABGR.pack(this.defaultR, this.defaultG, this.defaultB, this.defaultA));
+        transform(ptr, count, format, this.color);
 
         VertexBufferWriter.of(this.delegate)
                 .push(stack, ptr, count, format);

@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import me.jellysquid.mods.sodium.client.render.viewport.ViewportProvider;
 import me.jellysquid.mods.sodium.client.world.WorldRendererExtended;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -220,8 +221,8 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     }
 
     @Inject(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
-    private void onRenderBlockEntities(float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightmapTextureManager, Matrix4f pose, Matrix4f positionMatrix, CallbackInfo ci) {
-        this.renderer.renderBlockEntities(pose, this.renderBuffers, this.destructionProgress, camera, this.level.tickRateManager().isFrozen() ? 1.0F : tickDelta);
+    private void onRenderBlockEntities(DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightmapTextureManager, Matrix4f pose, Matrix4f positionMatrix, CallbackInfo ci) {
+        this.renderer.renderBlockEntities(pose, this.renderBuffers, this.destructionProgress, camera, deltaTracker.getGameTimeDeltaPartialTick(false));
     }
 
     /**

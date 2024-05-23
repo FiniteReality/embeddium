@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/LevelRenderer.java
 +++ b/net/minecraft/client/renderer/LevelRenderer.java
-@@ -3587,6 +_,10 @@
+@@ -3485,6 +_,10 @@
          return this.cloudsTarget;
      }
  

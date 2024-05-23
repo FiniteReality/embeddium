@@ -48,7 +48,7 @@ public class ShaderParser {
         String namespace = matcher.group("namespace");
         String path = matcher.group("path");
 
-        ResourceLocation identifier = new ResourceLocation(namespace, path);
+        ResourceLocation identifier = ResourceLocation.fromNamespaceAndPath(namespace, path);
         String source = ShaderLoader.getShaderSource(identifier);
 
         return ShaderParser.parseShader(source);

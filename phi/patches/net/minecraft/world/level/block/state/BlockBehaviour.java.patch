@@ -11,7 +11,7 @@
          public boolean isAir() {
              return this.isAir;
          }
-@@ -856,6 +_,23 @@
+@@ -857,6 +_,23 @@
  
          public NoteBlockInstrument instrument() {
              return this.instrument;

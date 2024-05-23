@@ -36,16 +36,13 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     private final int[] sideCount = new int[ModelQuadFacing.VALUES.length];
     private int currentVertex;
 
-    private float x;
+    private float x = Float.NaN;
     private float y;
     private float z;
     private float u;
     private float v;
     private int color;
     private int light;
-
-    private int fixedColor;
-    private boolean hasFixedColor = false;
 
     private final ChunkVertexEncoder.Vertex[] sodiumVertexArray = ChunkVertexEncoder.Vertex.uninitializedQuad();
     private final ModelQuadView previousQuad = new ModelQuadView() {
@@ -130,63 +127,56 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return newBuf;
     }
 
-    @Nonnull
     @Override
-    public VertexConsumer vertex(double x, double y, double z) {
-        this.x = (float) x;
-        this.y = (float) y;
-        this.z = (float) z;
+    public VertexConsumer addVertex(float x, float y, float z) {
+        pushLastVertex();
+        this.x = x;
+        this.y = y;
+        this.z = z;
         return this;
     }
 
     @Nonnull
     @Override
-    public VertexConsumer color(int r, int g, int b, int a) {
+    public VertexConsumer setColor(int r, int g, int b, int a) {
         color = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
         // Colour.flipABGR(Colour.packRGBA(r, g, b, a)); // We need ABGR so we compose it on the fly
         return this;
     }
 
     @Override
-    public void defaultColor(int r, int g, int b, int a) {
-        fixedColor = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
-        hasFixedColor = true;
-    }
-
-    @Override
-    public void unsetDefaultColor() {
-        hasFixedColor = false;
-    }
-
-    @Nonnull
-    @Override
-    public VertexConsumer uv(float u, float v) {
+    public VertexConsumer setUv(float u, float v) {
         this.u = u;
         this.v = v;
         return this;
     }
 
-    @Nonnull
     @Override
-    public VertexConsumer overlayCoords(int u, int v) {
-        return this;
-    }
-
-    @Nonnull
-    @Override
-    public VertexConsumer uv2(int u, int v) {
-        light = (v << 16) | u; // Compose lightmap coords into raw light value 0xVVVV_UUUU
-        return this;
-    }
-
-    @Nonnull
-    @Override
-    public VertexConsumer normal(float x, float y, float z) {
+    public VertexConsumer setUv1(int p_350815_, int p_350629_) {
         return this;
     }
 
     @Override
-    public void endVertex() {
+    public VertexConsumer setUv2(int p_350859_, int p_351004_) {
+        this.light = (p_351004_ << 16) | (p_350859_ & 0xFFFF);
+        return this;
+    }
+
+    @Override
+    public VertexConsumer setLight(int light) {
+        this.light = light;
+        return this;
+    }
+
+    @Override
+    public VertexConsumer setNormal(float p_350429_, float p_350286_, float p_350836_) {
+        return this;
+    }
+
+    private void pushLastVertex() {
+        if(Float.isNaN(this.x)) {
+            return;
+        }
         // Make sure there is enough space for a new vertex
         if ((this.buffer.capacity() - this.buffer.position()) < VERTEX_SIZE_BYTES) {
             int newCapacity = this.buffer.capacity() * 2;
@@ -205,7 +195,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         buffer.putFloat(z);
         buffer.putFloat(u);
         buffer.putFloat(v);
-        buffer.putInt(hasFixedColor ? fixedColor : color);
+        buffer.putInt(color);
         buffer.putInt(light);
         // We store 32 bytes per vertex
 
@@ -214,6 +204,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         if((currentVertex % 4) == 0) {
             recalculateNormals();
         }
+        this.x = Float.NaN;
     }
 
     private void recalculateNormals() {
@@ -235,6 +226,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, float oX, float oY, float oZ) {
+        pushLastVertex();
         if(currentVertex == 0) {
             return false;
         }
@@ -294,7 +286,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     private void resetCurrentVertex() {
-        x = y = z = 0F;
+        x = y = z = Float.NaN; // we use NaN to indicate that there is no started vertex
         u = v = 0F;
         color = 0xFFFF_FFFF;
         light = 0;

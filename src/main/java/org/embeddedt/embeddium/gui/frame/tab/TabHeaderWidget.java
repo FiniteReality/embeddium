@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class TabHeaderWidget extends FlatButtonWidget {
-    private static final ResourceLocation FALLBACK_LOCATION = new ResourceLocation("textures/misc/unknown_pack.png");
+    private static final ResourceLocation FALLBACK_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/unknown_pack.png");
 
     private static final Set<String> erroredLogos = new HashSet<>();
     private final ResourceLocation logoTexture;
@@ -54,7 +54,7 @@ public class TabHeaderWidget extends FlatButtonWidget {
                         logo.close();
                         throw new IOException("Logo " + logoFile.get() + " for " + modId + " is not square");
                     }
-                    texture = new ResourceLocation(SodiumClientMod.MODID, "logo/" + modId);
+                    texture = ResourceLocation.fromNamespaceAndPath(SodiumClientMod.MODID, "logo/" + modId);
                     Minecraft.getInstance().getTextureManager().register(texture, new DynamicTexture(logo));
                 }
             } catch(IOException e) {

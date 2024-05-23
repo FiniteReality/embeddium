@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -1086,6 +_,10 @@
+@@ -1100,6 +_,10 @@
  
      public abstract PotionBrewing potionBrewing();
  
@@ -8,6 +8,6 @@
 +        return net.neoforged.neoforge.client.model.data.ModelDataManager.INSTANCE;
 +    }
 +
-     public static enum ExplosionInteraction {
-         NONE,
-         BLOCK,
+     public static enum ExplosionInteraction implements StringRepresentable {
+         NONE("none"),
+         BLOCK("block"),

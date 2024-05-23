@@ -1,7 +1,7 @@
 --- a/net/minecraft/client/renderer/RenderType.java
 +++ b/net/minecraft/client/renderer/RenderType.java
-@@ -1187,6 +_,10 @@
-         return this.asOptional;
+@@ -1138,6 +_,10 @@
+         return this.sortOnUpload;
      }
  
 +    public int getChunkLayerId() {

@@ -1,3 +1,7 @@
+import net.neoforged.gradle.dsl.common.runs.type.RunType
+
+evaluationDependsOnChildren()
+
 plugins {
     id("idea")
     id("net.neoforged.gradle.userdev")
@@ -69,35 +73,45 @@ repositories {
     }
 }
 
-minecraft {
-    accessTransformers {
-        file(rootProject.file("src/main/resources/META-INF/accesstransformer.cfg"))
+if(!usePhi) {
+    minecraft {
+        accessTransformers {
+            file(rootProject.file("src/main/resources/META-INF/accesstransformer.cfg"))
+        }
     }
-}
 
-if(project.hasProperty("parchment_version")) {
-    val parchment_info = "parchment_version"().split("-")
-    subsystems {
-        parchment {
-            minecraftVersion = parchment_info[1]
-            mappingsVersion = parchment_info[0]
+    if(project.hasProperty("parchment_version")) {
+        val parchment_info = "parchment_version"().split("-")
+        subsystems {
+            parchment {
+                minecraftVersion = parchment_info[1]
+                mappingsVersion = parchment_info[0]
+            }
+        }
+    }
+
+    runs {
+        // Create the default client run
+        create("client")
+    }
+} else {
+    val phiProject = project(":phi")
+    runs {
+        create("client") {
+            configure((phiProject.extensions.getByName("runTypes") as NamedDomainObjectContainer<RunType>).getByName("client"))
         }
     }
 }
 
 runs {
     configureEach {
-
         systemProperty("forge.logging.console.level", "info")
 
         modSource(sourceSets["main"])
         extraSourceSets.forEach { modSource(sourceSets[it]) }
     }
-    if(!usePhi) {
-        // Create the default client run
-        create("client")
-    }
 }
+
 
 configurations {
     val runtimeOnlyNonPublishable = create("runtimeOnlyNonPublishable") {
@@ -126,7 +140,8 @@ dependencies {
         implementation("net.neoforged:neoforge:${"forge_version"()}")
     } else {
         implementation(project(":phi"))
-        runtimeOnly(project(":phi", "clientExtra"))
+        // TODO find a less disgusting way of doing this
+        //implementation(project(":phi").dependencyProject.tasks.findByPath("create" + "minecraft_version"() + "ClientExtraJar")?.outputs!!.files)
     }
 
     // FIXME remove when NG not loading this from NF itself is fixed

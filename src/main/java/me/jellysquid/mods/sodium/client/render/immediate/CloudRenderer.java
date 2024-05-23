@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class CloudRenderer {
-    private static final ResourceLocation CLOUDS_TEXTURE_ID = new ResourceLocation("textures/environment/clouds.png");
+    private static final ResourceLocation CLOUDS_TEXTURE_ID = ResourceLocation.withDefaultNamespace("textures/environment/clouds.png");
 
     private static final int CLOUD_COLOR_NEG_Y = ColorABGR.pack(0.7F, 0.7F, 0.7F, 1.0f);
     private static final int CLOUD_COLOR_POS_Y = ColorABGR.pack(1.0f, 1.0f, 1.0f, 1.0f);
@@ -115,8 +115,7 @@ public class CloudRenderer {
         int centerCellZ = (int) (Math.floor(cloudCenterZ / this.cloudSizeZ));
 
         if (this.vertexBuffer == null || this.prevCenterCellX != centerCellX || this.prevCenterCellY != centerCellZ || this.cachedRenderDistance != renderDistance || cloudRenderMode != Minecraft.getInstance().options.getCloudsType()) {
-            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
             this.cloudRenderMode = Minecraft.getInstance().options.getCloudsType();
 
@@ -127,7 +126,7 @@ public class CloudRenderer {
             }
 
             this.vertexBuffer.bind();
-            this.vertexBuffer.upload(bufferBuilder.end());
+            this.vertexBuffer.upload(bufferBuilder.buildOrThrow());
 
             VertexBuffer.unbind();
 

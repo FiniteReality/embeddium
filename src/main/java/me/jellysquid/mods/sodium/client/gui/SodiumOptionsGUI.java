@@ -19,13 +19,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.VideoSettingsScreen;
+import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
-import net.neoforged.fml.loading.FMLLoader;
 import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
 import org.embeddedt.embeddium.gui.EmbeddiumVideoOptionsScreen;
 import org.embeddedt.embeddium.util.PlatformUtil;
@@ -394,7 +393,7 @@ public class SodiumOptionsGUI extends Screen implements ScreenPromptable {
         }
 
         if (this.prompt == null && keyCode == GLFW.GLFW_KEY_P && (modifiers & GLFW.GLFW_MOD_SHIFT) != 0) {
-            Minecraft.getInstance().setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance().options));
+            Minecraft.getInstance().setScreen(new VideoSettingsScreen(this.prevScreen, Minecraft.getInstance(), Minecraft.getInstance().options));
 
             return true;
         }

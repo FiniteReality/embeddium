@@ -4,20 +4,15 @@ import net.caffeinemc.mods.sodium.api.vertex.format.common.ParticleVertex;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
-import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SingleQuadParticle;
-import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.lwjgl.system.MemoryStack;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SingleQuadParticle.class)
@@ -37,44 +32,30 @@ public abstract class BillboardParticleMixin extends Particle {
     @Shadow
     protected abstract float getV1();
 
-    @Shadow
-    public abstract SingleQuadParticle.FacingCameraMode getFacingCameraMode();
-
-    @Shadow
-    @Final
-    private Quaternionf rotation;
+    private final Quaternionf embeddium$rotation = new Quaternionf();
 
     protected BillboardParticleMixin(ClientLevel world, double x, double y, double z) {
         super(world, x, y, z);
     }
 
     /**
-     * @reason Optimize function
+     * @reason Avoid allocation
      * @author JellySquid
      */
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void buildGeometryFast(VertexConsumer vertexConsumer, Camera camera, float tickDelta, CallbackInfo ci) {
-        var writer = VertexBufferWriter.tryOf(vertexConsumer);
+    @Redirect(method = "render", at = @At(value = "NEW", target = "()Lorg/joml/Quaternionf;"))
+    private Quaternionf useCachedQuaternion() {
+        return embeddium$rotation;
+    }
+
+    @Inject(method = "renderRotatedQuad(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lorg/joml/Quaternionf;FFFF)V", at = @At("HEAD"), cancellable = true)
+    private void renderRotatedQuadFast(VertexConsumer consumer, Quaternionf quaternion, float x, float y, float z, float tickDelta, CallbackInfo ci) {
+        var writer = VertexBufferWriter.tryOf(consumer);
 
         if (writer == null) {
             return;
         }
 
         ci.cancel();
-
-        Vec3 vec3d = camera.getPosition();
-
-        float x = (float) (Mth.lerp(tickDelta, this.xo, this.x) - vec3d.x());
-        float y = (float) (Mth.lerp(tickDelta, this.yo, this.y) - vec3d.y());
-        float z = (float) (Mth.lerp(tickDelta, this.zo, this.z) - vec3d.z());
-
-        Quaternionf quaternion = this.rotation;
-
-        this.getFacingCameraMode().setRotation(quaternion, camera, tickDelta);
-        if (this.roll != 0.0F) {
-            float angle = Mth.lerp(tickDelta, this.oRoll, this.roll);
-            quaternion.rotateZ(angle);
-        }
 
         float size = this.getQuadSize(tickDelta);
         int light = this.getLightColor(tickDelta);
