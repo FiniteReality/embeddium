@@ -193,45 +193,50 @@ publishing {
         }
     }
 
-    repositories {
-        maven("file://${System.getenv("local_maven")}")
+    // Phi builds shouldn't be published to Maven, because they're useless
+    if(!usePhi) {
+        repositories {
+            maven("file://${System.getenv("local_maven")}")
+        }
     }
 }
 
-publishMods {
-    file = tasks.jar.get().archiveFile
-    changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
-    type = STABLE
-    modLoaders.add("neoforge")
+if(!usePhi) {
+    publishMods {
+        file = tasks.jar.get().archiveFile
+        changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
+        type = STABLE
+        modLoaders.add("neoforge")
 
-    curseforge {
-        projectId = "908741"
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        minecraftVersions.add("minecraft_version"())
+        curseforge {
+            projectId = "908741"
+            accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+            minecraftVersions.add("minecraft_version"())
 
-        incompatible {
-            slug = "rubidium"
+            incompatible {
+                slug = "rubidium"
+            }
+
+            incompatible {
+                slug = "textrues-embeddium-options"
+            }
+        }
+        modrinth {
+            projectId = "sk9rgfiA"
+            accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+            minecraftVersions.add("minecraft_version"())
+
+            incompatible {
+                slug = "rubidium"
+            }
+
+            incompatible {
+                slug = "textrues-embeddium-options"
+            }
         }
 
-        incompatible {
-            slug = "textrues-embeddium-options"
-        }
+        displayName = "[${"minecraft_version"()}] Embeddium ${"mod_version"()}"
     }
-    modrinth {
-        projectId = "sk9rgfiA"
-        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-        minecraftVersions.add("minecraft_version"())
-
-        incompatible {
-            slug = "rubidium"
-        }
-
-        incompatible {
-            slug = "textrues-embeddium-options"
-        }
-    }
-
-    displayName = "[${"minecraft_version"()}] Embeddium ${"mod_version"()}"
 }
 
 fun getModVersion(): String {
