@@ -20,7 +20,15 @@ public class PhiTweaker implements ITweaker {
     private List<String> extraArgs = List.of();
     @Override
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
-        extraArgs = args;
+        extraArgs = new ArrayList<>(args);
+        if(gameDir != null) {
+            extraArgs.add("--gameDir");
+            extraArgs.add(gameDir.getAbsolutePath());
+        }
+        if(assetsDir != null) {
+            extraArgs.add("-assetsDir");
+            extraArgs.add(assetsDir.getAbsolutePath());
+        }
     }
 
     @Override
