@@ -60,7 +60,6 @@ runTypes {
 
         arguments.addAll '--embeddiumVersion', project.version
         arguments.addAll '--fml.fmlVersion', project.fancy_mod_loader_version
-        arguments.addAll '--fml.mcVersion', project.minecraft_version
         arguments.addAll '--fml.neoFormVersion', project.neoform_version
     }
 }

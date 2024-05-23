@@ -11,14 +11,16 @@ import org.spongepowered.asm.mixin.Mixins;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PhiTweaker implements ITweaker {
+    private List<String> extraArgs = List.of();
     @Override
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
-
+        extraArgs = args;
     }
 
     @Override
@@ -61,6 +63,9 @@ public class PhiTweaker implements ITweaker {
         if(RetroFuturaBootstrap.API.launchClassLoader().asURLClassLoader().findResource("embeddium.mixins.json") != null) {
             Mixins.addConfiguration("embeddium.mixins.json");
         }
-        return new String[] { "--accessToken", "0", "--version", "0.0.0" };
+        List<String> args = new ArrayList<>(extraArgs);
+        args.add("--version");
+        args.add(Main.initialGameVersion);
+        return args.toArray(new String[0]);
     }
 }
