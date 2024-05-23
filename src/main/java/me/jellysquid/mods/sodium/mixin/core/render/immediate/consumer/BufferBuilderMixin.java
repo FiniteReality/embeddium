@@ -7,7 +7,6 @@ import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatRegistry;
 import net.caffeinemc.mods.sodium.api.vertex.serializer.VertexSerializerRegistry;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import org.lwjgl.system.MemoryStack;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,9 +48,7 @@ public abstract class BufferBuilderMixin implements VertexBufferWriter {
     public void push(MemoryStack stack, long src, int count, VertexFormatDescription format) {
         var length = count * this.vertexSize;
 
-        // Ensure that there is always space for 1 more vertex; see BufferBuilder.next()
-        // TODO - that might not be needed after the 24w21a refactor, the semantics seem to be different
-        // However, vertices are tiny so it doesn't really matter
+        // Ensure that there is space for the data we're about to push
         long dst = this.buffer.reserve(length);
 
         if (format == this.embeddiumFormat) {
