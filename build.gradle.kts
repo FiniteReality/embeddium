@@ -184,6 +184,15 @@ tasks.named<Jar>("sourcesJar").configure {
     }
 }
 
+// Make a JAR that has impl stripped
+tasks.create<Jar>("apiJar") {
+    archiveClassifier = "api"
+    from(sourceSets["main"].output) {
+        exclude("org/embeddedt/embeddium/impl/**")
+        exclude("assets/**")
+    }
+}
+
 publishing {
     tasks.publish {
         dependsOn(tasks.build)
