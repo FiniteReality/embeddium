@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.impl;
 
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.impl.data.fingerprint.FingerprintMeasure;
 import org.embeddedt.embeddium.impl.data.fingerprint.HashedFingerprint;
 import org.embeddedt.embeddium.impl.gui.EmbeddiumOptions;
@@ -14,8 +15,8 @@ import java.io.IOException;
 
 @Mod(Embeddium.MODID)
 public class Embeddium {
-    public static final String MODID = "embeddium";
-    public static final String MODNAME = "Embeddium";
+    public static final String MODID = EmbeddiumConstants.MODID;
+    public static final String MODNAME = EmbeddiumConstants.MODNAME;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME);
     private static EmbeddiumOptions CONFIG = loadConfig();
