@@ -1,6 +1,7 @@
 package org.embeddedt.embeddium.gui.options.storage;
 
 import org.embeddedt.embeddium.Embeddium;
+import org.embeddedt.embeddium.api.options.structure.OptionStorage;
 import org.embeddedt.embeddium.gui.EmbeddiumOptions;
 
 import java.io.IOException;

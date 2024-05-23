@@ -1,7 +1,8 @@
-package org.embeddedt.embeddium.gui.options;
+package org.embeddedt.embeddium.api.options.structure;
 
 import org.embeddedt.embeddium.Embeddium;
 import net.minecraft.resources.ResourceLocation;
+import org.embeddedt.embeddium.api.options.OptionIdentifier;
 
 public final class StandardOptions {
     public static class Group {

@@ -7,7 +7,7 @@ import org.embeddedt.embeddium.render.chunk.compile.ChunkBuildBuffers;
 import org.embeddedt.embeddium.render.chunk.compile.ChunkBuildContext;
 import org.embeddedt.embeddium.render.chunk.compile.ChunkBuildOutput;
 import org.embeddedt.embeddium.render.chunk.compile.pipeline.BlockRenderCache;
-import org.embeddedt.embeddium.render.chunk.compile.pipeline.BlockRenderContext;
+import org.embeddedt.embeddium.api.render.chunk.BlockRenderContext;
 import org.embeddedt.embeddium.render.chunk.data.BuiltSectionInfo;
 import org.embeddedt.embeddium.render.chunk.data.BuiltSectionMeshParts;
 import org.embeddedt.embeddium.render.chunk.terrain.DefaultTerrainRenderPasses;

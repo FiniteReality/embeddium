@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
+import org.embeddedt.embeddium.api.render.chunk.EmbeddiumBlockAndTintGetter;
 import org.embeddedt.embeddium.world.biome.*;
 import org.embeddedt.embeddium.world.cloned.ChunkRenderContext;
 import org.embeddedt.embeddium.world.cloned.ClonedChunkSection;
@@ -12,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
@@ -46,7 +46,7 @@ import java.util.Objects;
  *
  * <p>Object pooling should be used to avoid huge allocations as this class contains many large arrays.</p>
  */
-public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
+public class WorldSlice implements EmbeddiumBlockAndTintGetter {
     private static final LightLayer[] LIGHT_TYPES = LightLayer.values();
 
     // The number of blocks in a section.
@@ -374,11 +374,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
     @Override
     public int getMinBuildHeight() {
         return this.world.getMinBuildHeight();
-    }
-
-    @Override
-    public int getColor(BiomeColorSource source, int x, int y, int z) {
-        return this.biomeColors.getColor(source, x, y, z);
     }
 
     @Override

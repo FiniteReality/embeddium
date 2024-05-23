@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.gui.options.storage;
+package org.embeddedt.embeddium.api.options.structure;
 
 public interface OptionStorage<T> {
     T getData();

@@ -1,6 +1,7 @@
 package org.embeddedt.embeddium.render.world;
 
 import com.google.common.base.Suppliers;
+import org.embeddedt.embeddium.api.render.chunk.EmbeddiumBlockAndTintGetter;
 import org.embeddedt.embeddium.world.WorldSlice;
 import net.minecraft.world.level.BlockAndTintGetter;
 import org.objectweb.asm.*;
@@ -56,24 +57,23 @@ public class WorldSliceLocalGenerator {
         WORLD_SLICE_LOCAL_CLASS = createWrapperClass();
         try {
             WORLD_SLICE_LOCAL_CONSTRUCTOR = MethodHandles.publicLookup()
-                    .findConstructor(WORLD_SLICE_LOCAL_CLASS, MethodType.methodType(void.class, WorldSlice.class))
-                    .asType(MethodType.methodType(BlockAndTintGetter.class, WorldSlice.class));
+                    .findConstructor(WORLD_SLICE_LOCAL_CLASS, MethodType.methodType(void.class, EmbeddiumBlockAndTintGetter.class))
+                    .asType(MethodType.methodType(BlockAndTintGetter.class, EmbeddiumBlockAndTintGetter.class));
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Generate a delegate wrapper around {@link org.embeddedt.embeddium.world.WorldSlice}. This delegate is used
+     * Generate a delegate wrapper around {@link EmbeddiumBlockAndTintGetter}. This delegate is used
      * to provide a unique BlockAndTintGetter for each subchunk, like vanilla does, while avoiding the huge array allocations
      * associated with WorldSlice.
      *
-     * The returned object is guaranteed to implement all interfaces implemented by {@link org.embeddedt.embeddium.world.WorldSlice}.
      * @param originalSlice the backing world slice for the delegate
      * @return a unique BlockAndTintGetter guaranteed to be reference-unequal with any other one returned by this
      * method, that points to the given WorldSlice
      */
-    public static BlockAndTintGetter generate(WorldSlice originalSlice) {
+    public static BlockAndTintGetter generate(EmbeddiumBlockAndTintGetter originalSlice) {
         try {
             return (BlockAndTintGetter)WORLD_SLICE_LOCAL_CONSTRUCTOR.invokeExact(originalSlice);
         } catch(Throwable e) {
@@ -84,14 +84,14 @@ public class WorldSliceLocalGenerator {
     private static final boolean VERIFY = false;
 
     private static byte[] createWrapperClassBytecode() {
-        String worldSliceDesc = Type.getDescriptor(WorldSlice.class);
+        String worldSliceDesc = Type.getDescriptor(EmbeddiumBlockAndTintGetter.class);
         ClassWriter classWriter = new ClassWriter(0);
         ClassVisitor classVisitor = VERIFY ? new CheckClassAdapter(classWriter) : classWriter;
 
         FieldVisitor fieldVisitor;
         MethodVisitor methodVisitor;
 
-        Class<?>[] interfaces = WorldSlice.class.getInterfaces();
+        Class<?>[] interfaces = new Class[] { EmbeddiumBlockAndTintGetter.class };
 
         classVisitor.visit(MixinEnvironment.getCompatibilityLevel().getClassVersion(), Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, WORLD_SLICE_LOCAL_CLASS_NAME, null, "java/lang/Object",
                 Arrays.stream(interfaces).map(Type::getInternalName).toArray(String[]::new));
@@ -120,7 +120,7 @@ public class WorldSliceLocalGenerator {
         methodVisitor.visitEnd();
 
         // Now generate delegates for each method on WorldSlice's interfaces
-        for(Method method : WorldSlice.class.getMethods()) {
+        for(Method method : EmbeddiumBlockAndTintGetter.class.getMethods()) {
             // Only delegate for public, non-static methods implemented by WorldSlice or an interface
             if(Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().isAssignableFrom(Object.class)) {
                 int maxStack = 0;

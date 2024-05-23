@@ -1,9 +1,8 @@
 package org.embeddedt.embeddium.gui.frame.components;
 
-import org.embeddedt.embeddium.gui.options.OptionPage;
+import org.embeddedt.embeddium.api.options.structure.OptionPage;
 import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
-import org.embeddedt.embeddium.util.Dim2i;
-import net.minecraft.SharedConstants;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;

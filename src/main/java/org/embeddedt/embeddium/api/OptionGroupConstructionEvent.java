@@ -1,9 +1,9 @@
 package org.embeddedt.embeddium.api;
 
-import org.embeddedt.embeddium.gui.options.Option;
+import org.embeddedt.embeddium.api.options.structure.Option;
 import org.embeddedt.embeddium.api.eventbus.EmbeddiumEvent;
 import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
-import org.embeddedt.embeddium.gui.options.OptionIdentifier;
+import org.embeddedt.embeddium.api.options.OptionIdentifier;
 
 import java.util.List;
 

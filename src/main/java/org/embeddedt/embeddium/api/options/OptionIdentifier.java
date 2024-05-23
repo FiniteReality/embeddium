@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.gui.options;
+package org.embeddedt.embeddium.api.options;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.resources.ResourceLocation;

@@ -1,6 +1,7 @@
 package org.embeddedt.embeddium.render.chunk.data;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import org.embeddedt.embeddium.api.render.chunk.SectionInfoBuilder;
 import org.embeddedt.embeddium.render.chunk.RenderSection;
 import org.embeddedt.embeddium.render.chunk.RenderSectionFlags;
 import org.embeddedt.embeddium.render.chunk.occlusion.VisibilityEncoding;
@@ -61,7 +62,7 @@ public class BuiltSectionInfo {
         this.visibilityData = VisibilityEncoding.encode(occlusionData);
     }
 
-    public static class Builder {
+    public static class Builder implements SectionInfoBuilder {
         private final List<TerrainRenderPass> blockRenderPasses = new ArrayList<>();
         private final List<BlockEntity> globalBlockEntities = new ArrayList<>();
         private final List<BlockEntity> culledBlockEntities = new ArrayList<>();
@@ -77,22 +78,14 @@ public class BuiltSectionInfo {
             this.occlusionData = data;
         }
 
-        /**
-         * Adds a sprite to this data container for tracking. If the sprite is tickable, it will be ticked every frame
-         * before rendering as necessary.
-         * @param sprite The sprite
-         */
+        @Override
         public void addSprite(TextureAtlasSprite sprite) {
             if (SpriteUtil.hasAnimation(sprite)) {
                 this.animatedSprites.add(sprite);
             }
         }
 
-        /**
-         * Adds a block entity to the data container.
-         * @param entity The block entity itself
-         * @param cull True if the block entity can be culled to this chunk render's volume, otherwise false
-         */
+        @Override
         public void addBlockEntity(BlockEntity entity, boolean cull) {
             (cull ? this.culledBlockEntities : this.globalBlockEntities).add(entity);
         }

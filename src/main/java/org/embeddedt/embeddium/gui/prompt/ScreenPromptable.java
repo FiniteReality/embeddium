@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.gui.prompt;
 
-import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import org.jetbrains.annotations.Nullable;
 
 @Deprecated(forRemoval = true)

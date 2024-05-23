@@ -1,5 +1,7 @@
 package org.embeddedt.embeddium.gui.options.binding;
 
+import org.embeddedt.embeddium.api.options.structure.OptionBinding;
+
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 

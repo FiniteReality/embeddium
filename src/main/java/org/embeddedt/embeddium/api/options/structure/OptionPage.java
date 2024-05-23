@@ -1,10 +1,12 @@
-package org.embeddedt.embeddium.gui.options;
+package org.embeddedt.embeddium.api.options.structure;
 
 import com.google.common.collect.ImmutableList;
 import org.embeddedt.embeddium.Embeddium;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.embeddedt.embeddium.api.OptionPageConstructionEvent;
+import org.embeddedt.embeddium.api.options.OptionIdentifier;
+import org.embeddedt.embeddium.gui.options.OptionIdGenerator;
 
 import java.util.List;
 

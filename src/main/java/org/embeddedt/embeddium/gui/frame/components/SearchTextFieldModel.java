@@ -1,11 +1,9 @@
 package org.embeddedt.embeddium.gui.frame.components;
 
 import com.google.common.base.Predicates;
-import org.embeddedt.embeddium.gui.options.Option;
-import org.embeddedt.embeddium.gui.options.OptionPage;
+import org.embeddedt.embeddium.api.options.structure.Option;
+import org.embeddedt.embeddium.api.options.structure.OptionPage;
 import org.embeddedt.embeddium.gui.options.control.CyclingControl;
-import org.embeddedt.embeddium.util.Dim2i;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -16,7 +14,6 @@ import org.embeddedt.embeddium.gui.EmbeddiumVideoOptionsScreen;
 import org.embeddedt.embeddium.util.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 

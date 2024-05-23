@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.gui.frame.tab;
 import com.mojang.blaze3d.platform.NativeImage;
 import org.embeddedt.embeddium.Embeddium;
 import org.embeddedt.embeddium.gui.widgets.FlatButtonWidget;
-import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.DynamicTexture;

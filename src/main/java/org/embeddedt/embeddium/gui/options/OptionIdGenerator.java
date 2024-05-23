@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.gui.options;
 
 import net.neoforged.fml.ModList;
+import org.embeddedt.embeddium.api.options.OptionIdentifier;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;

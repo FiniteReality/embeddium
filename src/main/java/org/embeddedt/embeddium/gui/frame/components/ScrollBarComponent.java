@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.gui.frame.components;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
-import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.util.Mth;

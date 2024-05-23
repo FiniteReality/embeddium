@@ -1,12 +1,11 @@
 package org.embeddedt.embeddium.gui.frame.tab;
 
-import org.embeddedt.embeddium.gui.options.Option;
-import org.embeddedt.embeddium.gui.options.OptionPage;
-import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.options.structure.Option;
+import org.embeddedt.embeddium.api.options.structure.OptionPage;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
-import org.embeddedt.embeddium.gui.options.OptionIdentifier;
+import org.embeddedt.embeddium.api.options.OptionIdentifier;
 import org.embeddedt.embeddium.gui.frame.AbstractFrame;
 import org.embeddedt.embeddium.gui.frame.OptionPageFrame;
 import org.embeddedt.embeddium.gui.frame.ScrollableFrame;

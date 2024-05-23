@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.api;
 
-import org.embeddedt.embeddium.render.chunk.data.BuiltSectionInfo;
+import org.embeddedt.embeddium.api.render.chunk.SectionInfoBuilder;
 import org.embeddedt.embeddium.api.eventbus.EmbeddiumEvent;
 import org.embeddedt.embeddium.api.eventbus.EventHandlerRegistrar;
 import org.jetbrains.annotations.ApiStatus;
@@ -11,13 +11,13 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public class ChunkDataBuiltEvent extends EmbeddiumEvent {
     public static final EventHandlerRegistrar<ChunkDataBuiltEvent> BUS = new EventHandlerRegistrar<>();
-    private final BuiltSectionInfo.Builder dataBuilder;
+    private final SectionInfoBuilder dataBuilder;
 
-    public ChunkDataBuiltEvent(BuiltSectionInfo.Builder dataBuilder) {
+    public ChunkDataBuiltEvent(SectionInfoBuilder dataBuilder) {
         this.dataBuilder = dataBuilder;
     }
 
-    public BuiltSectionInfo.Builder getDataBuilder() {
+    public SectionInfoBuilder getDataBuilder() {
         return this.dataBuilder;
     }
 }

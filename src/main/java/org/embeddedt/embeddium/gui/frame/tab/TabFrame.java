@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.gui.widgets.FlatButtonWidget;
-import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.Validate;

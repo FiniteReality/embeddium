@@ -1,6 +1,5 @@
 package org.embeddedt.embeddium.api;
 
-import org.embeddedt.embeddium.render.chunk.compile.ChunkBuildBuffers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -21,11 +20,7 @@ public interface MeshAppender {
      * @param blockRenderView The chunk section being rendered. You should only retrieve blocks using this, not the
      *                        client world
      * @param sectionOrigin The origin of the section in the world
-     * @param sodiumBuildBuffers Provides access to the Sodium/Embeddium vertex writing APIs. Intended mainly for internal
-     *                           use
      */
     record Context(Function<RenderType, VertexConsumer> vertexConsumerProvider,
-                   BlockAndTintGetter blockRenderView,
-                   SectionPos sectionOrigin,
-                   ChunkBuildBuffers sodiumBuildBuffers) {}
+                   BlockAndTintGetter blockRenderView, SectionPos sectionOrigin) {}
 }

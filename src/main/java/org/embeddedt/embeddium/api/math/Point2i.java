@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.util;
+package org.embeddedt.embeddium.api.math;
 
 public interface Point2i {
     Point2i ZERO = new Point2i() {

@@ -1,13 +1,13 @@
 package org.embeddedt.embeddium.gui.frame;
 
 import com.google.common.base.Predicates;
-import org.embeddedt.embeddium.gui.options.Option;
-import org.embeddedt.embeddium.gui.options.OptionGroup;
-import org.embeddedt.embeddium.gui.options.OptionImpact;
-import org.embeddedt.embeddium.gui.options.OptionPage;
-import org.embeddedt.embeddium.gui.options.control.Control;
+import org.embeddedt.embeddium.api.options.structure.Option;
+import org.embeddedt.embeddium.api.options.structure.OptionGroup;
+import org.embeddedt.embeddium.api.options.structure.OptionImpact;
+import org.embeddedt.embeddium.api.options.structure.OptionPage;
+import org.embeddedt.embeddium.api.gui.control.Control;
 import org.embeddedt.embeddium.gui.options.control.ControlElement;
-import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
@@ -81,7 +81,7 @@ public class OptionPageFrame extends AbstractFrame {
                 }
                 Control<?> control = option.getControl();
                 Dim2i dim = new Dim2i(0, y, this.dim.width(), 18).withParentOffset(this.dim);
-                ControlElement<?> element = control.createElement(dim);
+                ControlElement<?> element = (ControlElement<?>)control.createElement(dim);
                 this.children.add(element);
 
                 // Move down to the next option

@@ -1,4 +1,5 @@
 import net.neoforged.gradle.dsl.common.runs.type.RunType
+import org.embeddedt.embeddium.gradle.VerifyAPICompat
 
 evaluationDependsOnChildren()
 
@@ -208,6 +209,11 @@ tasks.register<DefaultTask>("setupPhi") {
     if(usePhi) {
         dependsOn(":phi:setup")
     }
+}
+
+tasks.register<VerifyAPICompat>("verifyAPICompat") {
+    group = "verification"
+    binary = tasks.getByName<Jar>("jar").archiveFile
 }
 
 if(!usePhi) {

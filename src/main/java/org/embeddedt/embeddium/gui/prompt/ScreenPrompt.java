@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.gui.prompt;
 
 import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.gui.widgets.FlatButtonWidget;
-import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;

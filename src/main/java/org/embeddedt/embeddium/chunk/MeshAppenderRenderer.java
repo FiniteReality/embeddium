@@ -22,7 +22,7 @@ public class MeshAppenderRenderer {
             var material = DefaultMaterials.forRenderLayer(type);
             usedMaterials.add(material);
             return buffers.get(material).asVertexConsumer(material);
-        }, world, origin, buffers);
+        }, world, origin);
 
         for (MeshAppender appender : appenders) {
             appender.render(context);

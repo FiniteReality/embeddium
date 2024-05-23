@@ -1,9 +1,8 @@
 package org.embeddedt.embeddium.model.color;
 
+import org.embeddedt.embeddium.api.render.chunk.EmbeddiumBlockAndTintGetter;
 import org.embeddedt.embeddium.model.quad.ModelQuadView;
 import org.embeddedt.embeddium.model.quad.blender.BlendedColorProvider;
-import org.embeddedt.embeddium.world.biome.BiomeColorSource;
-import org.embeddedt.embeddium.world.WorldSlice;
 import org.embeddedt.embeddium.api.util.ColorARGB;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.BlockPos;
@@ -23,49 +22,6 @@ public class DefaultColorProviders {
         return new ForgeFluidAdapter();
     }
 
-    @Deprecated(forRemoval = true)
-    public static class GrassColorProvider<T> extends BlendedColorProvider<T> {
-        public static final ColorProvider<BlockState> BLOCKS = new GrassColorProvider<>();
-
-        private GrassColorProvider() {
-
-        }
-
-        @Override
-        protected int getColor(WorldSlice world, int x, int y, int z) {
-            return world.getColor(BiomeColorSource.GRASS, x, y, z);
-        }
-    }
-
-    @Deprecated(forRemoval = true)
-    public static class FoliageColorProvider<T> extends BlendedColorProvider<T> {
-        public static final ColorProvider<BlockState> BLOCKS = new FoliageColorProvider<>();
-
-        private FoliageColorProvider() {
-
-        }
-
-        @Override
-        protected int getColor(WorldSlice world, int x, int y, int z) {
-            return world.getColor(BiomeColorSource.FOLIAGE, x, y, z);
-        }
-    }
-
-    @Deprecated(forRemoval = true)
-    public static class WaterColorProvider<T> extends BlendedColorProvider<T> {
-        public static final ColorProvider<BlockState> BLOCKS = new WaterColorProvider<>();
-        public static final ColorProvider<FluidState> FLUIDS = new WaterColorProvider<>();
-
-        private WaterColorProvider() {
-
-        }
-
-        @Override
-        protected int getColor(WorldSlice world, int x, int y, int z) {
-            return world.getColor(BiomeColorSource.WATER, x, y, z);
-        }
-    }
-
     public static class VertexBlendedBiomeColorAdapter<T> extends BlendedColorProvider<T> {
         private final VanillaBiomeColor vanillaGetter;
 
@@ -79,7 +35,7 @@ public class DefaultColorProviders {
         }
 
         @Override
-        protected int getColor(WorldSlice world, BlockPos pos) {
+        protected int getColor(EmbeddiumBlockAndTintGetter world, BlockPos pos) {
             return vanillaGetter.getAverageColor(world, pos);
         }
     }
@@ -92,14 +48,14 @@ public class DefaultColorProviders {
         }
 
         @Override
-        public void getColors(WorldSlice view, BlockPos pos, BlockState state, ModelQuadView quad, int[] output) {
+        public void getColors(EmbeddiumBlockAndTintGetter view, BlockPos pos, BlockState state, ModelQuadView quad, int[] output) {
             Arrays.fill(output, ColorARGB.toABGR(this.provider.getColor(state, view, pos, quad.getColorIndex())));
         }
     }
 
     private static class ForgeFluidAdapter implements ColorProvider<FluidState> {
         @Override
-        public void getColors(WorldSlice view, BlockPos pos, FluidState state, ModelQuadView quad, int[] output) {
+        public void getColors(EmbeddiumBlockAndTintGetter view, BlockPos pos, FluidState state, ModelQuadView quad, int[] output) {
             if (view == null || state == null) {
                 Arrays.fill(output, -1);
                 return;

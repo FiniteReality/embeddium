@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.render.chunk.compile.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.embeddedt.embeddium.api.render.chunk.BlockRenderContext;
 import org.embeddedt.embeddium.model.color.ColorProvider;
 import org.embeddedt.embeddium.model.color.ColorProviderRegistry;
 import org.embeddedt.embeddium.model.light.LightMode;

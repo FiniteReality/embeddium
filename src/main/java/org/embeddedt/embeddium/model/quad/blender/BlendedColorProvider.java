@@ -1,5 +1,6 @@
 package org.embeddedt.embeddium.model.quad.blender;
 
+import org.embeddedt.embeddium.api.render.chunk.EmbeddiumBlockAndTintGetter;
 import org.embeddedt.embeddium.model.quad.ModelQuadView;
 import org.embeddedt.embeddium.model.color.ColorProvider;
 import org.embeddedt.embeddium.world.WorldSlice;
@@ -21,7 +22,7 @@ public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
     }
 
     @Override
-    public void getColors(WorldSlice view, BlockPos pos, T state, ModelQuadView quad, int[] output) {
+    public void getColors(EmbeddiumBlockAndTintGetter view, BlockPos pos, T state, ModelQuadView quad, int[] output) {
         if (shouldUseVertexBlending) {
             for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++) {
                 output[vertexIndex] = this.getVertexColor(view, pos, quad, vertexIndex);
@@ -32,7 +33,7 @@ public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
         }
     }
 
-    private int getVertexColor(WorldSlice world, BlockPos blockPos, ModelQuadView quad, int vertexIndex) {
+    private int getVertexColor(EmbeddiumBlockAndTintGetter world, BlockPos blockPos, ModelQuadView quad, int vertexIndex) {
         // Offset the position by -0.5f to align smooth blending with flat blending.
         final float posX = quad.getX(vertexIndex) - 0.5f;
         final float posY = quad.getY(vertexIndex) - 0.5f;
@@ -87,12 +88,5 @@ public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
         return ColorARGB.toABGR(x0);
     }
 
-    protected int getColor(WorldSlice world, BlockPos pos) {
-        return getColor(world, pos.getX(), pos.getY(), pos.getZ());
-    }
-
-    @Deprecated(forRemoval = true)
-    protected int getColor(WorldSlice world, int x, int y, int z) {
-        throw new AssertionError("Must override one of the getColor methods");
-    }
+    protected abstract int getColor(EmbeddiumBlockAndTintGetter world, BlockPos pos);
 }

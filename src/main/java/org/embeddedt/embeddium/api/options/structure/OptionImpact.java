@@ -1,7 +1,8 @@
-package org.embeddedt.embeddium.gui.options;
+package org.embeddedt.embeddium.api.options.structure;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import org.embeddedt.embeddium.gui.options.TextProvider;
 
 public enum OptionImpact implements TextProvider {
     LOW(ChatFormatting.GREEN, "sodium.option_impact.low"),

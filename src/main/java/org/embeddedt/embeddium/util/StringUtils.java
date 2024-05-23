@@ -1,10 +1,6 @@
 package org.embeddedt.embeddium.util;
 
-import org.embeddedt.embeddium.gui.options.Option;
-import org.embeddedt.embeddium.gui.options.OptionPage;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 

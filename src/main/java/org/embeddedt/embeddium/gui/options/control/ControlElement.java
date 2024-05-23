@@ -1,9 +1,10 @@
 package org.embeddedt.embeddium.gui.options.control;
 
-import org.embeddedt.embeddium.gui.options.Option;
+import org.embeddedt.embeddium.api.options.structure.Option;
+import org.embeddedt.embeddium.api.options.structure.OptionControlElement;
 import org.embeddedt.embeddium.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.gui.widgets.FlatButtonWidget;
-import org.embeddedt.embeddium.util.Dim2i;
+import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,7 +13,7 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ControlElement<T> extends AbstractWidget {
+public class ControlElement<T> extends AbstractWidget implements OptionControlElement<T> {
     protected final Option<T> option;
 
     protected final Dim2i dim;
@@ -53,6 +54,7 @@ public class ControlElement<T> extends AbstractWidget {
         }
     }
 
+    @Override
     public Option<T> getOption() {
         return this.option;
     }

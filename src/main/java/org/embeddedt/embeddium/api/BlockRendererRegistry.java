@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.api;
 
-import org.embeddedt.embeddium.render.chunk.compile.pipeline.BlockRenderContext;
+import org.embeddedt.embeddium.api.render.chunk.BlockRenderContext;
 import net.minecraft.util.RandomSource;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;

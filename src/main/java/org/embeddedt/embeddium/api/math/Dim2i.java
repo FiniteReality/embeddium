@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.util;
+package org.embeddedt.embeddium.api.math;
 
 public record Dim2i(int x, int y, int width, int height) implements Point2i {
     public int getLimitX() {

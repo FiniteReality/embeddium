@@ -1,6 +1,5 @@
-package org.embeddedt.embeddium.render.chunk.compile.pipeline;
+package org.embeddedt.embeddium.api.render.chunk;
 
-import org.embeddedt.embeddium.world.WorldSlice;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -12,7 +11,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 public class BlockRenderContext {
-    private final WorldSlice world;
+    private final EmbeddiumBlockAndTintGetter world;
     private final BlockAndTintGetter localSlice;
 
     private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -28,7 +27,7 @@ public class BlockRenderContext {
     private RenderType renderLayer;
 
 
-    public BlockRenderContext(WorldSlice world) {
+    public BlockRenderContext(EmbeddiumBlockAndTintGetter world) {
         this.world = world;
         this.localSlice = WorldSliceLocalGenerator.generate(world);
     }
@@ -56,7 +55,7 @@ public class BlockRenderContext {
     /**
      * @return The world which the block is being rendered from
      */
-    public WorldSlice world() {
+    public EmbeddiumBlockAndTintGetter world() {
         return this.world;
     }
 
