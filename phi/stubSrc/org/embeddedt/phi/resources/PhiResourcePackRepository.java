@@ -19,6 +19,7 @@ public class PhiResourcePackRepository implements RepositorySource {
             Class<?> clz = Class.forName("me.jellysquid.mods.sodium.client.SodiumClientMod");
             embeddiumExists = true;
             clz.getConstructor().newInstance();
+        } catch (ClassNotFoundException ignored) {
         } catch(Throwable e) {
             e.printStackTrace();
         }

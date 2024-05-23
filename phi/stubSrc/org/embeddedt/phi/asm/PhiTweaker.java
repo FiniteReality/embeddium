@@ -58,7 +58,9 @@ public class PhiTweaker implements ITweaker {
 
     @Override
     public String[] getLaunchArguments() {
-        Mixins.addConfiguration("embeddium.mixins.json");
+        if(RetroFuturaBootstrap.API.launchClassLoader().asURLClassLoader().findResource("embeddium.mixins.json") != null) {
+            Mixins.addConfiguration("embeddium.mixins.json");
+        }
         return new String[] { "--accessToken", "0", "--version", "0.0.0" };
     }
 }
