@@ -5,7 +5,7 @@ import org.embeddedt.embeddium.api.internal.DependencyInjection;
 
 public interface VertexFormatRegistry {
     VertexFormatRegistry INSTANCE = DependencyInjection.load(VertexFormatRegistry.class,
-            "org.embeddedt.embeddium.render.vertex.VertexFormatRegistryImpl");
+            "org.embeddedt.embeddium.impl.render.vertex.VertexFormatRegistryImpl");
 
     static VertexFormatRegistry instance() {
         return INSTANCE;

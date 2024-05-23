@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import org.embeddedt.embeddium.render.world.WorldSliceLocalGenerator;
+import org.embeddedt.embeddium.impl.render.world.WorldSliceLocalGenerator;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 

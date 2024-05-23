@@ -1,10 +1,10 @@
 {
-  "package" : "org.embeddedt.embeddium.mixin",
+  "package" : "org.embeddedt.embeddium.impl.mixin",
   "refmap": "embeddium-refmap.json",
   "required" : true,
   "minVersion": "0.8",
   "compatibilityLevel" : "JAVA_17",
-  "plugin" : "org.embeddedt.embeddium.mixin.MixinPlugin",
+  "plugin" : "org.embeddedt.embeddium.impl.mixin.MixinPlugin",
   "injectors" : {
     "defaultRequire" : 1
   },

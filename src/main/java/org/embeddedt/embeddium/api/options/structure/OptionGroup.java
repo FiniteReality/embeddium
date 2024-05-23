@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.api.options.structure;
 
 import com.google.common.collect.ImmutableList;
-import org.embeddedt.embeddium.Embeddium;
+import org.embeddedt.embeddium.impl.Embeddium;
 import net.minecraft.resources.ResourceLocation;
 import org.embeddedt.embeddium.api.OptionGroupConstructionEvent;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;

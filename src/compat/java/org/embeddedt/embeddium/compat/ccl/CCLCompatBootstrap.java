@@ -5,7 +5,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import org.embeddedt.embeddium.Embeddium;
+import org.embeddedt.embeddium.impl.Embeddium;
 
 @EventBusSubscriber(modid = Embeddium.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class CCLCompatBootstrap {

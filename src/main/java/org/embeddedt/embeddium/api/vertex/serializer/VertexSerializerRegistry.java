@@ -5,7 +5,7 @@ import org.embeddedt.embeddium.api.vertex.format.VertexFormatDescription;
 
 public interface VertexSerializerRegistry {
     VertexSerializerRegistry INSTANCE = DependencyInjection.load(VertexSerializerRegistry.class,
-            "org.embeddedt.embeddium.render.vertex.serializers.VertexSerializerRegistryImpl");
+            "org.embeddedt.embeddium.impl.render.vertex.serializers.VertexSerializerRegistryImpl");
 
     static VertexSerializerRegistry instance() {
         return INSTANCE;

@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.api.options.structure;
 
-import org.embeddedt.embeddium.Embeddium;
+import org.embeddedt.embeddium.impl.Embeddium;
 import net.minecraft.resources.ResourceLocation;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;
 
