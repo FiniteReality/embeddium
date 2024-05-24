@@ -1,3 +1,5 @@
+import org.w3c.dom.Element
+
 plugins {
     id("idea")
     id("net.neoforged.gradle") version("6.0.21")
@@ -210,6 +212,23 @@ publishing {
         this.create<MavenPublication>("mavenJava") {
             from(components["java"])
             fg.component(this)
+            pom {
+                withXml {
+                    // Workaround for NG only checking for net.minecraftforge group
+                    val root = this.asElement()
+
+                    val depsParent = (root.getElementsByTagName("dependencies").item(0) as Element)
+                    val allDeps = depsParent.getElementsByTagName("dependency")
+
+                    (0..allDeps.length).map { allDeps.item(it) }.filterIsInstance<Element>().filter {
+                        val artifactId = it.getElementsByTagName("artifactId").item(0).textContent
+                        val groupId = it.getElementsByTagName("groupId").item(0).textContent
+                        (artifactId == "forge") && (groupId == "net.neoforged")
+                    }.forEach {
+                        depsParent.removeChild(it)
+                    }
+                }
+            }
         }
     }
 
