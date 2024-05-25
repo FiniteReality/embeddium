@@ -4,6 +4,15 @@ pluginManagement {
     repositories {
         maven("https://maven.neoforged.net")
         maven("https://repo.spongepowered.org/repository/maven-public/")
+        // Add the maven repository for the ModDevGradle plugin.
+        maven("https://prmaven.neoforged.net/ModDevGradle/pr1") {
+            name = "Maven for PR #1" // https://github.com/neoforged/ModDevGradle/pull/1
+            content {
+                includeModule("net.neoforged.moddev", "net.neoforged.moddev.gradle.plugin")
+                includeModule("net.neoforged.moddev.junit", "net.neoforged.moddev.junit.gradle.plugin")
+                includeModule("net.neoforged", "moddev-gradle")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -14,7 +23,7 @@ val use_phi = extra["use_phi"].toString().toBoolean()
 
 plugins {
     id("net.neoforged.gradle.platform") version("7.0.134")
-    id("net.neoforged.gradle.userdev") version("7.0.134") apply false
+    id("net.neoforged.moddev") version("0.1.24-pr-1-pr-publish") apply false
 }
 
 if(use_phi) {

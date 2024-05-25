@@ -1,6 +1,7 @@
 plugins {
     id("idea")
-    id("net.neoforged.gradle.userdev")
+    id("net.neoforged.moddev")
+    //id("net.neoforged.gradle.userdev")
     id("maven-publish")
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
@@ -69,33 +70,32 @@ repositories {
     }
 }
 
-minecraft {
-    accessTransformers {
-        file(rootProject.file("src/main/resources/META-INF/accesstransformer.cfg"))
-    }
-}
+if(!usePhi) {
+    neoForge {
+        // For now we require a special NeoForge build. You can find the latest version at https://github.com/neoforged/NeoForge/pull/959.
+        version = "20.6.84-beta-pr-959-features-gradle-metadata"
 
-if(project.hasProperty("parchment_version")) {
-    val parchment_info = "parchment_version"().split("-")
-    subsystems {
-        parchment {
-            minecraftVersion = parchment_info[1]
-            mappingsVersion = parchment_info[0]
+        runs {
+            create("client") {
+                client()
+                systemProperty("forge.logging.console.level", "info")
+            }
         }
-    }
-}
 
-runs {
-    configureEach {
+        mods {
+            create("embeddium") {
+                sourceSet(sourceSets["main"])
+                extraSourceSets.forEach { sourceSet(sourceSets[it]) }
+            }
+        }
 
-        systemProperty("forge.logging.console.level", "info")
-
-        modSource(sourceSets["main"])
-        extraSourceSets.forEach { modSource(sourceSets[it]) }
-    }
-    if(!usePhi) {
-        // Create the default client run
-        create("client")
+        if(project.hasProperty("parchment_version")) {
+            val parchment_info = "parchment_version"().split("-")
+            parchment {
+                minecraftVersion = parchment_info[1]
+                mappingsVersion = parchment_info[0]
+            }
+        }
     }
 }
 
@@ -122,9 +122,7 @@ fun DependencyHandlerScope.compatCompileOnly(dependency: String) {
 }
 
 dependencies {
-    if(!usePhi) {
-        implementation("net.neoforged:neoforge:${"forge_version"()}")
-    } else {
+    if(usePhi) {
         implementation(project(":phi"))
         runtimeOnly(project(":phi", "clientExtra"))
     }
