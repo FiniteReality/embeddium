@@ -4,13 +4,12 @@ import me.jellysquid.mods.sodium.client.world.biome.BiomeColorMaps;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import org.embeddedt.embeddium.chunk.biome.ExtendedBiomeSpecialEffects;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Biome.class)
+@Mixin(value = Biome.class, priority = 800)
 public abstract class BiomeMixin {
     @Shadow
     @Final
@@ -30,17 +29,12 @@ public abstract class BiomeMixin {
 
     /**
      * @author JellySquid
-     * @reason Avoid unnecessary pointer de-references and allocations
+     * @reason Avoid unnecessary allocations
      */
     @Overwrite
     public int getGrassColor(double x, double z) {
-        int color;
-
-        if (((ExtendedBiomeSpecialEffects)this.specialEffects).embeddium$hasCustomGrass()) {
-            color = ((ExtendedBiomeSpecialEffects)this.specialEffects).embeddium$getCustomGrass();
-        } else {
-            color = BiomeColorMaps.getGrassColor(this.defaultColorIndex);
-        }
+        var override = this.specialEffects.getGrassColorOverride().orElse(null);
+        int color = override != null ? override.intValue() : BiomeColorMaps.getGrassColor(this.defaultColorIndex);
 
         var modifier = this.specialEffects.getGrassColorModifier();
 
@@ -53,19 +47,12 @@ public abstract class BiomeMixin {
 
     /**
      * @author JellySquid
-     * @reason Avoid unnecessary pointer de-references and allocations
+     * @reason Avoid allocations
      */
     @Overwrite
     public int getFoliageColor() {
-        int color;
-
-        if (((ExtendedBiomeSpecialEffects)this.specialEffects).embeddium$hasCustomFoliage()) {
-            color = ((ExtendedBiomeSpecialEffects)this.specialEffects).embeddium$getCustomFoliage();
-        } else {
-            color = BiomeColorMaps.getFoliageColor(this.defaultColorIndex);
-        }
-
-        return color;
+        var override = this.specialEffects.getFoliageColorOverride().orElse(null);
+        return override != null ? override.intValue() : BiomeColorMaps.getFoliageColor(this.defaultColorIndex);
     }
 
     @Unique
