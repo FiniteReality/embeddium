@@ -187,6 +187,10 @@ java {
     withSourcesJar()
 }
 
+tasks.named<Jar>("jar").configure {
+    archiveClassifier = "slim"
+}
+
 tasks.jarJar {
     from("COPYING", "COPYING.LESSER", "README.md")
 
@@ -196,6 +200,8 @@ tasks.jarJar {
     }
 
     finalizedBy("reobfJarJar")
+
+    archiveClassifier = ""
 }
 
 tasks.named<Jar>("sourcesJar").configure {
@@ -210,7 +216,8 @@ publishing {
     }
     publications {
         this.create<MavenPublication>("mavenJava") {
-            from(components["java"])
+            artifact(tasks.named("jarJar"))
+            artifact(tasks.named("sourcesJar"))
             fg.component(this)
             pom {
                 withXml {
