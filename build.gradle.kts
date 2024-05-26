@@ -1,3 +1,5 @@
+import org.slf4j.event.Level
+
 plugins {
     id("idea")
     id("net.neoforged.moddev")
@@ -78,7 +80,7 @@ if(!usePhi) {
         runs {
             create("client") {
                 client()
-                systemProperty("forge.logging.console.level", "info")
+                logLevel = Level.INFO
             }
         }
 
