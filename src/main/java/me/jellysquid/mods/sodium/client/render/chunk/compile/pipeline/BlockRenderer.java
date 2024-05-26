@@ -24,6 +24,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEn
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
+import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -197,6 +198,10 @@ public class BlockRenderer {
 
         if (colorProvider != null && quad.hasColor()) {
             colorProvider.getColors(ctx.world(), ctx.pos(), ctx.state(), quad, vertexColors);
+            // Force full alpha on all colors
+            for(int i = 0; i < vertexColors.length; i++) {
+                vertexColors[i] |= 0xFF000000;
+            }
         } else {
             Arrays.fill(vertexColors, 0xFFFFFFFF);
         }
@@ -225,7 +230,7 @@ public class BlockRenderer {
             out.y = ctx.origin().y() + quad.getY(srcIndex) + (float) offset.y();
             out.z = ctx.origin().z() + quad.getZ(srcIndex) + (float) offset.z();
 
-            out.color = ColorABGR.withAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), light.br[srcIndex]);
+            out.color = ColorMixer.mulSingleWithoutAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), (int)(light.br[srcIndex] * 255));
 
             out.u = quad.getTexU(srcIndex);
             out.v = quad.getTexV(srcIndex);

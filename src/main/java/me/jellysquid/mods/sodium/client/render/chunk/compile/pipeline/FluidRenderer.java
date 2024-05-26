@@ -17,17 +17,14 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder.Vertex;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
-import net.caffeinemc.mods.sodium.api.util.NormI8;
+import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -430,7 +427,7 @@ public class FluidRenderer {
         // multiply the per-vertex color against the combined brightness
         // the combined brightness is the per-vertex brightness multiplied by the block's brightness
         for (int i = 0; i < 4; i++) {
-            this.quadColors[i] = ColorABGR.withAlpha(this.quadColors[i], light.br[i] * brightness);
+            this.quadColors[i] = ColorMixer.mulSingleWithoutAlpha(ColorABGR.withAlpha(this.quadColors[i], 255), (int)(light.br[i] * brightness * 255));
         }
     }
 
