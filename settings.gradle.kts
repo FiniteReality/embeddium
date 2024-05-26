@@ -23,7 +23,7 @@ val use_phi = extra["use_phi"].toString().toBoolean()
 
 plugins {
     id("net.neoforged.gradle.platform") version("7.0.134")
-    id("net.neoforged.moddev") version("0.1.24-pr-1-pr-publish") apply false
+    id("net.neoforged.moddev") version("0.1.32-pr-1-pr-publish") apply false
 }
 
 if(use_phi) {

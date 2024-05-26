@@ -230,8 +230,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      *
      * NOTE: When updating Embeddium to newer versions of the game, this injection point must be checked.
      */
-    // FIXME FAILING MIXIN
-    @ModifyVariable(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0), ordinal = 3, print = true)
+    @ModifyVariable(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0), ordinal = 3)
     private boolean changeEntityOutlineFlag(boolean bl) {
         return bl || (this.renderer.didBlockEntityRequestOutline() && this.shouldShowEntityOutlines());
     }
