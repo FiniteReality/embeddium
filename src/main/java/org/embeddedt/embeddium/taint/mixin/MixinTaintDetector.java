@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.transformer.ext.ITargetClassContext;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -42,7 +42,7 @@ public class MixinTaintDetector implements IExtension {
      */
     private static final List<String> TARGET_PREFIXES = List.of("me.jellysquid.mods.sodium", "org.embeddedt.embeddium");
     /**
-     * A method handle used to call the package-private {@link ClassInfo#getMixins()} method. We need this to find out
+     * A method handle used to read the package-private {@link ClassInfo#mixins} field. We need this to find out
      * about mixins before they are applied.
      */
     private static final MethodHandle GET_MIXINS_ON_CLASS_INFO;
@@ -78,10 +78,10 @@ public class MixinTaintDetector implements IExtension {
     static {
         MethodHandle mh = null;
         try {
-            Method m = ClassInfo.class.getDeclaredMethod("getMixins");
+            Field m = ClassInfo.class.getDeclaredField("mixins");
             m.setAccessible(true);
-            mh = MethodHandles.publicLookup().unreflect(m);
-        } catch(ReflectiveOperationException e) {
+            mh = MethodHandles.publicLookup().unreflectGetter(m).asType(MethodType.methodType(Set.class, ClassInfo.class));
+        } catch(ReflectiveOperationException | RuntimeException e) {
             e.printStackTrace();
         }
         GET_MIXINS_ON_CLASS_INFO = mh;
