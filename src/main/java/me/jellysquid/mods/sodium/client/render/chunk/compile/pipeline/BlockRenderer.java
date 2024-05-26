@@ -40,6 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeConfig;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 import org.embeddedt.embeddium.api.model.EmbeddiumBakedModelExtension;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 
 import java.util.Arrays;
 import java.util.List;
@@ -71,6 +72,12 @@ public class BlockRenderer {
 
     private final SinkingVertexBuilder sinkingVertexBuilder = new SinkingVertexBuilder();
 
+    /**
+     * Since Iris duplicates the terrain pipeline inside itself, it still tries to apply the legacy AO multiplication.
+     * To ensure blocks render as intended, we force what it interprets as the brightness value to 1.
+     */
+    private final int shaderAlphaMagicValue;
+
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
@@ -78,6 +85,7 @@ public class BlockRenderer {
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
         this.useForgeExperimentalLightingPipeline = false;
+        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -230,7 +238,7 @@ public class BlockRenderer {
             out.y = ctx.origin().y() + quad.getY(srcIndex) + (float) offset.y();
             out.z = ctx.origin().z() + quad.getZ(srcIndex) + (float) offset.z();
 
-            out.color = ColorMixer.mulSingleWithoutAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), (int)(light.br[srcIndex] * 255));
+            out.color = ColorMixer.mulSingleWithoutAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), (int)(light.br[srcIndex] * 255)) | shaderAlphaMagicValue;
 
             out.u = quad.getTexU(srcIndex);
             out.v = quad.getTexV(srcIndex);
