@@ -22,6 +22,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEn
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
+import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 
 import java.util.Arrays;
 import java.util.List;
@@ -65,6 +67,12 @@ public class BlockRenderer {
 
     private final SinkingVertexBuilder sinkingVertexBuilder = new SinkingVertexBuilder();
 
+    /**
+     * Since Iris duplicates the terrain pipeline inside itself, it still tries to apply the legacy AO multiplication.
+     * To ensure blocks render as intended, we force what it interprets as the brightness value to 1.
+     */
+    private final int shaderAlphaMagicValue;
+
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
@@ -72,6 +80,7 @@ public class BlockRenderer {
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
         this.useForgeExperimentalLightingPipeline = false;
+        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -178,6 +187,10 @@ public class BlockRenderer {
 
         if (colorProvider != null && quad.hasColor()) {
             colorProvider.getColors(ctx.world(), ctx.pos(), ctx.state(), quad, vertexColors);
+            // Force full alpha on all colors
+            for(int i = 0; i < vertexColors.length; i++) {
+                vertexColors[i] |= 0xFF000000;
+            }
         } else {
             Arrays.fill(vertexColors, 0xFFFFFFFF);
         }
@@ -206,7 +219,7 @@ public class BlockRenderer {
             out.y = ctx.origin().y() + quad.getY(srcIndex) + (float) offset.y();
             out.z = ctx.origin().z() + quad.getZ(srcIndex) + (float) offset.z();
 
-            out.color = ColorABGR.withAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), light.br[srcIndex]);
+            out.color = ColorMixer.mulSingleWithoutAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), (int)(light.br[srcIndex] * 255)) | shaderAlphaMagicValue;
 
             out.u = quad.getTexU(srcIndex);
             out.v = quad.getTexV(srcIndex);
