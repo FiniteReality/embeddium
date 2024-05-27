@@ -2,7 +2,7 @@ import org.w3c.dom.Element
 
 plugins {
     id("idea")
-    id("net.neoforged.gradle") version("6.0.21")
+    id("net.minecraftforge.gradle") version("6.0.25")
     id("maven-publish")
     id("org.spongepowered.mixin") version("0.7.38")
 
@@ -132,7 +132,7 @@ fun DependencyHandlerScope.compatCompileOnly(dependency: Dependency) {
 }
 
 dependencies {
-    minecraft("net.neoforged:forge:${"minecraft_version"()}-${"forge_version"()}")
+    minecraft("net.minecraftforge:forge:${"minecraft_version"()}-${"forge_version"()}")
 
     // Mods
     compatCompileOnly(fg.deobf("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}"))
