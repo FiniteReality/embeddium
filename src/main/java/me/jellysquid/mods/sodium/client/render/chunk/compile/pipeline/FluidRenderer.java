@@ -22,7 +22,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
-import net.caffeinemc.mods.sodium.api.util.ColorABGR;
+import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.Minecraft;
@@ -43,6 +43,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 
 import java.util.function.Predicate;
 
@@ -68,12 +69,18 @@ public class FluidRenderer {
     private final SinkingVertexBuilder fluidVertexBuilder = new SinkingVertexBuilder();
 
     private final Reference2BooleanOpenHashMap<Class<? extends FluidRenderHandler>> handlersUsingCustomRenderer = new Reference2BooleanOpenHashMap<>();
+    /**
+     * Since Iris duplicates the terrain pipeline inside itself, it still tries to apply the legacy AO multiplication.
+     * To ensure blocks render as intended, we force what it interprets as the brightness value to 1.
+     */
+    private final int shaderAlphaMagicValue;
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
 
         this.lighters = lighters;
         this.colorProviderRegistry = colorProviderRegistry;
+        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
     }
 
     private boolean isFluidOccluded(BlockAndTintGetter world, int x, int y, int z, Direction dir, Fluid fluid) {
@@ -132,7 +139,7 @@ public class FluidRenderer {
         var handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getType());
 
         // TODO move to a separate class
-        boolean overridesRenderFluid = handlersUsingCustomRenderer.computeIfAbsent(handler.getClass(), (Predicate<? super Class<? extends FluidRenderHandler>>)handlerClass -> {
+        boolean overridesRenderFluid = handlersUsingCustomRenderer.computeIfAbsent(handler.getClass(), (Predicate<? super Class<? extends FluidRenderHandler>>) handlerClass -> {
             try {
                 var method = handlerClass.getMethod("renderFluid", BlockPos.class, BlockAndTintGetter.class, VertexConsumer.class, BlockState.class, FluidState.class);
                 return method.getDeclaringClass() != FluidRenderHandler.class;
@@ -461,7 +468,7 @@ public class FluidRenderer {
         // multiply the per-vertex color against the combined brightness
         // the combined brightness is the per-vertex brightness multiplied by the block's brightness
         for (int i = 0; i < 4; i++) {
-            this.quadColors[i] = ColorABGR.withAlpha(this.quadColors[i], light.br[i] * brightness);
+            this.quadColors[i] = ColorMixer.mulSingleWithoutAlpha(this.quadColors[i], (int)(light.br[i] * brightness * 255)) | this.shaderAlphaMagicValue;
         }
     }
 
