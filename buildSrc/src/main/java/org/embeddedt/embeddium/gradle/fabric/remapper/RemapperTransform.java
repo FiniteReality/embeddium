@@ -18,6 +18,8 @@ import org.gradle.api.tasks.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -59,38 +61,48 @@ abstract public class RemapperTransform implements TransformAction<RemapperTrans
         }
     }
 
-    private void remapToMojmap(File inputJar, File outputJar) throws IOException {
-        VisitableMappingTree intermediaryTree = new MemoryMappingTree();
-        try(ZipFile intermediaryFile = new ZipFile(getParameters().getIntermediaryMappings().get().getAsFile())) {
-            var mappingsEntry = intermediaryFile.getEntry("mappings/mappings.tiny");
-            if(mappingsEntry == null) {
-                throw new IllegalArgumentException("Cannot find intermediary mappings in jar");
-            }
-            MappingReader.read(new InputStreamReader(intermediaryFile.getInputStream(mappingsEntry), StandardCharsets.UTF_8), MappingFormat.TINY_2_FILE, intermediaryTree);
-        }
+    record CachedMappings(MappingTreeRemapper intermediaryToObf, MappingTreeRemapper obfToMojmap) {}
 
-        VisitableMappingTree proguardTree = new MemoryMappingTree();
-        try(FileInputStream stream = new FileInputStream(getParameters().getMojangMappings().get().getAsFile())) {
-            MappingReader.read(new InputStreamReader(stream, StandardCharsets.UTF_8), MappingFormat.PROGUARD_FILE, proguardTree);
-        }
+    record MappingsKey(String intermediaryPath, String mojmapPath) {}
+
+    private static final Map<MappingsKey, CachedMappings> mappingsByVersion = new ConcurrentHashMap<>();
+
+    private void remapToMojmap(File inputJar, File outputJar) throws IOException {
+        var intermediaryJar = getParameters().getIntermediaryMappings().get().getAsFile();
+        var mojmapFile = getParameters().getMojangMappings().get().getAsFile();
+        var cachedMappings = mappingsByVersion.computeIfAbsent(new MappingsKey(intermediaryJar.getAbsolutePath(), mojmapFile.getAbsolutePath()), key -> {
+            try {
+                VisitableMappingTree intermediaryTree = new MemoryMappingTree();
+                try(ZipFile intermediaryFile = new ZipFile(getParameters().getIntermediaryMappings().get().getAsFile())) {
+                    var mappingsEntry = intermediaryFile.getEntry("mappings/mappings.tiny");
+                    if(mappingsEntry == null) {
+                        throw new IllegalArgumentException("Cannot find intermediary mappings in jar");
+                    }
+                    MappingReader.read(new InputStreamReader(intermediaryFile.getInputStream(mappingsEntry), StandardCharsets.UTF_8), MappingFormat.TINY_2_FILE, intermediaryTree);
+                }
+
+                VisitableMappingTree proguardTree = new MemoryMappingTree();
+                try(FileInputStream stream = new FileInputStream(getParameters().getMojangMappings().get().getAsFile())) {
+                    MappingReader.read(new InputStreamReader(stream, StandardCharsets.UTF_8), MappingFormat.PROGUARD_FILE, proguardTree);
+                }
+
+                return new CachedMappings(new MappingTreeRemapper(intermediaryTree, "intermediary", "official"), new MappingTreeRemapper(proguardTree, MappingUtil.NS_TARGET_FALLBACK, MappingUtil.NS_SOURCE_FALLBACK));
+            } catch(IOException e) {
+                throw new RuntimeException("Failure to build mappings trees", e);
+            }
+        });
 
         try(InputStream is = new FileInputStream(inputJar)) {
             try(OutputStream os = new FileOutputStream(outputJar)) {
-                ModRemapper.remapMod(is, os, new MappingTreeRemapper(intermediaryTree, "intermediary", "official"),
-                        new MappingTreeRemapper(proguardTree, MappingUtil.NS_TARGET_FALLBACK, MappingUtil.NS_SOURCE_FALLBACK));
+                ModRemapper.remapMod(is, os, cachedMappings.intermediaryToObf(), cachedMappings.obfToMojmap());
             }
         }
     }
 
     private boolean isFabricMod(File jar) {
         if(jar.isFile()) {
-            try (JarInputStream inputStream =  new JarInputStream(new FileInputStream(jar))) {
-                ZipEntry next;
-                while ((next = inputStream.getNextEntry()) != null) {
-                    if ("fabric.mod.json".equals(next.getName())) {
-                        return true;
-                    }
-                }
+            try (ZipFile zf = new ZipFile(jar)) {
+                return zf.getEntry("fabric.mod.json") != null;
             } catch (IOException e) {
                 e.printStackTrace();
             }
