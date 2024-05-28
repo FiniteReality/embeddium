@@ -57,7 +57,7 @@ public class RemapperPlugin implements Plugin<Project> {
                 return deps.iterator().next();
             }));
             t.getParameters().getMojangMappings().set(mappingsFile);
-            //t.getParameters().getRemappingCache().set(project.getLayout().getBuildDirectory().dir("embeddium_remap_cache"));
+            t.getParameters().getRemappingCache().set(project.getLayout().getBuildDirectory().dir("embeddium_remap_cache").get().getAsFile().getAbsolutePath());
             t.getFrom().attribute(artifactType, "jar").attribute(devCompatible, false);
             t.getTo().attribute(artifactType, "jar").attribute(devCompatible, true);
         });

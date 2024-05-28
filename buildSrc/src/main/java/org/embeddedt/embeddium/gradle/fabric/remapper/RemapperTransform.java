@@ -18,10 +18,13 @@ import org.gradle.api.tasks.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.*;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
@@ -39,6 +42,9 @@ abstract public class RemapperTransform implements TransformAction<RemapperTrans
         @InputFile
         @PathSensitive(PathSensitivity.NONE)
         RegularFileProperty getMojangMappings();
+
+        @Input
+        Property<String> getRemappingCache();
     }
 
     @InputArtifact
@@ -61,7 +67,7 @@ abstract public class RemapperTransform implements TransformAction<RemapperTrans
         }
     }
 
-    record CachedMappings(MappingTreeRemapper intermediaryToObf, MappingTreeRemapper obfToMojmap) {}
+    record CachedMappings(MappingTreeRemapper intermediaryToObf, MappingTreeRemapper obfToMojmap, String hash) {}
 
     record MappingsKey(String intermediaryPath, String mojmapPath) {}
 
@@ -73,30 +79,55 @@ abstract public class RemapperTransform implements TransformAction<RemapperTrans
         var cachedMappings = mappingsByVersion.computeIfAbsent(new MappingsKey(intermediaryJar.getAbsolutePath(), mojmapFile.getAbsolutePath()), key -> {
             try {
                 VisitableMappingTree intermediaryTree = new MemoryMappingTree();
+                MessageDigest digest = MessageDigest.getInstance("MD5");
+                digest.reset();
                 try(ZipFile intermediaryFile = new ZipFile(getParameters().getIntermediaryMappings().get().getAsFile())) {
                     var mappingsEntry = intermediaryFile.getEntry("mappings/mappings.tiny");
                     if(mappingsEntry == null) {
                         throw new IllegalArgumentException("Cannot find intermediary mappings in jar");
                     }
-                    MappingReader.read(new InputStreamReader(intermediaryFile.getInputStream(mappingsEntry), StandardCharsets.UTF_8), MappingFormat.TINY_2_FILE, intermediaryTree);
+                    MappingReader.read(new InputStreamReader(new DigestInputStream(intermediaryFile.getInputStream(mappingsEntry), digest), StandardCharsets.UTF_8), MappingFormat.TINY_2_FILE, intermediaryTree);
                 }
 
                 VisitableMappingTree proguardTree = new MemoryMappingTree();
                 try(FileInputStream stream = new FileInputStream(getParameters().getMojangMappings().get().getAsFile())) {
-                    MappingReader.read(new InputStreamReader(stream, StandardCharsets.UTF_8), MappingFormat.PROGUARD_FILE, proguardTree);
+                    MappingReader.read(new InputStreamReader(new DigestInputStream(stream, digest), StandardCharsets.UTF_8), MappingFormat.PROGUARD_FILE, proguardTree);
                 }
 
-                return new CachedMappings(new MappingTreeRemapper(intermediaryTree, "intermediary", "official"), new MappingTreeRemapper(proguardTree, MappingUtil.NS_TARGET_FALLBACK, MappingUtil.NS_SOURCE_FALLBACK));
-            } catch(IOException e) {
+                StringBuilder hashBuilder = new StringBuilder();
+
+                for(byte b : digest.digest()) {
+                    hashBuilder.append(String.format("%02x", b));
+                }
+
+                return new CachedMappings(
+                        new MappingTreeRemapper(intermediaryTree, "intermediary", "official"),
+                        new MappingTreeRemapper(proguardTree, MappingUtil.NS_TARGET_FALLBACK, MappingUtil.NS_SOURCE_FALLBACK),
+                        hashBuilder.toString()
+                );
+            } catch(IOException | NoSuchAlgorithmException e) {
                 throw new RuntimeException("Failure to build mappings trees", e);
             }
         });
 
-        try(InputStream is = new FileInputStream(inputJar)) {
-            try(OutputStream os = new FileOutputStream(outputJar)) {
-                ModRemapper.remapMod(is, os, cachedMappings.intermediaryToObf(), cachedMappings.obfToMojmap());
+        File cacheDir = new File(getParameters().getRemappingCache().get() + File.separator + cachedMappings.hash());
+        if(!cacheDir.exists()) {
+            cacheDir.mkdirs();
+        }
+
+        File outputCachedJar = new File(cacheDir, outputJar.getName());
+
+        if(!outputCachedJar.exists()) {
+            System.out.println("Remapping " + outputCachedJar.getName());
+            try(InputStream is = new FileInputStream(inputJar)) {
+                try(OutputStream os = new FileOutputStream(outputCachedJar)) {
+                    ModRemapper.remapMod(is, os, cachedMappings.intermediaryToObf(), cachedMappings.obfToMojmap());
+                }
             }
         }
+
+        outputJar.delete();
+        Files.copy(outputCachedJar.toPath(), outputJar.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
     }
 
     private boolean isFabricMod(File jar) {
