@@ -94,6 +94,9 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, FabricBlo
     // (Local Section -> Block Entity) table.
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
 
+    // (Local Section -> Block Entity Render Data) table.
+    private final @Nullable Int2ReferenceMap<Object>[] blockEntityRenderDataArrays;
+
     // The starting point from which this slice captures blocks
     private int originX, originY, originZ;
     
@@ -152,6 +155,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, FabricBlo
         this.lightArrays = new DataLayer[SECTION_ARRAY_SIZE][LIGHT_TYPES.length];
 
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
+        this.blockEntityRenderDataArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
@@ -194,6 +198,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, FabricBlo
         this.lightArrays[sectionIndex][LightLayer.SKY.ordinal()] = section.getLightArray(LightLayer.SKY);
 
         this.blockEntityArrays[sectionIndex] = section.getBlockEntityMap();
+        this.blockEntityRenderDataArrays[sectionIndex] = section.getBlockEntityRenderDataMap();
     }
 
     private void unpackBlockData(BlockState[] blockArray, ChunkRenderContext context, ClonedChunkSection section) {
@@ -382,7 +387,21 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, FabricBlo
 
     @Override
     public Object getBlockEntityRenderData(BlockPos pos) {
-        throw new UnsupportedOperationException("TODO");
+        int relX = pos.getX() - this.originX;
+        int relY = pos.getY() - this.originY;
+        int relZ = pos.getZ() - this.originZ;
+
+        if (!isInside(relX, relY, relZ)) {
+            return null;
+        }
+
+        var blockEntityRenderDataMap = this.blockEntityRenderDataArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
+
+        if (blockEntityRenderDataMap == null) {
+            return null;
+        }
+
+        return blockEntityRenderDataMap.get(getLocalBlockIndex(relX & 15, relY & 15, relZ & 15));
     }
 
     public static int getLocalBlockIndex(int x, int y, int z) {
