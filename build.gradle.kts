@@ -13,6 +13,8 @@ plugins {
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
 
     id("org.parchmentmc.librarian.forgegradle") version("1.2.0.7-dev-SNAPSHOT")
+
+    id("embeddium-fabric-remapper")
 }
 
 operator fun String.invoke(): String {
