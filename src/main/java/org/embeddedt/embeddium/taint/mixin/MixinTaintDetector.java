@@ -55,6 +55,7 @@ public class MixinTaintDetector implements IExtension {
      * Mods which are not subject to the new taint requirements.
      */
     private static final Collection<String> MOD_ID_WHITELIST = Set.of(
+            "embeddium", // obviously
             "flywheel", // until we finish sorting that out ;)
             "oculus", "iris" // because it will not be refactored on legacy versions
     );

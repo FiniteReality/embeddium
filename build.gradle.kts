@@ -140,6 +140,9 @@ dependencies {
     compatCompileOnly(fg.deobf("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}"))
     compatCompileOnly(fg.deobf("curse.maven:immersiveengineering-231951:${"ie_fileid"()}"))
 
+    // Fabric API
+    compileOnly("net.fabricmc.fabric-api:fabric-api:0.91.0+1.20.1")
+
     annotationProcessor("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
 
     compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
