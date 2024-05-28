@@ -2,9 +2,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
-import me.jellysquid.mods.sodium.client.compat.forge.ForgeBlockRenderer;
 import me.jellysquid.mods.sodium.client.model.color.ColorProvider;
 import me.jellysquid.mods.sodium.client.model.color.ColorProviderRegistry;
 import me.jellysquid.mods.sodium.client.model.light.LightMode;
@@ -18,12 +16,9 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder.Vertex;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
-import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -37,10 +32,12 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeConfig;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 import org.embeddedt.embeddium.api.model.EmbeddiumBakedModelExtension;
 import org.embeddedt.embeddium.render.ShaderModBridge;
+import org.embeddedt.embeddium.render.frapi.FRAPIModelUtils;
+import org.embeddedt.embeddium.render.frapi.FRAPIRenderHandler;
+import org.embeddedt.embeddium.render.frapi.IndigoBlockRenderContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,10 +56,6 @@ public class BlockRenderer {
     private final ChunkVertexEncoder.Vertex[] vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
 
     private final boolean useAmbientOcclusion;
-    @Deprecated(forRemoval = true)
-    private final boolean useForgeExperimentalLightingPipeline;
-
-    private final ForgeBlockRenderer forgeBlockRenderer = new ForgeBlockRenderer();
 
     private final int[] quadColors = new int[4];
 
@@ -71,6 +64,8 @@ public class BlockRenderer {
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
     private final SinkingVertexBuilder sinkingVertexBuilder = new SinkingVertexBuilder();
+
+    private final FRAPIRenderHandler fabricModelRenderingHandler;
 
     /**
      * Since Iris duplicates the terrain pipeline inside itself, it still tries to apply the legacy AO multiplication.
@@ -84,8 +79,8 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
-        this.useForgeExperimentalLightingPipeline = false;
         this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
+        this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -119,17 +114,11 @@ public class BlockRenderer {
             }
         }
 
-        if(this.useForgeExperimentalLightingPipeline) {
-            final PoseStack mStack;
-            if(renderOffset != Vec3.ZERO) {
-                mStack = new PoseStack();
-                mStack.translate(renderOffset.x, renderOffset.y, renderOffset.z);
-            } else
-                mStack = EMPTY_STACK;
-
-            sinkingVertexBuilder.reset();
-            forgeBlockRenderer.renderBlock(mode, ctx, sinkingVertexBuilder, mStack, this.random, this.occlusionCache, meshBuilder);
-            sinkingVertexBuilder.flush(meshBuilder, material, ctx.origin());
+        // Delegate FRAPI models to their pipeline
+        if (FRAPIModelUtils.isFRAPIModel(ctx.model())) {
+            this.fabricModelRenderingHandler.reset();
+            this.fabricModelRenderingHandler.renderEmbeddium(ctx, ctx.stack(), random);
+            this.fabricModelRenderingHandler.flush(buffers, ctx.origin());
             return;
         }
 

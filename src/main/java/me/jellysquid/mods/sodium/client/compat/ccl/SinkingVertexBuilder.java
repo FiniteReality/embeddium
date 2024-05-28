@@ -6,12 +6,12 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelB
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
-import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
 import org.joml.Vector3fc;
 
 import javax.annotation.Nonnull;
@@ -224,10 +224,16 @@ public final class SinkingVertexBuilder implements VertexConsumer {
     }
 
     public void reset() {
-        buffer.rewind();
-        currentVertex = 0;
-        Arrays.fill(sideCount, 0);
+        if(currentVertex != 0) {
+            buffer.rewind();
+            currentVertex = 0;
+            Arrays.fill(sideCount, 0);
+        }
         resetCurrentVertex();
+    }
+
+    public boolean isEmpty() {
+        return currentVertex == 0;
     }
 
     public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, Vector3fc origin) {
@@ -271,6 +277,8 @@ public final class SinkingVertexBuilder implements VertexConsumer {
 
             ChunkVertexEncoder.Vertex[] sodiumQuad = sodiumVertexArray;
 
+            float midU = 0, midV = 0;
+
             for(int i = 0; i < 4; i++) {
                 if(i != 0)
                     buffer.getInt(); // read normal
@@ -281,8 +289,16 @@ public final class SinkingVertexBuilder implements VertexConsumer {
                 sodiumVertex.z = oZ + buffer.getFloat();
                 sodiumVertex.u = buffer.getFloat();
                 sodiumVertex.v = buffer.getFloat();
+                midU += sodiumVertex.u;
+                midV += sodiumVertex.v;
                 sodiumVertex.color = buffer.getInt();
                 sodiumVertex.light = buffer.getInt();
+            }
+
+            // Detect sprite
+            TextureAtlasSprite sprite = SpriteFinderCache.forBlockAtlas().findNearestSprite(midU / 4, midV / 4);
+            if(sprite != null) {
+                buffers.addSprite(sprite);
             }
 
             sink.push(sodiumQuad, material);

@@ -10,8 +10,10 @@ import java.util.EnumMap;
 
 public class LightPipelineProvider {
     private final EnumMap<LightMode, LightPipeline> lighters = new EnumMap<>(LightMode.class);
+    private final LightDataAccess lightData;
 
     public LightPipelineProvider(LightDataAccess cache) {
+        this.lightData = cache;
         if (ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get()) {
             this.lighters.put(LightMode.SMOOTH, ForgeLightPipeline.smooth(cache));
             this.lighters.put(LightMode.FLAT, ForgeLightPipeline.flat(cache));
@@ -29,6 +31,10 @@ public class LightPipelineProvider {
         }
 
         return pipeline;
+    }
+
+    public LightDataAccess getLightData() {
+        return this.lightData;
     }
 
     public void reset() {
