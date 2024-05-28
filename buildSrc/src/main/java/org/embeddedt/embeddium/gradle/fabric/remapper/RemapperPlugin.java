@@ -27,6 +27,9 @@ public class RemapperPlugin implements Plugin<Project> {
 
         project.getDependencies().add(intermediaryConfig.getName(), "net.fabricmc:intermediary:" + minecraftVersion + ":v2");
 
+        // Make sure the build directory exists
+        project.getLayout().getBuildDirectory().get().getAsFile().mkdirs();
+
         var mappingsFile = project.getLayout().getBuildDirectory().file("embeddium_mappings.txt").get().getAsFile();
 
         if(!mappingsFile.exists()) {
