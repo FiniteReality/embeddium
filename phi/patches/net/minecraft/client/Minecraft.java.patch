@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/Minecraft.java
 +++ b/net/minecraft/client/Minecraft.java
-@@ -415,7 +_,7 @@
+@@ -416,7 +_,7 @@
          RepositorySource repositorysource = new FolderRepositorySource(
              this.resourcePackDirectory, PackType.CLIENT_RESOURCES, PackSource.DEFAULT, this.directoryValidator
          );

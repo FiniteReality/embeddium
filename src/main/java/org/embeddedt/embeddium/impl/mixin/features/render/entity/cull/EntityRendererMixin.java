@@ -1,5 +1,8 @@
 package org.embeddedt.embeddium.impl.mixin.features.render.entity.cull;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.world.entity.Leashable;
 import org.embeddedt.embeddium.impl.render.EmbeddiumWorldRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -11,17 +14,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin<T extends Entity> {
-    @Inject(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z", shift = At.Shift.AFTER), cancellable = true)
-    private void preShouldRender(T entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
+    @ModifyExpressionValue(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z", ordinal = 0))
+    private boolean checkSectionForCullingMain(boolean isWithinFrustum, @Local(ordinal = 0, argsOnly = true) T entity) {
+        if(!isWithinFrustum) {
+            return false;
+        }
+
+        // Check if the entity is in a visible chunk section
+
         var renderer = EmbeddiumWorldRenderer.instanceNullable();
 
-        if (renderer == null) {
-            return;
+        return renderer == null || renderer.isEntityVisible(entity);
+    }
+
+    @ModifyExpressionValue(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z", ordinal = 1))
+    private boolean checkSectionForCullingMain(boolean isWithinFrustum, @Local(ordinal = 0) Leashable leashable) {
+        if(!isWithinFrustum) {
+            return false;
         }
 
-        // If the entity isn't culled already by other means, try to perform a second pass
-        if (cir.getReturnValue() && !renderer.isEntityVisible(entity)) {
-            cir.setReturnValue(false);
-        }
+        // Check if the entity is in a visible chunk section
+
+        var renderer = EmbeddiumWorldRenderer.instanceNullable();
+
+        return renderer == null || renderer.isEntityVisible(leashable.getLeashHolder());
     }
 }

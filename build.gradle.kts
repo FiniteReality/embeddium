@@ -54,7 +54,7 @@ sourceSets {
 }
 
 repositories {
-    maven("https://libraries.minecraft.net/")
+    maven("https://libraries.minecraft.net")
     maven("https://maven.fabricmc.net")
     maven("https://maven.tterrag.com/")
     maven("https://maven.blamejared.com")
@@ -72,6 +72,11 @@ repositories {
     if(usePhi) {
         maven("https://nexus.gtnewhorizons.com/repository/public/")
     }
+}
+
+// FIXME hack to prevent LWJGL from being resolved from the Neo maven, which doesn't contain all needed variants
+repositories["NeoForm Maven"].content {
+    excludeGroupByRegex("org\\.lwjgl.*")
 }
 
 if(!usePhi) {
