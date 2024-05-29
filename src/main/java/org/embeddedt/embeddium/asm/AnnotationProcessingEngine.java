@@ -6,6 +6,7 @@ import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.util.Annotations;
 
 import java.io.IOException;
+import java.util.List;
 
 public class AnnotationProcessingEngine {
     private static final String OPTIONAL_INTERFACE_DESC = Type.getDescriptor(OptionalInterface.class);
@@ -13,12 +14,14 @@ public class AnnotationProcessingEngine {
     public static void processClass(ClassNode clz) {
         for(var annotationNode : clz.invisibleAnnotations) {
             if(annotationNode.desc.equals(OPTIONAL_INTERFACE_DESC)) {
-                Type ifaceType = Annotations.getValue(annotationNode);
-                String ifaceName = ifaceType.getInternalName();
-                try {
-                    MixinService.getService().getBytecodeProvider().getClassNode(ifaceName);
-                } catch(IOException | ClassNotFoundException e) {
-                    clz.interfaces.removeIf(i -> i.equals(ifaceName));
+                List<Type> list = Annotations.getValue(annotationNode);
+                for(Type ifaceType : list) {
+                    String ifaceName = ifaceType.getInternalName();
+                    try {
+                        MixinService.getService().getBytecodeProvider().getClassNode(ifaceName);
+                    } catch(IOException | ClassNotFoundException e) {
+                        clz.interfaces.removeIf(i -> i.equals(ifaceName));
+                    }
                 }
             }
         }

@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
 public @interface OptionalInterface {
-    Class<?> value();
+    Class<?>[] value();
 }
