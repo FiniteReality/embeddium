@@ -50,7 +50,7 @@ public class ClonedChunkSection {
     static {
         boolean hasRenderData;
         try {
-            hasRenderData = BlockEntity.class.isAssignableFrom(RenderDataBlockEntity.class);
+            hasRenderData = RenderDataBlockEntity.class.isAssignableFrom(BlockEntity.class);
         } catch(Throwable e) {
             hasRenderData = false;
         }
