@@ -141,7 +141,8 @@ dependencies {
     compatCompileOnly(fg.deobf("curse.maven:immersiveengineering-231951:${"ie_fileid"()}"))
 
     // Fabric API
-    compileOnly("net.fabricmc.fabric-api:fabric-api:0.91.0+1.20.1")
+    compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
+    compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 
     annotationProcessor("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
 

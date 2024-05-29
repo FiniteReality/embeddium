@@ -14,6 +14,7 @@ import net.minecraftforge.network.NetworkConstants;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
 import org.embeddedt.embeddium.taint.scanning.TaintDetector;
+import org.embeddedt.embeddium.util.sodium.FlawlessFrames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,7 @@ public class SodiumClientMod {
 
     public void onClientSetup(final FMLClientSetupEvent event) {
         IncompatibleModManager.checkMods(event);
+        FlawlessFrames.onClientInitialization();
     }
 
     public static SodiumGameOptions options() {
