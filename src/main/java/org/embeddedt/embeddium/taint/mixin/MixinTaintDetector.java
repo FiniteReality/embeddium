@@ -50,11 +50,12 @@ public class MixinTaintDetector implements IExtension {
     /**
      * The enforcement level of taint detection. The default will only warn and not enforce the new requirements.
      */
-    public static final EnforceLevel ENFORCE_LEVEL = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", EnforceLevel.IGNORE.name()));
+    public static final EnforceLevel ENFORCE_LEVEL = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", EnforceLevel.WARN.name()));
     /**
      * Mods which are not subject to the new taint requirements.
      */
     private static final Collection<String> MOD_ID_WHITELIST = Set.of(
+            "embeddium", // obviously
             "flywheel", // until we finish sorting that out ;)
             "oculus", "iris" // because it will not be refactored on legacy versions
     );
@@ -222,7 +223,7 @@ public class MixinTaintDetector implements IExtension {
                 var illegalMixinMap = filterInvalidMixins(mixins);
                 if(!illegalMixinMap.isEmpty()) {
                     var mixinList = "[" + String.join(", ", illegalMixinMap.keySet()) + "]";
-                    LOGGER.warn("Class {} is targeted by mixins from mods {}. This will be prohibited in a future Embeddium release unless the mod explicitly limits itself to being compatible with a single Embeddium version. It is highly recommended that mods migrate to APIs provided by Embeddium or the modloader (and/or contribute their own).", name, mixinList);
+                    LOGGER.warn("Mod(s) {} are modifying Embeddium class {}, which may cause instability. Limited support is provided for such mods, and the ability to do this will be mostly removed in 1.21. It is highly recommended that mods migrate to APIs provided by Embeddium or the modloader (and/or request/contribute their own).", mixinList, name);
                     if(ENFORCE_LEVEL == EnforceLevel.CRASH) {
                         throw new IllegalStateException("One or more mods are mixing into internal Embeddium class " + name + ", which is no longer permitted");
                     }

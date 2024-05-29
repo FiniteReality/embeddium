@@ -1,12 +1,15 @@
 package me.jellysquid.mods.sodium.client;
 
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import me.jellysquid.mods.sodium.client.data.fingerprint.FingerprintMeasure;
 import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import org.embeddedt.embeddium.render.ShaderModBridge;
+import org.embeddedt.embeddium.util.sodium.FlawlessFrames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +25,7 @@ public class SodiumClientMod {
 
     private static String MOD_VERSION;
 
-    public SodiumClientMod() {
+    public SodiumClientMod(IEventBus modEventBus) {
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
 
         try {
@@ -30,6 +33,12 @@ public class SodiumClientMod {
         } catch (Throwable t) {
             LOGGER.error("Failed to update fingerprint", t);
         }
+
+        modEventBus.addListener(this::onClientSetup);
+    }
+
+    public void onClientSetup(final FMLClientSetupEvent event) {
+        FlawlessFrames.onClientInitialization();
     }
 
     public static SodiumGameOptions options() {

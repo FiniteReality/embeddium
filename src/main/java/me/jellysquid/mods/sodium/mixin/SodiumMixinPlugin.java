@@ -7,6 +7,7 @@ import net.neoforged.fml.loading.moddiscovery.ModFile;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.embeddedt.embeddium.asm.AnnotationProcessingEngine;
 import org.embeddedt.embeddium.config.ConfigMigrator;
 import org.embeddedt.embeddium.taint.mixin.MixinTaintDetector;
 import org.objectweb.asm.tree.ClassNode;
@@ -159,6 +160,8 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
+        if(targetClassName.startsWith("org.embeddedt.embeddium.") || targetClassName.startsWith("me.jellysquid.mods.sodium.")) {
+            AnnotationProcessingEngine.processClass(targetClass);
+        }
     }
 }
