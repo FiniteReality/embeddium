@@ -78,7 +78,8 @@ abstract public class RemapperTransform implements TransformAction<RemapperTrans
         var mojmapFile = getParameters().getMojangMappings().get().getAsFile();
         var cachedMappings = mappingsByVersion.computeIfAbsent(new MappingsKey(intermediaryJar.getAbsolutePath(), mojmapFile.getAbsolutePath()), key -> {
             try {
-                VisitableMappingTree intermediaryTree = new MemoryMappingTree();
+                MemoryMappingTree intermediaryTree = new MemoryMappingTree();
+                intermediaryTree.setIndexByDstNames(true);
                 MessageDigest digest = MessageDigest.getInstance("MD5");
                 digest.reset();
                 try(ZipFile intermediaryFile = new ZipFile(getParameters().getIntermediaryMappings().get().getAsFile())) {
@@ -89,7 +90,8 @@ abstract public class RemapperTransform implements TransformAction<RemapperTrans
                     MappingReader.read(new InputStreamReader(new DigestInputStream(intermediaryFile.getInputStream(mappingsEntry), digest), StandardCharsets.UTF_8), MappingFormat.TINY_2_FILE, intermediaryTree);
                 }
 
-                VisitableMappingTree proguardTree = new MemoryMappingTree();
+                MemoryMappingTree proguardTree = new MemoryMappingTree();
+                proguardTree.setIndexByDstNames(true);
                 try(FileInputStream stream = new FileInputStream(getParameters().getMojangMappings().get().getAsFile())) {
                     MappingReader.read(new InputStreamReader(new DigestInputStream(stream, digest), StandardCharsets.UTF_8), MappingFormat.PROGUARD_FILE, proguardTree);
                 }
