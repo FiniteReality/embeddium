@@ -4,6 +4,7 @@ import com.gtnewhorizons.retrofuturabootstrap.Main;
 import com.gtnewhorizons.retrofuturabootstrap.api.RetroFuturaBootstrap;
 import com.gtnewhorizons.retrofuturabootstrap.api.RfbClassTransformer;
 import com.gtnewhorizons.rfbplugins.compat.ModernJavaCompatibilityPlugin;
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.spongepowered.asm.mixin.Mixins;
@@ -74,6 +75,7 @@ public class PhiTweaker implements ITweaker {
         List<String> args = new ArrayList<>(extraArgs);
         args.add("--version");
         args.add(Main.initialGameVersion);
+        MixinExtrasBootstrap.init();
         return args.toArray(new String[0]);
     }
 }
