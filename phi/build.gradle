@@ -5,6 +5,21 @@ plugins {
 
 version = "1.0.0"
 
+repositories {
+    maven {
+        // RetroFuturaGradle
+        name "GTNH Maven"
+        url "https://nexus.gtnewhorizons.com/repository/public/"
+        mavenContent {
+            includeGroup("com.gtnewhorizons")
+            includeGroupByRegex("com\\.gtnewhorizons\\..+")
+        }
+    }
+    maven {
+        url "https://libraries.minecraft.net/"
+    }
+}
+
 dynamicProject {
     runtime("${project.minecraft_version}-${project.neoform_version}",
             project.layout.projectDirectory.dir('patches'),
@@ -15,18 +30,6 @@ sourceSets {
     main {
         java {
             srcDirs project.file("stubSrc")
-        }
-    }
-}
-
-repositories {
-    maven {
-        // RetroFuturaGradle
-        name "GTNH Maven"
-        url "https://nexus.gtnewhorizons.com/repository/public/"
-        mavenContent {
-            includeGroup("com.gtnewhorizons")
-            includeGroupByRegex("com\\.gtnewhorizons\\..+")
         }
     }
 }

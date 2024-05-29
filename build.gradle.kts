@@ -54,7 +54,7 @@ sourceSets {
 }
 
 repositories {
-    maven("https://maven.minecraftforge.net/")
+    maven("https://libraries.minecraft.net/")
     maven("https://maven.fabricmc.net")
     maven("https://maven.tterrag.com/")
     maven("https://maven.blamejared.com")
