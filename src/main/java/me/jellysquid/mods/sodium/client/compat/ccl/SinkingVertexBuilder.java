@@ -296,8 +296,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
             }
 
             // Detect sprite
-            TextureAtlasSprite sprite = SpriteFinderCache.forBlockAtlas().find(midU / 4, midV / 4);
-
+            TextureAtlasSprite sprite = SpriteFinderCache.forBlockAtlas().findNearestSprite(midU / 4, midV / 4);
             if(sprite != null) {
                 buffers.addSprite(sprite);
             }

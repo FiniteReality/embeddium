@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -20,6 +21,8 @@ public class BlockRenderContext {
     private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
     private final Vector3f origin = new Vector3f();
+
+    private final PoseStack stack = new PoseStack();
 
     private BlockState state;
     private BakedModel model;
@@ -75,6 +78,13 @@ public class BlockRenderContext {
     }
 
     /**
+     * @return A PoseStack for custom renderers
+     */
+    public PoseStack stack() {
+        return this.stack;
+    }
+
+    /**
      * @return The model used for this block
      */
     public BakedModel model() {
@@ -93,6 +103,14 @@ public class BlockRenderContext {
      */
     public long seed() {
         return this.seed;
+    }
+
+    /**
+     * @return null on Fabric, as it doesn't have model data
+     */
+    @Deprecated
+    public Object modelData() {
+        return null;
     }
 
     /**
