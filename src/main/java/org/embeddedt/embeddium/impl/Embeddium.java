@@ -1,15 +1,17 @@
 package org.embeddedt.embeddium.impl;
 
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.impl.data.fingerprint.FingerprintMeasure;
 import org.embeddedt.embeddium.impl.data.fingerprint.HashedFingerprint;
 import org.embeddedt.embeddium.impl.gui.EmbeddiumOptions;
-
 import org.embeddedt.embeddium.impl.render.ShaderModBridge;
+import org.embeddedt.embeddium.impl.sodium.FlawlessFrames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.io.IOException;
 
@@ -23,7 +25,7 @@ public class Embeddium {
 
     private static String MOD_VERSION;
 
-    public Embeddium() {
+    public Embeddium(IEventBus modEventBus) {
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
 
         try {
@@ -31,6 +33,12 @@ public class Embeddium {
         } catch (Throwable t) {
             LOGGER.error("Failed to update fingerprint", t);
         }
+
+        modEventBus.addListener(this::onClientSetup);
+    }
+
+    public void onClientSetup(final FMLClientSetupEvent event) {
+        FlawlessFrames.onClientInitialization();
     }
 
     public static EmbeddiumOptions options() {

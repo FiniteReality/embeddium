@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.transformer.ext.ITargetClassContext;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -42,7 +42,7 @@ public class MixinTaintDetector implements IExtension {
      */
     private static final List<String> TARGET_PREFIXES = List.of("org.embeddedt.embeddium.impl");
     /**
-     * A method handle used to call the package-private {@link ClassInfo#getMixins()} method. We need this to find out
+     * A method handle used to read the package-private {@link ClassInfo#mixins} field. We need this to find out
      * about mixins before they are applied.
      */
     private static final MethodHandle GET_MIXINS_ON_CLASS_INFO;
@@ -55,6 +55,7 @@ public class MixinTaintDetector implements IExtension {
      * Mods which are not subject to the new taint requirements.
      */
     private static final Collection<String> MOD_ID_WHITELIST = Set.of(
+            "embeddium", // obviously
             "flywheel", // until we finish sorting that out ;)
             "oculus", "iris" // because it will not be refactored on legacy versions
     );
@@ -78,10 +79,10 @@ public class MixinTaintDetector implements IExtension {
     static {
         MethodHandle mh = null;
         try {
-            Method m = ClassInfo.class.getDeclaredMethod("getMixins");
+            Field m = ClassInfo.class.getDeclaredField("mixins");
             m.setAccessible(true);
-            mh = MethodHandles.publicLookup().unreflect(m);
-        } catch(ReflectiveOperationException e) {
+            mh = MethodHandles.publicLookup().unreflectGetter(m).asType(MethodType.methodType(Set.class, ClassInfo.class));
+        } catch(ReflectiveOperationException | RuntimeException e) {
             e.printStackTrace();
         }
         GET_MIXINS_ON_CLASS_INFO = mh;
@@ -222,7 +223,7 @@ public class MixinTaintDetector implements IExtension {
                 var illegalMixinMap = filterInvalidMixins(mixins);
                 if(!illegalMixinMap.isEmpty()) {
                     var mixinList = "[" + String.join(", ", illegalMixinMap.keySet()) + "]";
-                    LOGGER.warn("Class {} is targeted by mixins from mods {}. This will be prohibited in a future Embeddium release unless the mod explicitly limits itself to being compatible with a single Embeddium version. It is highly recommended that mods migrate to APIs provided by Embeddium or the modloader (and/or contribute their own).", name, mixinList);
+                    LOGGER.warn("Mod(s) {} are modifying Embeddium class {}, which may cause instability. Limited support is provided for such mods, and the ability to do this will be mostly removed in 1.21. It is highly recommended that mods migrate to APIs provided by Embeddium or the modloader (and/or request/contribute their own).", mixinList, name);
                     if(ENFORCE_LEVEL == EnforceLevel.CRASH) {
                         throw new IllegalStateException("One or more mods are mixing into internal Embeddium class " + name + ", which is no longer permitted");
                     }

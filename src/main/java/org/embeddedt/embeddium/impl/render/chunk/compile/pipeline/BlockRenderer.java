@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.impl.render.chunk.compile.pipeline;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.embeddedt.embeddium.api.render.chunk.BlockRenderContext;
+import org.embeddedt.embeddium.api.util.ColorMixer;
 import org.embeddedt.embeddium.impl.model.color.ColorProvider;
 import org.embeddedt.embeddium.impl.model.color.ColorProviderRegistry;
 import org.embeddedt.embeddium.impl.model.light.LightMode;
@@ -12,6 +13,7 @@ import org.embeddedt.embeddium.impl.model.light.data.QuadLightData;
 import org.embeddedt.embeddium.impl.model.quad.BakedQuadView;
 import org.embeddedt.embeddium.impl.model.quad.properties.ModelQuadFacing;
 import org.embeddedt.embeddium.impl.model.quad.properties.ModelQuadOrientation;
+import org.embeddedt.embeddium.impl.render.ShaderModBridge;
 import org.embeddedt.embeddium.impl.render.chunk.compile.ChunkBuildBuffers;
 import org.embeddedt.embeddium.impl.render.chunk.compile.buffers.ChunkModelBuilder;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.DefaultMaterials;
@@ -19,7 +21,6 @@ import org.embeddedt.embeddium.impl.render.chunk.terrain.material.Material;
 import org.embeddedt.embeddium.impl.render.chunk.vertex.format.ChunkVertexEncoder;
 import org.embeddedt.embeddium.impl.util.DirectionUtil;
 import org.embeddedt.embeddium.impl.util.ModelQuadUtil;
-import org.embeddedt.embeddium.api.util.ColorABGR;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -29,6 +30,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
+import org.embeddedt.embeddium.impl.render.frapi.FRAPIModelUtils;
+import org.embeddedt.embeddium.impl.render.frapi.FRAPIRenderHandler;
+import org.embeddedt.embeddium.impl.render.frapi.IndigoBlockRenderContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,8 +51,6 @@ public class BlockRenderer {
     private final ChunkVertexEncoder.Vertex[] vertices = ChunkVertexEncoder.Vertex.uninitializedQuad();
 
     private final boolean useAmbientOcclusion;
-    @Deprecated(forRemoval = true)
-    private final boolean useForgeExperimentalLightingPipeline;
 
     private final int[] quadColors = new int[4];
 
@@ -56,13 +58,22 @@ public class BlockRenderer {
 
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
+    private final FRAPIRenderHandler fabricModelRenderingHandler;
+
+    /**
+     * Since Iris duplicates the terrain pipeline inside itself, it still tries to apply the legacy AO multiplication.
+     * To ensure blocks render as intended, we force what it interprets as the brightness value to 1.
+     */
+    private final int shaderAlphaMagicValue;
+
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
-        this.useForgeExperimentalLightingPipeline = false;
+        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
+        this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -95,6 +106,13 @@ public class BlockRenderer {
                     }
                 }
             }
+        }
+
+        // Delegate FRAPI models to their pipeline
+        if (FRAPIModelUtils.isFRAPIModel(ctx.model())) {
+            this.fabricModelRenderingHandler.reset();
+            this.fabricModelRenderingHandler.renderEmbeddium(ctx, buffers, ctx.stack(), random);
+            return;
         }
 
         for (Direction face : DirectionUtil.ALL_DIRECTIONS) {
@@ -170,6 +188,10 @@ public class BlockRenderer {
 
         if (colorProvider != null && quad.hasColor()) {
             colorProvider.getColors(ctx.world(), ctx.pos(), ctx.state(), quad, vertexColors);
+            // Force full alpha on all colors
+            for(int i = 0; i < vertexColors.length; i++) {
+                vertexColors[i] |= 0xFF000000;
+            }
         } else {
             Arrays.fill(vertexColors, 0xFFFFFFFF);
         }
@@ -198,7 +220,7 @@ public class BlockRenderer {
             out.y = ctx.origin().y() + quad.getY(srcIndex) + (float) offset.y();
             out.z = ctx.origin().z() + quad.getZ(srcIndex) + (float) offset.z();
 
-            out.color = ColorABGR.withAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), light.br[srcIndex]);
+            out.color = ColorMixer.mulSingleWithoutAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), (int)(light.br[srcIndex] * 255)) | shaderAlphaMagicValue;
 
             out.u = quad.getTexU(srcIndex);
             out.v = quad.getTexV(srcIndex);

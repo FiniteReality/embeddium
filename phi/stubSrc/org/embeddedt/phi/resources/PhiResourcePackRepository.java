@@ -5,7 +5,9 @@ import net.minecraft.server.packs.*;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -18,10 +20,10 @@ public class PhiResourcePackRepository implements RepositorySource {
         try {
             Class<?> clz = Class.forName("org.embeddedt.embeddium.impl.Embeddium");
             embeddiumExists = true;
-            clz.getConstructor().newInstance();
+            clz.getConstructor(IEventBus.class).newInstance(NeoForge.EVENT_BUS);
         } catch (ClassNotFoundException ignored) {
         } catch(Throwable e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Failed to initialize Embeddium", e);
         }
     }
 

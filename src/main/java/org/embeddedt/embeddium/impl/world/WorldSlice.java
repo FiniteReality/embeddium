@@ -7,16 +7,20 @@ import org.embeddedt.embeddium.impl.world.biome.*;
 import org.embeddedt.embeddium.impl.world.cloned.ChunkRenderContext;
 import org.embeddedt.embeddium.impl.world.cloned.ClonedChunkSection;
 import org.embeddedt.embeddium.impl.world.cloned.ClonedChunkSectionCache;
+import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
+import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,6 +34,7 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
+import org.embeddedt.embeddium.impl.asm.OptionalInterface;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -46,7 +51,8 @@ import java.util.Objects;
  *
  * <p>Object pooling should be used to avoid huge allocations as this class contains many large arrays.</p>
  */
-public class WorldSlice implements EmbeddiumBlockAndTintGetter {
+@OptionalInterface({ FabricBlockView.class, RenderAttachedBlockView.class })
+public class WorldSlice implements EmbeddiumBlockAndTintGetter, FabricBlockView, RenderAttachedBlockView {
     private static final LightLayer[] LIGHT_TYPES = LightLayer.values();
 
     // The number of blocks in a section.
@@ -90,6 +96,9 @@ public class WorldSlice implements EmbeddiumBlockAndTintGetter {
 
     // (Local Section -> Block Entity) table.
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
+
+    // (Local Section -> Block Entity Render Data) table.
+    private final @Nullable Int2ReferenceMap<Object>[] blockEntityRenderDataArrays;
 
     // (Local Section -> Model Data) table.
     private final @Nullable Long2ObjectFunction<ModelData>[] modelDataArrays;
@@ -159,6 +168,7 @@ public class WorldSlice implements EmbeddiumBlockAndTintGetter {
         this.auxLightArrays = new AuxiliaryLightManager[SECTION_ARRAY_SIZE];
 
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
+        this.blockEntityRenderDataArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
         this.modelDataArrays = new Long2ObjectFunction[SECTION_ARRAY_SIZE];
 
         this.biomeSlice = new BiomeSlice();
@@ -204,6 +214,8 @@ public class WorldSlice implements EmbeddiumBlockAndTintGetter {
         this.lightArrays[sectionIndex][LightLayer.SKY.ordinal()] = section.getLightArray(LightLayer.SKY);
 
         this.blockEntityArrays[sectionIndex] = section.getBlockEntityMap();
+        this.blockEntityRenderDataArrays[sectionIndex] = section.getBlockEntityRenderDataMap();
+
         this.modelDataArrays[sectionIndex] = section.getModelDataMap();
         if(this.modelDataArrays[sectionIndex] != null) {
             this.hasModelData = true;
@@ -408,6 +420,35 @@ public class WorldSlice implements EmbeddiumBlockAndTintGetter {
             return null;
         }
         return this.auxLightArrays[getLocalSectionIndex(pos.x - (this.originX >> 4), 0, pos.z - (this.originZ >> 4))];
+    }
+
+    @Override
+    public Holder<Biome> getBiomeFabric(BlockPos pos) {
+        return this.biomeSlice.getBiome(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    @Override
+    public boolean hasBiomes() {
+        return true;
+    }
+
+    @Override
+    public Object getBlockEntityRenderData(BlockPos pos) {
+        int relX = pos.getX() - this.originX;
+        int relY = pos.getY() - this.originY;
+        int relZ = pos.getZ() - this.originZ;
+
+        if (!isInside(relX, relY, relZ)) {
+            return null;
+        }
+
+        var blockEntityRenderDataMap = this.blockEntityRenderDataArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
+
+        if (blockEntityRenderDataMap == null) {
+            return null;
+        }
+
+        return blockEntityRenderDataMap.get(getLocalBlockIndex(relX & 15, relY & 15, relZ & 15));
     }
 
     public static int getLocalBlockIndex(int x, int y, int z) {

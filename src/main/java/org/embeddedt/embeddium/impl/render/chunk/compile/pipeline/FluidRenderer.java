@@ -1,5 +1,6 @@
 package org.embeddedt.embeddium.impl.render.chunk.compile.pipeline;
 
+import org.embeddedt.embeddium.api.util.ColorMixer;
 import org.embeddedt.embeddium.impl.model.light.LightMode;
 import org.embeddedt.embeddium.impl.model.light.LightPipeline;
 import org.embeddedt.embeddium.impl.model.light.LightPipelineProvider;
@@ -12,6 +13,7 @@ import org.embeddedt.embeddium.impl.model.quad.properties.ModelQuadFlags;
 import org.embeddedt.embeddium.impl.model.color.ColorProviderRegistry;
 import org.embeddedt.embeddium.impl.model.color.ColorProvider;
 import org.embeddedt.embeddium.impl.model.color.DefaultColorProviders;
+import org.embeddedt.embeddium.impl.render.ShaderModBridge;
 import org.embeddedt.embeddium.impl.render.chunk.compile.ChunkBuildBuffers;
 import org.embeddedt.embeddium.impl.render.chunk.compile.buffers.ChunkModelBuilder;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.DefaultMaterials;
@@ -19,7 +21,6 @@ import org.embeddedt.embeddium.impl.render.chunk.terrain.material.Material;
 import org.embeddedt.embeddium.impl.render.chunk.vertex.format.ChunkVertexEncoder;
 import org.embeddedt.embeddium.impl.world.WorldSlice;
 import org.embeddedt.embeddium.impl.util.DirectionUtil;
-import org.embeddedt.embeddium.api.util.ColorABGR;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -61,11 +62,18 @@ public class FluidRenderer {
 
     private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
 
+    /**
+     * Since Iris duplicates the terrain pipeline inside itself, it still tries to apply the legacy AO multiplication.
+     * To ensure blocks render as intended, we force what it interprets as the brightness value to 1.
+     */
+    private final int shaderAlphaMagicValue;
+
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
 
         this.lighters = lighters;
         this.colorProviderRegistry = colorProviderRegistry;
+        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
     }
 
     private boolean isFluidOccluded(BlockAndTintGetter world, int x, int y, int z, Direction dir, Fluid fluid) {
@@ -415,7 +423,7 @@ public class FluidRenderer {
         // multiply the per-vertex color against the combined brightness
         // the combined brightness is the per-vertex brightness multiplied by the block's brightness
         for (int i = 0; i < 4; i++) {
-            this.quadColors[i] = ColorABGR.withAlpha(this.quadColors[i], light.br[i] * brightness);
+            this.quadColors[i] = ColorMixer.mulSingleWithoutAlpha(this.quadColors[i], (int)(light.br[i] * brightness * 255)) | this.shaderAlphaMagicValue;
         }
     }
 

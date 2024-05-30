@@ -13,6 +13,8 @@ plugins {
     id("org.ajoberstar.grgit") version("5.0.0")
 
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
+
+    id("embeddium-fabric-remapper")
 }
 
 operator fun String.invoke(): String {
@@ -155,6 +157,10 @@ dependencies {
 
     // Mods
     compatCompileOnly("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
+
+    // Fabric API
+    compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
+    compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 }
 
 tasks.processResources {

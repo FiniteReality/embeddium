@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Queue;
 import org.embeddedt.embeddium.impl.render.chunk.occlusion.OcclusionCuller;
 import org.embeddedt.embeddium.impl.render.chunk.region.RenderRegion;
+import org.embeddedt.embeddium.impl.sodium.FlawlessFrames;
 
 public class VisibleChunkCollector implements OcclusionCuller.Visitor {
     private final ObjectArrayList<ChunkRenderList> sortedRenderLists;
@@ -16,11 +17,14 @@ public class VisibleChunkCollector implements OcclusionCuller.Visitor {
 
     private final int frame;
 
+    private final boolean ignoreQueueSizeLimit;
+
     public VisibleChunkCollector(int frame) {
         this.frame = frame;
 
         this.sortedRenderLists = new ObjectArrayList<>();
         this.sortedRebuildLists = new EnumMap<>(ChunkUpdateType.class);
+        this.ignoreQueueSizeLimit = FlawlessFrames.isActive();
 
         for (var type : ChunkUpdateType.values()) {
             this.sortedRebuildLists.put(type, new ArrayDeque<>());
@@ -53,7 +57,7 @@ public class VisibleChunkCollector implements OcclusionCuller.Visitor {
         if (type != null && section.getBuildCancellationToken() == null) {
             Queue<RenderSection> queue = this.sortedRebuildLists.get(type);
 
-            if (queue.size() < type.getMaximumQueueSize()) {
+            if (this.ignoreQueueSizeLimit || queue.size() < type.getMaximumQueueSize()) {
                 queue.add(section);
             }
         }
