@@ -147,6 +147,8 @@ public class IndigoBlockRenderContext extends BlockRenderContext implements FRAP
                                 PoseStack mStack,
                                 RandomSource random) {
         this.currentContext = ctx;
+        // We unfortunately have no choice but to push a pose here since FRAPI now mutates the given stack
+        mStack.pushPose();
         try {
             if(FABRIC_RENDER_HANDLE != null) {
                 FABRIC_RENDER_HANDLE.invokeExact((BlockRenderContext)this, (BlockAndTintGetter)ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), mStack, (VertexConsumer)null, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY);
@@ -156,6 +158,7 @@ public class IndigoBlockRenderContext extends BlockRenderContext implements FRAP
         } catch(Throwable e) {
             throw processException(e);
         } finally {
+            mStack.popPose();
             this.currentContext = null;
         }
     }
