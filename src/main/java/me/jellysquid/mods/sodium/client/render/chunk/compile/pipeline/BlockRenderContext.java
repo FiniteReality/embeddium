@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import org.embeddedt.embeddium.render.matrix_stack.CachingPoseStack;
 import org.embeddedt.embeddium.render.world.WorldSliceLocalGenerator;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -34,6 +35,7 @@ public class BlockRenderContext {
     public BlockRenderContext(WorldSlice world) {
         this.world = world;
         this.localSlice = WorldSliceLocalGenerator.generate(world);
+        ((CachingPoseStack)this.stack).embeddium$setCachingEnabled(true);
     }
 
     public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, ModelData modelData, RenderType renderLayer) {
