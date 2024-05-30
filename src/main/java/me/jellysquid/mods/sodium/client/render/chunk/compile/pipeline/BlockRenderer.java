@@ -79,7 +79,7 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
-        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
+        this.shaderAlphaMagicValue = ShaderModBridge.emulateLegacyColorBrightnessFormat() ? 0xFF000000 : 0;
         this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
     }
 

@@ -77,7 +77,7 @@ public class FluidRenderer {
 
         this.lighters = lighters;
         this.colorProviderRegistry = colorProviderRegistry;
-        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
+        this.shaderAlphaMagicValue = ShaderModBridge.emulateLegacyColorBrightnessFormat() ? 0xFF000000 : 0;
     }
 
     private boolean isFluidOccluded(BlockAndTintGetter world, int x, int y, int z, Direction dir, Fluid fluid) {
