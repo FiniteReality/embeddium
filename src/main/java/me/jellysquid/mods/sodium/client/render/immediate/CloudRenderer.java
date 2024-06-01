@@ -171,7 +171,7 @@ public class CloudRenderer {
         matrices.pushPose();
 
         Matrix4f modelViewMatrix = matrices.last().pose();
-        modelViewMatrix.translate(new Vector3f(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ));
+        modelViewMatrix.multiplyWithTranslation(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ);
 
         // PASS 1: Set up depth buffer
         RenderSystem.disableBlend();
