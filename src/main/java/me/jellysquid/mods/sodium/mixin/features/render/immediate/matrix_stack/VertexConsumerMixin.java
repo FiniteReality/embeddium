@@ -1,9 +1,10 @@
 package me.jellysquid.mods.sodium.mixin.features.render.immediate.matrix_stack;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.caffeinemc.mods.sodium.api.math.MatrixHelper;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import org.embeddedt.embeddium.api.math.Matrix3fExtended;
+import org.embeddedt.embeddium.api.math.Matrix4fExtended;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,9 +23,9 @@ public interface VertexConsumerMixin {
      */
     @Overwrite
     default VertexConsumer vertex(Matrix4f matrix, float x, float y, float z) {
-        float xt = MatrixHelper.transformPositionX(matrix, x, y, z);
-        float yt = MatrixHelper.transformPositionY(matrix, x, y, z);
-        float zt = MatrixHelper.transformPositionZ(matrix, x, y, z);
+        float xt = ((Matrix4fExtended)(Object)matrix).transformVecX(x, y, z);
+        float yt = ((Matrix4fExtended)(Object)matrix).transformVecY(x, y, z);
+        float zt = ((Matrix4fExtended)(Object)matrix).transformVecZ(x, y, z);
 
         return this.vertex(xt, yt, zt);
     }
@@ -35,9 +36,9 @@ public interface VertexConsumerMixin {
      */
     @Overwrite
     default VertexConsumer normal(Matrix3f matrix, float x, float y, float z) {
-        float xt = MatrixHelper.transformNormalX(matrix, x, y, z);
-        float yt = MatrixHelper.transformNormalY(matrix, x, y, z);
-        float zt = MatrixHelper.transformNormalZ(matrix, x, y, z);
+        float xt = ((Matrix3fExtended)(Object)matrix).transformVecX(x, y, z);
+        float yt = ((Matrix3fExtended)(Object)matrix).transformVecY(x, y, z);
+        float zt = ((Matrix3fExtended)(Object)matrix).transformVecZ(x, y, z);
 
         return this.normal(xt, yt, zt);
     }

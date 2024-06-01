@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.mixin.features.render.gui.font;
 
-import net.minecraft.client.gui.font.CodepointMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,8 +23,8 @@ public abstract class FontSetMixin {
      * @author embeddedt
      * @reason avoid lambda allocation from method reference in vanilla
      */
-    @Redirect(method = "getGlyphInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/font/CodepointMap;computeIfAbsent(ILjava/util/function/IntFunction;)Ljava/lang/Object;"))
-    private Object getGlyphInfoFast(CodepointMap<FontSet.GlyphInfoFilter> instance, int i, IntFunction<FontSet.GlyphInfoFilter> methodRef) {
+    @Redirect(method = "getGlyphInfo", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;computeIfAbsent(ILit/unimi/dsi/fastutil/ints/Int2ObjectFunction;)Ljava/lang/Object;"))
+    private Object getGlyphInfoFast(Int2ObjectMap<FontSet.GlyphInfoFilter> instance, int i, Int2ObjectFunction<FontSet.GlyphInfoFilter> methodRef) {
         FontSet.GlyphInfoFilter info = instance.get(i);
 
         if (info == null) {
@@ -38,8 +39,8 @@ public abstract class FontSetMixin {
      * @author embeddedt
      * @reason avoid lambda allocation from method reference in vanilla
      */
-    @Redirect(method = "getGlyph", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/font/CodepointMap;computeIfAbsent(ILjava/util/function/IntFunction;)Ljava/lang/Object;"))
-    private Object getGlyphFast(CodepointMap<BakedGlyph> instance, int i, IntFunction<BakedGlyph> methodRef) {
+    @Redirect(method = "getGlyph", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;computeIfAbsent(ILit/unimi/dsi/fastutil/ints/Int2ObjectFunction;)Ljava/lang/Object;"))
+    private Object getGlyphFast(Int2ObjectMap<BakedGlyph> instance, int i, Int2ObjectFunction<BakedGlyph> methodRef) {
         BakedGlyph glyph = instance.get(i);
 
         if (glyph == null) {

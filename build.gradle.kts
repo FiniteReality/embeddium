@@ -151,6 +151,10 @@ dependencies {
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.5")) {
         jarJar.ranged(this, "[0.3.5,)")
     }
+    implementation(jarJar("org.joml:joml:1.10.5")) {
+        jarJar.ranged(this, "[1.10.5,)")
+    }
+    minecraftLibrary("org.joml:joml:1.10.5")
 
     // runtime remapping at home
     fileTree(extraModsDir) {

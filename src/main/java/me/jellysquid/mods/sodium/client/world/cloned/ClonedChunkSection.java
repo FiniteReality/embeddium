@@ -5,7 +5,8 @@ import it.unimi.dsi.fastutil.ints.Int2ReferenceMaps;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
 import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
-import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
+import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
@@ -29,8 +30,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 public class ClonedChunkSection {
-    private static final DataLayer DEFAULT_SKY_LIGHT_ARRAY = new DataLayer(15);
-    private static final DataLayer DEFAULT_BLOCK_LIGHT_ARRAY = new DataLayer(0);
+    private static final DataLayer DEFAULT_SKY_LIGHT_ARRAY = Util.make(() -> {
+        var layer = new DataLayer();
+        for(int y = 0; y < DataLayer.LAYER_COUNT; y++) {
+            for(int z = 0; z < DataLayer.LAYER_COUNT; z++) {
+                for(int x = 0; x < DataLayer.LAYER_COUNT; x++) {
+                    layer.set(x, y, z, 15);
+                }
+            }
+        }
+        return layer;
+    });
+    private static final DataLayer DEFAULT_BLOCK_LIGHT_ARRAY = new DataLayer();
     private static final PalettedContainer<BlockState> DEFAULT_STATE_CONTAINER = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
     private static final boolean HAS_FABRIC_RENDER_DATA;
 
@@ -50,7 +61,7 @@ public class ClonedChunkSection {
     static {
         boolean hasRenderData;
         try {
-            hasRenderData = RenderDataBlockEntity.class.isAssignableFrom(BlockEntity.class);
+            hasRenderData = RenderAttachmentBlockEntity.class.isAssignableFrom(BlockEntity.class);
         } catch(Throwable e) {
             hasRenderData = false;
         }
@@ -198,7 +209,7 @@ public class ClonedChunkSection {
         // were iterating over any data in that chunk.
         // See https://github.com/CaffeineMC/sodium-fabric/issues/942 for more info.
         for (var entry : Int2ReferenceMaps.fastIterable(blockEntities)) {
-            Object data = ((RenderDataBlockEntity)entry.getValue()).getRenderData();
+            Object data = ((RenderAttachmentBlockEntity)entry.getValue()).getRenderAttachmentData();
 
             if (data != null) {
                 if (blockEntityRenderDataMap == null) {

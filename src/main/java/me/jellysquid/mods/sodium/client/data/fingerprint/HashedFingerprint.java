@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public record HashedFingerprint(
         @SerializedName("v")
-        int version,
+        Integer version,
 
         @NotNull
         @SerializedName("s")

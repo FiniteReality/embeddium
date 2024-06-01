@@ -1,8 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.immediate.model;
 
-import org.joml.*;
-import java.util.Set;
-import net.minecraft.core.Direction;
+import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 
 public class ModelCuboid {
     public final float x1, y1, z1;
@@ -20,8 +18,7 @@ public class ModelCuboid {
                        float sizeX, float sizeY, float sizeZ,
                        float extraX, float extraY, float extraZ,
                        boolean mirror,
-                       float textureWidth, float textureHeight,
-                       Set<Direction> renderDirections) {
+                       float textureWidth, float textureHeight) {
         float x2 = x1 + sizeX;
         float y2 = y1 + sizeY;
         float z2 = z1 + sizeZ;
@@ -66,7 +63,7 @@ public class ModelCuboid {
 
         int faces = 0;
 
-        for (var dir : renderDirections) {
+        for (var dir : DirectionUtil.ALL_DIRECTIONS) {
             faces |= 1 << dir.ordinal();
         }
 

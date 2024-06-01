@@ -1,17 +1,14 @@
 package org.embeddedt.embeddium.gui.frame;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -21,7 +18,7 @@ import java.util.function.Consumer;
 public abstract class AbstractFrame extends AbstractWidget implements ContainerEventHandler {
     protected Dim2i dim;
     protected final List<AbstractWidget> children = new ArrayList<>();
-    protected final List<Renderable> drawable = new ArrayList<>();
+    protected final List<Widget> drawable = new ArrayList<>();
     protected final List<ControlElement<?>> controlElements = new ArrayList<>();
     protected boolean renderOutline;
     private GuiEventListener focused;
@@ -41,18 +38,18 @@ public abstract class AbstractFrame extends AbstractWidget implements ContainerE
             if (element instanceof ControlElement<?>) {
                 this.controlElements.add((ControlElement<?>) element);
             }
-            if (element instanceof Renderable) {
-                this.drawable.add((Renderable) element);
+            if (element instanceof Widget) {
+                this.drawable.add((Widget) element);
             }
         }
     }
 
     @Override
-    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
         if (this.renderOutline) {
             this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
         }
-        for (Renderable drawable : this.drawable) {
+        for (Widget drawable : this.drawable) {
             drawable.render(drawContext, mouseX, mouseY, delta);
         }
     }
@@ -101,16 +98,6 @@ public abstract class AbstractFrame extends AbstractWidget implements ContainerE
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return this.dim.containsCursor(mouseX, mouseY);
-    }
-
-    @Override
-    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent navigation) {
-        return ContainerEventHandler.super.nextFocusPath(navigation);
-    }
-
-    @Override
-    public ScreenRectangle getRectangle() {
-        return new ScreenRectangle(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height());
     }
 
     public Dim2i getDimensions() {

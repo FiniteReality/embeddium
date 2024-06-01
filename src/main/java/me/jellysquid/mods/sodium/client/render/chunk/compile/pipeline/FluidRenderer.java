@@ -252,8 +252,8 @@ public class FluidRenderer {
 
             float uAvg = (u1 + u2 + u3 + u4) / 4.0F;
             float vAvg = (v1 + v2 + v3 + v4) / 4.0F;
-            float s1 = (float) sprites[0].contents().width() / (sprites[0].getU1() - sprites[0].getU0());
-            float s2 = (float) sprites[0].contents().height() / (sprites[0].getV1() - sprites[0].getV0());
+            float s1 = (float) sprites[0].getWidth() / (sprites[0].getU1() - sprites[0].getU0());
+            float s2 = (float) sprites[0].getHeight() / (sprites[0].getV1() - sprites[0].getV0());
             float s3 = 4.0F / Math.max(s2, s1);
 
             u1 = Mth.lerp(s3, u1, uAvg);
@@ -516,7 +516,7 @@ public class FluidRenderer {
                 return fluidState.getOwnHeight();
             }
         }
-        if (!blockState.isSolid()) {
+        if (!blockState.getMaterial().isSolid()) {
             return 0.0f;
         }
         return -1.0f;

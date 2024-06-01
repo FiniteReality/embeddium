@@ -1,10 +1,11 @@
 package org.embeddedt.embeddium.gui.screen;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -29,9 +30,9 @@ public class PromptScreen extends Screen {
     }
 
     @Override
-    protected void repositionElements() {
+    protected void rebuildWidgets() {
         prevScreen.resize(this.minecraft, this.width, this.height);
-        super.repositionElements();
+        super.rebuildWidgets();
     }
 
     public void init() {
@@ -49,23 +50,21 @@ public class PromptScreen extends Screen {
         this.addRenderableWidget(this.actionButton);
     }
 
-    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         // First, render the old screen. This gives the illusion of the prompt being on top.
-        this.prevScreen.render(drawContext, -1, -1, delta);
+        this.prevScreen.render(matrices, -1, -1, delta);
 
-        var matrices = drawContext.pose();
         matrices.pushPose();
         matrices.translate(0.0f, 0.0f, 1000.0f);
 
-        drawContext.fill(0, 0, prevScreen.width, prevScreen.height, 0x70090909);
+        Gui.fill(matrices, 0, 0, prevScreen.width, prevScreen.height, 0x70090909);
 
         matrices.translate(0.0f, 0.0f, 50.0f);
 
         int boxX = (prevScreen.width / 2) - (promptWidth / 2);
         int boxY = (prevScreen.height / 2) - (promptHeight / 2);
 
-        drawContext.fill(boxX, boxY, boxX + promptWidth, boxY + promptHeight, 0xFF171717);
-        drawContext.renderOutline(boxX, boxY, promptWidth, promptHeight, 0xFF121212);
+        Gui.fill(matrices, boxX, boxY, boxX + promptWidth, boxY + promptHeight, 0xFF171717);
 
         matrices.translate(0.0f, 0.0f, 50.0f);
 
@@ -83,14 +82,14 @@ public class PromptScreen extends Screen {
             var formatted = textRenderer.split(paragraph, textMaxWidth);
 
             for (var line : formatted) {
-                drawContext.drawString(textRenderer, line, textX, textY, 0xFFFFFFFF, true);
+                textRenderer.drawShadow(matrices, line, textX, textY, 0xFFFFFFFF);
                 textY += textRenderer.lineHeight + 2;
             }
 
             textY += 8;
         }
 
-        super.render(drawContext, mouseX, mouseY, delta);
+        super.render(matrices, mouseX, mouseY, delta);
 
         matrices.popPose();
     }

@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.mixin.core.render;
 
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
 import org.embeddedt.embeddium.render.matrix_stack.CachingPoseStack;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -33,10 +33,8 @@ public abstract class MatrixStackMixin implements CachingPoseStack {
 
         if (this.cacheEnabled && !this.cache.isEmpty()) {
             entry = this.cache.removeLast();
-            entry.pose()
-                    .set(prev.pose());
-            entry.normal()
-                    .set(prev.normal());
+            entry.pose().load(prev.pose());
+            entry.normal().load(prev.normal());
         } else {
             entry = new PoseStack.Pose(new Matrix4f(prev.pose()), new Matrix3f(prev.normal()));
         }

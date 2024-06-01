@@ -1,10 +1,8 @@
 package me.jellysquid.mods.sodium.client.gui.options.control;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.renderer.Rect2i;
 import org.embeddedt.embeddium.gui.theme.DefaultColors;
 
@@ -40,7 +38,7 @@ public class TickBoxControl implements Control<Boolean> {
         }
 
         @Override
-        public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
             super.render(drawContext, mouseX, mouseY, delta);
 
             final int x = this.button.getX();
@@ -82,7 +80,7 @@ public class TickBoxControl implements Control<Boolean> {
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             if (!isFocused()) return false;
 
-            if (CommonInputs.selected(keyCode)) {
+            if (keySelected(keyCode)) {
                 toggleControl();
                 this.playClickSound();
 

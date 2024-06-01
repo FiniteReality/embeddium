@@ -2,8 +2,8 @@ package me.jellysquid.mods.sodium.mixin.features.render.immediate.buffer_builder
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.renderer.ShaderInstance;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;

@@ -56,7 +56,7 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer impleme
         this.format = VertexFormatRegistry.instance()
                 .get(format);
         this.stride = format.getVertexSize();
-        this.fastDelegate = this.format.isSimpleFormat() ? new SodiumBufferBuilder(this) : null;
+        this.fastDelegate = null;// this.format.isSimpleFormat() ? new SodiumBufferBuilder(this) : null;
     }
 
     @Inject(method = { "discard", "reset", "begin" }, at = @At("RETURN"))

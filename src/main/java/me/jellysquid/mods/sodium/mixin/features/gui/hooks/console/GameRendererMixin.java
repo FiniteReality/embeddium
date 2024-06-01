@@ -1,11 +1,10 @@
 package me.jellysquid.mods.sodium.mixin.features.gui.hooks.console;
 
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.console.ConsoleHooks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderBuffers;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,14 +20,10 @@ public class GameRendererMixin {
     @Final
     Minecraft minecraft;
 
-    @Shadow
-    @Final
-    private RenderBuffers renderBuffers;
-
     @Unique
     private static boolean HAS_RENDERED_OVERLAY_ONCE = false;
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;flush()V", shift = At.Shift.AFTER))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;render(Lcom/mojang/blaze3d/vertex/PoseStack;F)V", shift = At.Shift.AFTER))
     private void onRender(float tickDelta, long startTime, boolean tick, CallbackInfo ci) {
         // Do not start updating the console overlay until the font renderer is ready
         // This prevents the console from using tofu boxes for everything during early startup
@@ -41,11 +36,7 @@ public class GameRendererMixin {
         this.minecraft.getProfiler()
                 .push("sodium_console_overlay");
 
-        GuiGraphics drawContext = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
-
-        ConsoleHooks.render(drawContext, GLFW.glfwGetTime());
-
-        drawContext.flush();
+        ConsoleHooks.render(new PoseStack(), GLFW.glfwGetTime());
 
         this.minecraft.getProfiler()
                 .pop();

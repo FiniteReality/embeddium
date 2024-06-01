@@ -151,7 +151,7 @@ public class ResourcePackScanner {
         final var unsupportedShaderPrograms = new ArrayList<String>();
         final var unsupportedShaderIncludes = new ArrayList<String>();
 
-        pack.listResources(PackType.CLIENT_RESOURCES, ResourceLocation.DEFAULT_NAMESPACE, "shaders", (identifier, supplier) -> {
+        pack.getResources(PackType.CLIENT_RESOURCES, ResourceLocation.DEFAULT_NAMESPACE, "shaders", p -> true).forEach((identifier) -> {
             // Trim full shader file path to only contain the filename
             final var path = identifier.getPath();
             final var name = path.substring(path.lastIndexOf('/') + 1);
@@ -181,7 +181,7 @@ public class ResourcePackScanner {
     }
 
     private static String getResourcePackName(PackResources pack) {
-        var path = pack.packId();
+        var path = pack.getName();
 
         // Omit 'file/' prefix for the in-game message
         return path.startsWith("file/") ? path.substring(5) : path;
@@ -203,7 +203,7 @@ public class ResourcePackScanner {
                 ignoredShaders.addAll(meta.ignoredShaders());
             }
         } catch (IOException x) {
-            LOGGER.error("Failed to load pack.mcmeta file for resource pack '{}'", resourcePack.packId());
+            LOGGER.error("Failed to load pack.mcmeta file for resource pack '{}'", resourcePack.getName());
         }
         return ignoredShaders;
     }

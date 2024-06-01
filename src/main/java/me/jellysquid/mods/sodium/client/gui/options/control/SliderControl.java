@@ -1,9 +1,9 @@
 package me.jellysquid.mods.sodium.client.gui.options.control;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -74,7 +74,7 @@ public class SliderControl implements Control<Integer> {
         }
 
         @Override
-        public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
             super.render(drawContext, mouseX, mouseY, delta);
 
             if (this.option.isAvailable() && (this.hovered || this.isFocused())) {
@@ -84,7 +84,7 @@ public class SliderControl implements Control<Integer> {
             }
         }
 
-        private void renderStandaloneValue(GuiGraphics drawContext) {
+        private void renderStandaloneValue(PoseStack drawContext) {
             int sliderX = this.sliderBounds.getX();
             int sliderY = this.sliderBounds.getY();
             int sliderWidth = this.sliderBounds.getWidth();
@@ -96,7 +96,7 @@ public class SliderControl implements Control<Integer> {
             this.drawString(drawContext, label, sliderX + sliderWidth - labelWidth, sliderY + (sliderHeight / 2) - 4, 0xFFFFFFFF);
         }
 
-        private void renderSlider(GuiGraphics drawContext) {
+        private void renderSlider(PoseStack drawContext) {
             int sliderX = this.sliderBounds.getX();
             int sliderY = this.sliderBounds.getY();
             int sliderWidth = this.sliderBounds.getWidth();

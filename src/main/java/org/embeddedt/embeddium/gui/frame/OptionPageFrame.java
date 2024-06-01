@@ -1,6 +1,7 @@
 package org.embeddedt.embeddium.gui.frame;
 
 import com.google.common.base.Predicates;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
@@ -10,9 +11,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -99,7 +98,7 @@ public class OptionPageFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
         ControlElement<?> hoveredElement = this.controlElements.stream()
                 .filter(ControlElement::isHovered)
                 .findFirst()
@@ -121,7 +120,7 @@ public class OptionPageFrame extends AbstractFrame {
         }
     }
 
-    private void renderOptionTooltip(GuiGraphics drawContext, ControlElement<?> element) {
+    private void renderOptionTooltip(PoseStack drawContext, ControlElement<?> element) {
         if (this.lastTime + 500 > System.currentTimeMillis()) return;
 
         Dim2i dim = element.getDimensions();
@@ -157,20 +156,15 @@ public class OptionPageFrame extends AbstractFrame {
             boxY = dim.getLimitY();
         }
 
-        drawContext.pose().pushPose();
-        drawContext.pose().translate(0, 0, 90);
+        drawContext.pushPose();
+        drawContext.translate(0, 0, 90);
         this.drawRect(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0xE0000000);
         this.drawBorder(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, DefaultColors.ELEMENT_ACTIVATED);
 
         for (int i = 0; i < tooltip.size(); i++) {
-            drawContext.drawString(Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF, true);
+            Gui.drawString(drawContext, Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
         }
-        drawContext.pose().popPose();
-    }
-
-    @Override
-    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent navigation) {
-        return super.nextFocusPath(navigation);
+        drawContext.popPose();
     }
 
     public static class Builder {

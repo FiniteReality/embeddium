@@ -8,7 +8,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Holder.Reference;
 import net.minecraft.core.QuartPos;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
 import net.minecraft.util.LinearCongruentialGenerator;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -44,7 +44,7 @@ public class BiomeSlice {
 
     private void copyBiomeData(Level world, ChunkRenderContext context) {
         var defaultValue = world.registryAccess()
-                .registryOrThrow(Registries.BIOME)
+                .registryOrThrow(Registry.BIOME_REGISTRY)
                 .getHolderOrThrow(Biomes.PLAINS);
 
         for (int sectionX = 0; sectionX < 3; sectionX++) {

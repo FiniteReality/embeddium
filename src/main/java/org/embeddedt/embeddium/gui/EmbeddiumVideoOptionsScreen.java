@@ -2,10 +2,11 @@ package org.embeddedt.embeddium.gui;
 
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
+import me.jellysquid.mods.sodium.client.gui.SodiumGameOptionPages;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI;
 import me.jellysquid.mods.sodium.client.gui.console.Console;
 import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
@@ -18,12 +19,15 @@ import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.VideoSettingsScreen;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
 import org.embeddedt.embeddium.gui.frame.AbstractFrame;
 import org.embeddedt.embeddium.gui.frame.BasicFrame;
@@ -72,10 +76,17 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
     private boolean firstInit = true;
 
-    public EmbeddiumVideoOptionsScreen(Screen prev, List<OptionPage> pages) {
+    public EmbeddiumVideoOptionsScreen(Screen prev) {
         super(Component.literal("Embeddium Options"));
         this.prevScreen = prev;
-        this.pages.addAll(pages);
+
+        this.pages.add(SodiumGameOptionPages.general());
+        this.pages.add(SodiumGameOptionPages.quality());
+        this.pages.add(SodiumGameOptionPages.performance());
+        this.pages.add(SodiumGameOptionPages.advanced());
+
+        OptionGUIConstructionEvent.BUS.post(new OptionGUIConstructionEvent(this.pages));
+
         this.searchTextModel = new SearchTextFieldModel(this.pages, this);
         registerTextures();
     }
@@ -129,7 +140,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
     private void openDonationPrompt() {
         //noinspection removal
-        var prompt = new PromptScreen(this, SodiumOptionsGUI.DONATION_PROMPT_MESSAGE, 320, 190,
+        var prompt = new PromptScreen(this, DONATION_PROMPT_MESSAGE, 320, 190,
                 new PromptScreen.Action(Component.literal("Support Sodium"), this::openDonationPage));
 
         this.minecraft.setScreen(prompt);
@@ -287,25 +298,26 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics gfx) {
+    public void renderBackground(PoseStack gfx) {
         super.renderBackground(gfx);
 
         // Render watermarks
-        gfx.setColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
+        RenderSystem.setShaderColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(770, 1);
-        gfx.blit(LOGO_LOCATION, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), 0.0F, 0.0F, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE);
+        RenderSystem.setShaderTexture(0, LOGO_LOCATION);
+        Gui.blit(gfx, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), 0.0F, 0.0F, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        gfx.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
-    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
         this.renderBackground(drawContext);
         this.updateControls();
         this.frame.render(drawContext, mouseX, mouseY, delta);
@@ -425,5 +437,17 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     @Override
     public void onClose() {
         this.minecraft.setScreen(this.prevScreen);
+    }
+
+    public static final List<FormattedText> DONATION_PROMPT_MESSAGE;
+
+    static {
+        DONATION_PROMPT_MESSAGE = List.of(
+                FormattedText.composite(Component.literal("Hello!")),
+                FormattedText.composite(Component.literal("It seems that you've been enjoying "), Component.literal("Embeddium").setStyle(Style.EMPTY.withColor(0x27eb92)), Component.literal(", a fork of Sodium for Minecraft.")),
+                FormattedText.composite(Component.literal("Sodium is complex, and requires "), Component.literal("thousands of hours").setStyle(Style.EMPTY.withColor(0xff6e00)), Component.literal(" of development, debugging, and tuning to create the experience that players have come to expect.")),
+                FormattedText.composite(Component.literal("If you'd like to show a token of appreciation, and support the development of Sodium in the process, then consider "), Component.literal("buying them a coffee").setStyle(Style.EMPTY.withColor(0xed49ce)), Component.literal(".")),
+                FormattedText.composite(Component.literal("And thanks again for using the mod! We hope it helps you (and your computer.)"))
+        );
     }
 }

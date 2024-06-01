@@ -36,7 +36,6 @@ import org.embeddedt.embeddium.api.model.EmbeddiumBakedModelExtension;
 import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 import org.embeddedt.embeddium.render.frapi.FRAPIModelUtils;
 import org.embeddedt.embeddium.render.frapi.FRAPIRenderHandler;
-import org.embeddedt.embeddium.render.frapi.IndigoBlockRenderContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +73,7 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
-        this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
+        this.fabricModelRenderingHandler = null;
     }
 
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
@@ -85,13 +84,7 @@ public class BlockRenderer {
 
         LightMode mode = this.getLightingMode(ctx.state(), ctx.model(), ctx.localSlice(), ctx.pos(), ctx.renderLayer());
         LightPipeline lighter = this.lighters.getLighter(mode);
-        Vec3 renderOffset;
-        
-        if (ctx.state().hasOffsetFunction()) {
-            renderOffset = ctx.state().getOffset(ctx.localSlice(), ctx.pos());
-        } else {
-            renderOffset = Vec3.ZERO;
-        }
+        Vec3 renderOffset = ctx.state().getOffset(ctx.localSlice(), ctx.pos());
 
         // Process custom renderers
         customRenderers.clear();

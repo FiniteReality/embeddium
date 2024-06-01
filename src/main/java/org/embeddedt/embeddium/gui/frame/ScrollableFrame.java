@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.gui.frame;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
 import org.embeddedt.embeddium.gui.frame.components.ScrollBarComponent;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -133,17 +133,17 @@ public class ScrollableFrame extends AbstractFrame {
 
 
     @Override
-    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
         if (this.canScrollHorizontal || this.canScrollVertical) {
             if (this.renderOutline) {
                 this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
             }
             boolean mouseInViewport = this.viewPortDimension.containsCursor(mouseX, mouseY);
             this.applyScissor(this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> {
-                drawContext.pose().pushPose();
-                drawContext.pose().translate(applyOffset(this.horizontalScrollBar, 0, true), applyOffset(this.verticalScrollBar, 0, true), 0);
+                drawContext.pushPose();
+                drawContext.translate(applyOffset(this.horizontalScrollBar, 0, true), applyOffset(this.verticalScrollBar, 0, true), 0);
                 super.render(drawContext, mouseInViewport ? (int)applyOffset(this.horizontalScrollBar, mouseX, false) : -1, mouseInViewport ? (int)applyOffset(this.verticalScrollBar, mouseY, false) : -1, delta);
-                drawContext.pose().popPose();
+                drawContext.popPose();
             });
         } else {
             super.render(drawContext, mouseX, mouseY, delta);

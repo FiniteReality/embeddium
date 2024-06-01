@@ -1,9 +1,10 @@
 package me.jellysquid.mods.sodium.client.compatibility.checks;
 
+import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
-import net.minecraft.server.packs.metadata.MetadataSectionType;
 
 import java.util.List;
 
@@ -18,6 +19,16 @@ public record SodiumResourcePackMetadata(List<String> ignoredShaders) {
                     .forGetter(SodiumResourcePackMetadata::ignoredShaders))
                     .apply(instance, SodiumResourcePackMetadata::new)
     );
-    public static final MetadataSectionType<SodiumResourcePackMetadata> SERIALIZER =
-            MetadataSectionType.fromCodec("sodium", CODEC);
+
+    public static final MetadataSectionSerializer<SodiumResourcePackMetadata> SERIALIZER = new MetadataSectionSerializer<>() {
+        @Override
+        public String getMetadataSectionName() {
+            return "sodium";
+        }
+
+        @Override
+        public SodiumResourcePackMetadata fromJson(JsonObject pJson) {
+            return CODEC.decode(JsonOps.INSTANCE, pJson).get().orThrow().getFirst();
+        }
+    };
 }

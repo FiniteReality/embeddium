@@ -1,15 +1,13 @@
 package org.embeddedt.embeddium.gui.frame.components;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
@@ -36,7 +34,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack context, int mouseX, int mouseY, float delta) {
         this.model.innerWidth = this.getInnerWidth();
 
         if (!this.isVisible()) {
@@ -59,7 +57,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         }
         if (!string.isEmpty()) {
             String string2 = bl ? string.substring(0, j) : string;
-            n = context.drawString(this.textRenderer, this.renderTextProvider.apply(string2, this.model.firstCharacterIndex), n, m, 0xFFFFFFFF);
+            n = this.textRenderer.drawShadow(context, this.renderTextProvider.apply(string2, this.model.firstCharacterIndex), n, m, 0xFFFFFFFF);
         }
         boolean bl3 = this.model.selectionStart < this.model.text.length() || this.model.text.length() >= this.model.getMaxLength();
         int o = n;
@@ -70,11 +68,11 @@ public class SearchTextFieldComponent extends AbstractWidget {
             --n;
         }
         if (!string.isEmpty() && bl && j < string.length()) {
-            context.drawString(this.textRenderer, this.renderTextProvider.apply(string.substring(j), this.model.selectionStart), n, m, 0xFFFFFFFF);
+            this.textRenderer.drawShadow(context, this.renderTextProvider.apply(string.substring(j), this.model.selectionStart), n, m, 0xFFFFFFFF);
         }
         // Cursor
         if (this.isFocused()) {
-            context.fill(RenderType.guiOverlay(), o, m - 1, o + 1, m + 1 + this.textRenderer.lineHeight, -3092272);
+            Gui.fill(context, o, m - 1, o + 1, m + 1 + this.textRenderer.lineHeight, -3092272);
         }
         // Highlighted text
         if (k != j) {
@@ -99,7 +97,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         this.focused = focused;
     }
 
-    private void drawSelectionHighlight(GuiGraphics context, int x1, int y1, int x2, int y2) {
+    private void drawSelectionHighlight(PoseStack context, int x1, int y1, int x2, int y2) {
         int i;
         if (x1 < x2) {
             i = x1;
@@ -117,7 +115,7 @@ public class SearchTextFieldComponent extends AbstractWidget {
         if (x1 > this.dim.x() + this.dim.width()) {
             x1 = this.dim.x() + this.dim.width();
         }
-        context.fill(RenderType.guiTextHighlight(), x1, y1, x2, y2, -16776961);
+        Gui.fill(context, x1, y1, x2, y2, -16776961);
     }
     
 
@@ -229,17 +227,5 @@ public class SearchTextFieldComponent extends AbstractWidget {
 
     public int getInnerWidth() {
         return this.dim.width() - 12;
-    }
-
-    @Override
-    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent navigation) {
-        if (!this.model.visible)
-            return null;
-        return super.nextFocusPath(navigation);
-    }
-
-    @Override
-    public ScreenRectangle getRectangle() {
-        return new ScreenRectangle(this.dim.x(), this.dim.y(), this.dim.width(), this.dim.height());
     }
 }

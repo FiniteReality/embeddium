@@ -10,6 +10,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.api.util.ColorMixer;
@@ -31,9 +33,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
+import org.embeddedt.embeddium.api.math.JomlHelper;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryStack;
 
@@ -124,7 +126,7 @@ public class CloudRenderer {
             this.rebuildGeometry(bufferBuilder, cloudDistance, centerCellX, centerCellZ);
 
             if (this.vertexBuffer == null) {
-                this.vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+                this.vertexBuffer = new VertexBuffer();
             }
 
             this.vertexBuffer.bind();
@@ -169,7 +171,7 @@ public class CloudRenderer {
         matrices.pushPose();
 
         Matrix4f modelViewMatrix = matrices.last().pose();
-        modelViewMatrix.translate(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ);
+        modelViewMatrix.translate(new Vector3f(-translateX, cloudHeight - (float) cameraY + 0.33F, -translateZ));
 
         // PASS 1: Set up depth buffer
         RenderSystem.disableBlend();

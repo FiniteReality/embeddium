@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.mixin.core.render.world;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
@@ -23,7 +24,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraftforge.client.ForgeHooksClient;
 import org.embeddedt.embeddium.util.sodium.FlawlessFrames;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
 import java.util.SortedSet;
 
 @Mixin(LevelRenderer.class)
@@ -53,11 +54,6 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Final
     private Minecraft minecraft;
 
-    @Shadow(remap = false)
-    public Frustum getFrustum() {
-        return null;
-    }
-
     @Unique
     private SodiumWorldRenderer renderer;
 
@@ -65,6 +61,13 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     private int frame;
 
     @Shadow public abstract boolean shouldShowEntityOutlines();
+
+    @Shadow
+    @Nullable
+    private Frustum capturedFrustum;
+
+    @Shadow
+    private Frustum cullingFrustum;
 
     @Override
     public SodiumWorldRenderer sodium$getWorldRenderer() {
@@ -132,7 +135,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
 
         // TODO: Avoid setting up and clearing the state a second time
         renderLayer.setupRenderState();
-        ForgeHooksClient.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), matrices, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.getFrustum());
+        ForgeHooksClient.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), matrices, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum);
         renderLayer.clearRenderState();
     }
 

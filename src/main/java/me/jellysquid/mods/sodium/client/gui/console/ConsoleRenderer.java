@@ -6,7 +6,7 @@ import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.api.util.ColorU8;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -45,12 +45,11 @@ public class ConsoleRenderer {
         }
     }
 
-    public void draw(GuiGraphics context) {
+    public void draw(PoseStack matrices) {
         var currentTime = GLFW.glfwGetTime();
 
         Minecraft client = Minecraft.getInstance();
 
-        var matrices = context.pose();
         matrices.pushPose();
         matrices.translate(0.0f, 0.0f, 1000.0f);
 
@@ -115,17 +114,17 @@ public class ConsoleRenderer {
             }
 
             // message background
-            context.fill(x, y, x + width, y + height,
+            Gui.fill(matrices, x, y, x + width, y + height,
                     ColorARGB.withAlpha(colors.background(), weightAlpha(opacity)));
 
             // message colored stripe
-            context.fill(x, y, x + 1, y + height,
+            Gui.fill(matrices, x, y, x + 1, y + height,
                     ColorARGB.withAlpha(colors.foreground(), weightAlpha(opacity)));
 
             for (var line : render.lines()) {
                 // message text
-                context.drawString(client.font, line, x + paddingWidth + 3, y + paddingHeight,
-                        ColorARGB.withAlpha(colors.text(), weightAlpha(opacity)), false);
+                client.font.draw(matrices, line, x + paddingWidth + 3, y + paddingHeight,
+                        ColorARGB.withAlpha(colors.text(), weightAlpha(opacity)));
 
                 y += client.font.lineHeight;
             }

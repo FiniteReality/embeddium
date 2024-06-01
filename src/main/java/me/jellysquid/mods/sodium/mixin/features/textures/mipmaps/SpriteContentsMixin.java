@@ -4,7 +4,8 @@ import com.mojang.blaze3d.platform.NativeImage;
 import me.jellysquid.mods.sodium.client.util.NativeImageHelper;
 import me.jellysquid.mods.sodium.client.util.color.ColorSRGB;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import org.lwjgl.system.MemoryUtil;
@@ -20,14 +21,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 /**
  * This Mixin is ported from Iris at <a href="https://github.com/IrisShaders/Iris/blob/41095ac23ea0add664afd1b85c414d1f1ed94066/src/main/java/net/coderbot/iris/mixin/bettermipmaps/MixinTextureAtlasSprite.java">MixinTextureAtlasSprite</a>.
  */
-@Mixin(SpriteContents.class)
+@Mixin(TextureAtlasSprite.class)
 public class SpriteContentsMixin {
+    @Shadow
     @Mutable
-    @Shadow
-    @Final
-    private NativeImage originalImage;
-
-    @Shadow
     @Final
     private ResourceLocation name;
 
@@ -39,15 +36,15 @@ public class SpriteContentsMixin {
     // support Forge, since this works well on Fabric too, it's fine to ensure that the diff between Fabric and Forge
     // can remain minimal. Being less dependent on specific details of Fabric is good, since it means we can be more
     // cross-platform.
-    @Redirect(method = "<init>(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/resources/metadata/animation/FrameSize;Lcom/mojang/blaze3d/platform/NativeImage;Lnet/minecraft/client/resources/metadata/animation/AnimationMetadataSection;Lnet/minecraftforge/client/textures/ForgeTextureMetadata;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/texture/SpriteContents;originalImage:Lcom/mojang/blaze3d/platform/NativeImage;", opcode = Opcodes.PUTFIELD))
-    private void sodium$beforeGenerateMipLevels(SpriteContents instance, NativeImage nativeImage, ResourceLocation identifier) {
+    @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;name:Lnet/minecraft/resources/ResourceLocation;", opcode = Opcodes.PUTFIELD))
+    private void sodium$beforeGenerateMipLevels(TextureAtlasSprite instance, ResourceLocation name, TextureAtlas pAtlas, TextureAtlasSprite.Info pSpriteInfo, int pMipLevel, int pStorageX, int pStorageY, int pX, int pY, NativeImage pImage) {
         // Embeddium: Only fill in transparent colors if mipmaps are on and the texture name does not contain "leaves".
         // We're injecting after the "name" field has been set, so this is safe even though we're in a constructor.
-        if (Minecraft.getInstance().options.mipmapLevels().get() > 0 && !this.name.getPath().contains("leaves")) {
-            sodium$fillInTransparentPixelColors(nativeImage);
+        if (Minecraft.getInstance().options.mipmapLevels().get() > 0 && !name.getPath().contains("leaves")) {
+            sodium$fillInTransparentPixelColors(pImage);
         }
 
-        this.originalImage = nativeImage;
+        this.name = name;
     }
 
     /**
@@ -75,16 +72,17 @@ public class SpriteContentsMixin {
             long pPixel = ppPixel + (pixelIndex * 4);
 
             int color = MemoryUtil.memGetInt(pPixel);
-            int alpha = FastColor.ABGR32.alpha(color);
+            int alpha = FastColor.ARGB32.alpha(color);
 
             // Ignore all fully-transparent pixels for the purposes of computing an average color.
             if (alpha != 0) {
                 float weight = (float) alpha;
 
                 // Make sure to convert to linear space so that we don't lose brightness.
-                r += ColorSRGB.srgbToLinear(FastColor.ABGR32.red(color)) * weight;
-                g += ColorSRGB.srgbToLinear(FastColor.ABGR32.green(color)) * weight;
-                b += ColorSRGB.srgbToLinear(FastColor.ABGR32.blue(color)) * weight;
+                // We use the ARGB functions with red and blue swapped.
+                r += ColorSRGB.srgbToLinear(FastColor.ARGB32.blue(color)) * weight;
+                g += ColorSRGB.srgbToLinear(FastColor.ARGB32.green(color)) * weight;
+                b += ColorSRGB.srgbToLinear(FastColor.ARGB32.red(color)) * weight;
 
                 totalWeight += weight;
             }
@@ -107,7 +105,7 @@ public class SpriteContentsMixin {
             long pPixel = ppPixel + (pixelIndex * 4);
 
             int color = MemoryUtil.memGetInt(pPixel);
-            int alpha = FastColor.ABGR32.alpha(color);
+            int alpha = FastColor.ARGB32.alpha(color);
 
             // Replace the color values of pixels which are fully transparent, since they have no color data.
             if (alpha == 0) {

@@ -1,8 +1,9 @@
 
 package me.jellysquid.mods.sodium.mixin.features.render.immediate.buffer_builder.sorting;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.math.Vector3f;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -10,7 +11,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexSorting;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
 import java.nio.ByteBuffer;
 
 @Mixin(BufferBuilder.class)
@@ -33,10 +37,6 @@ public abstract class BufferBuilderMixin {
 
     @Shadow
     private int renderedBufferPointer;
-
-    @Shadow
-    @Nullable
-    private VertexSorting sorting;
 
     /**
      * @author JellySquid
@@ -71,12 +71,10 @@ public abstract class BufferBuilderMixin {
      * @author JellySquid
      * @reason Use direct memory access, avoid indirection
      */
-    @Overwrite
-    private void putSortedQuadIndices(VertexFormat.IndexType indexType) {
-        if (this.sorting != null) {
-            int[] indices = this.sorting.sort(this.sortingPoints);
-            this.writePrimitiveIndices(indexType, indices);
-        }
+    @Inject(method = "putSortedQuadIndices", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;intConsumer(ILcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)Lit/unimi/dsi/fastutil/ints/IntConsumer;"), cancellable = true)
+    private void putSortedQuadIndices(VertexFormat.IndexType indexType, CallbackInfo ci, @Local(ordinal = 0) int[] indices) {
+        ci.cancel();
+        this.writePrimitiveIndices(indexType, indices);
     }
 
     @Unique
@@ -87,6 +85,16 @@ public abstract class BufferBuilderMixin {
         long ptr = MemoryUtil.memAddress(this.buffer, this.nextElementByte);
 
         switch (indexType.bytes) {
+            case 1 -> { // BYTE
+                for (int index : indices) {
+                    int start = index * 4;
+
+                    for (int offset : VERTEX_ORDER) {
+                        MemoryUtil.memPutByte(ptr, (byte) (start + offset));
+                        ptr += Byte.BYTES;
+                    }
+                }
+            }
             case 2 -> { // SHORT
                 for (int index : indices) {
                     int start = index * 4;
@@ -107,6 +115,7 @@ public abstract class BufferBuilderMixin {
                     }
                 }
             }
+            default -> throw new IllegalStateException("Unexpected index size: " + indexType.bytes);
         }
     }
 }

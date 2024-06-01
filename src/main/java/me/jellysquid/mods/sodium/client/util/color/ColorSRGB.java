@@ -1,6 +1,7 @@
 
 package me.jellysquid.mods.sodium.client.util.color;
 
+import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.minecraft.util.FastColor;
 
 /**
@@ -82,7 +83,8 @@ public class ColorSRGB {
      * @param a The alpha-component in linear RGB space (0 to 255)
      */
     public static int linearToSrgb(float r, float g, float b, int a) {
-        return FastColor.ABGR32.color(a, linearToSrgb(b), linearToSrgb(g), linearToSrgb(r));
+        return ColorABGR.pack(linearToSrgb(b), linearToSrgb(g), linearToSrgb(r), a);
+        //return FastColor.ABGR32.color(a, linearToSrgb(b), linearToSrgb(g), linearToSrgb(r));
     }
 
     /**

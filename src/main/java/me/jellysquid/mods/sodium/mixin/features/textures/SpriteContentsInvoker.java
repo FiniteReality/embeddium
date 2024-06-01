@@ -1,12 +1,12 @@
 package me.jellysquid.mods.sodium.mixin.features.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(SpriteContents.class)
+@Mixin(TextureAtlasSprite.class)
 public interface SpriteContentsInvoker {
     @Invoker
-    void invokeUpload(int x, int y, int unpackSkipPixels, int unpackSkipRows, NativeImage[] images);
+    void invokeUpload(int x, int y, NativeImage[] images);
 }

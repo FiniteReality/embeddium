@@ -7,8 +7,7 @@ import me.jellysquid.mods.sodium.client.compatibility.workarounds.Workarounds;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.nvidia.NvidiaWorkarounds;
 import net.minecraft.Util;
 import net.minecraftforge.fml.loading.FMLConfig;
-import net.minecraftforge.fml.loading.ImmediateWindowHandler;
-import org.embeddedt.embeddium.bootstrap.EmbeddiumEarlyWindowHacks;
+import net.minecraftforge.fml.loading.progress.EarlyProgressVisualization;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
@@ -44,8 +43,8 @@ public class WindowMixin {
     private long wglPrevContext = MemoryUtil.NULL;
 
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/loading/ImmediateWindowHandler;setupMinecraftWindow(Ljava/util/function/IntSupplier;Ljava/util/function/IntSupplier;Ljava/util/function/Supplier;Ljava/util/function/LongSupplier;)J", remap = false))
-    private long wrapGlfwCreateWindow(IntSupplier width, IntSupplier height, Supplier<String> title, LongSupplier monitor) {
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/loading/progress/EarlyProgressVisualization;handOffWindow(Ljava/util/function/IntSupplier;Ljava/util/function/IntSupplier;Ljava/util/function/Supplier;Ljava/util/function/LongSupplier;)J", remap = false))
+    private long wrapGlfwCreateWindow(EarlyProgressVisualization instance, IntSupplier width, IntSupplier height, Supplier<String> title, LongSupplier monitor) {
         final boolean applyNvidiaWorkarounds = Workarounds.isWorkaroundEnabled(Workarounds.Reference.NVIDIA_THREADED_OPTIMIZATIONS);
 
         if (applyNvidiaWorkarounds) {
@@ -61,14 +60,8 @@ public class WindowMixin {
             GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_NO_ERROR, GLFW.GLFW_TRUE);
         }
 
-        // If the user has opted to delegate creation of the early window to us (needed for the above calls to have an
-        // effect) create it now.
-        if (FMLConfig.getBoolConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_CONTROL) && Objects.equals(FMLConfig.getConfigValue(FMLConfig.ConfigValue.EARLY_WINDOW_PROVIDER), "embeddium")) {
-            EmbeddiumEarlyWindowHacks.createEarlyLaunchWindow(width, height);
-        }
-
         try {
-            return ImmediateWindowHandler.setupMinecraftWindow(width, height, title, monitor);
+            return instance.handOffWindow(width, height, title, monitor);
         } finally {
             if (applyNvidiaWorkarounds) {
                 NvidiaWorkarounds.uninstall();

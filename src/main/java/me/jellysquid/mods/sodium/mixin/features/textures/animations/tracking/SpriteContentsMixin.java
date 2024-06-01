@@ -1,19 +1,21 @@
 package me.jellysquid.mods.sodium.mixin.features.textures.animations.tracking;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteContentsExtended;
-import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(SpriteContents.class)
+@Mixin(TextureAtlasSprite.class)
 public abstract class SpriteContentsMixin implements SpriteContentsExtended {
     @Shadow
     @Final
     @Nullable
-    private SpriteContents.AnimatedTexture animatedTexture;
+    private TextureAtlasSprite.AnimatedTexture animatedTexture;
 
     @Unique
     private boolean active;
@@ -31,5 +33,16 @@ public abstract class SpriteContentsMixin implements SpriteContentsExtended {
     @Override
     public boolean sodium$isActive() {
         return this.active;
+    }
+
+    /**
+     * @author embeddedt
+     * @reason Mark sprite as active for animation when U0 coordinate is retrieved. This catches some more render
+     * paths not caught by the other mixins.
+     */
+    @ModifyReturnValue(method = "getU0", at = @At("RETURN"))
+    private float embeddium$markActive(float f) {
+        this.active = true;
+        return f;
     }
 }

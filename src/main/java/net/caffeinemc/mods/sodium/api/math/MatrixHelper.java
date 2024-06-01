@@ -111,24 +111,6 @@ public class MatrixHelper {
     }
 
     /**
-     * Rotates the position and normal matrix in ZYX order. The rotation angles are specified in radians. This is
-     * functionally identical to rotating the matrix stack by a quaternion representing an ZYX rotation, but is
-     * significantly faster.
-     *
-     * @param matrices The matrix stack to rotate
-     * @param angleZ The angle to rotate by on the Z-axis
-     * @param angleY The angle to rotate by on the Y-axis
-     * @param angleX The angle to rotate by on the X-axis
-     */
-    public static void rotateZYX(PoseStack.Pose matrices, float angleZ, float angleY, float angleX) {
-        matrices.pose()
-                .rotateZYX(angleZ, angleY, angleX);
-
-        matrices.normal()
-                .rotateZYX(angleZ, angleY, angleX);
-    }
-
-    /**
      * Returns the transformed normal vector for a given unit vector (direction). This is significantly faster
      * than transforming the vector directly (i.e. with {@link Matrix3f#transform(Vector3f)}), as it can simply
      * extract the values from the provided matrix (rather than transforming the vertices.)

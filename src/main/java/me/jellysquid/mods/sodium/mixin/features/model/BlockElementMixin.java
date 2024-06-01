@@ -1,10 +1,10 @@
 package me.jellysquid.mods.sodium.mixin.features.model;
 
+import com.mojang.math.Vector3f;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.client.renderer.block.model.BlockElement;
 import org.embeddedt.embeddium.model.EpsilonizableBlockElement;
 import org.embeddedt.embeddium.util.PlatformUtil;
-import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,9 +33,9 @@ public class BlockElementMixin implements EpsilonizableBlockElement {
     }
 
     private static void embeddium$epsilonize(Vector3f v) {
-        v.x = embeddium$epsilonize(v.x);
-        v.y = embeddium$epsilonize(v.y);
-        v.z = embeddium$epsilonize(v.z);
+        v.setX(embeddium$epsilonize(v.x()));
+        v.setY(embeddium$epsilonize(v.y()));
+        v.setZ(embeddium$epsilonize(v.z()));
     }
 
     private static final float EMBEDDIUM$MINIMUM_EPSILON = 0.008f;

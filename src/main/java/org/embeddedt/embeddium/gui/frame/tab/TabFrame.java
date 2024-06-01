@@ -3,10 +3,10 @@ package org.embeddedt.embeddium.gui.frame.tab;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.Validate;
 import org.embeddedt.embeddium.gui.frame.AbstractFrame;
@@ -162,7 +162,7 @@ public class TabFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
         for (AbstractWidget widget : this.children) {
             if (widget != this.selectedFrame) {
                 widget.render(drawContext, mouseX, mouseY, delta);

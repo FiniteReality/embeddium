@@ -5,7 +5,6 @@ import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
-import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -49,8 +48,8 @@ import java.util.Objects;
  *
  * <p>Object pooling should be used to avoid huge allocations as this class contains many large arrays.</p>
  */
-@OptionalInterface({ FabricBlockView.class, RenderAttachedBlockView.class })
-public class WorldSlice implements BlockAndTintGetter, BiomeColorView, FabricBlockView, RenderAttachedBlockView {
+@OptionalInterface({ RenderAttachedBlockView.class })
+public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAttachedBlockView {
     private static final LightLayer[] LIGHT_TYPES = LightLayer.values();
 
     // The number of blocks in a section.
@@ -377,17 +376,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, FabricBlo
     }
 
     @Override
-    public Holder<Biome> getBiomeFabric(BlockPos pos) {
-        return this.biomeSlice.getBiome(pos.getX(), pos.getY(), pos.getZ());
-    }
-
-    @Override
-    public boolean hasBiomes() {
-        return true;
-    }
-
-    @Override
-    public Object getBlockEntityRenderData(BlockPos pos) {
+    public Object getBlockEntityRenderAttachment(BlockPos pos) {
         int relX = pos.getX() - this.originX;
         int relY = pos.getY() - this.originY;
         int relZ = pos.getZ() - this.originZ;

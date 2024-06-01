@@ -1,11 +1,9 @@
 package me.jellysquid.mods.sodium.client.gui.options.control;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.Validate;
@@ -91,7 +89,7 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
         }
 
         @Override
-        public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+        public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
             super.render(drawContext, mouseX, mouseY, delta);
 
             Enum<T> value = this.option.getValue();
@@ -117,7 +115,7 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
         public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
             if (!isFocused()) return false;
 
-            if (CommonInputs.selected(keyCode)) {
+            if (keySelected(keyCode)) {
                 cycleControl(Screen.hasShiftDown());
                 return true;
             }

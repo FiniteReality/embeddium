@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.render.entity.shadows;
 
+import com.mojang.math.Matrix4f;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.common.ModelVertex;
 import net.minecraft.client.renderer.LightTexture;
@@ -17,8 +18,8 @@ import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.caffeinemc.mods.sodium.api.math.MatrixHelper;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
+import org.embeddedt.embeddium.api.math.Matrix3fExtended;
+import org.embeddedt.embeddium.api.math.Matrix4fExtended;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -37,7 +38,7 @@ public class EntityRenderDispatcherMixin {
      * @reason Reduce vertex assembly overhead for shadow rendering
      */
     @Inject(method = "renderBlockShadow", at = @At("HEAD"), cancellable = true)
-    private static void renderShadowPartFast(PoseStack.Pose entry, VertexConsumer vertices, ChunkAccess chunk, LevelReader world, BlockPos pos, double x, double y, double z, float radius, float opacity, CallbackInfo ci) {
+    private static void renderShadowPartFast(PoseStack.Pose entry, VertexConsumer vertices, LevelReader world, BlockPos pos, double x, double y, double z, float radius, float opacity, CallbackInfo ci) {
         var writer = VertexBufferWriter.tryOf(vertices);
 
         if (writer == null)
@@ -108,7 +109,7 @@ public class EntityRenderDispatcherMixin {
         var matPosition = matrices.pose();
 
         var color = ColorABGR.withAlpha(SHADOW_COLOR, alpha);
-        var normal = MatrixHelper.transformNormal(matNormal, Direction.UP);
+        var normal = ((Matrix3fExtended)(Object)matNormal).computeNormal(Direction.UP);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             long buffer = stack.nmalloc(4 * ModelVertex.STRIDE);
@@ -134,9 +135,9 @@ public class EntityRenderDispatcherMixin {
     @Unique
     private static void writeShadowVertex(long ptr, Matrix4f matPosition, float x, float y, float z, float u, float v, int color, int normal) {
         // The transformed position vector
-        float xt = MatrixHelper.transformPositionX(matPosition, x, y, z);
-        float yt = MatrixHelper.transformPositionY(matPosition, x, y, z);
-        float zt = MatrixHelper.transformPositionZ(matPosition, x, y, z);
+        float xt = ((Matrix4fExtended)(Object)matPosition).transformVecX(x, y, z);
+        float yt = ((Matrix4fExtended)(Object)matPosition).transformVecY(x, y, z);
+        float zt = ((Matrix4fExtended)(Object)matPosition).transformVecZ(x, y, z);
 
         ModelVertex.write(ptr, xt, yt, zt, color, u, v, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, normal);
     }

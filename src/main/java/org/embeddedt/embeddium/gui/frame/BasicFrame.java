@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.gui.frame;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.minecraft.client.gui.GuiGraphics;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class BasicFrame extends AbstractFrame {
     }
 
     @Override
-    public void render(GuiGraphics drawContext, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack drawContext, int mouseX, int mouseY, float delta) {
         super.render(drawContext, mouseX, mouseY, delta);
     }
 
