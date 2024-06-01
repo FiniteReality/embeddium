@@ -1,6 +1,8 @@
 package org.embeddedt.embeddium.api.math;
 
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
+import org.jetbrains.annotations.Contract;
 
 public interface Matrix4fExtended {
     /**
@@ -80,4 +82,9 @@ public interface Matrix4fExtended {
     float getA23();
 
     float getA33();
+
+    @Contract(pure = true)
+    static Matrix4fExtended get(Matrix4f matrix) {
+        return (Matrix4fExtended)(Object)matrix;
+    }
 }

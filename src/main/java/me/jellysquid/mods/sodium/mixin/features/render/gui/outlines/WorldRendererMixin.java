@@ -36,8 +36,8 @@ public class WorldRendererMixin {
 
         ci.cancel();
 
-        Matrix4fExtended position = (Matrix4fExtended)(Object)matrices.last().pose();
-        Matrix3fExtended normal = (Matrix3fExtended)(Object)matrices.last().normal();
+        Matrix4fExtended position = Matrix4fExtended.get(matrices.last().pose());
+        Matrix3fExtended normal = Matrix3fExtended.get(matrices.last().normal());
 
         float x1f = (float) x1;
         float y1f = (float) y1;

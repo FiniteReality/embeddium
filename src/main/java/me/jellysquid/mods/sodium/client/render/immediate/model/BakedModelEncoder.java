@@ -1,8 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.immediate.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
@@ -18,28 +16,28 @@ public class BakedModelEncoder {
     /**
      * Use the packed normal and transform it if set, otherwise use the precalculated and multiplied normal.
      */
-    private static int mergeNormalAndMult(int packed, int calc, Matrix3f matNormal) {
+    private static int mergeNormalAndMult(int packed, int calc, Matrix3fExtended matNormal) {
         if((packed & 0xFFFFFF) == 0)
             return calc;
         var x = NormI8.unpackX(packed);
         var y = NormI8.unpackY(packed);
         var z = NormI8.unpackZ(packed);
-        var tX = ((Matrix3fExtended)(Object)matNormal).transformVecX(x, y, z);
-        var tY = ((Matrix3fExtended)(Object)matNormal).transformVecY(x, y, z);
-        var tZ = ((Matrix3fExtended)(Object)matNormal).transformVecZ(x, y, z);
+        var tX = matNormal.transformVecX(x, y, z);
+        var tY = matNormal.transformVecY(x, y, z);
+        var tZ = matNormal.transformVecZ(x, y, z);
         return NormI8.pack(tX, tY, tZ);
     }
 
     public static void writeQuadVertices(VertexBufferWriter writer, PoseStack.Pose matrices, ModelQuadView quad, int color, int light, int overlay) {
-        Matrix3f matNormal = matrices.normal();
-        Matrix4f matPosition = matrices.pose();
+        Matrix3fExtended matNormal = Matrix3fExtended.get(matrices.normal());
+        Matrix4fExtended matPosition = Matrix4fExtended.get(matrices.pose());
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             long buffer = stack.nmalloc(4 * ModelVertex.STRIDE);
             long ptr = buffer;
 
             // The packed transformed normal vector
-            var normal = ((Matrix3fExtended)(Object)matNormal).transformNormal(quad.getLightFace());
+            var normal = matNormal.transformNormal(quad.getLightFace());
 
             for (int i = 0; i < 4; i++) {
                 // The position vector
@@ -48,9 +46,9 @@ public class BakedModelEncoder {
                 float z = quad.getZ(i);
 
                 // The transformed position vector
-                float xt = ((Matrix4fExtended)(Object)matPosition).transformVecX(x, y, z);
-                float yt = ((Matrix4fExtended)(Object)matPosition).transformVecY(x, y, z);
-                float zt = ((Matrix4fExtended)(Object)matPosition).transformVecZ(x, y, z);
+                float xt = matPosition.transformVecX(x, y, z);
+                float yt = matPosition.transformVecY(x, y, z);
+                float zt = matPosition.transformVecZ(x, y, z);
 
                 ModelVertex.write(ptr, xt, yt, zt, multARGBInts(quad.getColor(i), color), quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), mergeNormalAndMult(quad.getForgeNormal(i), normal, matNormal));
                 ptr += ModelVertex.STRIDE;
@@ -65,15 +63,15 @@ public class BakedModelEncoder {
     }
 
     public static void writeQuadVertices(VertexBufferWriter writer, PoseStack.Pose matrices, ModelQuadView quad, float r, float g, float b, float[] brightnessTable, boolean colorize, int[] light, int overlay) {
-        Matrix3f matNormal = matrices.normal();
-        Matrix4f matPosition = matrices.pose();
+        Matrix3fExtended matNormal = Matrix3fExtended.get(matrices.normal());
+        Matrix4fExtended matPosition = Matrix4fExtended.get(matrices.pose());
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             long buffer = stack.nmalloc(4 * ModelVertex.STRIDE);
             long ptr = buffer;
 
             // The packed transformed normal vector
-            var normal = ((Matrix3fExtended)(Object)matNormal).transformNormal(quad.getLightFace());
+            var normal = matNormal.transformNormal(quad.getLightFace());
 
             for (int i = 0; i < 4; i++) {
                 // The position vector
@@ -82,9 +80,9 @@ public class BakedModelEncoder {
                 float z = quad.getZ(i);
 
                 // The transformed position vector
-                float xt = ((Matrix4fExtended)(Object)matPosition).transformVecX(x, y, z);
-                float yt = ((Matrix4fExtended)(Object)matPosition).transformVecY(x, y, z);
-                float zt = ((Matrix4fExtended)(Object)matPosition).transformVecZ(x, y, z);
+                float xt = matPosition.transformVecX(x, y, z);
+                float yt = matPosition.transformVecY(x, y, z);
+                float zt = matPosition.transformVecZ(x, y, z);
 
                 float fR;
                 float fG;

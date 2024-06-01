@@ -36,9 +36,10 @@ public interface VertexConsumerMixin {
      */
     @Overwrite
     default VertexConsumer normal(Matrix3f matrix, float x, float y, float z) {
-        float xt = ((Matrix3fExtended)(Object)matrix).transformVecX(x, y, z);
-        float yt = ((Matrix3fExtended)(Object)matrix).transformVecY(x, y, z);
-        float zt = ((Matrix3fExtended)(Object)matrix).transformVecZ(x, y, z);
+        var matrixExt = Matrix3fExtended.get(matrix);
+        float xt = matrixExt.transformVecX(x, y, z);
+        float yt = matrixExt.transformVecY(x, y, z);
+        float zt = matrixExt.transformVecZ(x, y, z);
 
         return this.normal(xt, yt, zt);
     }

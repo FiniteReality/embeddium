@@ -1,8 +1,10 @@
 package org.embeddedt.embeddium.api.math;
 
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.minecraft.core.Direction;
+import org.jetbrains.annotations.Contract;
 
 public interface Matrix3fExtended {
     /**
@@ -51,5 +53,10 @@ public interface Matrix3fExtended {
     float getA22();
 
     int transformNormal(Direction direction);
+
+    @Contract(pure = true)
+    static Matrix3fExtended get(Matrix3f matrix) {
+        return (Matrix3fExtended)(Object)matrix;
+    }
 }
 

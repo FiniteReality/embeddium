@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.mixin.features.render.entity.shadows;
 
-import com.mojang.math.Matrix4f;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.common.ModelVertex;
 import net.minecraft.client.renderer.LightTexture;
@@ -106,10 +105,10 @@ public class EntityRenderDispatcherMixin {
         float v2 = (-maxZ * size) + 0.5F;
 
         var matNormal = matrices.normal();
-        var matPosition = matrices.pose();
+        var matPosition = Matrix4fExtended.get(matrices.pose());
 
         var color = ColorABGR.withAlpha(SHADOW_COLOR, alpha);
-        var normal = ((Matrix3fExtended)(Object)matNormal).computeNormal(Direction.UP);
+        var normal = Matrix3fExtended.get(matNormal).computeNormal(Direction.UP);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             long buffer = stack.nmalloc(4 * ModelVertex.STRIDE);
@@ -133,11 +132,11 @@ public class EntityRenderDispatcherMixin {
     }
 
     @Unique
-    private static void writeShadowVertex(long ptr, Matrix4f matPosition, float x, float y, float z, float u, float v, int color, int normal) {
+    private static void writeShadowVertex(long ptr, Matrix4fExtended matPosition, float x, float y, float z, float u, float v, int color, int normal) {
         // The transformed position vector
-        float xt = ((Matrix4fExtended)(Object)matPosition).transformVecX(x, y, z);
-        float yt = ((Matrix4fExtended)(Object)matPosition).transformVecY(x, y, z);
-        float zt = ((Matrix4fExtended)(Object)matPosition).transformVecZ(x, y, z);
+        float xt = matPosition.transformVecX(x, y, z);
+        float yt = matPosition.transformVecY(x, y, z);
+        float zt = matPosition.transformVecZ(x, y, z);
 
         ModelVertex.write(ptr, xt, yt, zt, color, u, v, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, normal);
     }
