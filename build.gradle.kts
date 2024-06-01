@@ -144,6 +144,8 @@ dependencies {
     compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
     compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 
+    "runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))
+
     annotationProcessor("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
 
     compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
