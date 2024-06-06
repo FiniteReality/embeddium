@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/ItemBlockRenderTypes.java
 +++ b/net/minecraft/client/renderer/ItemBlockRenderTypes.java
-@@ -398,4 +_,8 @@
+@@ -397,4 +_,8 @@
      public static void setFancy(boolean p_109292_) {
          renderCutout = p_109292_;
      }
