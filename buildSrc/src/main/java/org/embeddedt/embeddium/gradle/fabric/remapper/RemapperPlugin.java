@@ -30,7 +30,7 @@ public class RemapperPlugin implements Plugin<Project> {
         // Make sure the build directory exists
         project.getLayout().getBuildDirectory().get().getAsFile().mkdirs();
 
-        var mappingsFile = project.getLayout().getBuildDirectory().file("embeddium_mappings.txt").get().getAsFile();
+        var mappingsFile = project.getLayout().getBuildDirectory().file("embeddium_mappings_" + minecraftVersion + ".txt").get().getAsFile();
 
         if(!mappingsFile.exists()) {
             try {
