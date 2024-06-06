@@ -75,7 +75,7 @@ public class Embeddium {
         CONFIG = EmbeddiumOptions.defaults();
 
         try {
-            CONFIG.writeChanges();
+            EmbeddiumOptions.writeToDisk(CONFIG);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write config file", e);
         }
@@ -111,7 +111,7 @@ public class Embeddium {
             CONFIG.notifications.hasClearedDonationButton = false;
 
             try {
-                CONFIG.writeChanges();
+                EmbeddiumOptions.writeToDisk(CONFIG);
             } catch (IOException e) {
                 LOGGER.error("Failed to update config file", e);
             }

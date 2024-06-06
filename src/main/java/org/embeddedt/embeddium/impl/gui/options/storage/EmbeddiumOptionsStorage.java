@@ -21,7 +21,7 @@ public class EmbeddiumOptionsStorage implements OptionStorage<EmbeddiumOptions> 
     @Override
     public void save() {
         try {
-            this.options.writeChanges();
+            EmbeddiumOptions.writeToDisk(this.options);
         } catch (IOException e) {
             throw new RuntimeException("Couldn't save configuration changes", e);
         }

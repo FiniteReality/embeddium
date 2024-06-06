@@ -9,8 +9,6 @@ import java.util.EnumSet;
 import java.util.NoSuchElementException;
 
 public class VertexFormatDescriptionImpl implements VertexFormatDescription {
-    // legacy use only
-    @Deprecated
     private final VertexFormat format;
 
     private final int id;
@@ -89,7 +87,6 @@ public class VertexFormatDescriptionImpl implements VertexFormatDescription {
         return this.stride;
     }
 
-    @Deprecated
     public VertexFormat format() {
         return this.format;
     }

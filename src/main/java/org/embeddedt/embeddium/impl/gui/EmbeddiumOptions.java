@@ -69,8 +69,6 @@ public class EmbeddiumOptions {
     }
 
     public static class NotificationSettings {
-        public boolean forceDisableDonationPrompts = false;
-
         public boolean hasClearedDonationButton = false;
         public boolean hasSeenDonationPrompt = false;
     }
@@ -127,12 +125,9 @@ public class EmbeddiumOptions {
 
         config.configPath = path;
 
-        // TODO Embeddium: Remove the field completely in 0.4
-        config.notifications.forceDisableDonationPrompts = false;
-
         try {
             if(resaveConfig)
-                config.writeChanges();
+                EmbeddiumOptions.writeToDisk(config);
         } catch (IOException e) {
             throw new RuntimeException("Couldn't update config file", e);
         }
@@ -142,11 +137,6 @@ public class EmbeddiumOptions {
 
     private static Path getConfigPath(String name) {
         return ConfigMigrator.handleConfigMigration(name);
-    }
-
-    @Deprecated
-    public void writeChanges() throws IOException {
-        writeToDisk(this);
     }
 
     public static void writeToDisk(EmbeddiumOptions config) throws IOException {

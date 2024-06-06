@@ -7,15 +7,6 @@ import org.embeddedt.embeddium.impl.render.chunk.vertex.format.ChunkMeshFormats;
 import org.embeddedt.embeddium.impl.render.chunk.vertex.format.ChunkVertexType;
 
 public record ChunkShaderOptions(ChunkFogMode fog, TerrainRenderPass pass, ChunkVertexType vertexType) {
-    /**
-     * @deprecated Only kept for Iris/Oculus compatibility, do not use
-     */
-    @Deprecated
-    @SuppressWarnings("unused")
-    public ChunkShaderOptions(ChunkFogMode fog, TerrainRenderPass pass) {
-        this(fog, pass, ChunkMeshFormats.COMPACT);
-    }
-
     public ShaderConstants constants() {
         ShaderConstants.Builder constants = ShaderConstants.builder();
         constants.addAll(this.fog.getDefines());

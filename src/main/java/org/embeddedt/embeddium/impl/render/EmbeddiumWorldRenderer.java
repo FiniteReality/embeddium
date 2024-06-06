@@ -161,7 +161,7 @@ public class EmbeddiumWorldRenderer {
      */
     public void setupTerrain(Camera camera,
                              Viewport viewport,
-                             @Deprecated(forRemoval = true) int frame,
+                             int frame,
                              boolean spectator,
                              boolean updateChunksImmediately) {
         NativeBuffer.reclaim(false);
@@ -595,24 +595,5 @@ public class EmbeddiumWorldRenderer {
 
     public boolean isSectionReady(int x, int y, int z) {
         return this.renderSectionManager.isSectionBuilt(x, y, z);
-    }
-
-    // Legacy compatibility
-    @Deprecated
-    public void onChunkAdded(int x, int z) {
-        var tracker = ChunkTrackerHolder.get(this.world);
-        tracker.onChunkStatusAdded(x, z, ChunkStatus.FLAG_HAS_BLOCK_DATA);
-    }
-
-    @Deprecated
-    public void onChunkLightAdded(int x, int z) {
-        var tracker = ChunkTrackerHolder.get(this.world);
-        tracker.onChunkStatusAdded(x, z, ChunkStatus.FLAG_HAS_LIGHT_DATA);
-    }
-
-    @Deprecated
-    public void onChunkRemoved(int x, int z) {
-        var tracker = ChunkTrackerHolder.get(this.world);
-        tracker.onChunkStatusRemoved(x, z, ChunkStatus.FLAG_ALL);
     }
 }

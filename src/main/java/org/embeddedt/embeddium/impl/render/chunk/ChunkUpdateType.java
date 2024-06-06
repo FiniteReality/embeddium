@@ -13,11 +13,6 @@ public enum ChunkUpdateType {
         this.maximumQueueSize = maximumQueueSize;
     }
 
-    @Deprecated
-    public static boolean canPromote(ChunkUpdateType prev, ChunkUpdateType next) {
-        return prev == null || (prev == REBUILD && next == IMPORTANT_REBUILD);
-    }
-
     // borrowed from PR #2016
     public static ChunkUpdateType getPromotionUpdateType(ChunkUpdateType prev, ChunkUpdateType next) {
         if (prev == next)

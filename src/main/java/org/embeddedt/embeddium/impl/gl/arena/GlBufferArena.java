@@ -158,16 +158,6 @@ public class GlBufferArena {
         return used;
     }
 
-    @Deprecated
-    public int getDeviceUsedMemory() {
-        return this.used * this.stride;
-    }
-
-    @Deprecated
-    public int getDeviceAllocatedMemory() {
-        return this.capacity * this.stride;
-    }
-
     public long getDeviceUsedMemoryL() {
         return (long)this.used * this.stride;
     }

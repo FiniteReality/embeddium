@@ -98,7 +98,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         var options = Embeddium.options();
 
         // If the user has disabled the nags forcefully (by config), or has already seen the prompt, don't show it again.
-        if (options.notifications.forceDisableDonationPrompts || options.notifications.hasSeenDonationPrompt) {
+        if (options.notifications.hasSeenDonationPrompt) {
             return;
         }
 
