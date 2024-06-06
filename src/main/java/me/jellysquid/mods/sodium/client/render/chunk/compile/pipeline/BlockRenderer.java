@@ -19,7 +19,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
-import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -34,7 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
-import org.embeddedt.embeddium.render.ShaderModBridge;
+import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 import org.embeddedt.embeddium.render.frapi.FRAPIModelUtils;
 import org.embeddedt.embeddium.render.frapi.FRAPIRenderHandler;
 import org.embeddedt.embeddium.render.frapi.IndigoBlockRenderContext;
@@ -67,11 +66,7 @@ public class BlockRenderer {
 
     private final FRAPIRenderHandler fabricModelRenderingHandler;
 
-    /**
-     * Since Iris duplicates the terrain pipeline inside itself, it still tries to apply the legacy AO multiplication.
-     * To ensure blocks render as intended, we force what it interprets as the brightness value to 1.
-     */
-    private final int shaderAlphaMagicValue;
+    private final ChunkColorWriter colorEncoder = ChunkColorWriter.get();
 
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
@@ -79,7 +74,6 @@ public class BlockRenderer {
 
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
-        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
         this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
     }
 
@@ -234,7 +228,7 @@ public class BlockRenderer {
             out.y = ctx.origin().y() + quad.getY(srcIndex) + (float) offset.y();
             out.z = ctx.origin().z() + quad.getZ(srcIndex) + (float) offset.z();
 
-            out.color = ColorMixer.mulSingleWithoutAlpha(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), (int)(light.br[srcIndex] * 255)) | shaderAlphaMagicValue;
+            out.color = colorEncoder.writeColor(ModelQuadUtil.mixARGBColors(colors[srcIndex], quad.getColor(srcIndex)), light.br[srcIndex]);
 
             out.u = quad.getTexU(srcIndex);
             out.v = quad.getTexV(srcIndex);
