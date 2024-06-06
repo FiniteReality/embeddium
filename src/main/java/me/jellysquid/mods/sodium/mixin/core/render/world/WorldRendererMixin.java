@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.BlockDestructionProgress;
+import org.embeddedt.embeddium.util.sodium.FlawlessFrames;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
@@ -134,7 +135,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
         RenderDevice.enterManagedCode();
 
         try {
-            this.renderer.setupTerrain(camera, viewport, this.frame++, spectator, false);
+            this.renderer.setupTerrain(camera, viewport, this.frame++, spectator, FlawlessFrames.isActive());
         } finally {
             RenderDevice.exitManagedCode();
         }

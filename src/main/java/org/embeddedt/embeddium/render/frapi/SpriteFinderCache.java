@@ -2,51 +2,74 @@ package org.embeddedt.embeddium.render.frapi;
 
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
-import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.inventory.InventoryMenu;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.List;
+import java.lang.invoke.*;
 
 /**
- * Caches {@link SpriteFinder}s for maximum efficiency. They must be refreshed after each resource reload.
- *
- * <p><b>This class should not be used during a resource reload</b>, as returned SpriteFinders may be null or outdated.
+ * Provides a mechanism for retrieving sprites by location on the atlas.
  */
 public class SpriteFinderCache {
-    private static SpriteFinder blockAtlasSpriteFinder;
+    private static final Finder NULL_FINDER = (u, v) -> null;
+    private static final MethodHandle SPRITE_FINDER_HANDLE;
 
-    public static SpriteFinder forBlockAtlas() {
-        return blockAtlasSpriteFinder;
+    private static Finder blockAtlasSpriteFinder = NULL_FINDER;
+
+    static {
+        MethodHandle mh;
+        try {
+            mh = MethodHandles.lookup().findVirtual(Class.forName("net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder"), "find", MethodType.methodType(TextureAtlasSprite.class, float.class, float.class));
+        } catch(Throwable e) {
+            mh = null;
+        }
+        SPRITE_FINDER_HANDLE = mh;
     }
 
-    public static class ReloadListener implements SimpleSynchronousResourceReloadListener {
-        public static final ResourceLocation ID = new ResourceLocation(SodiumClientMod.MODID, "sprite_finder_cache");
-        public static final List<ResourceLocation> DEPENDENCIES = List.of(ResourceReloadListenerKeys.MODELS);
-        public static final ReloadListener INSTANCE = new ReloadListener();
+    public interface Finder {
+        @Nullable
+        TextureAtlasSprite findNearestSprite(float u, float v);
+    }
 
-        private ReloadListener() {
-        }
+    public static void onReload() {
+        if(SPRITE_FINDER_HANDLE != null) {
+            var listener = new SimpleSynchronousResourceReloadListener() {
+                @Override
+                public ResourceLocation getFabricId() {
+                    return new ResourceLocation(SodiumClientMod.MODID, "sprite_finder_cache");
+                }
 
-        // BakedModelManager#getAtlas only returns correct results after the BakedModelManager is done reloading
-        @Override
-        public void onResourceManagerReload(ResourceManager manager) {
-            var modelManager = Minecraft.getInstance().getModelManager();
-            blockAtlasSpriteFinder = SpriteFinder.get(modelManager.getAtlas(InventoryMenu.BLOCK_ATLAS));
+                @Override
+                public void onResourceManagerReload(ResourceManager pResourceManager) {
+                    var modelManager = Minecraft.getInstance().getModelManager();
+                    Finder finder = NULL_FINDER;
+                    var fabricFinder = SpriteFinder.get(modelManager.getAtlas(InventoryMenu.BLOCK_ATLAS));
+                    try {
+                        MethodType bootstrapType = MethodType.methodType(Finder.class, SpriteFinder.class);
+                        MethodType invocationType = MethodType.methodType(TextureAtlasSprite.class, float.class, float.class);
+                        // Adapt to our Finder interface
+                        finder = (Finder)LambdaMetafactory.metafactory(MethodHandles.lookup(),
+                                "findNearestSprite",
+                                bootstrapType, invocationType,
+                                SPRITE_FINDER_HANDLE, invocationType).getTarget().invokeExact((SpriteFinder)fabricFinder);
+                    } catch(Throwable e) {
+                        e.printStackTrace();
+                    }
+                    blockAtlasSpriteFinder = finder;
+                }
+            };
+            ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(listener);
         }
+    }
 
-        @Override
-        public ResourceLocation getFabricId() {
-            return ID;
-        }
-
-        @Override
-        public Collection<ResourceLocation> getFabricDependencies() {
-            return DEPENDENCIES;
-        }
+    public static Finder forBlockAtlas() {
+        return blockAtlasSpriteFinder;
     }
 }

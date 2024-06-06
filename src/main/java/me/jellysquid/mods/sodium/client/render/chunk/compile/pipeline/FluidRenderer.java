@@ -22,7 +22,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
-import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRendering;
@@ -44,6 +43,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 
 import java.util.function.Predicate;
 
@@ -87,6 +87,7 @@ public class FluidRenderer {
     }
 
     private final DefaultFabricRenderer defaultFabricRenderer = new DefaultFabricRenderer();
+    private final ChunkColorWriter colorEncoder = ChunkColorWriter.get();
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
@@ -151,7 +152,7 @@ public class FluidRenderer {
         var handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getType());
 
         // TODO move to a separate class
-        boolean overridesRenderFluid = handlersUsingCustomRenderer.computeIfAbsent(handler.getClass(), (Predicate<? super Class<? extends FluidRenderHandler>>)handlerClass -> {
+        boolean overridesRenderFluid = handlersUsingCustomRenderer.computeIfAbsent(handler.getClass(), (Predicate<? super Class<? extends FluidRenderHandler>>) handlerClass -> {
             try {
                 var method = handlerClass.getMethod("renderFluid", BlockPos.class, BlockAndTintGetter.class, VertexConsumer.class, BlockState.class, FluidState.class);
                 return method.getDeclaringClass() != FluidRenderHandler.class;
@@ -492,7 +493,7 @@ public class FluidRenderer {
         // multiply the per-vertex color against the combined brightness
         // the combined brightness is the per-vertex brightness multiplied by the block's brightness
         for (int i = 0; i < 4; i++) {
-            this.quadColors[i] = ColorABGR.withAlpha(this.quadColors[i], light.br[i] * brightness);
+            this.quadColors[i] = colorEncoder.writeColor(this.quadColors[i], light.br[i] * brightness);
         }
     }
 

@@ -26,11 +26,16 @@ void main() {
     }
 #endif
 
+#ifdef USE_VANILLA_COLOR_FORMAT
+    // Apply per-vertex color. AO shade is applied ahead of time on the CPU.
+    diffuseColor *= v_Color;
+#else
     // Apply per-vertex color
     diffuseColor.rgb *= v_Color.rgb;
 
     // Apply ambient occlusion "shade"
     diffuseColor.rgb *= v_Color.a;
+#endif
 
     fragColor = _linearFog(diffuseColor, v_FragDistance, u_FogColor, u_FogStart, u_FogEnd);
 }

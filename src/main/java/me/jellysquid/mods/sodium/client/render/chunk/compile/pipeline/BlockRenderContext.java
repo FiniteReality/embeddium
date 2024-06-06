@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -9,6 +10,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.embeddedt.embeddium.model.UnwrappableBakedModel;
+import org.embeddedt.embeddium.render.matrix_stack.CachingPoseStack;
 import org.embeddedt.embeddium.render.world.WorldSliceLocalGenerator;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -21,6 +23,8 @@ public class BlockRenderContext {
 
     private final Vector3f origin = new Vector3f();
 
+    private final PoseStack stack = new PoseStack();
+
     private BlockState state;
     private BakedModel model;
 
@@ -32,6 +36,7 @@ public class BlockRenderContext {
     public BlockRenderContext(WorldSlice world) {
         this.world = world;
         this.localSlice = WorldSliceLocalGenerator.generate(world);
+        ((CachingPoseStack)this.stack).embeddium$setCachingEnabled(true);
     }
 
     public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed) {
@@ -75,6 +80,13 @@ public class BlockRenderContext {
     }
 
     /**
+     * @return A PoseStack for custom renderers
+     */
+    public PoseStack stack() {
+        return this.stack;
+    }
+
+    /**
      * @return The model used for this block
      */
     public BakedModel model() {
@@ -93,6 +105,14 @@ public class BlockRenderContext {
      */
     public long seed() {
         return this.seed;
+    }
+
+    /**
+     * @return null on Fabric, as it doesn't have model data
+     */
+    @Deprecated
+    public Object modelData() {
+        return null;
     }
 
     /**

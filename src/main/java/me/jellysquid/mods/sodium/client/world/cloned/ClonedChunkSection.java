@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
+import net.fabricmc.fabric.api.blockview.v2.RenderDataBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
@@ -33,6 +34,7 @@ public class ClonedChunkSection {
     private static final DataLayer DEFAULT_SKY_LIGHT_ARRAY = new DataLayer(15);
     private static final DataLayer DEFAULT_BLOCK_LIGHT_ARRAY = new DataLayer(0);
     private static final PalettedContainer<BlockState> DEFAULT_STATE_CONTAINER = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
+    private static final boolean HAS_FABRIC_RENDER_DATA;
 
     private final SectionPos pos;
 
@@ -47,6 +49,16 @@ public class ClonedChunkSection {
 
     private long lastUsedTimestamp = Long.MAX_VALUE;
 
+    static {
+        boolean hasRenderData;
+        try {
+            hasRenderData = RenderDataBlockEntity.class.isAssignableFrom(BlockEntity.class);
+        } catch(Throwable e) {
+            hasRenderData = false;
+        }
+        HAS_FABRIC_RENDER_DATA = hasRenderData;
+    }
+
     public ClonedChunkSection(Level world, LevelChunk chunk, @Nullable LevelChunkSection section, SectionPos pos) {
         this.pos = pos;
 
@@ -55,7 +67,6 @@ public class ClonedChunkSection {
 
         Int2ReferenceMap<BlockEntity> blockEntityMap = null;
         Int2ReferenceMap<Object> blockEntityRenderDataMap = null;
-
 
         if (section != null) {
             if (!section.hasOnlyAir()) {
@@ -186,6 +197,11 @@ public class ClonedChunkSection {
 
     @Nullable
     private static Int2ReferenceMap<Object> copyBlockEntityRenderData(Int2ReferenceMap<BlockEntity> blockEntities) {
+        // Immediately exit if block entities do not have Fabric render data.
+        if(!HAS_FABRIC_RENDER_DATA) {
+            return null;
+        }
+
         Int2ReferenceOpenHashMap<Object> blockEntityRenderDataMap = null;
 
         // Retrieve any render data after we have copied all block entities, as this will call into the code of
@@ -193,7 +209,7 @@ public class ClonedChunkSection {
         // were iterating over any data in that chunk.
         // See https://github.com/CaffeineMC/sodium-fabric/issues/942 for more info.
         for (var entry : Int2ReferenceMaps.fastIterable(blockEntities)) {
-            Object data = entry.getValue().getRenderData();
+            Object data = ((RenderDataBlockEntity)entry.getValue()).getRenderData();
 
             if (data != null) {
                 if (blockEntityRenderDataMap == null) {

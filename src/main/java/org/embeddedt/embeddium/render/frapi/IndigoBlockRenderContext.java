@@ -1,28 +1,36 @@
-package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
+package org.embeddedt.embeddium.render.frapi;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockOcclusionCache;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import net.fabricmc.fabric.impl.client.indigo.renderer.aocalc.AoCalculator;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.embeddedt.embeddium.render.type.RenderTypeExtended;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.util.function.Supplier;
+
 /**
  * Adaptation of Indigo's {@link BlockRenderContext} that delegates back to the Sodium renderer.
  */
-public class IndigoBlockRenderContext extends BlockRenderContext {
+public class IndigoBlockRenderContext extends BlockRenderContext implements FRAPIRenderHandler {
     private final SinkingVertexBuilder[] vertexBuilderMap = new SinkingVertexBuilder[RenderType.chunkBufferLayers().size()];
 
     private me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext currentContext;
@@ -30,6 +38,37 @@ public class IndigoBlockRenderContext extends BlockRenderContext {
     private final LightDataAccess lightDataAccess;
 
     private int cullChecked, cullValue;
+
+    private static final MethodHandle FABRIC_RENDER_HANDLE, FORGIFIED_RENDER_HANDLE;
+
+    static {
+        MethodHandle fabricHandle = null, forgeHandle = null;
+        ReflectiveOperationException forgeException = null, fabricException = null;
+        try {
+            fabricHandle = MethodHandles.lookup().findVirtual(BlockRenderContext.class, "render", MethodType.methodType(void.class, BlockAndTintGetter.class, BakedModel.class, BlockState.class, BlockPos.class, PoseStack.class, VertexConsumer.class, boolean.class, RandomSource.class, long.class, int.class));
+        } catch(ReflectiveOperationException e) {
+            fabricException = e;
+        }
+        /*
+        try {
+            forgeHandle = MethodHandles.lookup().findVirtual(BlockRenderContext.class, "render", MethodType.methodType(void.class, BlockAndTintGetter.class, BakedModel.class, BlockState.class, BlockPos.class, PoseStack.class, VertexConsumer.class, boolean.class, RandomSource.class, long.class, int.class, ModelData.class, RenderType.class));
+        } catch(ReflectiveOperationException e) {
+            forgeException = e;
+        }
+        */
+        if(fabricHandle == null && forgeHandle == null) {
+            var ex = new IllegalStateException("Failed to find render method on BlockRenderContext.");
+            if(fabricException != null) {
+                ex.addSuppressed(fabricException);
+            }
+            if(forgeException != null) {
+                ex.addSuppressed(forgeException);
+            }
+            throw ex;
+        }
+        FABRIC_RENDER_HANDLE = fabricHandle;
+        FORGIFIED_RENDER_HANDLE = forgeHandle;
+    }
 
     public IndigoBlockRenderContext(BlockOcclusionCache occlusionCache, LightDataAccess lightDataAccess) {
         this.occlusionCache = occlusionCache;
@@ -98,13 +137,30 @@ public class IndigoBlockRenderContext extends BlockRenderContext {
         cullValue = 0;
     }
 
+    private RuntimeException processException(Throwable e) {
+        if(e instanceof RuntimeException) {
+            return (RuntimeException)e;
+        } else {
+            return new IllegalStateException("Unexpected throwable", e);
+        }
+    }
+
     public void renderEmbeddium(me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext ctx,
                                 PoseStack mStack,
                                 RandomSource random) {
         this.currentContext = ctx;
+        // We unfortunately have no choice but to push a pose here since FRAPI now mutates the given stack
+        mStack.pushPose();
         try {
-            this.render(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), mStack, null, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY);
+            if(FABRIC_RENDER_HANDLE != null) {
+                FABRIC_RENDER_HANDLE.invokeExact((BlockRenderContext)this, (BlockAndTintGetter)ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), mStack, (VertexConsumer)null, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY);
+            } else if(FORGIFIED_RENDER_HANDLE != null) {
+                FORGIFIED_RENDER_HANDLE.invokeExact((BlockRenderContext)this, (BlockAndTintGetter)ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), mStack, (VertexConsumer)null, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY, ctx.modelData(), ctx.renderLayer());
+            }
+        } catch(Throwable e) {
+            throw processException(e);
         } finally {
+            mStack.popPose();
             this.currentContext = null;
         }
     }

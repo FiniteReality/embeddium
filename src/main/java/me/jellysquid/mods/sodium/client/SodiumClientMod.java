@@ -5,12 +5,11 @@ import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.packs.PackType;
 import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.taint.scanning.TaintDetector;
+import org.embeddedt.embeddium.util.sodium.FlawlessFrames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,8 @@ public class SodiumClientMod implements ClientModInitializer {
             LOGGER.error("Failed to update fingerprint", t);
         }
 
-        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(SpriteFinderCache.ReloadListener.INSTANCE);
+        SpriteFinderCache.onReload();
+        FlawlessFrames.onClientInitialization();
     }
 
     public static SodiumGameOptions options() {
