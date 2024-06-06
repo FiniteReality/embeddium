@@ -62,6 +62,10 @@ public class ShaderModBridge {
         return SHADERS_ENABLED != null;
     }
 
+    public static boolean emulateLegacyColorBrightnessFormat() {
+        return areShadersEnabled() || isNvidiumEnabled();
+    }
+
     public static Object openShaderScreen(Screen parentScreen) {
         if(SHADERS_OPEN_SCREEN != null) {
             try {
