@@ -20,7 +20,6 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
-import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -40,7 +39,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.embeddedt.embeddium.render.ShaderModBridge;
+import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
 import org.embeddedt.embeddium.tags.EmbeddiumTags;
 
@@ -66,18 +65,13 @@ public class FluidRenderer {
     private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
     private final SinkingVertexBuilder vertexBuilder = new SinkingVertexBuilder();
 
-    /**
-     * Since Iris duplicates the terrain pipeline inside itself, it still tries to apply the legacy AO multiplication.
-     * To ensure blocks render as intended, we force what it interprets as the brightness value to 1.
-     */
-    private final int shaderAlphaMagicValue;
+    private final ChunkColorWriter colorEncoder = ChunkColorWriter.get();
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
 
         this.lighters = lighters;
         this.colorProviderRegistry = colorProviderRegistry;
-        this.shaderAlphaMagicValue = ShaderModBridge.areShadersEnabled() ? 0xFF000000 : 0;
     }
 
     private boolean isFluidOccluded(BlockAndTintGetter world, int x, int y, int z, Direction dir, Fluid fluid) {
@@ -426,7 +420,7 @@ public class FluidRenderer {
         // multiply the per-vertex color against the combined brightness
         // the combined brightness is the per-vertex brightness multiplied by the block's brightness
         for (int i = 0; i < 4; i++) {
-            this.quadColors[i] = ColorMixer.mulSingleWithoutAlpha(this.quadColors[i], (int)(light.br[i] * brightness * 255)) | this.shaderAlphaMagicValue;
+            this.quadColors[i] = colorEncoder.writeColor(this.quadColors[i], light.br[i] * brightness);
         }
     }
 
