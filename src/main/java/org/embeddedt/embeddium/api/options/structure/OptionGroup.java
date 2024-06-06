@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OptionGroup {
-    public static final OptionIdentifier<Void> DEFAULT_ID = OptionIdentifier.create(Embeddium.MODID, "empty");
-
     private final ImmutableList<Option<?>> options;
 
     public final OptionIdentifier<Void> id;
@@ -60,9 +58,7 @@ public class OptionGroup {
             }
 
             if (this.id == null) {
-                this.id = OptionGroup.DEFAULT_ID;
-                // FIXME Actually enforce IDs on groups
-                //SodiumClientMod.logger().warn("Id must be specified in OptionGroup which contains {}, this might throw a exception on a next release", this.options.get(0).getName().getString());
+                throw new IllegalStateException("Must provide ID for OptionGroup");
             }
 
             OptionGroupConstructionEvent.BUS.post(new OptionGroupConstructionEvent(this.id, this.options));

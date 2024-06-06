@@ -145,7 +145,7 @@ public class EmbeddiumGameOptionPages {
                         .build())
                 .build());
 
-        return new OptionPage(Component.translatable("stat.generalButton"), ImmutableList.copyOf(groups));
+        return new OptionPage(StandardOptions.Pages.GENERAL, Component.translatable("stat.generalButton"), ImmutableList.copyOf(groups));
     }
 
     public static OptionPage quality() {
@@ -283,7 +283,7 @@ public class EmbeddiumGameOptionPages {
                         .build())
                 .build());
 
-        return new OptionPage(Component.translatable("sodium.options.pages.quality"), ImmutableList.copyOf(groups));
+        return new OptionPage(StandardOptions.Pages.QUALITY, Component.translatable("sodium.options.pages.quality"), ImmutableList.copyOf(groups));
     }
 
     public static OptionPage performance() {
@@ -379,7 +379,7 @@ public class EmbeddiumGameOptionPages {
                         .build())
                 .build());
 
-        return new OptionPage(Component.translatable("sodium.options.pages.performance"), ImmutableList.copyOf(groups));
+        return new OptionPage(StandardOptions.Pages.PERFORMANCE, Component.translatable("sodium.options.pages.performance"), ImmutableList.copyOf(groups));
     }
 
     private static boolean supportsNoErrorContext() {
@@ -414,7 +414,7 @@ public class EmbeddiumGameOptionPages {
                 )
                 .build());
 
-        return new OptionPage(Component.translatable("sodium.options.pages.advanced"), ImmutableList.copyOf(groups));
+        return new OptionPage(StandardOptions.Pages.ADVANCED, Component.translatable("sodium.options.pages.advanced"), ImmutableList.copyOf(groups));
     }
 
     public static OptionStorage<Options> getVanillaOpts() {

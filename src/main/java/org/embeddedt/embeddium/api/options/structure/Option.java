@@ -8,10 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 public interface Option<T> {
-    @Nullable
-    default OptionIdentifier<T> getId() {
-        return null;
-    }
+    OptionIdentifier<T> getId();
 
     Component getName();
 
