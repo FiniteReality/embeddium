@@ -67,7 +67,7 @@ dependencies {
     api("net.neoforged:neoforgespi:${project.spi_version}")
     api("cpw.mods:modlauncher:${project.modlauncher_version}")
 
-    instanceJarEmbedded("com.gtnewhorizons.retrofuturabootstrap:RetroFuturaBootstrap:1.0.2") {
+    instanceJarEmbedded("com.gtnewhorizons.retrofuturabootstrap:RetroFuturaBootstrap:1.0.3") {
         transitive = false
     }
 }
@@ -79,7 +79,7 @@ runTypes {
 
         mainClass "org.embeddedt.phi.PhiBootstrap"
 
-        jvmArguments.set(["-Djava.system.class.loader=com.gtnewhorizons.retrofuturabootstrap.RfbSystemClassLoader"])
+        jvmArguments.set(["-Djava.system.class.loader=com.gtnewhorizons.retrofuturabootstrap.RfbSystemClassLoader", "-Drfb.enableModernJavaCompatibilityPlugin=false"])
 
         arguments.addAll '--embeddiumVersion', project.version
         arguments.addAll '--fml.fmlVersion', project.fancy_mod_loader_version

@@ -36,20 +36,6 @@ public class PhiTweaker implements ITweaker {
 
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
-        // Fix classloading of SLF4J
-        if(RetroFuturaBootstrap.API.launchClassLoader() instanceof LaunchClassLoader lcl) {
-            // Make sure SLF4J is loaded by app classloader
-            lcl.addClassLoaderExclusion("org.slf4j.");
-        }
-        RetroFuturaBootstrap.API.compatClassLoader().addClassLoaderExclusion("org.slf4j.");
-
-        // Yeet modern Java transformer, this is modern Minecraft
-        ModernJavaCompatibilityPlugin plugin = new ModernJavaCompatibilityPlugin();
-        var idsToRemove = Arrays.stream(plugin.makeTransformers()).map(t -> "rfb-modern-java:" + t.id()).collect(Collectors.toSet());
-        Main.mutateRfbTransformers(list -> {
-            list.removeIf(transformer -> idsToRemove.contains(transformer.id()));
-        });
-
         // Inject MOD_CLASSES
         String modClasses = System.getenv("MOD_CLASSES");
         if(modClasses != null && !modClasses.isEmpty()) {
