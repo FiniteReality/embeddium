@@ -1,0 +1,8 @@
+{
+    "formatVersion": 1,
+    "name": "Embeddium Phi launch args",
+    "uid": "org.embeddedt.embeddium.phi.launchargs",
+    "version": "${version}",
+    "order": 100,
+    "mainClass": "org.embeddedt.phi.PhiBootstrap"
+}

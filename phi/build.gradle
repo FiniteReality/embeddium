@@ -34,6 +34,18 @@ sourceSets {
     }
 }
 
+configurations {
+    instanceJarEmbedded {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+    instanceJar {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+    implementation.extendsFrom(instanceJarEmbedded)
+}
+
 dependencies {
     api "org.ow2.asm:asm:${project.asm_version}"
     api "org.ow2.asm:asm-commons:${project.asm_version}"
@@ -49,7 +61,9 @@ dependencies {
     api("net.neoforged:neoforgespi:${project.spi_version}")
     api("cpw.mods:modlauncher:${project.modlauncher_version}")
 
-    implementation("com.gtnewhorizons.retrofuturabootstrap:RetroFuturaBootstrap:1.0.2")
+    instanceJarEmbedded("com.gtnewhorizons.retrofuturabootstrap:RetroFuturaBootstrap:1.0.2") {
+        transitive = false
+    }
 }
 
 runTypes {
@@ -90,6 +104,34 @@ minecraft {
 }
 
 tasks.withType(GenerateModuleMetadata).configureEach { enabled = false }
+
+tasks.register("mmcInstanceJar", Jar) {
+    dependsOn "universalJar"
+    archiveClassifier.set("mmc-instance")
+    from(zipTree(tasks.named("universalJar").get().outputs.files.singleFile))
+    from(tasks.named("generateClientBinaryPatches")) {
+        into("data")
+        rename { "client.lzma" }
+    }
+    configurations.instanceJarEmbedded.resolve().forEach { dep ->
+        from(zipTree(dep)) {
+            filesMatching("META-INF/*") {
+                this.name = "${dep.name}-${this.name}"
+            }
+        }
+    }
+    manifest {
+        attributes (
+            "Multi-Release": "true"
+        )
+    }
+}
+
+
+
+artifacts {
+    instanceJar(tasks.named("mmcInstanceJar"))
+}
 
 minecraft {
     modIdentifier 'minecraft'

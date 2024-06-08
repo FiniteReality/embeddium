@@ -274,6 +274,45 @@ if(!usePhi) {
     }
 }
 
+if(usePhi) {
+    configurations {
+        create("instanceJarConsumer") {
+            isCanBeResolved = true
+            isCanBeConsumed = false
+        }
+    }
+    dependencies {
+        "instanceJarConsumer"(project(":phi", "instanceJar"))
+    }
+    tasks.register<Zip>("mmcInstanceFiles") {
+        dependsOn(project(":phi").tasks.named("mmcInstanceJar"))
+        description = "Packages the MultiMC patches"
+        archiveClassifier.set("multimc")
+        from(project.file("prism-libraries/"))
+        from(configurations.getByName("instanceJarConsumer").resolve()) {
+            into("libraries")
+        }
+        exclude("META-INF", "META-INF/**")
+        filesMatching(
+                listOf(
+                        "mmc-pack.json",
+                        "patches/org.embeddedt.embeddium.phi.launchargs.json",
+                        "patches/org.embeddedt.embeddium.phi.universal.json"
+                )
+        ) {
+            expand(
+                    mapOf(
+                            "version" to project.version,
+                            "minecraftVersion" to "minecraft_version"(),
+                            "asmVersion" to "asm_version"(),
+                            "mixinVersion" to "mixin_version"(),
+                            "mixinExtrasVersion" to "mixin_extras_version"()
+                    )
+            )
+        }
+    }
+}
+
 fun getModVersion(): String {
     var baseVersion: String = project.properties["mod_version"].toString()
     val mcMetadata: String = "+mc" + project.properties["minecraft_version"]

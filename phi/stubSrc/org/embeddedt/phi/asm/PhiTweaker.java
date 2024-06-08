@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PhiTweaker implements ITweaker {
+    private static final boolean PRODUCTION = Boolean.getBoolean("phi.production");
+
     private List<String> extraArgs = List.of();
     @Override
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
@@ -59,6 +61,10 @@ public class PhiTweaker implements ITweaker {
                     e.printStackTrace();
                 }
             }
+        }
+
+        if(PRODUCTION) {
+            classLoader.registerTransformer("org.embeddedt.phi.asm.PhiPatchingTransformer");
         }
     }
 
