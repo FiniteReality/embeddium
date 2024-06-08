@@ -32,6 +32,12 @@ sourceSets {
             srcDirs project.file("stubSrc")
         }
     }
+    production {
+        java {
+            srcDirs project.file("productionSrc")
+            compileClasspath += main.compileClasspath
+        }
+    }
 }
 
 configurations {
@@ -108,6 +114,7 @@ tasks.withType(GenerateModuleMetadata).configureEach { enabled = false }
 tasks.register("mmcInstanceJar", Jar) {
     dependsOn "universalJar"
     archiveClassifier.set("mmc-instance")
+    from(sourceSets.production.output)
     from(zipTree(tasks.named("universalJar").get().outputs.files.singleFile))
     from(tasks.named("generateClientBinaryPatches")) {
         into("data")
