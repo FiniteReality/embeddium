@@ -6,7 +6,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.embeddedt.embeddium.api.OptionPageConstructionEvent;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;
-import org.embeddedt.embeddium.impl.gui.options.OptionIdGenerator;
 
 import java.util.List;
 import java.util.Objects;
