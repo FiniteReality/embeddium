@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.impl.gui.options.control;
+package org.embeddedt.embeddium.api.gui.options.control.control;
 
 import org.embeddedt.embeddium.api.gui.control.Control;
 import org.embeddedt.embeddium.api.options.structure.Option;

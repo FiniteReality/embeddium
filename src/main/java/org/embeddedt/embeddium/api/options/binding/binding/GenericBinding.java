@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.impl.gui.options.binding;
+package org.embeddedt.embeddium.api.options.binding.binding;
 
 import org.embeddedt.embeddium.api.options.structure.OptionBinding;
 

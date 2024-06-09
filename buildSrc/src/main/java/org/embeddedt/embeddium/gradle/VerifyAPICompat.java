@@ -1,6 +1,5 @@
 package org.embeddedt.embeddium.gradle;
 
-import groovyjarjarasm.asm.Opcodes;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;
@@ -76,22 +75,26 @@ public abstract class VerifyAPICompat extends DefaultTask implements Verificatio
 
                 @Override
                 public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-                    enclosingSigType = "method";
-                    enclosingSigName = name;
-                    check(validateType(Type.getMethodType(descriptor)));
-                    if(signature != null) {
-                        new SignatureReader(signature).accept(sigVisitor);
+                    if((access & Opcodes.ACC_PRIVATE) == 0) {
+                        enclosingSigType = "method";
+                        enclosingSigName = name;
+                        check(validateType(Type.getMethodType(descriptor)));
+                        if(signature != null) {
+                            new SignatureReader(signature).accept(sigVisitor);
+                        }
                     }
                     return super.visitMethod(access, name, descriptor, signature, exceptions);
                 }
 
                 @Override
                 public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-                    enclosingSigType = "field";
-                    enclosingSigName = name;
-                    check(validateType(Type.getType(descriptor)));
-                    if(signature != null) {
-                        new SignatureReader(signature).accept(sigVisitor);
+                    if((access & Opcodes.ACC_PRIVATE) == 0) {
+                        enclosingSigType = "field";
+                        enclosingSigName = name;
+                        check(validateType(Type.getType(descriptor)));
+                        if(signature != null) {
+                            new SignatureReader(signature).accept(sigVisitor);
+                        }
                     }
                     return super.visitField(access, name, descriptor, signature, value);
                 }

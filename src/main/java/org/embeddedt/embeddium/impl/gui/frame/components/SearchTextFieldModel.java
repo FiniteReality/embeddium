@@ -3,7 +3,7 @@ package org.embeddedt.embeddium.impl.gui.frame.components;
 import com.google.common.base.Predicates;
 import org.embeddedt.embeddium.api.options.structure.Option;
 import org.embeddedt.embeddium.api.options.structure.OptionPage;
-import org.embeddedt.embeddium.impl.gui.options.control.CyclingControl;
+import org.embeddedt.embeddium.api.gui.options.control.control.CyclingControl;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;

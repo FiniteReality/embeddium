@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.impl.gui.options.control;
+package org.embeddedt.embeddium.api.gui.options.control.control;
 
 import net.minecraft.network.chat.Component;
 

@@ -6,7 +6,7 @@ import org.embeddedt.embeddium.api.options.structure.OptionGroup;
 import org.embeddedt.embeddium.api.options.structure.OptionImpact;
 import org.embeddedt.embeddium.api.options.structure.OptionPage;
 import org.embeddedt.embeddium.api.gui.control.Control;
-import org.embeddedt.embeddium.impl.gui.options.control.ControlElement;
+import org.embeddedt.embeddium.api.gui.options.control.control.ControlElement;
 import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

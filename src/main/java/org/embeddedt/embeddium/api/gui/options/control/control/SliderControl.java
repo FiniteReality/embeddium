@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.impl.gui.options.control;
+package org.embeddedt.embeddium.api.gui.options.control.control;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import org.embeddedt.embeddium.api.gui.control.Control;

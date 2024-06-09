@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.impl.gui.options.binding.compat;
+package org.embeddedt.embeddium.api.options.binding.binding.compat;
 
 import org.embeddedt.embeddium.api.options.structure.OptionBinding;
 import net.minecraft.client.OptionInstance;

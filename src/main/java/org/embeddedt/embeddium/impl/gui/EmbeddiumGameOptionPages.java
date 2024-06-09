@@ -12,12 +12,12 @@ import org.embeddedt.embeddium.impl.compat.modernui.MuiGuiScaleHook;
 import org.embeddedt.embeddium.impl.compatibility.workarounds.Workarounds;
 import org.embeddedt.embeddium.impl.gl.arena.staging.MappedStagingBuffer;
 import org.embeddedt.embeddium.impl.gl.device.RenderDevice;
-import org.embeddedt.embeddium.impl.gui.options.binding.compat.VanillaBooleanOptionBinding;
-import org.embeddedt.embeddium.impl.gui.options.control.ControlValueFormatter;
-import org.embeddedt.embeddium.impl.gui.options.control.CyclingControl;
-import org.embeddedt.embeddium.impl.gui.options.control.SliderControl;
-import org.embeddedt.embeddium.impl.gui.options.control.TickBoxControl;
-import org.embeddedt.embeddium.impl.gui.options.storage.MinecraftOptionsStorage;
+import org.embeddedt.embeddium.api.options.binding.binding.compat.VanillaBooleanOptionBinding;
+import org.embeddedt.embeddium.api.gui.options.control.control.ControlValueFormatter;
+import org.embeddedt.embeddium.api.gui.options.control.control.CyclingControl;
+import org.embeddedt.embeddium.api.gui.options.control.control.SliderControl;
+import org.embeddedt.embeddium.api.gui.options.control.control.TickBoxControl;
+import org.embeddedt.embeddium.api.options.storage.MinecraftOptionsStorage;
 import org.embeddedt.embeddium.api.options.structure.OptionStorage;
 import org.embeddedt.embeddium.impl.gui.options.storage.EmbeddiumOptionsStorage;
 import org.embeddedt.embeddium.impl.render.chunk.compile.executor.ChunkBuilder;
@@ -33,7 +33,7 @@ import java.util.List;
 
 public class EmbeddiumGameOptionPages {
     private static final EmbeddiumOptionsStorage sodiumOpts = new EmbeddiumOptionsStorage();
-    private static final MinecraftOptionsStorage vanillaOpts = new MinecraftOptionsStorage();
+    private static final MinecraftOptionsStorage vanillaOpts = MinecraftOptionsStorage.INSTANCE;
 
     public static OptionPage general() {
         List<OptionGroup> groups = new ArrayList<>();

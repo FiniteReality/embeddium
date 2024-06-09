@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.impl.gui.options.storage;
+package org.embeddedt.embeddium.api.options.storage;
 
 import org.embeddedt.embeddium.impl.Embeddium;
 import net.minecraft.client.Minecraft;
@@ -6,9 +6,11 @@ import net.minecraft.client.Options;
 import org.embeddedt.embeddium.api.options.structure.OptionStorage;
 
 public class MinecraftOptionsStorage implements OptionStorage<Options> {
+    public static final MinecraftOptionsStorage INSTANCE = new MinecraftOptionsStorage();
+
     private final Minecraft client;
 
-    public MinecraftOptionsStorage() {
+    private MinecraftOptionsStorage() {
         this.client = Minecraft.getInstance();
     }
 
