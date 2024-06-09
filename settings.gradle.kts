@@ -13,8 +13,8 @@ val minecraft_version: String by settings
 val use_phi = extra["use_phi"].toString().toBoolean()
 
 plugins {
-    id("net.neoforged.gradle.platform") version("7.0.134")
-    id("net.neoforged.gradle.userdev") version("7.0.134") apply false
+    id("net.neoforged.gradle.platform") version("7.0.142")
+    id("net.neoforged.gradle.userdev") version("7.0.142") apply false
 }
 
 if(use_phi) {

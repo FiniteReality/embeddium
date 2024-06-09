@@ -40,6 +40,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 val extraSourceSets = arrayOf("legacy", "compat")
 val usePhi = rootProject.properties["use_phi"].toString().toBoolean()
+val neoForgePr = if(rootProject.hasProperty("neoforge_pr")) rootProject.properties["neoforge_pr"].toString() else null
 
 sourceSets {
     val main = getByName("main")
@@ -73,6 +74,14 @@ repositories {
     maven("https://maven.covers1624.net/")
     if(usePhi) {
         maven("https://nexus.gtnewhorizons.com/repository/public/")
+    }
+    if(neoForgePr != null) {
+        maven("https://prmaven.neoforged.net/NeoForge/pr" + neoForgePr) {
+            content {
+                includeModule("net.neoforged", "neoforge")
+                includeModule("net.neoforged", "testframework")
+            }
+        }
     }
 }
 
