@@ -1,7 +1,6 @@
-package org.embeddedt.embeddium.api.gui.options.control.control;
+package org.embeddedt.embeddium.api.options.control;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import org.embeddedt.embeddium.api.gui.control.Control;
 import org.embeddedt.embeddium.api.options.structure.Option;
 import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.gui.GuiGraphics;

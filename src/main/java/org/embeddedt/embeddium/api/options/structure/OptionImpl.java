@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.api.options.structure;
 
-import org.embeddedt.embeddium.api.options.binding.binding.GenericBinding;
-import org.embeddedt.embeddium.api.gui.control.Control;
+import org.embeddedt.embeddium.api.options.binding.GenericBinding;
+import org.embeddedt.embeddium.api.options.control.Control;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;

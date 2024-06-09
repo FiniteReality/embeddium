@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.impl.gui.frame;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import org.embeddedt.embeddium.api.gui.options.control.control.ControlElement;
+import org.embeddedt.embeddium.api.options.control.ControlElement;
 import org.embeddedt.embeddium.impl.gui.widgets.AbstractWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
 import net.minecraft.client.Minecraft;

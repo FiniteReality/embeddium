@@ -1,9 +1,8 @@
 package org.embeddedt.embeddium.api.options.structure;
 
-import org.embeddedt.embeddium.api.gui.control.Control;
+import org.embeddedt.embeddium.api.options.control.Control;
 import net.minecraft.network.chat.Component;
 import org.embeddedt.embeddium.api.options.OptionIdentifier;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
