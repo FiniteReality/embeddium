@@ -220,6 +220,7 @@ publishing {
     publications {
         this.create<MavenPublication>("mavenJava") {
             from(components["java"])
+            artifact(tasks.named("apiJar"))
         }
     }
 
