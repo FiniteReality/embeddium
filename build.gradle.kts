@@ -122,7 +122,14 @@ tasks.register<VerifyAPICompat>("verifyAPICompat") {
 publishMods {
     file = tasks.jar.get().archiveFile
     changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
-    type = STABLE
+    val modVer = "mod_version"()
+    if(modVer.contains("beta")) {
+        type = BETA
+    } else if(modVer.contains("alpha")) {
+        type = ALPHA
+    } else {
+        type = STABLE
+    }
     modLoaders.add("neoforge")
 
     curseforge {
