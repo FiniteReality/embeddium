@@ -156,13 +156,19 @@ fun getModVersion(): String {
     var baseVersion: String = project.properties["mod_version"].toString()
     val mcMetadata: String = "+mc" + project.properties["minecraft_version"]
 
-    if (project.hasProperty("build.release")) {
+    if (project.hasProperty("build.release") || baseVersion.contains('-')) {
         return baseVersion + mcMetadata // no tag whatsoever
     }
 
     // Increment patch version
     baseVersion = baseVersion.split(".").mapIndexed {
-        index, s -> if(index == 2) (s.toInt() + 1) else s
+        index, s -> if(index == 2) {
+            try {
+                (s.toInt() + 1)
+            } catch(e: NumberFormatException) {
+                s
+            }
+        } else s
     }.joinToString(separator = ".")
 
     val head = grgit.head()
