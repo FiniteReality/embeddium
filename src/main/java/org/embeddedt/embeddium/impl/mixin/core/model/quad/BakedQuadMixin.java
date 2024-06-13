@@ -52,12 +52,12 @@ public class BakedQuadMixin implements BakedQuadView {
     @Unique
     private ModelQuadFacing normalFace;
 
-    @Inject(method = "<init>([IILnet/minecraft/core/Direction;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;ZZ)V", at = @At("RETURN"))
-    private void init(int[] vertexData, int colorIndex, Direction face, TextureAtlasSprite sprite, boolean shade, boolean hasAmbientOcclusion, CallbackInfo ci) {
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    private void init(CallbackInfo ci) {
         this.normal = ModelQuadUtil.calculateNormal(this);
         this.normalFace = ModelQuadUtil.findNormalFace(this.normal);
 
-        this.flags = ModelQuadFlags.getQuadFlags(this, face);
+        this.flags = ModelQuadFlags.getQuadFlags(this, this.direction);
     }
 
     @Override

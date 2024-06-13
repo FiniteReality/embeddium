@@ -159,7 +159,7 @@ public class MultipartBakedModelMixin {
         // at all
         if (!this.embeddium$hasCustomRenderTypes) {
             //noinspection deprecation
-            return ItemBlockRenderTypes.getRenderLayers(state);
+            return ItemBlockRenderTypesInvoker.invokeGetRenderLayers(state);
         }
 
         BakedModel[] models = getModelComponents(state);

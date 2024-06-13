@@ -1,5 +1,7 @@
 plugins {
     `java-gradle-plugin` // so we can assign and ID to our plugin
+    `kotlin-dsl`
+    `kotlin-dsl-precompiled-script-plugins`
 }
 
 dependencies {
@@ -10,11 +12,17 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:9.7")
     implementation("org.ow2.asm:asm-commons:9.7")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("net.neoforged.gradle:userdev:7.0.142") // NeoGradle
+    implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:1.6.397") // Loom
+    implementation("com.github.johnrengelman:shadow:8.1.1") // Shadow
 }
 
 repositories {
+    gradlePluginPortal()
     mavenCentral()
     maven("https://maven.fabricmc.net/")
+    maven("https://maven.architectury.dev/")
+    maven("https://maven.neoforged.net")
 }
 
 gradlePlugin {

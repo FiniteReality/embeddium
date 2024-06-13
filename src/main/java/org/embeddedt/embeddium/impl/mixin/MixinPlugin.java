@@ -32,9 +32,22 @@ public class MixinPlugin implements IMixinConfigPlugin {
     private final Logger logger = LogManager.getLogger(MODNAME);
     private MixinConfig config;
 
-    private static final boolean USING_PHI = Boolean.getBoolean("embeddium.phi");
+    // TODO handle production
+    private static final boolean RUNNING_ON_FABRIC;
 
-    private static final Set<String> BLACKLISTED_MIXINS = !USING_PHI ? Set.of() : Set.of(
+    static {
+        boolean mlPresent;
+        try {
+            Class.forName("cpw.mods.modlauncher.Launcher", false, MixinPlugin.class.getClassLoader());
+            mlPresent = true;
+        } catch(ReflectiveOperationException e) {
+            mlPresent = false;
+        }
+
+        RUNNING_ON_FABRIC = !mlPresent;
+    }
+
+    private static final Set<String> BLACKLISTED_MIXINS = !RUNNING_ON_FABRIC ? Set.of() : Set.of(
             "features.render.model.ChunkRenderTypeSetMixin"
     );
 
@@ -127,7 +140,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         ModFile modFile = modFileInfo.getFile();
         Set<Path> rootPaths = new HashSet<>();
         // This allows us to see it from multiple sourcesets if need be
-        for(String basePackage : new String[] { "core", "modcompat" }) {
+        for(String basePackage : new String[] { "core", "modcompat", "fabric" }) {
             Path mixinPackagePath = modFile.findResource("org", "embeddedt", "embeddium", "impl", "mixin", basePackage);
             if(Files.exists(mixinPackagePath)) {
                 rootPaths.add(mixinPackagePath.getParent().toAbsolutePath());

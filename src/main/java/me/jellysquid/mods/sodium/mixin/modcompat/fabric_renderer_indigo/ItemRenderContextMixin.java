@@ -1,10 +1,10 @@
 package me.jellysquid.mods.sodium.mixin.modcompat.fabric_renderer_indigo;
 
-import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
+import org.embeddedt.embeddium.impl.render.frapi.SpriteFinderCache;
+import org.embeddedt.embeddium.impl.render.texture.SpriteUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;

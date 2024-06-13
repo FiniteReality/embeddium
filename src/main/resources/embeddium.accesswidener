@@ -1,0 +1,42 @@
+accessWidener v2 named
+
+# embeddium {
+# public net.minecraft.client.model.geom.ModelPart$Vertex
+transitive-accessible class net/minecraft/client/model/geom/ModelPart$Vertex
+# public net.minecraft.client.model.geom.ModelPart$Polygon
+transitive-accessible class net/minecraft/client/model/geom/ModelPart$Polygon
+# public net.minecraft.client.renderer.texture.SpriteContents$InterpolationData
+transitive-accessible class net/minecraft/client/renderer/texture/SpriteContents$InterpolationData
+# public net.minecraft.client.renderer.texture.SpriteContents$AnimatedTexture
+transitive-accessible class net/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture
+# public net.minecraft.client.renderer.texture.SpriteContents$FrameInfo
+transitive-accessible class net/minecraft/client/renderer/texture/SpriteContents$FrameInfo
+# public net.minecraft.client.renderer.texture.SpriteContents$Ticker
+transitive-accessible class net/minecraft/client/renderer/texture/SpriteContents$Ticker
+# public net.minecraft.world.level.chunk.PalettedContainer$Data
+transitive-accessible class net/minecraft/world/level/chunk/PalettedContainer$Data
+# public net.minecraft.world.level.chunk.PalettedContainer$Configuration
+transitive-accessible class net/minecraft/world/level/chunk/PalettedContainer$Configuration
+# public net.minecraft.client.renderer.FogRenderer$FogData
+transitive-accessible class net/minecraft/client/renderer/FogRenderer$FogData
+# public net.minecraft.client.renderer.FogRenderer$MobEffectFogFunction
+transitive-accessible class net/minecraft/client/renderer/FogRenderer$MobEffectFogFunction
+# public net.minecraft.client.renderer.texture.Stitcher$Holder
+transitive-accessible class net/minecraft/client/renderer/texture/Stitcher$Holder
+# public net.minecraft.world.level.biome.Biome$ClimateSettings
+transitive-accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
+# public com.mojang.blaze3d.vertex.PoseStack$Pose <init>(Lorg/joml/Matrix4f;Lorg/joml/Matrix3f;)V
+transitive-accessible method com/mojang/blaze3d/vertex/PoseStack$Pose <init> (Lorg/joml/Matrix4f;Lorg/joml/Matrix3f;)V
+# public net.minecraft.client.gui.font.FontSet$GlyphInfoFilter
+transitive-accessible class net/minecraft/client/gui/font/FontSet$GlyphInfoFilter
+# public com.mojang.blaze3d.vertex.PoseStack$Pose trustedNormals # trustedNormals
+transitive-accessible field com/mojang/blaze3d/vertex/PoseStack$Pose trustedNormals Z
+# public net.minecraft.client.renderer.SectionBufferBuilderPool <init>(Ljava/util/List;)V
+transitive-accessible method net/minecraft/client/renderer/SectionBufferBuilderPool <init> (Ljava/util/List;)V
+# public net.minecraft.world.level.GrassColor pixels
+transitive-accessible field net/minecraft/world/level/GrassColor pixels [I
+# public net.minecraft.world.level.FoliageColor pixels
+transitive-accessible field net/minecraft/world/level/FoliageColor pixels [I
+# public net.minecraft.client.renderer.FogRenderer getPriorityFogFunction(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/FogRenderer$MobEffectFogFunction;
+transitive-accessible method net/minecraft/client/renderer/FogRenderer getPriorityFogFunction (Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/FogRenderer$MobEffectFogFunction;
+# }
