@@ -109,6 +109,9 @@ publishing {
             artifact(tasks.named("apiJar"))
         }
     }
+    repositories {
+        maven("file://${System.getenv("local_maven")}")
+    }
 }
 
 tasks.register<VerifyAPICompat>("verifyAPICompat") {
