@@ -1,4 +1,4 @@
-package me.jellysquid.mods.sodium.mixin.modcompat.fabric_renderer_indigo;
+package org.embeddedt.embeddium.impl.mixin.modcompat.fabric_renderer_indigo;
 
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
