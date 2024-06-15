@@ -39,7 +39,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
         boolean mlPresent;
         try {
             Class.forName("cpw.mods.modlauncher.Launcher", false, MixinPlugin.class.getClassLoader());
-            mlPresent = true;
+            // TODO write proper reflection-based fabric detector that won't see Connector
+            String mixinService = System.getProperty("mixin.service");
+            mlPresent = mixinService == null || !mixinService.contains("MixinServiceKnot");
         } catch(ReflectiveOperationException e) {
             mlPresent = false;
         }
