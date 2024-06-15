@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.impl.render.frapi;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.impl.client.indigo.renderer.aocalc.AoCalculator;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderContext;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.client.renderer.RenderType;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.embeddedt.embeddium.impl.model.light.data.LightDataAccess;
 import org.embeddedt.embeddium.impl.render.chunk.compile.ChunkBuildBuffers;
+import org.embeddedt.embeddium.impl.render.chunk.compile.buffers.ChunkModelVertexConsumer;
 import org.embeddedt.embeddium.impl.render.chunk.compile.pipeline.BlockOcclusionCache;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.DefaultMaterials;
 import org.jetbrains.annotations.Nullable;
@@ -113,6 +115,14 @@ public class IndigoBlockRenderContext extends BlockRenderContext implements FRAP
         var consumer = currentBuffers.get(material).asVertexConsumer(material);
         consumer.embeddium$setOffset(currentContext.origin());
         return consumer;
+    }
+
+    @Override
+    protected void bufferQuad(MutableQuadViewImpl quad, VertexConsumer vertexConsumer) {
+        super.bufferQuad(quad, vertexConsumer);
+        if(vertexConsumer instanceof ChunkModelVertexConsumer modelConsumer) {
+            modelConsumer.close();
+        }
     }
 
     public void reset() {
