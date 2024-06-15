@@ -100,6 +100,7 @@ public class BakedChunkModelBuilder implements ChunkModelBuilder {
         public void close() {
             if(currentIndex >= 0) {
                 flushLastVertex();
+                currentIndex = -1; // safety, to make sure we start at vertex 0 with next addVertex call
             }
         }
 
