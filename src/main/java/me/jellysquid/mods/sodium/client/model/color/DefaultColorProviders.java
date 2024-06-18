@@ -4,6 +4,7 @@ import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.blender.BlendedColorProvider;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeColorSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
+import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.minecraft.client.color.block.BlockColor;
@@ -106,7 +107,7 @@ public class DefaultColorProviders {
 
         @Override
         public void getColors(WorldSlice view, BlockPos pos, FluidState state, ModelQuadView quad, int[] output) {
-            Arrays.fill(output, ColorARGB.toABGR(this.handler.getFluidColor(view, pos, state)));
+            Arrays.fill(output, ColorABGR.withAlpha(ColorARGB.toABGR(this.handler.getFluidColor(view, pos, state)), 255));
         }
     }
 }
