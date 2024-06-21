@@ -42,9 +42,12 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.embeddedt.embeddium.impl.render.chunk.compile.GlobalChunkBuildContext;
 import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 
 import java.util.function.Predicate;
+
+import java.util.Objects;
 
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
@@ -149,17 +152,21 @@ public class FluidRenderer {
         }
 
         // Call vanilla fluid renderer and capture the results
+        var context = Objects.requireNonNull(GlobalChunkBuildContext.get());
+        context.setCaptureAdditionalSprites(true);
         fluidVertexBuilder.reset();
         handler.renderFluid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState);
         fluidVertexBuilder.flush(buffers, material, 0, 0, 0);
 
-        // Mark fluid sprites as being used in rendering
-        TextureAtlasSprite[] sprites = handler.getFluidSprites(world, blockPos, fluidState);
+        var sprites = context.getAdditionalCapturedSprites();
+
         for(TextureAtlasSprite sprite : sprites) {
             if (sprite != null) {
                 buffers.addSprite(sprite);
             }
         }
+
+        context.setCaptureAdditionalSprites(false);
 
         return true;
     }
