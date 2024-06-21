@@ -40,7 +40,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.embeddedt.embeddium.impl.render.chunk.compile.GlobalChunkBuildContext;
 import org.embeddedt.embeddium.impl.render.fluid.EmbeddiumFluidSpriteCache;
+
+import java.util.Objects;
 
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
@@ -129,18 +132,25 @@ public class FluidRenderer {
         var meshBuilder = buffers.get(material);
 
         // Embeddium: Apply Forge's hook for fluid rendering
+        var context = Objects.requireNonNull(GlobalChunkBuildContext.get());
+        context.setCaptureAdditionalSprites(true);
         boolean skipDefaultRendering;
         try(var consumer = meshBuilder.asVertexConsumer(material)) {
             skipDefaultRendering = IClientFluidTypeExtensions.of(fluidState).renderFluid(fluidState, world, blockPos, consumer, world.getBlockState(blockPos));
         }
         if(skipDefaultRendering) {
-            // Animate any sprites still, since they may have been used in the custom hook
-            for(TextureAtlasSprite sprite : fluidSpriteCache.getSprites(world, blockPos, fluidState)) {
+            var sprites = context.getAdditionalCapturedSprites();
+
+            for(TextureAtlasSprite sprite : sprites) {
                 if (sprite != null) {
                     meshBuilder.addSprite(sprite);
                 }
             }
+
+            context.setCaptureAdditionalSprites(false);
             return;
+        } else {
+            context.setCaptureAdditionalSprites(false);
         }
 
         int posX = blockPos.getX();
