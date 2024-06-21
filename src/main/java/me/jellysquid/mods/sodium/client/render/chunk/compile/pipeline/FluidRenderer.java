@@ -38,9 +38,12 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.embeddedt.embeddium.impl.render.chunk.compile.GlobalChunkBuildContext;
 import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
 import org.embeddedt.embeddium.tags.EmbeddiumTags;
+
+import java.util.Objects;
 
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
@@ -128,17 +131,21 @@ public class FluidRenderer {
 
     private void renderVanilla(WorldSlice world, FluidState fluidState, BlockPos blockPos, ChunkModelBuilder buffers, Material material) {
         // Call vanilla fluid renderer and capture the results
+        var context = Objects.requireNonNull(GlobalChunkBuildContext.get());
+        context.setCaptureAdditionalSprites(true);
         fluidVertexBuilder.reset();
         Minecraft.getInstance().getBlockRenderer().renderLiquid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState);
         fluidVertexBuilder.flush(buffers, material, 0, 0, 0);
 
-        // Mark fluid sprites as being used in rendering
-        TextureAtlasSprite[] sprites = fluidSpriteCache.getSprites(world, blockPos, fluidState);
+        var sprites = context.getAdditionalCapturedSprites();
+
         for(TextureAtlasSprite sprite : sprites) {
             if (sprite != null) {
                 buffers.addSprite(sprite);
             }
         }
+
+        context.setCaptureAdditionalSprites(false);
     }
 
     public void render(WorldSlice world, FluidState fluidState, BlockPos blockPos, BlockPos offset, ChunkBuildBuffers buffers) {
