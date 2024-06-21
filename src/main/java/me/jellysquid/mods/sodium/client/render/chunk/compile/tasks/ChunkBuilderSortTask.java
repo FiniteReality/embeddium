@@ -1,28 +1,26 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.tasks;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
 import me.jellysquid.mods.sodium.client.render.chunk.RenderSection;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter;
-import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBufferSorter.SortBuffer;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildContext;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildOutput;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionMeshParts;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import me.jellysquid.mods.sodium.client.util.task.CancellationToken;
+import org.embeddedt.embeddium.render.chunk.sorting.TranslucentQuadAnalyzer;
 
 import java.nio.ByteBuffer;
-import java.util.EnumMap;
 import java.util.Map;
 
 public class ChunkBuilderSortTask extends ChunkBuilderTask<ChunkBuildOutput> {
     private final RenderSection render;
     private final float cameraX, cameraY, cameraZ;
     private final int frame;
-    private final Map<TerrainRenderPass, ChunkBufferSorter.SortBuffer> translucentMeshes;
+    private final Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> translucentMeshes;
 
-    public ChunkBuilderSortTask(RenderSection render, float cameraX, float cameraY, float cameraZ, int frame, Map<TerrainRenderPass, ChunkBufferSorter.SortBuffer> translucentMeshes) {
+    public ChunkBuilderSortTask(RenderSection render, float cameraX, float cameraY, float cameraZ, int frame, Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> translucentMeshes) {
         this.render = render;
         this.cameraX = cameraX;
         this.cameraY = cameraY;
@@ -41,16 +39,19 @@ public class ChunkBuilderSortTask extends ChunkBuilderTask<ChunkBuildOutput> {
     @Override
     public ChunkBuildOutput execute(ChunkBuildContext context, CancellationToken cancellationSource) {
         Map<TerrainRenderPass, BuiltSectionMeshParts> meshes = new Reference2ReferenceOpenHashMap<>();
-        for(Map.Entry<TerrainRenderPass, ChunkBufferSorter.SortBuffer> entry : translucentMeshes.entrySet()) {
+        for(Map.Entry<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> entry : translucentMeshes.entrySet()) {
             var sortBuffer = entry.getValue();
-            ChunkBufferSorter.sort(entry.getValue(), cameraX - this.render.getOriginX(), cameraY - this.render.getOriginY(), cameraZ - this.render.getOriginZ());
+            var newIndexBuffer = new NativeBuffer(ChunkBufferSorter.getIndexBufferSize(sortBuffer.centers().length / 3));
+            ChunkBufferSorter.sort(newIndexBuffer, sortBuffer, cameraX - this.render.getOriginX(), cameraY - this.render.getOriginY(), cameraZ - this.render.getOriginZ());
             meshes.put(entry.getKey(), new BuiltSectionMeshParts(
-                    makeNativeBuffer(sortBuffer.vertexBuffer()),
-                    sortBuffer.ranges()
+                    null,
+                    newIndexBuffer,
+                    sortBuffer,
+                    null
             ));
         }
         ChunkBuildOutput result = new ChunkBuildOutput(render, null, meshes, this.frame);
-        result.setPartialUpload(true);
+        result.setIndexOnlyUpload(true);
         return result;
     }
 }

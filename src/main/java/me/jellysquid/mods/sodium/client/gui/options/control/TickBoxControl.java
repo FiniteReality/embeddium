@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.renderer.Rect2i;
+import org.embeddedt.embeddium.gui.theme.DefaultColors;
 
 public class TickBoxControl implements Control<Boolean> {
     private final Option<Boolean> option;
@@ -53,7 +54,7 @@ public class TickBoxControl implements Control<Boolean> {
             final int color;
 
             if (enabled) {
-                color = ticked ? 0xFF94E4D3 : 0xFFFFFFFF;
+                color = ticked ? DefaultColors.ELEMENT_ACTIVATED : 0xFFFFFFFF;
             } else {
                 color = 0xFFAAAAAA;
             }

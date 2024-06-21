@@ -7,30 +7,22 @@
 [![](http://cf.way2muchnoise.eu/short_embeddium_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/embeddium)
 [![](http://cf.way2muchnoise.eu/versions/Available%20for_embeddium_full.svg)](https://www.curseforge.com/minecraft/mc-mods/embeddium/files)
 
-Embeddium is an unofficial fork of Sodium, with additional changes and bugfixes to integrate it with the Forge modding
-ecosystem.
+Embeddium is a free and open-source performance mod for Minecraft clients. It is based on the last FOSS-licensed version of the Sodium codebase, and includes additional bugfixes & features for better mod compatibility.
 
-Embeddium is **not supported by CaffeineMC**. Do not report issues encountered with it to their bug tracker or in their
-Discord. I have my own [Discord server](https://discord.gg/rN9Y7caguP) for my mods.
+Despite being forked from Sodium, Embeddium is **not supported by CaffeineMC**. Do not report issues encountered with it to their bug tracker or in their Discord. I have my own [Discord server](https://discord.gg/rN9Y7caguP) for my mods.
 
-## Compatibility
+## Highlights
 
-Generally, Embeddium should work out of the box with many more mods than Rubidium. However, given the scope of changes
-it makes to the renderer, it may have compatibility issues with some mods that use advanced rendering. Please open an
-issue if you experience problems. Some issues may require changes to be made in the other mod but it's good to have
-them documented.
+* All performance improvements from Sodium 0.5.8 and earlier, i.e. a rewritten terrain renderer, various optimizations to the immediate-mode rendering pipeline (used by entities, GUIs, block entities, etc.), and other miscellaneous improvements
+* Available for Minecraft Forge on 1.20.1 and older, and Fabric/NeoForge on 1.20.1 and newer
+* Integrated Fabric Rendering API support (Indium is no longer required, and will not work with Embeddium)
+* Frequent patch updates to fix mod compatibility issues soon after being reported & reproduced
+* Additional APIs for mod integration
+* Optional support for translucency sorting (can be enabled in Video Settings)
 
-**OptiFine is not supported** for obvious reasons.
+## For developers
 
-## Shaders
-
-For now, please continue to use [Oculus](https://www.curseforge.com/minecraft/mc-mods/oculus) if you want shader support.
-Note that Oculus is somewhat buggy, and your experience will probably be more stable without it. I recommend removing
-Oculus if you do not need shaders.
-
-## Mod integration
-
-If you're looking to add Embeddium to your development environment, please take a look at the [dedicated wiki page](https://github.com/embeddedt/embeddium/wiki/For-Developers).
+If you're looking to add Embeddium to your development environment, please take a look at the [dedicated wiki page](https://github.com/embeddedt/embeddium/wiki/For-Developers) for instructions & recommended guidelines for integration.
 
 ## Credits
 
@@ -42,4 +34,7 @@ If you're looking to add Embeddium to your development environment, please take 
 
 ## License
 
-Embeddium currently follows the license of upstream Sodium (LGPL-3.0).
+Embeddium is licensed under the Lesser GNU General Public License version 3.
+
+Portions of the option screen code are based on Reese's Sodium Options by FlashyReese, and are used under the terms of
+the [MIT license](https://opensource.org/license/mit), located in `src/main/resources/licenses/rso.txt`. 

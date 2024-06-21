@@ -23,10 +23,6 @@ public class ArrayLightDataCache extends LightDataAccess {
         this.light = new int[BLOCK_LENGTH * BLOCK_LENGTH * BLOCK_LENGTH];
     }
 
-    public BlockAndTintGetter getLevel() {
-        return this.world;
-    }
-
     public void reset(SectionPos origin) {
         this.xOffset = origin.minBlockX() - NEIGHBOR_BLOCK_RADIUS;
         this.yOffset = origin.minBlockY() - NEIGHBOR_BLOCK_RADIUS;

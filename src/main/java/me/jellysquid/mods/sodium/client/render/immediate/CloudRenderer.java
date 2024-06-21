@@ -10,7 +10,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import me.jellysquid.mods.sodium.client.util.MathUtil;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.api.util.ColorMixer;
@@ -32,7 +31,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.Validate;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30C;
@@ -58,12 +57,34 @@ public class CloudRenderer {
     private static final int DIR_NEG_Z = 1 << 4;
     private static final int DIR_POS_Z = 1 << 5;
 
+    // 256x256 px cloud.png is 12x12 units
+    // 3072 / 256 = 12
+    // 3072 / 1024 = 3
+    private static final int MAX_SINGLE_CLOUD_SIZE = 3072;
+
+    // 256x256 px cloud.png starts fog 8x from cloud render distance
+    // 2048 / 256 = 8
+    // 2048 / 1024 = 2
+    private static final int CLOUD_PIXELS_TO_FOG_DISTANCE = 2048;
+
+    // 256x256 px cloud.png results in a minimum render distance of 32
+    // 256 / 8 = 32
+    // 1024 / 8 = 128
+    private static final float CLOUD_PIXELS_TO_MINIMUM_RENDER_DISTANCE = 0.125F;
+
+    // 256x256 px cloud.png results in render distance multiplier of 2
+    // 256 / 128 = 2
+    // 1024 / 128 = 8
+    private static final float CLOUD_PIXELS_TO_MAXIMUM_RENDER_DISTANCE = 0.0078125F;
+
     private VertexBuffer vertexBuffer;
     private CloudEdges edges;
     private ShaderInstance shader;
     private final FogRenderer.FogData fogData = new FogRenderer.FogData(FogRenderer.FogMode.FOG_TERRAIN);
 
     private int prevCenterCellX, prevCenterCellY, cachedRenderDistance;
+    private float cloudSizeX, cloudSizeZ, fogDistanceMultiplier;
+    private int cloudDistanceMinimum, cloudDistanceMaximum;
     private CloudStatus cloudRenderMode;
 
     public CloudRenderer(ResourceProvider factory) {
@@ -86,13 +107,13 @@ public class CloudRenderer {
 
         double cloudTime = (ticks + tickDelta) * 0.03F;
         double cloudCenterX = (cameraX + cloudTime);
-        double cloudCenterZ = (cameraZ) + 0.33D;
+        double cloudCenterZ = (cameraZ) + 3.96D;
 
         int renderDistance = Minecraft.getInstance().options.getEffectiveRenderDistance();
-        int cloudDistance = Math.max(32, (renderDistance * 2) + 9);
+        int cloudDistance = Math.max(this.cloudDistanceMinimum, (renderDistance * this.cloudDistanceMaximum) + 9);
 
-        int centerCellX = (int) (Math.floor(cloudCenterX / 12));
-        int centerCellZ = (int) (Math.floor(cloudCenterZ / 12));
+        int centerCellX = (int) (Math.floor(cloudCenterX / this.cloudSizeX));
+        int centerCellZ = (int) (Math.floor(cloudCenterZ / this.cloudSizeZ));
 
         if (this.vertexBuffer == null || this.prevCenterCellX != centerCellX || this.prevCenterCellY != centerCellZ || this.cachedRenderDistance != renderDistance || cloudRenderMode != Minecraft.getInstance().options.getCloudsType()) {
             BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
@@ -118,17 +139,17 @@ public class CloudRenderer {
 
         float previousEnd = RenderSystem.getShaderFogEnd();
         float previousStart = RenderSystem.getShaderFogStart();
-        this.fogData.end = cloudDistance * 8;
-        this.fogData.start = (cloudDistance * 8) - 16;
+        this.fogData.end = cloudDistance * this.fogDistanceMultiplier;
+        this.fogData.start = (cloudDistance * this.fogDistanceMultiplier) - 16;
 
-        applyFogModifiers(world, this.fogData, player, cloudDistance * 8, tickDelta);
+        applyFogModifiers(world, this.fogData, player, (int)(cloudDistance * this.fogDistanceMultiplier), tickDelta);
 
 
         RenderSystem.setShaderFogEnd(this.fogData.end);
         RenderSystem.setShaderFogStart(this.fogData.start);
 
-        float translateX = (float) (cloudCenterX - (centerCellX * 12));
-        float translateZ = (float) (cloudCenterZ - (centerCellZ * 12));
+        float translateX = (float) (cloudCenterX - (centerCellX * this.cloudSizeX));
+        float translateZ = (float) (cloudCenterZ - (centerCellZ * this.cloudSizeZ));
 
         RenderSystem.enableDepthTest();
 
@@ -224,7 +245,7 @@ public class CloudRenderer {
         if (fogModifier != null) {
             MobEffectInstance statusEffectInstance = player.getEffect(fogModifier.getMobEffect());
             if (statusEffectInstance != null) {
-                fogModifier.setupFog(fogData, player, statusEffectInstance, (cloudDistance * 8), tickDelta);
+                fogModifier.setupFog(fogData, player, statusEffectInstance, cloudDistance, tickDelta);
             }
         }
     }
@@ -244,8 +265,8 @@ public class CloudRenderer {
 
                 int texel = this.edges.getColor(centerCellX + offsetX, centerCellZ + offsetZ);
 
-                float x = offsetX * 12;
-                float z = offsetZ * 12;
+                float x = offsetX * this.cloudSizeX;
+                float z = offsetZ * this.cloudSizeZ;
 
                 try (MemoryStack stack = MemoryStack.stackPush()) {
                     final long buffer = stack.nmalloc((fastClouds ? 4 : (6 * 4)) * ColorVertex.STRIDE);
@@ -257,10 +278,10 @@ public class CloudRenderer {
                     if ((connectedEdges & DIR_NEG_Y) != 0) {
                         int mixedColor = ColorMixer.mul(texel, fastClouds ? CLOUD_COLOR_POS_Y : CLOUD_COLOR_NEG_Y);
 
-                        ptr = writeVertex(ptr, x + 12, 0.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + 12, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 0.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + this.cloudSizeZ, mixedColor);
                         ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + 0.0f, mixedColor);
-                        ptr = writeVertex(ptr, x + 12, 0.0f, z + 0.0f, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 0.0f, z + 0.0f, mixedColor);
 
                         count += 4;
                     }
@@ -275,9 +296,9 @@ public class CloudRenderer {
                     if ((connectedEdges & DIR_POS_Y) != 0) {
                         int mixedColor = ColorMixer.mul(texel, CLOUD_COLOR_POS_Y);
 
-                        ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 12, 4.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 12, 4.0f, z + 0.0f, mixedColor);
+                        ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 4.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 4.0f, z + 0.0f, mixedColor);
                         ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + 0.0f, mixedColor);
 
                         count += 4;
@@ -287,8 +308,8 @@ public class CloudRenderer {
                     if ((connectedEdges & DIR_NEG_X) != 0) {
                         int mixedColor = ColorMixer.mul(texel, CLOUD_COLOR_NEG_X);
 
-                        ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + 12, mixedColor);
+                        ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + this.cloudSizeZ, mixedColor);
                         ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + 0.0f, mixedColor);
                         ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + 0.0f, mixedColor);
 
@@ -299,10 +320,10 @@ public class CloudRenderer {
                     if ((connectedEdges & DIR_POS_X) != 0) {
                         int mixedColor = ColorMixer.mul(texel, CLOUD_COLOR_POS_X);
 
-                        ptr = writeVertex(ptr, x + 12, 4.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 12, 0.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 12, 0.0f, z + 0.0f, mixedColor);
-                        ptr = writeVertex(ptr, x + 12, 4.0f, z + 0.0f, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 4.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 0.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 0.0f, z + 0.0f, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 4.0f, z + 0.0f, mixedColor);
 
                         count += 4;
                     }
@@ -311,8 +332,8 @@ public class CloudRenderer {
                     if ((connectedEdges & DIR_NEG_Z) != 0) {
                         int mixedColor = ColorMixer.mul(texel, CLOUD_COLOR_NEG_Z);
 
-                        ptr = writeVertex(ptr, x + 12, 4.0f, z + 0.0f, mixedColor);
-                        ptr = writeVertex(ptr, x + 12, 0.0f, z + 0.0f, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 4.0f, z + 0.0f, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 0.0f, z + 0.0f, mixedColor);
                         ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + 0.0f, mixedColor);
                         ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + 0.0f, mixedColor);
 
@@ -323,10 +344,10 @@ public class CloudRenderer {
                     if ((connectedEdges & DIR_POS_Z) != 0) {
                         int mixedColor = ColorMixer.mul(texel, CLOUD_COLOR_POS_Z);
 
-                        ptr = writeVertex(ptr, x + 12, 0.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 12, 4.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + 12, mixedColor);
-                        ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + 12, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 0.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + this.cloudSizeX, 4.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + 0.0f, 4.0f, z + this.cloudSizeZ, mixedColor);
+                        ptr = writeVertex(ptr, x + 0.0f, 0.0f, z + this.cloudSizeZ, mixedColor);
 
                         count += 4;
                     }
@@ -348,6 +369,19 @@ public class CloudRenderer {
         this.destroy();
 
         this.edges = createCloudEdges();
+
+        // FIXME this ugly code is needed because Iris, as usual, duplicates the original code and assumes the old sizes
+        // If shaders are on we assume the vanilla size so that the hardcoded values will actually match up with our code.
+        // This will be removed when Iris support is dropped.
+        boolean shaderMod = ShaderModBridge.areShadersEnabled();
+        float width = shaderMod ? 256 : this.edges.width;
+        float height = shaderMod ? 256 : this.edges.height;
+
+        this.cloudSizeX = MAX_SINGLE_CLOUD_SIZE / width;
+        this.cloudSizeZ = MAX_SINGLE_CLOUD_SIZE / height;
+        this.fogDistanceMultiplier = CLOUD_PIXELS_TO_FOG_DISTANCE / width;
+        this.cloudDistanceMinimum = (int) (width * CLOUD_PIXELS_TO_MINIMUM_RENDER_DISTANCE);
+        this.cloudDistanceMaximum = (int) (width * CLOUD_PIXELS_TO_MAXIMUM_RENDER_DISTANCE);
 
         try {
             this.shader = new ShaderInstance(factory, "clouds", DefaultVertexFormat.POSITION_COLOR);
@@ -390,9 +424,6 @@ public class CloudRenderer {
         public CloudEdges(NativeImage texture) {
             int width = texture.getWidth();
             int height = texture.getHeight();
-
-            Validate.isTrue(MathUtil.isPowerOfTwo(width), "Texture width must be power-of-two");
-            Validate.isTrue(MathUtil.isPowerOfTwo(height), "Texture height must be power-of-two");
 
             this.edges = new byte[width * height];
             this.colors = new int[width * height];
@@ -455,11 +486,11 @@ public class CloudRenderer {
         }
 
         private static int index(int posX, int posZ, int width, int height) {
-            return (wrap(posX, width) * width) + wrap(posZ, height);
+            return (wrap(posX, width) * height) + wrap(posZ, height);
         }
 
         private static int wrap(int pos, int dim) {
-            return (pos & (dim - 1));
+            return Math.floorMod(pos, dim);
         }
     }
 }

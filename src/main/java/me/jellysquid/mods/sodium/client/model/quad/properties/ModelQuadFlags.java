@@ -45,6 +45,10 @@ public class ModelQuadFlags {
         if (quad instanceof BakedQuad bakedQuad) {
             numVertices = Math.min(numVertices, bakedQuad.getVertices().length / 8);
         }
+
+        float lX = Float.NaN, lY = Float.NaN, lZ = Float.NaN;
+        boolean degenerate = false;
+
         for (int i = 0; i < numVertices; ++i) {
             float x = quad.getX(i);
             float y = quad.getY(i);
@@ -56,13 +60,21 @@ public class ModelQuadFlags {
             maxX = Math.max(maxX, x);
             maxY = Math.max(maxY, y);
             maxZ = Math.max(maxZ, z);
+
+            if(x == lX && y == lY && z == lZ) {
+                degenerate = true;
+            } else {
+                lX = x;
+                lY = y;
+                lZ = z;
+            }
         }
 
-        boolean partial = switch (face.getAxis()) {
+        boolean partial = degenerate || (switch (face.getAxis()) {
             case X -> minY >= 0.0001f || minZ >= 0.0001f || maxY <= 0.9999F || maxZ <= 0.9999F;
             case Y -> minX >= 0.0001f || minZ >= 0.0001f || maxX <= 0.9999F || maxZ <= 0.9999F;
             case Z -> minX >= 0.0001f || minY >= 0.0001f || maxX <= 0.9999F || maxY <= 0.9999F;
-        };
+        });
 
         boolean parallel = switch(face.getAxis()) {
             case X -> minX == maxX;

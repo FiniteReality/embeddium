@@ -21,11 +21,11 @@ public class IncompatibleModManager {
             .build();
 
     public static void checkMods(FMLClientSetupEvent event) {
+        IModInfo selfInfo = ModLoadingContext.get().getActiveContainer().getModInfo();
         // TODO: Enable
         if (true || SodiumClientMod.options().advanced.disableIncompatibleModWarnings) {
             return;
         }
-        IModInfo selfInfo = ModLoadingContext.get().getActiveContainer().getModInfo();
         String[] modDeclarationList = INCOMPATIBLE_MODS.stream().filter(ModDeclaration::matches).map(ModDeclaration::toString).toArray(String[]::new);
         if(modDeclarationList.length > 0) {
             event.enqueueWork(() -> {

@@ -43,7 +43,7 @@ public class EmbeddiumEarlyWindowHacks {
             Field f = ImmediateWindowHandler.class.getDeclaredField("provider");
             f.setAccessible(true);
             ImmediateWindowProvider oldProvider = (ImmediateWindowProvider)f.get(null);
-            if(!oldProvider.getClass().getName().contains("Dummy")) {
+            if(!oldProvider.name().equals("dummyprovider")) {
                 LOGGER.error("Did not find dummy provider as we expected, found {}. Aborting.", oldProvider.getClass().getName());
                 return;
             }

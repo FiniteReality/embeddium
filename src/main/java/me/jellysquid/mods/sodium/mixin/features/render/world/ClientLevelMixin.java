@@ -71,9 +71,7 @@ public abstract class ClientLevelMixin extends Level {
 
         BlockState blockState = this.getBlockState(pos);
 
-        if (!blockState.isAir()) {
-            blockState.getBlock().animateTick(blockState, this, pos, random);
-        }
+        blockState.getBlock().animateTick(blockState, this, pos, random);
 
         FluidState fluidState = blockState.getFluidState();
 

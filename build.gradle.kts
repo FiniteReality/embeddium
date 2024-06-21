@@ -1,6 +1,8 @@
+import org.w3c.dom.Element
+
 plugins {
     id("idea")
-    id("net.neoforged.gradle.userdev") version("7.0.94")
+    id("net.neoforged.gradle.userdev") version("7.0.145")
     id("maven-publish")
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
@@ -8,6 +10,8 @@ plugins {
     id("org.ajoberstar.grgit") version("5.0.0")
 
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
+
+    id("embeddium-fabric-remapper")
 }
 
 operator fun String.invoke(): String {
@@ -20,8 +24,9 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-version = "${"mod_version"()}${getVersionMetadata()}+mc${"minecraft_version"()}"
+version = getModVersion()
 group = "maven_group"()
+println("Embeddium: $version")
 
 base {
     archivesName = "archives_base_name"()
@@ -30,36 +35,18 @@ base {
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+val extraSourceSets = arrayOf("legacy", "compat")
+
 sourceSets {
     val main = getByName("main")
-    val api = create("api")
-    val legacy = create("legacy")
-    val compat = create("compat")
-    
-    api.apply {
-        java {
-            compileClasspath += main.compileClasspath
-        }
-    }
 
-    main.apply {
-        java {
-            compileClasspath += api.output
-            runtimeClasspath += api.output
-        }
-    }
-
-    legacy.apply {
-        java {
-            compileClasspath += main.compileClasspath
-            compileClasspath += main.output
-        }
-    }
-
-    compat.apply {
-        java {
-            compileClasspath += main.compileClasspath
-            compileClasspath += main.output
+    extraSourceSets.forEach {
+        val sourceset = create(it)
+        sourceset.apply {
+            java {
+                compileClasspath += main.compileClasspath
+                compileClasspath += main.output
+            }
         }
     }
 }
@@ -94,9 +81,9 @@ runs {
         systemProperty("forge.logging.console.level", "info")
 
         modSource(sourceSets["main"])
-        modSource(sourceSets["compat"])
-        modSource(sourceSets["api"])
-        modSource(sourceSets["legacy"])
+        extraSourceSets.forEach {
+            modSource(sourceSets[it])
+        }
     }
 
     create("client")
@@ -129,6 +116,10 @@ dependencies {
 
     // Mods
     compatCompileOnly("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
+
+    // Fabric API
+    compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
+    compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 }
 
 tasks.processResources {
@@ -149,19 +140,18 @@ java {
 }
 
 tasks.jar {
-    from("COPYING", "COPYING.LESSER")
-    from(sourceSets["compat"].output.classesDirs)
-    from(sourceSets["compat"].output.resourcesDir)
-    from(sourceSets["api"].output.classesDirs)
-    from(sourceSets["api"].output.resourcesDir)
-    from(sourceSets["legacy"].output.classesDirs)
-    from(sourceSets["legacy"].output.resourcesDir)
+    from("COPYING", "COPYING.LESSER", "README.md")
+
+    extraSourceSets.forEach {
+        from(sourceSets[it].output.classesDirs)
+        from(sourceSets[it].output.resourcesDir)
+    }
 }
 
 tasks.named<Jar>("sourcesJar").configure {
-    from(sourceSets["compat"].allJava)
-    from(sourceSets["api"].allJava)
-    from(sourceSets["legacy"].allJava)
+    extraSourceSets.forEach {
+        from(sourceSets[it].allJava)
+    }
 }
 
 publishing {
@@ -170,7 +160,7 @@ publishing {
     }
     publications {
         this.create<MavenPublication>("mavenJava") {
-            artifact(tasks.jar)
+            artifact(tasks.named("jar"))
             artifact(tasks.named("sourcesJar"))
         }
     }
@@ -194,6 +184,10 @@ publishMods {
         incompatible {
             slug = "rubidium"
         }
+
+        incompatible {
+            slug = "textrues-embeddium-options"
+        }
     }
     modrinth {
         projectId = "sk9rgfiA"
@@ -203,24 +197,35 @@ publishMods {
         incompatible {
             slug = "rubidium"
         }
+
+        incompatible {
+            slug = "textrues-embeddium-options"
+        }
     }
 
     displayName = "[${"minecraft_version"()}] Embeddium ${"mod_version"()}"
 }
 
-fun getVersionMetadata(): String {
-    // CI builds only
+fun getModVersion(): String {
+    var baseVersion: String = project.properties["mod_version"].toString()
+    val mcMetadata: String = "+mc" + project.properties["minecraft_version"]
+
     if (project.hasProperty("build.release")) {
-        return "" // no tag whatsoever
+        return baseVersion + mcMetadata // no tag whatsoever
     }
+
+    // Increment patch version
+    baseVersion = baseVersion.split(".").mapIndexed {
+        index, s -> if(index == 2) (s.toInt() + 1) else s
+    }.joinToString(separator = ".")
 
     val head = grgit.head()
     var id = head.abbreviatedId
 
     // Flag the build if the build tree is not clean
     if (!grgit.status().isClean) {
-        id += ".dirty"
+        id += "-dirty"
     }
 
-    return "-git.${id}"
+    return baseVersion + "-git-${id}" + mcMetadata
 }

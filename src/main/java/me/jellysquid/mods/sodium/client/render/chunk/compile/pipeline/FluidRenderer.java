@@ -17,17 +17,13 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.DefaultMaterials;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
-import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder.Vertex;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
-import net.caffeinemc.mods.sodium.api.util.ColorABGR;
-import net.caffeinemc.mods.sodium.api.util.NormI8;
+import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -43,8 +39,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.embeddedt.embeddium.impl.render.chunk.compile.GlobalChunkBuildContext;
+import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 import org.embeddedt.embeddium.render.fluid.EmbeddiumFluidSpriteCache;
 import org.embeddedt.embeddium.tags.EmbeddiumTags;
+
+import java.util.Objects;
 
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
@@ -67,6 +67,8 @@ public class FluidRenderer {
 
     private final EmbeddiumFluidSpriteCache fluidSpriteCache = new EmbeddiumFluidSpriteCache();
     private final SinkingVertexBuilder vertexBuilder = new SinkingVertexBuilder();
+
+    private final ChunkColorWriter colorEncoder = ChunkColorWriter.get();
 
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
@@ -132,17 +134,23 @@ public class FluidRenderer {
         var meshBuilder = buffers.get(material);
 
         // Embeddium: Apply Forge's hook for fluid rendering
+        var context = Objects.requireNonNull(GlobalChunkBuildContext.get());
+        context.setCaptureAdditionalSprites(true);
         vertexBuilder.reset();
         boolean skipDefaultRendering = IClientFluidTypeExtensions.of(fluidState).renderFluid(fluidState, world, blockPos, vertexBuilder, world.getBlockState(blockPos));
         vertexBuilder.flush(meshBuilder, material, 0, 0, 0);
         if(skipDefaultRendering) {
-            // Animate any sprites still, since they may have been used in the custom hook
-            for(TextureAtlasSprite sprite : fluidSpriteCache.getSprites(world, blockPos, fluidState)) {
+            var sprites = context.getAdditionalCapturedSprites();
+
+            for(TextureAtlasSprite sprite : sprites) {
                 if (sprite != null) {
                     meshBuilder.addSprite(sprite);
                 }
             }
+            context.setCaptureAdditionalSprites(false);
             return;
+        } else {
+            context.setCaptureAdditionalSprites(false);
         }
 
         int posX = blockPos.getX();
@@ -421,7 +429,7 @@ public class FluidRenderer {
         // multiply the per-vertex color against the combined brightness
         // the combined brightness is the per-vertex brightness multiplied by the block's brightness
         for (int i = 0; i < 4; i++) {
-            this.quadColors[i] = ColorABGR.withAlpha(this.quadColors[i], light.br[i] * brightness);
+            this.quadColors[i] = colorEncoder.writeColor(this.quadColors[i], light.br[i] * brightness);
         }
     }
 

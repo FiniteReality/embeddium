@@ -143,7 +143,7 @@ public class MultipartBakedModelMixin {
             }
         }
 
-        return quads;
+        return quads != null ? quads : Collections.emptyList();
     }
 
     /**

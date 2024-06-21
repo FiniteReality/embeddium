@@ -32,3 +32,11 @@ mandatory = false
 versionRange = "(1.6.15,)"
 ordering = "BEFORE"
 side = "CLIENT"
+
+# The new config screen supersedes TexTrue's Embeddium Options
+[[dependencies.embeddium]]
+modId = "textrues_embeddium_options"
+type = "optional"
+versionRange = "[0.0.0-NOT-COMPATIBLE]"
+ordering = "BEFORE"
+side = "CLIENT"

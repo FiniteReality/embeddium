@@ -5,10 +5,13 @@ import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
+import net.fabricmc.fabric.api.blockview.v2.FabricBlockView;
+import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -16,6 +19,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,7 +34,9 @@ import net.neoforged.neoforge.client.model.data.ModelDataManager.Snapshot;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
+import org.embeddedt.embeddium.asm.OptionalInterface;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +52,8 @@ import java.util.Objects;
  *
  * <p>Object pooling should be used to avoid huge allocations as this class contains many large arrays.</p>
  */
-public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
+@OptionalInterface({ FabricBlockView.class, RenderAttachedBlockView.class })
+public class WorldSlice implements BlockAndTintGetter, BiomeColorView, FabricBlockView, RenderAttachedBlockView {
     private static final LightLayer[] LIGHT_TYPES = LightLayer.values();
 
     // The number of blocks in a section.
@@ -90,6 +97,9 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
 
     // (Local Section -> Block Entity) table.
     private final @Nullable Int2ReferenceMap<BlockEntity>[] blockEntityArrays;
+
+    // (Local Section -> Block Entity Render Data) table.
+    private final @Nullable Int2ReferenceMap<Object>[] blockEntityRenderDataArrays;
 
     // (Local Section -> Aux Light) table.
     private final @Nullable AuxiliaryLightManager[] auxLightArrays;
@@ -165,6 +175,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
         this.auxLightArrays = new AuxiliaryLightManager[SECTION_ARRAY_SIZE];
 
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
+        this.blockEntityRenderDataArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
 
         this.biomeSlice = new BiomeSlice();
         this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
@@ -209,6 +220,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
         this.lightArrays[sectionIndex][LightLayer.SKY.ordinal()] = section.getLightArray(LightLayer.SKY);
 
         this.blockEntityArrays[sectionIndex] = section.getBlockEntityMap();
+        this.blockEntityRenderDataArrays[sectionIndex] = section.getBlockEntityRenderDataMap();
         this.auxLightArrays[sectionIndex] = section.getAuxLightManager();
     }
 
@@ -394,6 +406,35 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView {
             return null;
         }
         return this.auxLightArrays[getLocalSectionIndex(pos.x - (this.originX >> 4), 0, pos.z - (this.originZ >> 4))];
+    }
+
+    @Override
+    public Holder<Biome> getBiomeFabric(BlockPos pos) {
+        return this.biomeSlice.getBiome(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    @Override
+    public boolean hasBiomes() {
+        return true;
+    }
+
+    @Override
+    public Object getBlockEntityRenderData(BlockPos pos) {
+        int relX = pos.getX() - this.originX;
+        int relY = pos.getY() - this.originY;
+        int relZ = pos.getZ() - this.originZ;
+
+        if (!isInside(relX, relY, relZ)) {
+            return null;
+        }
+
+        var blockEntityRenderDataMap = this.blockEntityRenderDataArrays[getLocalSectionIndex(relX >> 4, relY >> 4, relZ >> 4)];
+
+        if (blockEntityRenderDataMap == null) {
+            return null;
+        }
+
+        return blockEntityRenderDataMap.get(getLocalBlockIndex(relX & 15, relY & 15, relZ & 15));
     }
 
     public static int getLocalBlockIndex(int x, int y, int z) {
