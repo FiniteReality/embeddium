@@ -134,23 +134,22 @@ public class FluidRenderer {
         // Embeddium: Apply Forge's hook for fluid rendering
         var context = Objects.requireNonNull(GlobalChunkBuildContext.get());
         context.setCaptureAdditionalSprites(true);
+
         boolean skipDefaultRendering;
         try(var consumer = meshBuilder.asVertexConsumer(material)) {
             skipDefaultRendering = IClientFluidTypeExtensions.of(fluidState).renderFluid(fluidState, world, blockPos, consumer, world.getBlockState(blockPos));
         }
-        if(skipDefaultRendering) {
-            var sprites = context.getAdditionalCapturedSprites();
 
-            for(TextureAtlasSprite sprite : sprites) {
-                if (sprite != null) {
-                    meshBuilder.addSprite(sprite);
-                }
+        for(TextureAtlasSprite sprite : context.getAdditionalCapturedSprites()) {
+            if (sprite != null) {
+                meshBuilder.addSprite(sprite);
             }
+        }
 
-            context.setCaptureAdditionalSprites(false);
+        context.setCaptureAdditionalSprites(false);
+
+        if(skipDefaultRendering) {
             return;
-        } else {
-            context.setCaptureAdditionalSprites(false);
         }
 
         int posX = blockPos.getX();
