@@ -7,6 +7,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderCache;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
+import java.util.Collections;
+
 public class ChunkBuildContext {
     public final ChunkBuildBuffers buffers;
     public final BlockRenderCache cache;
@@ -33,8 +35,8 @@ public class ChunkBuildContext {
         }
     }
 
-    public ObjectOpenHashSet<TextureAtlasSprite> getAdditionalCapturedSprites() {
-        return additionalCapturedSprites;
+    public Iterable<TextureAtlasSprite> getAdditionalCapturedSprites() {
+        return additionalCapturedSprites.isEmpty() ? Collections.emptySet() : additionalCapturedSprites;
     }
 
     public void captureAdditionalSprite(TextureAtlasSprite sprite) {
