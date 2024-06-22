@@ -139,18 +139,17 @@ public class FluidRenderer {
         vertexBuilder.reset();
         boolean skipDefaultRendering = IClientFluidTypeExtensions.of(fluidState).renderFluid(fluidState, world, blockPos, vertexBuilder, world.getBlockState(blockPos));
         vertexBuilder.flush(meshBuilder, material, 0, 0, 0);
-        if(skipDefaultRendering) {
-            var sprites = context.getAdditionalCapturedSprites();
 
-            for(TextureAtlasSprite sprite : sprites) {
-                if (sprite != null) {
-                    meshBuilder.addSprite(sprite);
-                }
+        for(TextureAtlasSprite sprite : context.getAdditionalCapturedSprites()) {
+            if (sprite != null) {
+                meshBuilder.addSprite(sprite);
             }
-            context.setCaptureAdditionalSprites(false);
+        }
+
+        context.setCaptureAdditionalSprites(false);
+
+        if(skipDefaultRendering) {
             return;
-        } else {
-            context.setCaptureAdditionalSprites(false);
         }
 
         int posX = blockPos.getX();
