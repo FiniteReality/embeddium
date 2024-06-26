@@ -4,7 +4,7 @@ import org.embeddedt.embeddium.impl.model.ModelCuboidAccessor;
 import org.embeddedt.embeddium.impl.render.immediate.model.EntityRenderer;
 import org.embeddedt.embeddium.impl.render.immediate.model.ModelCuboid;
 import org.embeddedt.embeddium.impl.render.immediate.model.ModelPartData;
-import org.embeddedt.embeddium.impl.render.vertex.VertexConsumerUtils;
+import org.embeddedt.embeddium.impl.render.matrix_stack.CachingPoseStack;
 import org.embeddedt.embeddium.api.math.MatrixHelper;
 import org.embeddedt.embeddium.api.util.ColorARGB;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
@@ -12,14 +12,15 @@ import net.minecraft.client.model.geom.ModelPart;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Mixin(ModelPart.class)
+// Inject after most other mods
+@Mixin(value = ModelPart.class, priority = 1500)
 public class ModelPartMixin implements ModelPartData {
     @Shadow
     public float x;
@@ -52,11 +53,6 @@ public class ModelPartMixin implements ModelPartData {
     @Final
     private List<ModelPart.Cube> cubes;
 
-    @Mutable
-    @Shadow
-    @Final
-    private Map<String, ModelPart> children;
-
     @Unique
     private ModelPart[] sodium$children;
 
@@ -75,15 +71,28 @@ public class ModelPartMixin implements ModelPartData {
         this.sodium$cuboids = copies;
         this.sodium$children = children.values()
                 .toArray(ModelPart[]::new);
-
-        // Try to catch errors caused by mods touching the collections after we've copied everything.
-        this.cubes = Collections.unmodifiableList(this.cubes);
-        this.children = Collections.unmodifiableMap(this.children);
     }
 
-    @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V", at = @At("HEAD"), cancellable = true)
-    private void onRender(PoseStack matrices, VertexConsumer vertices, int light, int overlay, int color, CallbackInfo ci) {
-        VertexBufferWriter writer = VertexConsumerUtils.convertOrLog(vertices);
+    @Redirect(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"))
+    private void enableCachingBeforePush(PoseStack stack) {
+        ((CachingPoseStack)stack).embeddium$setCachingEnabled(true);
+        stack.pushPose();
+    }
+
+    @Redirect(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"))
+    private void disableCachingAfterPop(PoseStack stack) {
+        stack.popPose();
+        ((CachingPoseStack)stack).embeddium$setCachingEnabled(false);
+    }
+
+    /**
+     * @author JellySquid, embeddedt
+     * @reason Rewrite entity rendering to use faster code path. Original approach of replacing the entire render loop
+     * had to be neutered to accommodate mods injecting custom logic here and/or mutating the models at runtime.
+     */
+    @Inject(method = "compile", at = @At("HEAD"), cancellable = true)
+    private void onRender(PoseStack.Pose matrixPose, VertexConsumer vertices, int light, int overlay, int color, CallbackInfo ci) {
+        VertexBufferWriter writer = VertexBufferWriter.tryOf(vertices);
 
         if (writer == null) {
             return;
@@ -91,7 +100,22 @@ public class ModelPartMixin implements ModelPartData {
 
         ci.cancel();
 
-        EntityRenderer.render(matrices, writer, (ModelPart) (Object) this, light, overlay, ColorARGB.toABGR(color));
+        EntityRenderer.prepareNormals(matrixPose);
+
+        var cubes = this.cubes;
+        int swappedColor = ColorARGB.toABGR(color);
+
+        //noinspection ForLoopReplaceableByForEach
+        for(int i = 0; i < cubes.size(); i++) {
+            var cube = cubes.get(i);
+            var simpleCuboid = ((ModelCuboidAccessor)cube).embeddium$getSimpleCuboid();
+            if(simpleCuboid != null) {
+                EntityRenderer.renderCuboidFast(matrixPose, writer, simpleCuboid, light, overlay, swappedColor);
+            } else {
+                // Must use slow path as this cube can't be converted to a simple cuboid
+                cube.compile(matrixPose, vertices, light, overlay, color);
+            }
+        }
     }
 
     /**
