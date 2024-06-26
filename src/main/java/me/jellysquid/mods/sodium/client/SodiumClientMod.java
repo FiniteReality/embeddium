@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.taint.scanning.TaintDetector;
@@ -17,8 +18,8 @@ import java.io.IOException;
 
 public class SodiumClientMod implements ClientModInitializer {
 
-    public static final String MODID = "embeddium";
-    public static final String MODNAME = "Embeddium";
+    public static final String MODID = EmbeddiumConstants.MODID;
+    public static final String MODNAME = EmbeddiumConstants.MODNAME;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME);
     private static SodiumGameOptions CONFIG = loadConfig();
