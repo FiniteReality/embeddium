@@ -102,7 +102,22 @@ public class ModelPartMixin implements ModelPartData {
 
         ci.cancel();
 
-        EntityRenderer.renderCuboids(matrixPose, writer, this.cubes, light, overlay, ColorABGR.pack(red, green, blue, alpha));
+        EntityRenderer.prepareNormals(matrixPose);
+
+        var cubes = this.cubes;
+        int packedColor = ColorABGR.pack(red, green, blue, alpha);
+
+        //noinspection ForLoopReplaceableByForEach
+        for(int i = 0; i < cubes.size(); i++) {
+            var cube = cubes.get(i);
+            var simpleCuboid = ((ModelCuboidAccessor)cube).embeddium$getSimpleCuboid();
+            if(simpleCuboid != null) {
+                EntityRenderer.renderCuboidFast(matrixPose, writer, simpleCuboid, light, overlay, packedColor);
+            } else {
+                // Must use slow path as this cube can't be converted to a simple cuboid
+                cube.compile(matrixPose, vertices, light, overlay, red, green, blue, alpha);
+            }
+        }
     }
 
     /**

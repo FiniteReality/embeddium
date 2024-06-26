@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.immediate.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.jellysquid.mods.sodium.client.model.ModelCuboidAccessor;
 import org.embeddedt.embeddium.render.matrix_stack.CachingPoseStack;
 import net.caffeinemc.mods.sodium.api.math.MatrixHelper;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
@@ -136,20 +135,13 @@ public class EntityRenderer {
         }
     }
 
-    public static void renderCuboids(PoseStack.Pose matrices, VertexBufferWriter writer, List<ModelPart.Cube> cuboids, int light, int overlay, int color) {
-        prepareNormals(matrices);
+    public static void renderCuboidFast(PoseStack.Pose matrices, VertexBufferWriter writer, ModelCuboid cuboid, int light, int overlay, int color) {
+        prepareVertices(matrices, cuboid);
 
-        //noinspection ForLoopReplaceableByForEach
-        for (int i = 0; i < cuboids.size(); i++) {
-            // Despite the name, the method doesn't actually copy, it returns a preconstructed object
-            var cuboid = ((ModelCuboidAccessor)cuboids.get(i)).sodium$copy();
-            prepareVertices(matrices, cuboid);
+        var vertexCount = emitQuads(cuboid, color, overlay, light);
 
-            var vertexCount = emitQuads(cuboid, color, overlay, light);
-
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                writer.push(stack, SCRATCH_BUFFER, vertexCount, ModelVertex.FORMAT);
-            }
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            writer.push(stack, SCRATCH_BUFFER, vertexCount, ModelVertex.FORMAT);
         }
     }
 
@@ -207,7 +199,7 @@ public class EntityRenderer {
         buildVertexTexCoord(VERTEX_TEXTURES[FACE_POS_X], cuboid.u0, cuboid.v1, cuboid.u1, cuboid.v2);
     }
 
-    private static void prepareNormals(PoseStack.Pose matrices) {
+    public static void prepareNormals(PoseStack.Pose matrices) {
         CUBE_NORMALS[FACE_NEG_Y] = MatrixHelper.transformNormal(matrices.normal(), Direction.DOWN);
         CUBE_NORMALS[FACE_POS_Y] = MatrixHelper.transformNormal(matrices.normal(), Direction.UP);
         CUBE_NORMALS[FACE_NEG_Z] = MatrixHelper.transformNormal(matrices.normal(), Direction.NORTH);
