@@ -24,7 +24,10 @@ public class WorldRendererMixin {
      * @author JellySquid
      * @reason Use intrinsics where possible to speed up vertex writing
      */
-    @Inject(method = "renderLineBox(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;DDDDDDFFFFFFF)V", at = @At("HEAD"), cancellable = true)
+    // TODO embeddedt: Line vertex duplication looks dangerous to implement properly on 1.21. Disabling this for now
+    // as it's the only code path that uses line vertices with a VBW. This optimization is likely less impactful
+    // than it used to be now that VertexConsumer has (slightly) less indirection.
+    //@Inject(method = "renderLineBox(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;DDDDDDFFFFFFF)V", at = @At("HEAD"), cancellable = true)
     private static void drawBoxFast(PoseStack matrices, VertexConsumer vertexConsumer, double x1, double y1, double z1,
                                     double x2, double y2, double z2, float red, float green, float blue, float alpha,
                                     float xAxisRed, float yAxisGreen, float zAxisBlue, CallbackInfo ci) {
