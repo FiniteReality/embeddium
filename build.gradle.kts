@@ -2,17 +2,14 @@ import org.w3c.dom.Element
 
 plugins {
     id("idea")
-    id("net.minecraftforge.gradle") version("6.0.25")
+    id("dev.architectury.loom") version("1.6.397")
     id("maven-publish")
-    id("org.spongepowered.mixin") version("0.7.38")
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
     // more easily identified. TODO: Lazily load GrGit via a service only when builds are performed.
     id("org.ajoberstar.grgit") version("5.0.0")
 
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
-
-    id("org.parchmentmc.librarian.forgegradle") version("1.2.0.7-dev-SNAPSHOT")
 
     id("embeddium-fabric-remapper")
 }
@@ -70,38 +67,8 @@ repositories {
         }
     }
     maven("https://maven.covers1624.net/")
-}
+    maven("https://maven.parchmentmc.org") {
 
-jarJar.enable()
-
-minecraft {
-    if(rootProject.properties.containsKey("parchment_version")) {
-        mappings("parchment", "parchment_version"())
-    } else {
-        mappings("official", "minecraft_version"())
-    }
-    copyIdeResources = true
-    accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
-    runs {
-        configureEach {
-            workingDirectory(project.file("run"))
-
-            property("forge.logging.console.level", "info")
-
-            property("mixin.env.remapRefMap", "true")
-            property("mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg")
-
-            mods {
-                create("embeddium") {
-                    sources(sourceSets["main"])
-                    extraSourceSets.forEach {
-                        sources(sourceSets[it])
-                    }
-                }
-            }
-        }
-
-        create("client") {}
     }
 }
 
@@ -123,52 +90,60 @@ repositories {
     }
 }
 
-mixin {
-    // MixinGradle Settings
-    add(sourceSets["main"], "embeddium-refmap.json")
-    config("embeddium.mixins.json")
-}
-
-fun DependencyHandlerScope.compatCompileOnly(dependency: Dependency) {
+fun DependencyHandlerScope.compatCompileOnly(dependency: Any) {
     "compatCompileOnly"(dependency)
 }
 
+loom {
+    forge {
+        mixinConfigs.add("embeddium.mixins.json")
+    }
+    mixin.defaultRefmapName = "embeddium-refmap.json"
+    runs {
+        this["client"].apply {
+            mods {
+                create("archives_base_name"()) {
+                    sourceSet(sourceSets["main"])
+                    extraSourceSets.forEach {
+                        sourceSet(sourceSets[it])
+                    }
+                }
+            }
+        }
+    }
+    createRemapConfigurations(sourceSets["compat"])
+}
+
 dependencies {
-    minecraft("net.minecraftforge:forge:${"minecraft_version"()}-${"forge_version"()}")
+    minecraft("com.mojang:minecraft:${"minecraft_version"()}")
+    mappings(loom.layered {
+        officialMojangMappings {
+            nameSyntheticMembers = true
+        }
+        if(rootProject.properties.containsKey("parchment_version")) {
+            val parchment_version = "parchment_version"().split("-")
+            parchment("org.parchmentmc.data:parchment-${parchment_version[1]}:${parchment_version[0]}@zip")
+        }
+    })
+    forge("net.minecraftforge:forge:${"minecraft_version"()}-${"forge_version"()}")
 
     // Mods
-    compatCompileOnly(fg.deobf("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}"))
-    compatCompileOnly(fg.deobf("curse.maven:immersiveengineering-231951:${"ie_fileid"()}"))
+    compatCompileOnly("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
+    compatCompileOnly("curse.maven:immersiveengineering-231951:${"ie_fileid"()}")
 
     // Fabric API
     compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
     compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 
-    "runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))
+    //"runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))
 
     annotationProcessor("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
 
     compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
-    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.5")) {
-        jarJar.ranged(this, "[0.3.5,)")
-    }
-    implementation(jarJar("org.joml:joml:1.10.5")) {
-        jarJar.ranged(this, "[1.10.5,)")
-    }
-    minecraftLibrary("org.joml:joml:1.10.5")
-
-    // runtime remapping at home
-    fileTree(extraModsDir) {
-        include("*.jar") 
-    }.files.forEach { extraModJar ->
-        val basename = extraModJar.name.substring(0, extraModJar.name.length - ".jar".length)
-        val versionSep = basename.lastIndexOf('-')
-        assert(versionSep != -1)
-        val artifactId = basename.substring(0, versionSep)
-        val version = basename.substring(versionSep + 1)
-        runtimeOnly(fg.deobf("extra-mods:$artifactId:$version"))
-    }
+    implementation("io.github.llamalad7:mixinextras-forge:0.3.5")
+    implementation("org.joml:joml:1.10.5")
+    forgeRuntimeLibrary("org.joml:joml:1.10.5")
 }
 
 tasks.processResources {
@@ -192,17 +167,13 @@ tasks.named<Jar>("jar").configure {
     archiveClassifier = "slim"
 }
 
-tasks.jarJar {
+tasks.named<Jar>("jar") {
     from("COPYING", "COPYING.LESSER", "README.md")
 
     extraSourceSets.forEach {
         from(sourceSets[it].output.classesDirs)
         from(sourceSets[it].output.resourcesDir)
     }
-
-    finalizedBy("reobfJarJar")
-
-    archiveClassifier = ""
 }
 
 tasks.named<Jar>("sourcesJar").configure {
@@ -217,26 +188,8 @@ publishing {
     }
     publications {
         this.create<MavenPublication>("mavenJava") {
-            artifact(tasks.named("jarJar"))
-            artifact(tasks.named("sourcesJar"))
-            fg.component(this)
-            pom {
-                withXml {
-                    // Workaround for NG only checking for net.minecraftforge group
-                    val root = this.asElement()
-
-                    val depsParent = (root.getElementsByTagName("dependencies").item(0) as Element)
-                    val allDeps = depsParent.getElementsByTagName("dependency")
-
-                    (0..allDeps.length).map { allDeps.item(it) }.filterIsInstance<Element>().filter {
-                        val artifactId = it.getElementsByTagName("artifactId").item(0).textContent
-                        val groupId = it.getElementsByTagName("groupId").item(0).textContent
-                        (artifactId == "forge") && (groupId == "net.neoforged")
-                    }.forEach {
-                        depsParent.removeChild(it)
-                    }
-                }
-            }
+            artifact(tasks.named("remapJar"))
+            artifact(tasks.named("remapSourcesJar"))
         }
     }
 
@@ -246,7 +199,7 @@ publishing {
 }
 
 publishMods {
-    file = tasks.jarJar.get().archiveFile
+    file = tasks.remapJar.get().archiveFile
     changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
     type = STABLE
     modLoaders.add("forge")
