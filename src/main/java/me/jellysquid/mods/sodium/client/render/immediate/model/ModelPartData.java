@@ -7,7 +7,9 @@ public interface ModelPartData {
         return (ModelPartData) (Object) child;
     }
 
+    @Deprecated
     ModelCuboid[] getCuboids();
+    @Deprecated
     ModelPart[] getChildren();
 
     boolean isVisible();

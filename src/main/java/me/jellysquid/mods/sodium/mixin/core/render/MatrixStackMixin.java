@@ -18,7 +18,7 @@ public abstract class MatrixStackMixin implements CachingPoseStack {
     @Unique
     private final Deque<PoseStack.Pose> cache = new ArrayDeque<>();
 
-    private boolean cacheEnabled;
+    private int cacheEnabled = 0;
 
 
     /**
@@ -31,7 +31,7 @@ public abstract class MatrixStackMixin implements CachingPoseStack {
 
         PoseStack.Pose entry;
 
-        if (this.cacheEnabled && !this.cache.isEmpty()) {
+        if (this.cacheEnabled > 0 && !this.cache.isEmpty()) {
             entry = this.cache.removeLast();
             entry.pose()
                     .set(prev.pose());
@@ -51,13 +51,13 @@ public abstract class MatrixStackMixin implements CachingPoseStack {
     @Overwrite
     public void popPose() {
         PoseStack.Pose pose = this.poseStack.removeLast();
-        if(this.cacheEnabled) {
+        if(this.cacheEnabled > 0) {
             this.cache.addLast(pose);
         }
     }
 
     @Override
     public void embeddium$setCachingEnabled(boolean flag) {
-        this.cacheEnabled = flag;
+        this.cacheEnabled += flag ? 1 : -1;
     }
 }

@@ -1,0 +1,5 @@
+{
+  "embeddium.conflicting_mod": "Embeddium ha detectado que tienes mods instalados que pueden causar problemas conocidos de renderizado. Es recomendable que los desinstales. Échale un ojo a la lista debajo.",
+  "embeddium.conflicting_mod_list": "[{2}]",
+  "embeddium.search_bar_empty": "Buscar ajustes..."
+}

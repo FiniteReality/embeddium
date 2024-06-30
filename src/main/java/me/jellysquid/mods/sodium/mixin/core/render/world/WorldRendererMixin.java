@@ -11,11 +11,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -69,6 +65,10 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Shadow
     @Nullable
     private ClientLevel level;
+
+    @Shadow
+    @Final
+    private SectionOcclusionGraph sectionOcclusionGraph;
 
     @Override
     public SodiumWorldRenderer sodium$getWorldRenderer() {
@@ -156,6 +156,11 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Overwrite
     private void setupRender(Camera camera, Frustum frustum, boolean hasForcedFrustum, boolean spectator) {
         var viewport = ((ViewportProvider) frustum).sodium$createViewport();
+
+        // Detect mods setting the vanilla update flags themselves
+        if (this.sectionOcclusionGraph.consumeFrustumUpdate()) {
+            this.renderer.scheduleTerrainUpdate();
+        }
 
         RenderDevice.enterManagedCode();
 
