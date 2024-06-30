@@ -15,6 +15,8 @@ import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
+import java.util.List;
+
 public class EntityRenderer {
 
     private static final int NUM_CUBE_VERTICES = 8;
@@ -81,6 +83,7 @@ public class EntityRenderer {
         }
     }
 
+    @Deprecated
     public static void render(PoseStack matrixStack, VertexBufferWriter writer, ModelPart part, int light, int overlay, int color) {
         ModelPartData accessor = ModelPartData.from(part);
         
@@ -118,6 +121,7 @@ public class EntityRenderer {
         }
     }
 
+    @Deprecated
     private static void renderCuboids(PoseStack.Pose matrices, VertexBufferWriter writer, ModelCuboid[] cuboids, int light, int overlay, int color) {
         prepareNormals(matrices);
 
@@ -129,6 +133,16 @@ public class EntityRenderer {
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 writer.push(stack, SCRATCH_BUFFER, vertexCount, ModelVertex.FORMAT);
             }
+        }
+    }
+
+    public static void renderCuboidFast(PoseStack.Pose matrices, VertexBufferWriter writer, ModelCuboid cuboid, int light, int overlay, int color) {
+        prepareVertices(matrices, cuboid);
+
+        var vertexCount = emitQuads(cuboid, color, overlay, light);
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            writer.push(stack, SCRATCH_BUFFER, vertexCount, ModelVertex.FORMAT);
         }
     }
 
@@ -186,7 +200,7 @@ public class EntityRenderer {
         buildVertexTexCoord(VERTEX_TEXTURES[FACE_POS_X], cuboid.u0, cuboid.v1, cuboid.u1, cuboid.v2);
     }
 
-    private static void prepareNormals(PoseStack.Pose matrices) {
+    public static void prepareNormals(PoseStack.Pose matrices) {
         var normalMatrix = Matrix3fExtended.get(matrices.normal());
         CUBE_NORMALS[FACE_NEG_Y] = normalMatrix.transformNormal(Direction.DOWN);
         CUBE_NORMALS[FACE_POS_Y] = normalMatrix.transformNormal(Direction.UP);

@@ -11,6 +11,7 @@ import net.minecraft.util.Mth;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.embeddedt.embeddium.impl.render.chunk.compile.GlobalChunkBuildContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +44,7 @@ public class ChunkBuilder {
     private final ChunkBuildContext localContext;
 
     public ChunkBuilder(ClientLevel world, ChunkVertexType vertexType) {
+        GlobalChunkBuildContext.setMainThread();
         ForgeBlockRenderer.init();
 
         int count = getThreadCount();
@@ -51,7 +53,7 @@ public class ChunkBuilder {
             ChunkBuildContext context = new ChunkBuildContext(world, vertexType);
             WorkerRunnable worker = new WorkerRunnable(context);
 
-            Thread thread = new Thread(worker, "Chunk Render Task Executor #" + i);
+            Thread thread = new WorkerThread(worker, "Chunk Render Task Executor #" + i, context);
             thread.setPriority(Math.max(0, Thread.NORM_PRIORITY - 2));
             thread.start();
 
@@ -151,10 +153,12 @@ public class ChunkBuilder {
         }
 
         var localContext = this.localContext;
+        GlobalChunkBuildContext.bindMainThread(localContext);
 
         try {
             job.execute(localContext);
         } finally {
+            GlobalChunkBuildContext.bindMainThread(null);
             localContext.cleanup();
         }
     }
@@ -173,6 +177,21 @@ public class ChunkBuilder {
 
     public int getTotalThreadCount() {
         return this.threads.size();
+    }
+
+    private static class WorkerThread extends Thread implements GlobalChunkBuildContext.Holder {
+        private final ChunkBuildContext context;
+
+        public WorkerThread(Runnable runnable, String name, ChunkBuildContext context) {
+            super(runnable, name);
+            this.context = context;
+        }
+
+
+        @Override
+        public ChunkBuildContext embeddium$getGlobalContext() {
+            return context;
+        }
     }
 
     private class WorkerRunnable implements Runnable {

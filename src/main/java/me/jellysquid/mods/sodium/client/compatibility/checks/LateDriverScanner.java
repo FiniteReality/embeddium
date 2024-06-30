@@ -6,6 +6,8 @@ import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import me.jellysquid.mods.sodium.client.compatibility.environment.GLContextInfo;
+import org.lwjgl.opengl.ARBDebugOutput;
+import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +50,15 @@ public class LateDriverScanner {
             LOGGER.error("The NVIDIA graphics driver appears to be out of date. This will likely cause severe " +
                     "performance issues and crashes when used with Sodium. The graphics driver should be updated to " +
                     "the latest version (version 536.23 or newer).");
+        }
+
+        if (driver.vendor() != null && driver.vendor().contains("NVIDIA")) {
+            LOGGER.warn("Enabling secondary workaround for NVIDIA threaded optimizations");
+            // https://github.com/godotengine/godot/issues/33969#issuecomment-917846774
+            // Attempt to force the driver to disable its submission thread by enabling the synchronous debug output
+            // flag. In Linux testing, this successfully suppresses bad behavior from the driver on both 470 and
+            // 550 versions, even if __GL_THREADED_OPTIMIZATIONS=1 is explicitly provided.
+            GL11.glEnable(ARBDebugOutput.GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
         }
     }
 
