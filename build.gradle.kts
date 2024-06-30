@@ -2,7 +2,7 @@ import org.w3c.dom.Element
 
 plugins {
     id("idea")
-    id("net.neoforged.gradle.userdev") version("7.0.145")
+    id("net.neoforged.gradle.userdev") version("7.0.152")
     id("maven-publish")
 
     // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
@@ -72,6 +72,16 @@ repositories {
 minecraft {
     accessTransformers {
         file(rootProject.file("src/main/resources/META-INF/accesstransformer.cfg"))
+    }
+}
+
+if(project.hasProperty("parchment_version")) {
+    val parchment_info = project.properties["parchment_version"].toString().split("-")
+    subsystems {
+        parchment {
+            minecraftVersion = parchment_info[1]
+            mappingsVersion = parchment_info[0]
+        }
     }
 }
 
