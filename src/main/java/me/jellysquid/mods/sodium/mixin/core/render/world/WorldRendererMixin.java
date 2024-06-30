@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.SortedSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(LevelRenderer.class)
 public abstract class WorldRendererMixin implements WorldRendererExtended {
@@ -59,6 +60,10 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     private int frame;
 
     @Shadow public abstract boolean shouldShowEntityOutlines();
+
+    @Shadow
+    @Final
+    private AtomicBoolean needsFrustumUpdate;
 
     @Override
     public SodiumWorldRenderer sodium$getWorldRenderer() {
@@ -132,6 +137,11 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Overwrite
     private void setupRender(Camera camera, Frustum frustum, boolean hasForcedFrustum, boolean spectator) {
         var viewport = ((ViewportProvider) frustum).sodium$createViewport();
+
+        // Detect mods setting the vanilla update flags themselves
+        if (this.needsFullRenderChunkUpdate || this.needsFrustumUpdate.compareAndSet(true, false)) {
+            this.renderer.scheduleTerrainUpdate();
+        }
 
         RenderDevice.enterManagedCode();
 
