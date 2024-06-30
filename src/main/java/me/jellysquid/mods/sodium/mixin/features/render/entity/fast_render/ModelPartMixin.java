@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.mixin.features.render.entity.fast_render;
 
 import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import me.jellysquid.mods.sodium.client.model.ModelCuboidAccessor;
 import me.jellysquid.mods.sodium.client.render.immediate.model.EntityRenderer;
 import me.jellysquid.mods.sodium.client.render.immediate.model.ModelCuboid;
@@ -131,9 +132,17 @@ public class ModelPartMixin implements ModelPartData {
             matrixStack.translate(this.x * (1.0f / 16.0f), this.y * (1.0f / 16.0f), this.z * (1.0f / 16.0f));
         }
 
-        if (this.xRot != 0.0F || this.yRot != 0.0F || this.zRot != 0.0F) {
-            // TODO cache quaternion object
-            matrixStack.mulPose(Quaternion.fromXYZ(this.xRot, this.yRot, this.zRot));
+        // TODO do rotations without allocating so many Quaternions
+        if (this.zRot != 0.0F) {
+            matrixStack.mulPose(Vector3f.ZP.rotation(this.zRot));
+        }
+
+        if (this.yRot != 0.0F) {
+            matrixStack.mulPose(Vector3f.YP.rotation(this.yRot));
+        }
+
+        if (this.xRot != 0.0F) {
+            matrixStack.mulPose(Vector3f.XP.rotation(this.xRot));
         }
 
         if (this.xScale != 1.0F || this.yScale != 1.0F || this.zScale != 1.0F) {
