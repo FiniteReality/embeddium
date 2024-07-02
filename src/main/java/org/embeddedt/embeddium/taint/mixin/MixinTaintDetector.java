@@ -34,10 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MixinTaintDetector implements IExtension {
     /**
-     * The singleton instance of this mixin extension that is injected at launch time.
-     */
-    private static final MixinTaintDetector INSTANCE = new MixinTaintDetector();
-    /**
      * The list of class packages that are considered "internal".
      */
     private static final List<String> TARGET_PREFIXES = List.of("me.jellysquid.mods.sodium", "org.embeddedt.embeddium");
@@ -102,14 +98,15 @@ public class MixinTaintDetector implements IExtension {
     public static void initialize() {
         if(MixinEnvironment.getDefaultEnvironment().getActiveTransformer() instanceof IMixinTransformer transformer) {
             if(transformer.getExtensions() instanceof Extensions internalExtensions) {
+                var instance = new MixinTaintDetector();
                 try {
                     Field extensionsField = internalExtensions.getClass().getDeclaredField("extensions");
                     extensionsField.setAccessible(true);
-                    ((List<IExtension>)extensionsField.get(internalExtensions)).add(INSTANCE);
+                    ((List<IExtension>)extensionsField.get(internalExtensions)).add(instance);
                     Field activeExtensionsField = internalExtensions.getClass().getDeclaredField("activeExtensions");
                     activeExtensionsField.setAccessible(true);
                     List<IExtension> newActiveExtensions = new ArrayList<>((List<IExtension>)activeExtensionsField.get(internalExtensions));
-                    newActiveExtensions.add(INSTANCE);
+                    newActiveExtensions.add(instance);
                     activeExtensionsField.set(internalExtensions, Collections.unmodifiableList(newActiveExtensions));
                 } catch(ReflectiveOperationException | RuntimeException e) {
                     e.printStackTrace();
