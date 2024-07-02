@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.client.gui.options;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -55,6 +56,10 @@ public final class OptionIdentifier<T> {
             throw new IllegalArgumentException(String.format("OptionIdentifier '%s' created with differing class type %s from existing instance %s", ourIdentifier, ourIdentifier.clz, oldIdentifier.clz));
         }
         return oldIdentifier;
+    }
+
+    public static boolean isPresent(@Nullable OptionIdentifier<?> id) {
+        return id != null && id != EMPTY;
     }
     
     public boolean matches(OptionIdentifier<?> other) {
