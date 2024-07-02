@@ -139,6 +139,7 @@ dependencies {
     // Mods
     compatCompileOnly(fg.deobf("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}"))
     compatCompileOnly(fg.deobf("curse.maven:immersiveengineering-231951:${"ie_fileid"()}"))
+    compatCompileOnly(fg.deobf("com.brandon3055.brandonscore:BrandonsCore:1.20.1-3.2.1.302:universal"))
 
     // Fabric API
     compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
