@@ -47,10 +47,13 @@ public class MixinTaintDetector implements IExtension {
      */
     private static final MethodHandle GET_MIXINS_ON_CLASS_INFO;
     private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-MixinTaintDetector");
+    private static final EnforceLevel DEFAULT_ENFORCE_LEVEL = EnforceLevel.WARN;
+
     /**
-     * The enforcement level of taint detection. The default will only warn and not enforce the new requirements.
+     * The enforcement level of taint detection.
      */
-    public static final EnforceLevel ENFORCE_LEVEL = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", EnforceLevel.WARN.name()));
+    public static final EnforceLevel ENFORCE_LEVEL;
+
     /**
      * Mods which are not subject to the new taint requirements.
      */
@@ -86,6 +89,11 @@ public class MixinTaintDetector implements IExtension {
             e.printStackTrace();
         }
         GET_MIXINS_ON_CLASS_INFO = mh;
+        EnforceLevel propertyLevel = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", DEFAULT_ENFORCE_LEVEL.name()));
+        if(propertyLevel.ordinal() < DEFAULT_ENFORCE_LEVEL.ordinal()) {
+            propertyLevel = DEFAULT_ENFORCE_LEVEL;
+        }
+        ENFORCE_LEVEL = propertyLevel;
     }
 
     /**
