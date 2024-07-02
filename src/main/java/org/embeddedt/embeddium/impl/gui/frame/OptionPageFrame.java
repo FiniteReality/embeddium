@@ -1,6 +1,7 @@
 package org.embeddedt.embeddium.impl.gui.frame;
 
 import com.google.common.base.Predicates;
+import org.embeddedt.embeddium.api.options.OptionIdentifier;
 import org.embeddedt.embeddium.api.options.structure.Option;
 import org.embeddedt.embeddium.api.options.structure.OptionGroup;
 import org.embeddedt.embeddium.api.options.structure.OptionImpact;
@@ -18,10 +19,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.Validate;
 import org.embeddedt.embeddium.impl.gui.theme.DefaultColors;
+import org.embeddedt.embeddium.impl.util.PlatformUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class OptionPageFrame extends AbstractFrame {
@@ -121,6 +124,17 @@ public class OptionPageFrame extends AbstractFrame {
         }
     }
 
+    private static String normalizeModForTooltip(@Nullable String mod) {
+        if(mod == null) {
+            return null;
+        } else {
+            return switch(mod) {
+                case "minecraft" -> "embeddium";
+                default -> mod;
+            };
+        }
+    }
+
     private void renderOptionTooltip(GuiGraphics drawContext, ControlElement<?> element) {
         if (this.lastTime + 500 > System.currentTimeMillis()) return;
 
@@ -142,6 +156,12 @@ public class OptionPageFrame extends AbstractFrame {
 
         if (impact != null) {
             tooltip.add(Language.getInstance().getVisualOrder(Component.translatable("sodium.options.performance_impact_string", impact.getLocalizedName()).withStyle(ChatFormatting.GRAY)));
+        }
+
+        var id = option.getId();
+
+        if (OptionIdentifier.isPresent(page.getId()) && OptionIdentifier.isPresent(id) && !Objects.equals(normalizeModForTooltip(page.getId().getModId()), normalizeModForTooltip(id.getModId()))) {
+            tooltip.add(Language.getInstance().getVisualOrder(Component.translatable("embeddium.options.added_by_mod_string", Component.literal(PlatformUtil.getModName(id.getModId())).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY)));
         }
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;
