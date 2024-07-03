@@ -36,7 +36,7 @@ public class MixinTaintDetector implements IExtension {
     /**
      * The list of class packages that are considered "internal".
      */
-    private static final List<String> TARGET_PREFIXES = List.of("org.embeddedt.embeddium.impl");
+    private static final List<String> TARGET_PREFIXES = List.of("org.embeddedt.embeddium");
     /**
      * A method handle used to read the package-private {@link ClassInfo#mixins} field. We need this to find out
      * about mixins before they are applied.
