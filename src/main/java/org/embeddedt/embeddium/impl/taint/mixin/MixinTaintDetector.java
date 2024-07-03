@@ -34,10 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MixinTaintDetector implements IExtension {
     /**
-     * The singleton instance of this mixin extension that is injected at launch time.
-     */
-    private static final MixinTaintDetector INSTANCE = new MixinTaintDetector();
-    /**
      * The list of class packages that are considered "internal".
      */
     private static final List<String> TARGET_PREFIXES = List.of("org.embeddedt.embeddium.impl");
@@ -47,10 +43,13 @@ public class MixinTaintDetector implements IExtension {
      */
     private static final MethodHandle GET_MIXINS_ON_CLASS_INFO;
     private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-MixinTaintDetector");
+    private static final EnforceLevel DEFAULT_ENFORCE_LEVEL = EnforceLevel.CRASH;
+
     /**
-     * The enforcement level of taint detection. The default as of 1.21 is to crash.
+     * The enforcement level of taint detection.
      */
-    public static final EnforceLevel ENFORCE_LEVEL = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", EnforceLevel.CRASH.name()));
+    public static final EnforceLevel ENFORCE_LEVEL;
+
     /**
      * Mods which are not subject to the new taint requirements.
      */
@@ -86,6 +85,11 @@ public class MixinTaintDetector implements IExtension {
             e.printStackTrace();
         }
         GET_MIXINS_ON_CLASS_INFO = mh;
+        EnforceLevel propertyLevel = EnforceLevel.valueOf(System.getProperty("embeddium.mixinTaintEnforceLevel", DEFAULT_ENFORCE_LEVEL.name()));
+        if(propertyLevel.ordinal() < DEFAULT_ENFORCE_LEVEL.ordinal()) {
+            propertyLevel = DEFAULT_ENFORCE_LEVEL;
+        }
+        ENFORCE_LEVEL = propertyLevel;
     }
 
     /**
@@ -94,14 +98,15 @@ public class MixinTaintDetector implements IExtension {
     public static void initialize() {
         if(MixinEnvironment.getDefaultEnvironment().getActiveTransformer() instanceof IMixinTransformer transformer) {
             if(transformer.getExtensions() instanceof Extensions internalExtensions) {
+                var instance = new MixinTaintDetector();
                 try {
                     Field extensionsField = internalExtensions.getClass().getDeclaredField("extensions");
                     extensionsField.setAccessible(true);
-                    ((List<IExtension>)extensionsField.get(internalExtensions)).add(INSTANCE);
+                    ((List<IExtension>)extensionsField.get(internalExtensions)).add(instance);
                     Field activeExtensionsField = internalExtensions.getClass().getDeclaredField("activeExtensions");
                     activeExtensionsField.setAccessible(true);
                     List<IExtension> newActiveExtensions = new ArrayList<>((List<IExtension>)activeExtensionsField.get(internalExtensions));
-                    newActiveExtensions.add(INSTANCE);
+                    newActiveExtensions.add(instance);
                     activeExtensionsField.set(internalExtensions, Collections.unmodifiableList(newActiveExtensions));
                 } catch(ReflectiveOperationException | RuntimeException e) {
                     e.printStackTrace();
