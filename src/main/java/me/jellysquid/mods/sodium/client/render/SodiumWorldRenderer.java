@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render;
 
+import com.google.common.collect.Iterators;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -47,9 +48,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.loading.FMLLoader;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -296,6 +295,60 @@ public class SodiumWorldRenderer {
 
     public boolean didBlockEntityRequestOutline() {
         return blockEntityRequestedOutline;
+    }
+
+    /**
+     * {@return an iterator over all visible block entities}
+     * <p>
+     * Note that this method performs significantly more allocations and will generally be less efficient than
+     * {@link SodiumWorldRenderer#forEachVisibleBlockEntity(Consumer)}. It is intended only for situations where using
+     * that method is not feasible.
+     */
+    public Iterator<BlockEntity> blockEntityIterator() {
+        List<Iterator<BlockEntity>> iterators = new ArrayList<>();
+
+        SortedRenderLists renderLists = this.renderSectionManager.getRenderLists();
+        Iterator<ChunkRenderList> renderListIterator = renderLists.iterator();
+
+        while (renderListIterator.hasNext()) {
+            var renderList = renderListIterator.next();
+
+            var renderRegion = renderList.getRegion();
+            var renderSectionIterator = renderList.sectionsWithEntitiesIterator();
+
+            if (renderSectionIterator == null) {
+                continue;
+            }
+
+            while (renderSectionIterator.hasNext()) {
+                var renderSectionId = renderSectionIterator.nextByteAsInt();
+                var renderSection = renderRegion.getSection(renderSectionId);
+
+                var blockEntities = renderSection.getCulledBlockEntities();
+
+                if (blockEntities == null) {
+                    continue;
+                }
+
+                iterators.add(Iterators.forArray(blockEntities));
+            }
+        }
+
+        for (var renderSection : this.renderSectionManager.getSectionsWithGlobalEntities()) {
+            var blockEntities = renderSection.getGlobalBlockEntities();
+
+            if (blockEntities == null) {
+                continue;
+            }
+
+            iterators.add(Iterators.forArray(blockEntities));
+        }
+
+        if(iterators.isEmpty()) {
+            return Collections.emptyIterator();
+        } else {
+            return Iterators.concat(iterators.iterator());
+        }
     }
 
     public void forEachVisibleBlockEntity(Consumer<BlockEntity> consumer) {
