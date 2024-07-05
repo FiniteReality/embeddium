@@ -116,7 +116,9 @@ public class CloudRenderer {
         double cloudCenterX = (cameraX + cloudTime);
         double cloudCenterZ = (cameraZ) + 3.96D;
 
-        int renderDistance = fireModifyCloudRenderDistanceEvent(Minecraft.getInstance().options.getEffectiveRenderDistance());
+        int renderDistance = Minecraft.getInstance().options.getEffectiveRenderDistance();
+        // This insanity (as opposed to just wrapping the call) is necessary to preserve the original assignment for mixin compat
+        renderDistance = fireModifyCloudRenderDistanceEvent(renderDistance);
         int cloudDistance = Math.max(this.cloudDistanceMinimum, (renderDistance * this.cloudDistanceMaximum) + 9);
 
         int centerCellX = (int) (Math.floor(cloudCenterX / this.cloudSizeX));
