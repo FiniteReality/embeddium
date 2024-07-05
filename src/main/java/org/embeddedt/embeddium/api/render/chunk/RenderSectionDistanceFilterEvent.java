@@ -18,6 +18,10 @@ public class RenderSectionDistanceFilterEvent extends EmbeddiumEvent {
         return this.filter;
     }
 
+    /**
+     * Set a new render distance filter. Not delegating to the previous filter may cause other mods' behavior to be
+     * silently overwritten.
+     */
     public void setFilter(RenderSectionDistanceFilter filter) {
         this.filter = filter;
     }
