@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.taint.mixin;
+package org.embeddedt.embeddium_integrity;
 
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
