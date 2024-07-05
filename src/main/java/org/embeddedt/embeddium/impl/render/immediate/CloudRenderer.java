@@ -31,6 +31,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
+import org.embeddedt.embeddium.api.render.clouds.ModifyCloudRenderingEvent;
 import org.embeddedt.embeddium.impl.render.ShaderModBridge;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -90,6 +91,12 @@ public class CloudRenderer {
         this.reloadTextures(factory);
     }
 
+    private static int fireModifyCloudRenderDistanceEvent(int distance) {
+        var event = new ModifyCloudRenderingEvent(distance);
+        ModifyCloudRenderingEvent.BUS.post(event);
+        return event.getCloudRenderDistance();
+    }
+
     public void render(@Nullable ClientLevel world, LocalPlayer player, PoseStack stack, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, float ticks, float tickDelta, double cameraX, double cameraY, double cameraZ) {
         if (world == null) {
             return;
@@ -108,7 +115,7 @@ public class CloudRenderer {
         double cloudCenterX = (cameraX + cloudTime);
         double cloudCenterZ = (cameraZ) + 3.96D;
 
-        int renderDistance = Minecraft.getInstance().options.getEffectiveRenderDistance();
+        int renderDistance = fireModifyCloudRenderDistanceEvent(Minecraft.getInstance().options.getEffectiveRenderDistance());
         int cloudDistance = Math.max(this.cloudDistanceMinimum, (renderDistance * this.cloudDistanceMaximum) + 9);
 
         int centerCellX = (int) (Math.floor(cloudCenterX / this.cloudSizeX));

@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.impl.taint.mixin;
+package org.embeddedt.embeddium_integrity;
 
 import net.neoforged.fml.loading.LoadingModList;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
