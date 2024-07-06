@@ -5,6 +5,7 @@ import org.embeddedt.embeddium.impl.model.quad.properties.ModelQuadFacing;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.Material;
 import org.embeddedt.embeddium.impl.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import org.embeddedt.embeddium.impl.render.chunk.vertex.format.ChunkVertexEncoder;
+import org.embeddedt.embeddium.impl.render.frapi.SpriteFinderCache;
 import org.embeddedt.embeddium.impl.util.ModelQuadUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.embeddedt.embeddium.impl.render.chunk.data.BuiltSectionInfo;
@@ -72,11 +73,26 @@ public class BakedChunkModelBuilder implements ChunkModelBuilder {
         }
 
         private void flushQuad() {
+            triggerSpriteAnimation();
             var n = computedNormal;
             ModelQuadUtil.calculateNormal(vertices, n);
             var facing = ModelQuadUtil.findNormalFace(n.x, n.y, n.z);
             getVertexBuffer(facing).push(vertices, material);
             currentIndex = -1;
+        }
+
+        private void triggerSpriteAnimation() {
+            float uTotal = 0, vTotal = 0;
+            var vertices = this.vertices;
+            for(int i = 0; i < 4; i++) {
+                var vertex = vertices[i];
+                uTotal += vertex.u;
+                vTotal += vertex.v;
+            }
+            var sprite = SpriteFinderCache.forBlockAtlas().findNearestSprite(uTotal / 4, vTotal / 4);
+            if(sprite != null) {
+                addSprite(sprite);
+            }
         }
 
         private int flushLastVertex() {
