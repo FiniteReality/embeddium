@@ -23,12 +23,3 @@ mandatory = true
 versionRange = "[20.6.57-beta,)" #mandatory
 ordering = "NONE"
 side = "CLIENT"
-
-# Enforce new enough Oculus
-[[dependencies.embeddium]]
-modId = "oculus"
-type = "optional"
-mandatory = false
-versionRange = "(1.6.15,)"
-ordering = "BEFORE"
-side = "CLIENT"
