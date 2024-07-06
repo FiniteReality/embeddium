@@ -3,12 +3,7 @@ package org.embeddedt.embeddium.impl.render.immediate;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import org.embeddedt.embeddium.api.util.ColorABGR;
 import org.embeddedt.embeddium.api.util.ColorARGB;
 import org.embeddedt.embeddium.api.util.ColorMixer;
@@ -86,6 +81,7 @@ public class CloudRenderer {
     private float cloudSizeX, cloudSizeZ, fogDistanceMultiplier;
     private int cloudDistanceMinimum, cloudDistanceMaximum;
     private CloudStatus cloudRenderMode;
+    private boolean hasCloudGeometry;
 
     public CloudRenderer(ResourceProvider factory) {
         this.reloadTextures(factory);
@@ -133,13 +129,26 @@ public class CloudRenderer {
             }
 
             this.vertexBuffer.bind();
-            this.vertexBuffer.upload(bufferBuilder.buildOrThrow());
+
+            MeshData meshData = bufferBuilder.build();
+
+            if(meshData != null) {
+                this.vertexBuffer.upload(meshData);
+                this.hasCloudGeometry = true;
+            } else {
+                this.hasCloudGeometry = false;
+            }
 
             VertexBuffer.unbind();
 
             this.prevCenterCellX = centerCellX;
             this.prevCenterCellY = centerCellZ;
             this.cachedRenderDistance = renderDistance;
+        }
+
+        // Skip render path if there is no cloud geometry
+        if (!this.hasCloudGeometry) {
+            return;
         }
 
         float previousEnd = RenderSystem.getShaderFogEnd();
