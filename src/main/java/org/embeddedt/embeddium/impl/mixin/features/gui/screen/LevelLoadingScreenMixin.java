@@ -112,7 +112,11 @@ public class LevelLoadingScreenMixin {
             }
         }
 
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        var data = bufferBuilder.build();
+
+        if (data != null) {
+            BufferUploader.drawWithShader(data);
+        }
 
         RenderSystem.disableBlend();
     }
