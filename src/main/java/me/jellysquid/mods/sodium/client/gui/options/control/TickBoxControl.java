@@ -49,7 +49,7 @@ public class TickBoxControl implements Control<Boolean> {
             final int h = y + this.button.getHeight();
 
             final boolean enabled = this.option.isAvailable();
-            final boolean ticked = enabled && this.option.getValue();
+            final boolean ticked = this.option.getValue();
 
             final int color;
 
