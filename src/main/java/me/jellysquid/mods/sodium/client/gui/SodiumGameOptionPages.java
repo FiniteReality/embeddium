@@ -33,6 +33,13 @@ public class SodiumGameOptionPages {
     private static final SodiumOptionsStorage sodiumOpts = new SodiumOptionsStorage();
     private static final MinecraftOptionsStorage vanillaOpts = new MinecraftOptionsStorage();
 
+    private static int computeMaxRangeForRenderDistance(@SuppressWarnings("SameParameterValue") int injectedRenderDistance) {
+        if(vanillaOpts.getData().renderDistance().values() instanceof OptionInstance.IntRange range) {
+            injectedRenderDistance = Math.max(injectedRenderDistance, range.maxInclusive());
+        }
+        return injectedRenderDistance;
+    }
+
     public static OptionPage general() {
         List<OptionGroup> groups = new ArrayList<>();
 
@@ -42,7 +49,7 @@ public class SodiumGameOptionPages {
                         .setId(StandardOptions.Option.RENDER_DISTANCE)
                         .setName(Component.translatable("options.renderDistance"))
                         .setTooltip(Component.translatable("sodium.options.view_distance.tooltip"))
-                        .setControl(option -> new SliderControl(option, 2, 32, 1, ControlValueFormatter.translateVariable("options.chunks")))
+                        .setControl(option -> new SliderControl(option, 2, computeMaxRangeForRenderDistance(32), 1, ControlValueFormatter.translateVariable("options.chunks")))
                         .setBinding((options, value) -> options.renderDistance().set(value), options -> options.renderDistance().get())
                         .setImpact(OptionImpact.HIGH)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
