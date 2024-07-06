@@ -28,9 +28,9 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/loom-cache
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-build-snapshot-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-${{ steps.ref.output.branch }}-build-snapshot-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
-            ${{ runner.os }}-build-snapshot-
+            ${{ runner.os }}-${{ steps.ref.output.branch }}-build-snapshot-
       - name: Build artifacts
         run: ./gradlew reobfJarJar
       - name: Upload artifacts
