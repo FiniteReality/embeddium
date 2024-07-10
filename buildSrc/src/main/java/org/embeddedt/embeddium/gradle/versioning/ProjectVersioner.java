@@ -17,7 +17,7 @@ public class ProjectVersioner {
         String minecraftVersion = projectProperties.get("minecraft_version").toString();
         boolean isReleaseBuild = projectProperties.containsKey("build.release");
         if (isReleaseBuild) {
-            return "%s+%s".formatted(modVersion, minecraftVersion);
+            return "%s+mc%s".formatted(modVersion, minecraftVersion);
         } else {
             boolean isDirty;
             int betaVersion;
@@ -55,7 +55,7 @@ public class ProjectVersioner {
                 }
             }
 
-            return "%s-beta.%s%s+%s".formatted(modVersion, betaVersion, isDirty ? "-dirty" : "", minecraftVersion);
+            return "%s-beta.%s%s+mc%s".formatted(modVersion, betaVersion, isDirty ? "-dirty" : "", minecraftVersion);
         }
     }
 }
