@@ -1,7 +1,8 @@
-package org.embeddedt.embeddium.impl.render.texture;
+package org.embeddedt.embeddium.api.render.texture;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.embeddedt.embeddium.impl.render.chunk.compile.GlobalChunkBuildContext;
+import org.embeddedt.embeddium.impl.render.texture.SpriteContentsExtended;
 import org.jetbrains.annotations.Nullable;
 
 public class SpriteUtil {

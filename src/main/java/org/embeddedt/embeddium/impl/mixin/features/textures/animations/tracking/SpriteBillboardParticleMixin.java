@@ -1,7 +1,7 @@
 package org.embeddedt.embeddium.impl.mixin.features.textures.animations.tracking;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import org.embeddedt.embeddium.impl.render.texture.SpriteUtil;
+import org.embeddedt.embeddium.api.render.texture.SpriteUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.SingleQuadParticle;

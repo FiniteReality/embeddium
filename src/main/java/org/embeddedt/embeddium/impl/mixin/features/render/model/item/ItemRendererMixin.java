@@ -2,7 +2,7 @@ package org.embeddedt.embeddium.impl.mixin.features.render.model.item;
 
 import org.embeddedt.embeddium.impl.model.quad.BakedQuadView;
 import org.embeddedt.embeddium.impl.render.immediate.model.BakedModelEncoder;
-import org.embeddedt.embeddium.impl.render.texture.SpriteUtil;
+import org.embeddedt.embeddium.api.render.texture.SpriteUtil;
 import org.embeddedt.embeddium.impl.render.vertex.VertexConsumerUtils;
 import org.embeddedt.embeddium.impl.model.color.interop.ItemColorsExtended;
 import org.embeddedt.embeddium.impl.util.DirectionUtil;
