@@ -11,11 +11,13 @@ import net.minecraft.client.renderer.chunk.VisibilitySet;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.embeddedt.embeddium.api.render.chunk.SectionInfoBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 
 /**
  * The render data for a chunk render container containing all the information about which meshes are attached, the
@@ -87,6 +89,12 @@ public class BuiltSectionInfo {
         @Override
         public void addBlockEntity(BlockEntity entity, boolean cull) {
             (cull ? this.culledBlockEntities : this.globalBlockEntities).add(entity);
+        }
+
+        @Override
+        public void removeBlockEntitiesIf(Predicate<BlockEntity> filter) {
+            this.culledBlockEntities.removeIf(filter);
+            this.globalBlockEntities.removeIf(filter);
         }
 
         public BuiltSectionInfo build() {
