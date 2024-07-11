@@ -1,14 +1,12 @@
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RemapSourcesJarTask
+import org.embeddedt.embeddium.gradle.versioning.ProjectVersioner
+import org.w3c.dom.Element
 
 plugins {
     id("fabric-loom") version("1.6.6")
 
-    // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
-    // more easily identified. TODO: Lazily load GrGit via a service only when builds are performed.
-    id("org.ajoberstar.grgit") version("5.0.0")
-
-	id("me.modmuss50.mod-publish-plugin") version "0.3.4"
+    id("me.modmuss50.mod-publish-plugin") version("0.3.4")
 
     id("maven-publish")
 }
@@ -251,25 +249,5 @@ publishMods {
 }
 
 fun getModVersion(): String {
-    var baseVersion: String = project.properties["mod_version"].toString()
-    val mcMetadata: String = "+mc" + project.properties["minecraft_version"]
-
-    if (project.hasProperty("build.release")) {
-        return baseVersion + mcMetadata // no tag whatsoever
-    }
-
-    // Increment patch version
-    baseVersion = baseVersion.split(".").mapIndexed {
-        index, s -> if(index == 2) (s.toInt() + 1) else s
-    }.joinToString(separator = ".")
-
-    val head = grgit.head()
-    var id = head.abbreviatedId
-
-    // Flag the build if the build tree is not clean
-    if (!grgit.status().isClean) {
-        id += "-dirty"
-    }
-
-    return baseVersion + "-git-${id}" + mcMetadata
+    return ProjectVersioner.computeVersion(project.projectDir, project.properties)
 }
