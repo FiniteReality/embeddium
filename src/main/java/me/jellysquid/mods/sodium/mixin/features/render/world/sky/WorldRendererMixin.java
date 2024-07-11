@@ -5,6 +5,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.level.material.FogType;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ public class WorldRendererMixin {
         // This prevents the sky from being visible through chunks culled by Sodium's fog occlusion.
         // Fixes https://bugs.mojang.com/browse/MC-152504.
         // Credit to bytzo for noticing the change in 1.18.2.
-        if (camera.getFluidInCamera() == FogType.WATER) {
+        if (!ShaderModBridge.areShadersEnabled() && camera.getFluidInCamera() == FogType.WATER) {
             ci.cancel();
         }
     }
