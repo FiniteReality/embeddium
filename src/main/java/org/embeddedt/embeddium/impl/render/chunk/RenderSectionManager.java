@@ -50,6 +50,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.ArrayUtils;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
+import org.embeddedt.embeddium.impl.render.ShaderModBridge;
 import org.embeddedt.embeddium.impl.render.chunk.sorting.TranslucentQuadAnalyzer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -235,7 +236,8 @@ public class RenderSectionManager {
     private float getSearchDistance() {
         float distance;
 
-        if (Embeddium.options().performance.useFogOcclusion) {
+        // TODO: does *every* shaderpack really disable fog?
+        if (Embeddium.options().performance.useFogOcclusion && !ShaderModBridge.areShadersEnabled()) {
             distance = this.getEffectiveRenderDistance();
         } else {
             distance = this.getRenderDistance();

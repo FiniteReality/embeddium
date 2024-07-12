@@ -3,10 +3,12 @@ package org.embeddedt.embeddium.impl;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.impl.data.fingerprint.FingerprintMeasure;
 import org.embeddedt.embeddium.impl.data.fingerprint.HashedFingerprint;
 import org.embeddedt.embeddium.impl.gui.EmbeddiumOptions;
+import org.embeddedt.embeddium.impl.gui.EmbeddiumVideoOptionsScreen;
 import org.embeddedt.embeddium.impl.render.ShaderModBridge;
 import org.embeddedt.embeddium.impl.sodium.FlawlessFrames;
 import org.slf4j.Logger;
@@ -26,7 +28,9 @@ public class Embeddium {
     private static String MOD_VERSION;
 
     public Embeddium(IEventBus modEventBus) {
-        MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
+        var modContainer = ModList.get().getModContainerById(MODID).orElseThrow();
+        MOD_VERSION = modContainer.getModInfo().getVersion().toString();
+        modContainer.registerExtensionPoint(IConfigScreenFactory.class, (mc, screen) -> new EmbeddiumVideoOptionsScreen(screen, EmbeddiumVideoOptionsScreen.makePages()));
 
         try {
             updateFingerprint();
