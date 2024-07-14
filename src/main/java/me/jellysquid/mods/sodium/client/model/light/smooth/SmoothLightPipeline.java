@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
+import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -87,7 +88,11 @@ public class SmoothLightPipeline implements LightPipeline {
             this.applyNonParallelFace(neighborInfo, quad, pos, lightFace, out);
         }
 
-        this.applySidedBrightness(out, lightFace, shade);
+        if((flags & ModelQuadFlags.IS_VANILLA_SHADED) != 0) {
+            this.applySidedBrightness(out, lightFace, shade);
+        } else {
+            this.applySidedBrightnessFromNormals(out, quad, shade);
+        }
     }
 
     @Override
@@ -225,6 +230,18 @@ public class SmoothLightPipeline implements LightPipeline {
 
         for (int i = 0; i < br.length; i++) {
             br[i] *= brightness;
+        }
+    }
+
+    private void applySidedBrightnessFromNormals(QuadLightData out, ModelQuadView quad, boolean shade) {
+        float[] br = out.br;
+
+        for (int i = 0; i < br.length; i++) {
+            int normal = quad.getForgeNormal(i);
+            if (normal == 0) {
+                normal = quad.getComputedFaceNormal();
+            }
+            br[i] *= this.lightCache.getWorld().getShade(NormI8.unpackX(normal), NormI8.unpackY(normal), NormI8.unpackZ(normal), shade);
         }
     }
 
