@@ -40,7 +40,7 @@ public abstract class ForgeGuiMixin extends Gui {
      * @author embeddedt
      * @reason take over rendering of the actual list contents
      */
-    @Inject(method = "renderHUDText", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, remap = false)
+    @Inject(method = "renderHUDText", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, remap = false)
     private void embeddium$renderTextFast(int width, int height, PoseStack poseStack, CallbackInfo ci, ArrayList<String> listL, ArrayList<String> listR, CustomizeGuiOverlayEvent.DebugText event) {
         ci.cancel();
 
