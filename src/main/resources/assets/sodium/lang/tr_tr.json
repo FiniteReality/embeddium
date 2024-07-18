@@ -8,7 +8,7 @@
   "sodium.options.pages.performance": "Performans",
   "sodium.options.pages.advanced": "Gelişmis",
   "sodium.options.view_distance.tooltip": "Oluşturma mesafesi, arazinin ne kadar uzakta oluşturulacağını kontrol eder. Daha kısa mesafeler, daha az arazinin işleneceği anlamına gelir ve kare hızlarını iyileştirir.",
-  "sodium.options.simulation_distance.tooltip": ".Simülasyon mesafesi, arazinin ve varlıkların ne kadar uzağa yükleneceğini ve işaretleneceğini kontrol eder. Daha kısa mesafeler, iç sunucunun yükünü azaltabilir ve kare hızlarını iyileştirebilir.",
+  "sodium.options.simulation_distance.tooltip": "Simülasyon mesafesi, arazinin ve varlıkların ne kadar uzağa yükleneceğini ve işaretleneceğini kontrol eder. Daha kısa mesafeler, sunucunun yükünü azaltabilir ve kare hızlarını iyileştirebilir.",
   "sodium.options.brightness.tooltip": "Oyunun parlaklığını (gama) kontrol eder.",
   "sodium.options.gui_scale.tooltip": "Kullanıcı arayüzü için kullanılacak maksimum ölçek faktörünü ayarlar. ''Otomatik'' kullanılırsa, her zaman en büyük ölçek faktörü kullanılır.",
   "sodium.options.fullscreen.tooltip": "Etkinleştirilirse, oyun tam ekranda görüntülenir (destekleniyorsa).",
