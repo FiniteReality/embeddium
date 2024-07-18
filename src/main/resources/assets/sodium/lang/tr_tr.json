@@ -26,7 +26,7 @@
   "sodium.options.smooth_lighting.tooltip": "Blokların düzgün bir şekilde aydınlatılıp gölgelendirilip gölgelendirilmeyeceğini kontrol eder. Bu, bir yığını yeniden oluşturmak için gereken süreyi biraz artırır, ancak kare hızlarını etkilemez.",
   "sodium.options.biome_blend.value": "%s blok(lar)",
   "sodium.options.biome_blend.tooltip": "Blok renklendirme için hangi biyomların örnekleneceğini kontrol eder. Daha yüksek değerler, kalitede azalan iyileştirmeler için yığın oluşturmak için gereken süreyi büyük ölçüde artırır.",
-  "sodium.options.entity_distance.tooltip": "Varlıkların oyuncudan ne kadar uzakta oluşturulabileceğini kontrol eder. Daha yüksek değerler, kare hızlarından ödün vererek render mesafesini artırır.",
+  "sodium.options.entity_distance.tooltip": "Varlıkların oyuncudan ne kadar uzakta oluşturulabileceğini kontrol eder. Daha yüksek değerler, kare hızlarından ödün vererek işleme mesafesini artırır.",
   "sodium.options.entity_shadows.tooltip": "Etkinleştirilirse, yaratıkların ve diğer varlıkların altında temel gölgeler oluşturulur.",
   "sodium.options.vignette.name": "Vinyet",
   "sodium.options.vignette.tooltip": "Etkinleştirilirse, oyuncunun görünümünde bir vinyet efekti oluşturulacaktır. Doluluk oranı sınırlı olmadıkça bunun kare hızlarında bir fark yaratması pek olası değildir.",
@@ -54,7 +54,7 @@
   "sodium.options.always_defer_chunk_updates.name": "Yığın Güncellemelerini Her Zaman Ertele",
   "sodium.options.always_defer_chunk_updates.tooltip": "Etkinleştirilirse render işlemi, önemli olsalar bile yığın güncellemelerinin bitmesini asla beklemez. Bu, bazı senaryolarda kare hızlarını büyük ölçüde artırabilir, ancak dünyada önemli görsel gecikme yaratabilir.",
   "sodium.options.use_no_error_context.name": "Hata Yok İçeriğini Kullan",
-  "sodium.options.use_no_error_context.tooltip": "Etkinleştirilirse, OpenGL bağlamı hata denetimi devre dışı bırakılarak oluşturulur. Bu, performansı biraz artırabilir, ancak OpenGL hatalarını zarif bir şekilde ele almak yerine oyunun çökme riskini de artırır. Açıklanamayan ani çökmeler yaşıyorsanız bu seçeneği devre dışı bırakmalısınız.",
+  "sodium.options.use_no_error_context.tooltip": "Etkinleştirilirse, hata kontrolü devre dışı bırakılarak OpenGL içeriği oluşturulacaktır. Bu, performansı biraz artırabilir, ancak aynı zamanda OpenGL hatalarını düzgün bir şekilde ele almak yerine oyunun çökme riskini de artırır. Açıklanamayan ani çökmeler yaşıyorsanız bu seçeneği devre dışı bırakmalısınız.",
   "sodium.options.buttons.undo": "Geri al",
   "sodium.options.buttons.apply": "Uygula",
   "sodium.options.buttons.donate": "Sodium'u destekle!",
@@ -63,5 +63,5 @@
   "sodium.console.pojav_launcher": "PojavLauncher, Embeddium kullanılırken desteklenmez.\n * Aşırı performans sorunları, grafik hataları ve çökmelerle karşılaşmanız çok olasıdır.\n * Devam etmeye karar verirseniz kendi başınıza olacaksınız - herhangi bir hata veya çökme konusunda size yardımcı olmayacağız!",
   "sodium.console.core_shaders_error": "Aşağıdaki kaynak paketleri Embeddium ile uyumsuzdur:",
   "sodium.console.core_shaders_warn": "Aşağıdaki kaynak paketleri Embeddium ile uyumsuz olabilir:",
-  "sodium.console.core_shaders_info": "Ayrıntılı bilgi için oyun logunu kontrol edin."
+  "sodium.console.core_shaders_info": "Ayrıntılı bilgi için oyun günlükleri kontrol edin."
 }
