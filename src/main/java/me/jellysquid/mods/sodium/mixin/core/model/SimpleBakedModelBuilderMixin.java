@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(SimpleBakedModel.Builder.class)
 public class SimpleBakedModelBuilderMixin {
-    @ModifyArg(method = { "addCulledFace", "addUnculledFace" }, at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false))
+    @ModifyArg(method = { "addCulledFace", "addUnculledFace" }, at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), require = 0)
     private Object setVanillaShadingFlag(Object quad) {
         BakedQuadView view = (BakedQuadView)quad;
         view.setFlags(view.getFlags() | ModelQuadFlags.IS_VANILLA_SHADED);
