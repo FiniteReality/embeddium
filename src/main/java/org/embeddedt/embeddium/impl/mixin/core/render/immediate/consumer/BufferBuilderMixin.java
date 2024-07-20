@@ -37,16 +37,11 @@ public abstract class BufferBuilderMixin implements VertexBufferWriter {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onFormatChanged(ByteBufferBuilder buffer, VertexFormat.Mode mode, VertexFormat format, CallbackInfo ci) {
         this.embeddiumFormat = VertexFormatRegistry.instance().get(format);
-        // Sanity check, to avoid crashes in VertexBufferWriter code paths later
-        //noinspection ConstantValue
-        if (this.buffer == null && (Class<?>)this.getClass() == BufferBuilder.class) {
-            throw new IllegalArgumentException("Attempt to construct BufferBuilder with a null buffer, this will not work");
-        }
     }
 
     @Override
     public boolean canUseIntrinsics() {
-        return this.embeddiumFormat != null && this.embeddiumFormat.isSimpleFormat();
+        return this.embeddiumFormat != null && this.embeddiumFormat.isSimpleFormat() && this.buffer != null;
     }
 
     @Override
