@@ -126,6 +126,11 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     }
 
     @Override
+    public int getComputedFaceNormal() {
+        return this.normal;
+    }
+
+    @Override
     public Direction getLightFace() {
         return this.direction;
     }

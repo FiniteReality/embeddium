@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.model.light.flat;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
@@ -26,8 +27,14 @@ public class FlatLightPipeline implements LightPipeline {
      */
     private final LightDataAccess lightCache;
 
+    /**
+     * Whether or not to even attempt to shade quads using their normals rather than light face.
+     */
+    private final boolean useQuadNormalsForShading;
+
     public FlatLightPipeline(LightDataAccess lightCache) {
         this.lightCache = lightCache;
+        this.useQuadNormalsForShading = SodiumClientMod.options().quality.useQuadNormalsForShading;
     }
 
     @Override
@@ -49,7 +56,7 @@ public class FlatLightPipeline implements LightPipeline {
         }
 
         Arrays.fill(out.lm, lightmap);
-        if((quad.getFlags() & ModelQuadFlags.IS_VANILLA_SHADED) != 0) {
+        if((quad.getFlags() & ModelQuadFlags.IS_VANILLA_SHADED) != 0 || !this.useQuadNormalsForShading) {
             Arrays.fill(out.br, this.lightCache.getWorld().getShade(lightFace, shade));
         } else {
             this.applySidedBrightnessFromNormals(quad, out, shade);
@@ -57,13 +64,8 @@ public class FlatLightPipeline implements LightPipeline {
     }
 
     private void applySidedBrightnessFromNormals(ModelQuadView quad, QuadLightData out, boolean shade) {
-        for(int i = 0; i < 4; i++) {
-            int normal = quad.getForgeNormal(i);
-            if (normal == 0) {
-                normal = quad.getComputedFaceNormal();
-            }
-            out.br[i] = this.lightCache.getWorld().getShade(NormI8.unpackX(normal), NormI8.unpackY(normal), NormI8.unpackZ(normal), shade);
-        }
+        int normal = quad.getComputedFaceNormal();
+        Arrays.fill(out.br, this.lightCache.getWorld().getShade(NormI8.unpackX(normal), NormI8.unpackY(normal), NormI8.unpackZ(normal), shade));
     }
 
     /**
