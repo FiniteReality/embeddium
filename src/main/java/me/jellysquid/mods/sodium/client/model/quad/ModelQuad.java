@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.model.quad;
 
 import static me.jellysquid.mods.sodium.client.util.ModelQuadUtil.*;
 
+import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 
@@ -122,6 +123,11 @@ public class ModelQuad implements ModelQuadViewMutable {
     @Override
     public int getForgeNormal(int idx) {
         return this.data[vertexOffset(idx) + NORMAL_INDEX];
+    }
+
+    @Override
+    public int getComputedFaceNormal() {
+        return ModelQuadUtil.calculateNormal(this);
     }
 
     @Override

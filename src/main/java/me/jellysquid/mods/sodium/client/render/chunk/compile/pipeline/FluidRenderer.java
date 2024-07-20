@@ -220,7 +220,7 @@ public class FluidRenderer {
         LightMode lightMode = isWater && Minecraft.useAmbientOcclusion() ? LightMode.SMOOTH : LightMode.FLAT;
         LightPipeline lighter = this.lighters.getLighter(lightMode);
 
-        quad.setFlags(0);
+        quad.setFlags(ModelQuadFlags.IS_VANILLA_SHADED);
 
         if (!sfUp && this.isSideExposed(world, posX, posY, posZ, Direction.UP, Math.min(Math.min(northWestHeight, southWestHeight), Math.min(southEastHeight, northEastHeight)))) {
             northWestHeight -= EPSILON;
@@ -333,7 +333,7 @@ public class FluidRenderer {
 
         }
 
-        quad.setFlags(ModelQuadFlags.IS_PARALLEL | ModelQuadFlags.IS_ALIGNED);
+        quad.setFlags(ModelQuadFlags.IS_VANILLA_SHADED | ModelQuadFlags.IS_PARALLEL | ModelQuadFlags.IS_ALIGNED);
 
         for (Direction dir : DirectionUtil.HORIZONTAL_DIRECTIONS) {
             float c1;
