@@ -111,6 +111,11 @@ public class BakedQuadMixin implements BakedQuadView {
     }
 
     @Override
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    @Override
     public int getColorIndex() {
         return this.tintIndex;
     }
@@ -118,6 +123,11 @@ public class BakedQuadMixin implements BakedQuadView {
     @Override
     public ModelQuadFacing getNormalFace() {
         return this.normalFace;
+    }
+
+    @Override
+    public int getComputedFaceNormal() {
+        return this.normal;
     }
 
     @Override

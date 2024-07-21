@@ -9,7 +9,9 @@ import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import me.jellysquid.mods.sodium.client.data.fingerprint.FingerprintMeasure;
 import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
+import me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI;
 
+import net.neoforged.neoforge.client.ConfigScreenHandler;
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
@@ -33,6 +35,7 @@ public class SodiumClientMod {
     public SodiumClientMod() {
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "embeddium", (a, b) -> true));
+        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((mc, screen) -> new SodiumOptionsGUI(screen)));
 
         TaintDetector.init();
 

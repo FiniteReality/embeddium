@@ -21,6 +21,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuild
 import net.minecraft.client.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.embeddedt.embeddium.client.gui.options.StandardOptions;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.lwjgl.opengl.GL;
@@ -284,6 +285,18 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.VARIES)
                         .setBinding((opts, value) -> opts.performance.useTranslucentFaceSorting = value, opts -> opts.performance.useTranslucentFaceSorting)
                         .setEnabled(!ShaderModBridge.isNvidiumEnabled())
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build())
+                .build());
+
+        groups.add(OptionGroup.createBuilder()
+                .setId(StandardOptions.Group.LIGHTING)
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setId(StandardOptions.Option.USE_QUAD_NORMALS_FOR_LIGHTING)
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.LOW)
+                        .setBinding((opts, value) -> opts.quality.useQuadNormalsForShading = value, opts -> opts.quality.useQuadNormalsForShading)
+                        .setEnabled(!NeoForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get())
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .build());
