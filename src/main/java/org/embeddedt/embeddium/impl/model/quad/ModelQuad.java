@@ -4,6 +4,7 @@ import static org.embeddedt.embeddium.impl.util.ModelQuadUtil.*;
 
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import org.embeddedt.embeddium.impl.util.ModelQuadUtil;
 
 /**
  * A simple implementation of the {@link ModelQuadViewMutable} interface which can provide an on-heap scratch area
@@ -123,6 +124,11 @@ public class ModelQuad implements ModelQuadViewMutable {
     @Override
     public int getForgeNormal(int idx) {
         return this.data[vertexOffset(idx) + NORMAL_INDEX];
+    }
+
+    @Override
+    public int getComputedFaceNormal() {
+        return ModelQuadUtil.calculateNormal(this);
     }
 
     @Override

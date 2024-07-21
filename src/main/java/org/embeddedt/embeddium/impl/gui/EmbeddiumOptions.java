@@ -67,6 +67,8 @@ public class EmbeddiumOptions {
         public GraphicsQuality leavesQuality = GraphicsQuality.DEFAULT;
 
         public boolean enableVignette = true;
+
+        public boolean useQuadNormalsForShading = false;
     }
 
     public static class NotificationSettings {

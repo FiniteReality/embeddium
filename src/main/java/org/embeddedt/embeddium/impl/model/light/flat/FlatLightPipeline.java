@@ -1,5 +1,7 @@
 package org.embeddedt.embeddium.impl.model.light.flat;
 
+import org.embeddedt.embeddium.api.util.NormI8;
+import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.model.light.LightPipeline;
 import org.embeddedt.embeddium.impl.model.light.data.LightDataAccess;
 import org.embeddedt.embeddium.impl.model.light.data.QuadLightData;
@@ -25,8 +27,14 @@ public class FlatLightPipeline implements LightPipeline {
      */
     private final LightDataAccess lightCache;
 
+    /**
+     * Whether or not to even attempt to shade quads using their normals rather than light face.
+     */
+    private final boolean useQuadNormalsForShading;
+
     public FlatLightPipeline(LightDataAccess lightCache) {
         this.lightCache = lightCache;
+        this.useQuadNormalsForShading = Embeddium.options().quality.useQuadNormalsForShading;
     }
 
     @Override
@@ -48,7 +56,16 @@ public class FlatLightPipeline implements LightPipeline {
         }
 
         Arrays.fill(out.lm, lightmap);
-        Arrays.fill(out.br, this.lightCache.getWorld().getShade(lightFace, shade));
+        if((quad.getFlags() & ModelQuadFlags.IS_VANILLA_SHADED) != 0 || !this.useQuadNormalsForShading) {
+            Arrays.fill(out.br, this.lightCache.getWorld().getShade(lightFace, shade));
+        } else {
+            this.applySidedBrightnessFromNormals(quad, out, shade);
+        }
+    }
+
+    private void applySidedBrightnessFromNormals(ModelQuadView quad, QuadLightData out, boolean shade) {
+        int normal = quad.getComputedFaceNormal();
+        Arrays.fill(out.br, this.lightCache.getWorld().getShade(NormI8.unpackX(normal), NormI8.unpackY(normal), NormI8.unpackZ(normal), shade));
     }
 
     /**
