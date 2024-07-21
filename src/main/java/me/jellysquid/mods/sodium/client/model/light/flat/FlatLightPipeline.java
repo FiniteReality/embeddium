@@ -64,7 +64,7 @@ public class FlatLightPipeline implements LightPipeline {
     }
 
     private void applySidedBrightnessFromNormals(ModelQuadView quad, QuadLightData out, boolean shade) {
-        int normal = quad.getComputedFaceNormal();
+        int normal = quad.getModFaceNormal();
         Arrays.fill(out.br, this.lightCache.getWorld().getShade(NormI8.unpackX(normal), NormI8.unpackY(normal), NormI8.unpackZ(normal), shade));
     }
 
