@@ -243,7 +243,7 @@ public class SmoothLightPipeline implements LightPipeline {
 
     private void applySidedBrightnessFromNormals(QuadLightData out, ModelQuadView quad, boolean shade) {
         // TODO: consider calculating for vertex if mods actually change normals per-vertex
-        int normal = quad.getComputedFaceNormal();
+        int normal = quad.getModFaceNormal();
         float brightness = this.lightCache.getWorld().getShade(NormI8.unpackX(normal), NormI8.unpackY(normal), NormI8.unpackZ(normal), shade);
         float[] br = out.br;
 
