@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.impl.model.color;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import org.embeddedt.embeddium.impl.model.color.interop.BlockColorsExtended;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.BiomeColors;
@@ -41,7 +42,10 @@ public class ColorProviderRegistry {
                 Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
                 Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES);
 
-        DefaultColorProviders.VertexBlendedBiomeColorAdapter.VanillaBiomeColor waterGetter = (getter, pos) -> BiomeColors.getAverageWaterColor(getter, pos) | 0xFF000000;
+        var waterExtensions = IClientFluidTypeExtensions.of(Fluids.WATER);
+        var waterState = Fluids.WATER.defaultFluidState();
+        DefaultColorProviders.VertexBlendedBiomeColorAdapter.VanillaBiomeColor waterGetter = (getter, pos) -> waterExtensions.getTintColor(waterState, getter, pos);
+
         this.registerBlocks(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(waterGetter),
                 Blocks.WATER, Blocks.BUBBLE_COLUMN);
 

@@ -55,8 +55,13 @@ public class MixinTaintDetector implements IExtension {
      */
     private static final Collection<String> MOD_ID_WHITELIST = Set.of(
             "embeddium", // obviously
-            "flywheel" // until we finish sorting that out ;)
+            "flywheel" // mixin removed in next release, and only targets a class we are currently forced to protect anyway
     );
+
+    /**
+     * Mods which have injected into Embeddium with a mixin.
+     */
+    private static final Set<String> TAINTING_MODS = ConcurrentHashMap.newKeySet();
 
     public enum EnforceLevel {
         /**
@@ -89,6 +94,10 @@ public class MixinTaintDetector implements IExtension {
             propertyLevel = DEFAULT_ENFORCE_LEVEL;
         }
         ENFORCE_LEVEL = propertyLevel;
+    }
+
+    public static Collection<String> getTaintingMods() {
+        return Collections.unmodifiableCollection(TAINTING_MODS);
     }
 
     /**
@@ -226,10 +235,14 @@ public class MixinTaintDetector implements IExtension {
             if(!mixins.isEmpty()) {
                 var illegalMixinMap = filterInvalidMixins(mixins);
                 if(!illegalMixinMap.isEmpty()) {
+                    if(TAINTING_MODS.isEmpty()) {
+                        LOGGER.error("Mod mixin into Embeddium internals detected. This instance is now tainted. The Embeddium team does not provide any guarantee of support for issues encountered while such mods are installed.");
+                    }
+                    TAINTING_MODS.addAll(illegalMixinMap.keySet());
                     var mixinList = "[" + String.join(", ", illegalMixinMap.keySet()) + "]";
-                    LOGGER.warn("Mod(s) {} are modifying Embeddium class {}, which may cause instability. Limited support is provided for such mods, and the ability to do this will be mostly removed in 1.21. It is highly recommended that mods migrate to APIs provided by Embeddium or the modloader (and/or request/contribute their own).", mixinList, name);
+                    LOGGER.warn("Mod(s) {} are modifying Embeddium class {}, which may cause instability.", mixinList, name);
                     if(ENFORCE_LEVEL == EnforceLevel.CRASH) {
-                        throw new IllegalStateException("Mods " + mixinList + " are mixing into internal Embeddium class " + name + ", which is no longer permitted");
+                        throw new IllegalStateException("Mods " + mixinList + " are mixing into internal Embeddium class " + name + ". This has potential to destabilize the game, and the taint detector is currently configured to crash.");
                     }
                 }
             }
