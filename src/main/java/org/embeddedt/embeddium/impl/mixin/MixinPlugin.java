@@ -72,6 +72,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
         // Detect known bypasses of the taint detector
         try {
+            // https://github.com/dima-dencep/NanoLiveConfig/commit/841e17eacca2d3a1e12b025fc490f392d202ea73
             if(MixinService.getService().getBytecodeProvider().getClassNode("net.caffeinemc.caffeineconfig.AdvancedEmbeddiumHackery") != null) {
                 FMLLoader.getLoadingModList().getModLoadingIssues().add(ModLoadingIssue.error("Rubidium/Embeddium Extra by dima_dencep hacks Embeddium to prevent accurate detection of mods causing game issues, it is not supported"));
             }
