@@ -43,7 +43,7 @@ public class MixinTaintDetector implements IExtension {
      */
     private static final MethodHandle GET_MIXINS_ON_CLASS_INFO;
     private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-MixinTaintDetector");
-    private static final EnforceLevel DEFAULT_ENFORCE_LEVEL = EnforceLevel.CRASH;
+    private static final EnforceLevel DEFAULT_ENFORCE_LEVEL = EnforceLevel.WARN;
 
     /**
      * The enforcement level of taint detection.

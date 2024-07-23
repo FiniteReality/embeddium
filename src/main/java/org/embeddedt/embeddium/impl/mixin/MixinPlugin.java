@@ -1,5 +1,6 @@
 package org.embeddedt.embeddium.impl.mixin;
 
+import net.neoforged.fml.ModLoadingIssue;
 import org.embeddedt.embeddium.impl.EmbeddiumPreLaunch;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLLoader;
@@ -13,6 +14,7 @@ import org.embeddedt.embeddium_integrity.MixinTaintDetector;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.service.MixinService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -67,6 +69,15 @@ public class MixinPlugin implements IMixinConfigPlugin {
         EmbeddiumPreLaunch.onPreLaunch();
 
         MixinTaintDetector.initialize();
+
+        // Detect known bypasses of the taint detector
+        try {
+            if(MixinService.getService().getBytecodeProvider().getClassNode("net.caffeinemc.caffeineconfig.AdvancedEmbeddiumHackery") != null) {
+                FMLLoader.getLoadingModList().getModLoadingIssues().add(ModLoadingIssue.error("Rubidium/Embeddium Extra by dima_dencep hacks Embeddium to prevent accurate detection of mods causing game issues, it is not supported"));
+            }
+        } catch (ClassNotFoundException | IOException ignored) {
+            // no problem
+        }
     }
 
     @Override
