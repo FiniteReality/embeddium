@@ -1,0 +1,6 @@
+{
+  "embeddium.conflicting_mod": "Embeddium, işleme sorunlarına/çökmelerine neden olduğu bilinen modların varlığını tespit etti. Bunları kaldırmanız önerilir. Aşağıdaki listeye bakın.",
+  "embeddium.conflicting_mod_list": "[{2}]",
+  "embeddium.search_bar_empty": "Seçenekleri arayın...",
+  "embeddium.options.added_by_mod_string": "Mod tarafında eklendı: %s"
+}
