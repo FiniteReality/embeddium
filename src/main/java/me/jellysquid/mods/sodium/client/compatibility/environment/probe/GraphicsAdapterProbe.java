@@ -4,8 +4,6 @@ import me.jellysquid.mods.sodium.client.compatibility.environment.OSInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
-import oshi.hardware.GraphicsCard;
-import oshi.hardware.HardwareAbstractionLayer;
 import oshi.util.ExecutingCommand;
 
 import java.io.IOException;
@@ -46,6 +44,10 @@ public class GraphicsAdapterProbe {
 
         var results = new ArrayList<GraphicsAdapterInfo>();
 
+        // TODO
+
+        /*
+
         for (var graphicsCard : hardwareInfo.getGraphicsCards()) {
             GraphicsAdapterVendor vendor = GraphicsAdapterVendor.identifyVendorFromString(graphicsCard.getVendor());
             String name = graphicsCard.getName();
@@ -56,6 +58,8 @@ public class GraphicsAdapterProbe {
 
             LOGGER.info("Found graphics card: {}", info);
         }
+
+         */
 
         return results;
     }

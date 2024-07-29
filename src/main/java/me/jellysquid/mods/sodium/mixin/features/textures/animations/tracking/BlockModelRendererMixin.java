@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.textures.animations.tracking;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import me.jellysquid.mods.sodium.client.model.quad.BakedQuadView;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -22,6 +23,6 @@ public class BlockModelRendererMixin {
      */
     @Inject(method = "putQuadData", at = @At("HEAD"))
     private void preRenderQuad(BlockAndTintGetter world, BlockState state, BlockPos pos, VertexConsumer vertexConsumer, PoseStack.Pose matrixEntry, BakedQuad quad, float brightness0, float brightness1, float brightness2, float brightness3, int light0, int light1, int light2, int light3, int overlay, CallbackInfo ci) {
-        SpriteUtil.markSpriteActive(quad.getSprite());
+        SpriteUtil.markSpriteActive(((BakedQuadView)quad).getSprite());
     }
 }

@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ReferenceMaps;
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.*;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.gl.compat.FogHelper;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
@@ -149,9 +150,9 @@ public class RenderSectionManager {
         if(!this.translucencySorting || lastCameraPosition == null)
             return;
 
-        int camSectionX = SectionPos.blockToSectionCoord(cameraPosition.x);
-        int camSectionY = SectionPos.blockToSectionCoord(cameraPosition.y);
-        int camSectionZ = SectionPos.blockToSectionCoord(cameraPosition.z);
+        int camSectionX = SectionPos.blockToSectionCoord(Mth.floor(cameraPosition.x));
+        int camSectionY = SectionPos.blockToSectionCoord(Mth.floor(cameraPosition.y));
+        int camSectionZ = SectionPos.blockToSectionCoord(Mth.floor(cameraPosition.z));
 
         this.scheduleTranslucencyUpdates(camSectionX, camSectionY, camSectionZ);
     }
@@ -199,9 +200,9 @@ public class RenderSectionManager {
                     continue;
                 }
 
-                boolean cameraChangedSection = camSectionX != SectionPos.blockToSectionCoord(section.lastCameraX) ||
-                        camSectionY != SectionPos.blockToSectionCoord(section.lastCameraY) ||
-                        camSectionZ != SectionPos.blockToSectionCoord(section.lastCameraZ);
+                boolean cameraChangedSection = camSectionX != SectionPos.blockToSectionCoord(Mth.floor(section.lastCameraX)) ||
+                        camSectionY != SectionPos.blockToSectionCoord(Mth.floor(section.lastCameraY)) ||
+                        camSectionZ != SectionPos.blockToSectionCoord(Mth.floor(section.lastCameraZ));
 
                 if (cameraChangedSection || section.isAlignedWithSectionOnGrid(camSectionX, camSectionY, camSectionZ)) {
                     section.setPendingUpdate(update);
@@ -281,9 +282,9 @@ public class RenderSectionManager {
         this.sectionByPosition.put(key, renderSection);
 
         ChunkAccess chunk = this.world.getChunk(x, z);
-        LevelChunkSection section = chunk.getSections()[this.world.getSectionIndexFromSectionY(y)];
+        LevelChunkSection section = chunk.getSections()[y / 16];
 
-        boolean isEmpty = (section == null || section.hasOnlyAir()) && ChunkMeshEvent.post(this.world, SectionPos.of(x, y, z)).isEmpty();
+        boolean isEmpty = LevelChunkSection.isEmpty(section) && ChunkMeshEvent.post(this.world, SectionPos.of(x, y, z)).isEmpty();
         if (isEmpty) {
             this.updateSectionInfo(renderSection, BuiltSectionInfo.EMPTY);
         } else {
@@ -626,8 +627,8 @@ public class RenderSectionManager {
     }
 
     private float getEffectiveRenderDistance() {
-        var color = RenderSystem.getShaderFogColor();
-        var distance = RenderSystem.getShaderFogEnd();
+        var color = FogHelper.getFogColor();
+        var distance = FogHelper.getFogCutoff();
 
         var renderDistance = this.getRenderDistance();
 
@@ -793,13 +794,13 @@ public class RenderSectionManager {
     }
 
     public void onChunkAdded(int x, int z) {
-        for (int y = this.world.getMinSection(); y < this.world.getMaxSection(); y++) {
+        for (int y = 0; y < 16; y++) {
             this.onSectionAdded(x, y, z);
         }
     }
 
     public void onChunkRemoved(int x, int z) {
-        for (int y = this.world.getMinSection(); y < this.world.getMaxSection(); y++) {
+        for (int y = 0; y < 16; y++) {
             this.onSectionRemoved(x, y, z);
         }
     }

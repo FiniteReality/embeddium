@@ -15,8 +15,9 @@ public class OptionsScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "lambda$init$4", at = @At("HEAD"))
+    @Inject(method = "lambda$init$5", at = @At("HEAD"), cancellable = true)
     private void open(CallbackInfo ci) {
         this.minecraft.setScreen(new EmbeddiumVideoOptionsScreen(this));
+        ci.cancel();
     }
 }

@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import me.jellysquid.mods.sodium.client.compatibility.environment.GLContextInfo;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.lwjgl.opengl.ARBDebugOutput;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class LateDriverScanner {
         checkContextImplementation();
 
         if (isUsingPojavLauncher()) {
-            Console.instance().logMessage(MessageLevel.SEVERE, Component.translatable("sodium.console.pojav_launcher"), 30.0);
+            Console.instance().logMessage(MessageLevel.SEVERE, new TranslatableComponent("sodium.console.pojav_launcher"), 30.0);
             LOGGER.error("It appears that PojavLauncher is being used with an OpenGL compatibility layer. This will " +
                     "likely cause severe performance issues, graphical issues, and crashes when used with " + MODNAME + ". This " +
                     "configuration is not supported -- you are on your own!");
@@ -45,7 +46,7 @@ public class LateDriverScanner {
 
         if (!isSupportedNvidiaDriver(driver)) {
             Console.instance()
-                    .logMessage(MessageLevel.SEVERE, Component.translatable("sodium.console.broken_nvidia_driver"), 30.0);
+                    .logMessage(MessageLevel.SEVERE, new TranslatableComponent("sodium.console.broken_nvidia_driver"), 30.0);
 
             LOGGER.error("The NVIDIA graphics driver appears to be out of date. This will likely cause severe " +
                     "performance issues and crashes when used with Sodium. The graphics driver should be updated to " +

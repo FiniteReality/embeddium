@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.gui.options.binding.OptionBinding;
 import me.jellysquid.mods.sodium.client.gui.options.control.Control;
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
@@ -227,11 +228,11 @@ public class OptionImpl<S, T> implements Option<T> {
                 //SodiumClientMod.logger().warn("Id must be specified in option '{}', this might throw a exception on a future release", this.name.getString());
             } else {
                 if (this.name == null) {
-                    this.name = Component.translatable(this.id.getModId() + ".options." + this.id.getPath() + ".name");
+                    this.name = new TranslatableComponent(this.id.getModId() + ".options." + this.id.getPath() + ".name");
                 }
 
                 if (this.tooltip == null) {
-                    this.tooltip = Component.translatable(this.id.getModId() + ".options." + this.id.getPath() + ".tooltip");
+                    this.tooltip = new TranslatableComponent(this.id.getModId() + ".options." + this.id.getPath() + ".tooltip");
                 }
             }
 

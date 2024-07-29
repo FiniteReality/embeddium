@@ -36,7 +36,7 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer impleme
     protected abstract void ensureCapacity(int size);
 
     @Shadow
-    private VertexFormat.Mode mode;
+    private int mode;
     @Unique
     private VertexFormatDescription format;
 
@@ -59,7 +59,7 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer impleme
         this.fastDelegate = null;// this.format.isSimpleFormat() ? new SodiumBufferBuilder(this) : null;
     }
 
-    @Inject(method = { "discard", "reset", "begin" }, at = @At("RETURN"))
+    @Inject(method = { "discard", "begin" }, at = @At("RETURN"))
     private void resetDelegate(CallbackInfo ci) {
         if (this.fastDelegate != null) {
             this.fastDelegate.reset();
@@ -126,7 +126,7 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer impleme
 
     @Unique
     private boolean shouldDuplicateVertices() {
-        return this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP;
+        return false; //this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP;
     }
 
     @Unique

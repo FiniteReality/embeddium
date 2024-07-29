@@ -3,7 +3,7 @@ package me.jellysquid.mods.sodium.client.gui.options;
 import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.embeddedt.embeddium.api.OptionPageConstructionEvent;
 import org.embeddedt.embeddium.client.gui.options.OptionIdGenerator;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
@@ -21,8 +21,8 @@ public class OptionPage {
 
     private static OptionIdentifier<Void> tryMakeId(Component name) {
         OptionIdentifier<Void> id;
-        if(name.getContents() instanceof TranslatableContents translatableContents) {
-            String key = translatableContents.getKey();
+        if(name instanceof TranslatableComponent component) {
+            String key = component.getKey();
             if(name.getSiblings().isEmpty()) {
                 // Detect our own tabs
                 id = switch(key) {

@@ -9,6 +9,7 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.embeddedt.embeddium.config.ConfigMigrator;
 
 import java.io.FileReader;
@@ -51,7 +52,6 @@ public class SodiumGameOptions {
         public boolean useCompactVertexFormat = true;
         @SerializedName("use_translucent_face_sorting_v2")
         public boolean useTranslucentFaceSorting = true;
-        public boolean useNoErrorGLContext = true;
     }
 
     public static class AdvancedSettings {
@@ -84,7 +84,7 @@ public class SodiumGameOptions {
         private final Component name;
 
         GraphicsQuality(String name) {
-            this.name = Component.translatable(name);
+            this.name = new TranslatableComponent(name);
         }
 
         @Override

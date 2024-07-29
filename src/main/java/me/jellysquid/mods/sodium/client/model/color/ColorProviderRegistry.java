@@ -39,7 +39,7 @@ public class ColorProviderRegistry {
 
         this.registerBlocks(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(BiomeColors::getAverageFoliageColor),
                 Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
-                Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES);
+                Blocks.DARK_OAK_LEAVES, Blocks.VINE);
 
         DefaultColorProviders.VertexBlendedBiomeColorAdapter.VanillaBiomeColor waterGetter = (getter, pos) -> BiomeColors.getAverageWaterColor(getter, pos) | 0xFF000000;
         this.registerBlocks(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(waterGetter),

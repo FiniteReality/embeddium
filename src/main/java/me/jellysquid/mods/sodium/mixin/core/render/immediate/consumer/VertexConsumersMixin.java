@@ -41,37 +41,4 @@ public class VertexConsumersMixin {
             VertexBufferWriter.copyInto(VertexBufferWriter.of(this.second), stack, ptr, count, format);
         }
     }
-
-    @Mixin(targets = "com/mojang/blaze3d/vertex/VertexMultiConsumer$Multiple")
-    public static class UnionMixin implements VertexBufferWriter {
-        @Shadow
-        @Final
-        private VertexConsumer[] delegates;
-
-        private boolean isFullWriter;
-
-        @Inject(method = "<init>", at = @At("RETURN"))
-        private void checkFullStatus(CallbackInfo ci) {
-            boolean notWriter = false;
-            for(var delegate : this.delegates) {
-                if(VertexBufferWriter.tryOf(delegate) == null) {
-                    notWriter = true;
-                    break;
-                }
-            }
-            this.isFullWriter = !notWriter;
-        }
-
-        @Override
-        public boolean canUseIntrinsics() {
-            return this.isFullWriter;
-        }
-
-        @Override
-        public void push(MemoryStack stack, long ptr, int count, VertexFormatDescription format) {
-            for (var delegate : this.delegates) {
-                VertexBufferWriter.copyInto(VertexBufferWriter.of(delegate), stack, ptr, count, format);
-            }
-        }
-    }
 }

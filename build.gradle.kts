@@ -128,8 +128,9 @@ dependencies {
     forge("net.minecraftforge:forge:${"minecraft_version"()}-${"forge_version"()}")
 
     // Mods
-    compatCompileOnly("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
-    compatCompileOnly("curse.maven:immersiveengineering-231951:${"ie_fileid"()}")
+    "modCompatCompileOnly"("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
+
+    modLocalRuntime("curse.maven:lazydfu-460819:3249059")
 
     // Fabric API
     compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
@@ -137,13 +138,9 @@ dependencies {
 
     //"runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))
 
-    annotationProcessor("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
-
-    compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
+    implementation("io.github.llamalad7:mixinextras-common:0.3.5")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
-    implementation("io.github.llamalad7:mixinextras-forge:0.3.5")
     implementation("org.joml:joml:1.10.5")
-    forgeRuntimeLibrary("org.joml:joml:1.10.5")
 }
 
 tasks.processResources {

@@ -156,7 +156,7 @@ public class MixinTaintDetector implements IExtension {
             if(mfi.getMods().isEmpty()) {
                 continue;
             }
-            Path path = mfi.getFile().findResource(components);
+            Path path = mfi.getFile().findResource(String.join("/", components));
             if(path != null && Files.exists(path)) {
                 id = mfi.getMods().get(0).getModId();
                 break;

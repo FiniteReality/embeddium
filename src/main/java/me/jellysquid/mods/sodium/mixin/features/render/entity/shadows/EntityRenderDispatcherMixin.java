@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.mixin.features.render.entity.shadows;
 
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.vertex.format.common.ModelVertex;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -64,7 +65,7 @@ public class EntityRenderDispatcherMixin {
             return;
         }
 
-        float brightness = LightTexture.getBrightness(world.dimensionType(), light);
+        float brightness = world.dimensionType().brightness(light);
         float alpha = (float) (((double) opacity - ((y - (double) pos.getY()) / 2.0)) * 0.5 * (double) brightness);
 
         if (alpha >= 0.0F) {
@@ -131,6 +132,8 @@ public class EntityRenderDispatcherMixin {
         }
     }
 
+    private static final int FULL_BRIGHT = LightTexture.pack(15, 15);
+
     @Unique
     private static void writeShadowVertex(long ptr, Matrix4fExtended matPosition, float x, float y, float z, float u, float v, int color, int normal) {
         // The transformed position vector
@@ -138,6 +141,6 @@ public class EntityRenderDispatcherMixin {
         float yt = matPosition.transformVecY(x, y, z);
         float zt = matPosition.transformVecZ(x, y, z);
 
-        ModelVertex.write(ptr, xt, yt, zt, color, u, v, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, normal);
+        ModelVertex.write(ptr, xt, yt, zt, color, u, v, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, normal);
     }
 }

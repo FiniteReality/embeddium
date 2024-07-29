@@ -5,7 +5,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTrackerHolder;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
-import net.minecraft.network.protocol.game.ClientboundLightUpdatePacketData;
+import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,12 +18,12 @@ public class ClientPlayNetworkHandlerMixin {
     private ClientLevel level;
 
     @Inject(
-            method = "applyLightData",
+            method = "handleLightUpdatePacked",
             at = @At("RETURN")
     )
-    private void onLightDataReceived(int x, int z, ClientboundLightUpdatePacketData data, CallbackInfo ci) {
+    private void onLightDataReceived(ClientboundLightUpdatePacket data, CallbackInfo ci) {
         ChunkTrackerHolder.get(this.level)
-                .onChunkStatusAdded(x, z, ChunkStatus.FLAG_HAS_LIGHT_DATA);
+                .onChunkStatusAdded(data.getX(), data.getZ(), ChunkStatus.FLAG_HAS_LIGHT_DATA);
     }
 
     @Inject(method = "handleForgetLevelChunk", at = @At("RETURN"))

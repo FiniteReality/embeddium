@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.gui.options;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public enum OptionImpact implements TextProvider {
     LOW(ChatFormatting.GREEN, "sodium.option_impact.low"),
@@ -12,7 +13,7 @@ public enum OptionImpact implements TextProvider {
     private final Component text;
 
     OptionImpact(ChatFormatting color, String text) {
-        this.text = Component.translatable(text).withStyle(color);
+        this.text = new TranslatableComponent(text).withStyle(color);
     }
 
     @Override

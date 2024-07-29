@@ -4,12 +4,13 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +43,7 @@ public class SpriteFinderCache {
     }
 
     @SubscribeEvent
-    public static void onReload(RegisterClientReloadListenersEvent event) {
+    public static void onReload(ParticleFactoryRegisterEvent event) {
         if(SPRITE_FINDER_HANDLE != null) {
             var listener = new SimplePreparableReloadListener<>() {
                 @Override
@@ -69,7 +70,7 @@ public class SpriteFinderCache {
                     blockAtlasSpriteFinder = finder;
                 }
             };
-            event.registerReloadListener(listener);
+            ((ReloadableResourceManager)Minecraft.getInstance().getResourceManager()).registerReloadListener(listener);
         }
     }
 

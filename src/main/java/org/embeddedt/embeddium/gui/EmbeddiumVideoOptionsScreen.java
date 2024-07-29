@@ -23,9 +23,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.VideoSettingsScreen;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import org.embeddedt.embeddium.api.OptionGUIConstructionEvent;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
@@ -77,7 +75,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     private boolean firstInit = true;
 
     public EmbeddiumVideoOptionsScreen(Screen prev) {
-        super(Component.literal("Embeddium Options"));
+        super(new TextComponent("Embeddium Options"));
         this.prevScreen = prev;
 
         this.pages.add(SodiumGameOptionPages.general());
@@ -141,7 +139,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     private void openDonationPrompt() {
         //noinspection removal
         var prompt = new PromptScreen(this, DONATION_PROMPT_MESSAGE, 320, 190,
-                new PromptScreen.Action(Component.literal("Support Sodium"), this::openDonationPage));
+                new PromptScreen.Action(new TextComponent("Support Sodium"), this::openDonationPage));
 
         this.minecraft.setScreen(prompt);
     }
@@ -156,7 +154,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         // Remember if the search bar was previously focused since we'll lose that information after recreating
         // the widget.
         boolean wasSearchFocused = this.searchTextField.isFocused();
-        this.rebuildWidgets();
+        this.init();
         if(wasSearchFocused) {
             this.setFocused(this.searchTextField);
         }
@@ -165,7 +163,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
     @Override
     protected void init() {
         this.frame = this.parentFrameBuilder().build();
-        this.addRenderableWidget(this.frame);
+        this.addWidget(this.frame);
 
         this.setFocused(this.frame);
 
@@ -195,7 +193,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         Dim2i applyButtonDim = new Dim2i(tabFrameDim.getLimitX() - 134, tabFrameDim.getLimitY() + 5, 65, 20);
         Dim2i closeButtonDim = new Dim2i(tabFrameDim.getLimitX() - 65, tabFrameDim.getLimitY() + 5, 65, 20);
 
-        Component donationText = Component.translatable("sodium.options.buttons.donate");
+        Component donationText = new TranslatableComponent("sodium.options.buttons.donate");
         int donationTextWidth = this.minecraft.font.width(donationText);
 
         Dim2i donateButtonDim = new Dim2i(tabFrameDim.getLimitX() - 32 - donationTextWidth, tabFrameDim.y() - 26, 10 + donationTextWidth, 20);
@@ -204,12 +202,12 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         int logoSizeOnScreen = 20;
         this.logoDim = new Dim2i(tabFrameDim.x(), tabFrameDim.getLimitY() + 25 - logoSizeOnScreen, logoSizeOnScreen, logoSizeOnScreen);
 
-        this.undoButton = new FlatButtonWidget(undoButtonDim, Component.translatable("sodium.options.buttons.undo"), this::undoChanges);
-        this.applyButton = new FlatButtonWidget(applyButtonDim, Component.translatable("sodium.options.buttons.apply"), this::applyChanges);
-        this.closeButton = new FlatButtonWidget(closeButtonDim, Component.translatable("gui.done"), this::onClose);
+        this.undoButton = new FlatButtonWidget(undoButtonDim, new TranslatableComponent("sodium.options.buttons.undo"), this::undoChanges);
+        this.applyButton = new FlatButtonWidget(applyButtonDim, new TranslatableComponent("sodium.options.buttons.apply"), this::applyChanges);
+        this.closeButton = new FlatButtonWidget(closeButtonDim, new TranslatableComponent("gui.done"), this::onClose);
 
         this.donateButton = new FlatButtonWidget(donateButtonDim, donationText, this::openDonationPage);
-        this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, Component.literal("x"), this::hideDonationButton);
+        this.hideDonateButton = new FlatButtonWidget(hideDonateButtonDim, new TextComponent("x"), this::hideDonationButton);
 
         if (SodiumClientMod.options().notifications.hasClearedDonationButton) {
             this.setDonationButtonVisibility(false);
@@ -254,7 +252,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         if(this.searchTextModel.getOptionPredicate().test(null) && ShaderModBridge.isShaderModPresent()) {
             String shaderModId = Stream.of("oculus", "iris").filter(PlatformUtil::modPresent).findFirst().orElse("iris");
             tabs.put(shaderModId, Tab.createBuilder()
-                    .setTitle(Component.translatable("options.iris.shaderPackSelection"))
+                    .setTitle(new TranslatableComponent("options.iris.shaderPackSelection"))
                     .setId(OptionIdentifier.create("iris", "shader_packs"))
                     .setOnSelectFunction(() -> {
                         if(ShaderModBridge.openShaderScreen(this) instanceof Screen screen) {
@@ -302,18 +300,19 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         super.renderBackground(gfx);
 
         // Render watermarks
-        RenderSystem.setShaderColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(770, 1);
-        RenderSystem.setShaderTexture(0, LOGO_LOCATION);
-        Gui.blit(gfx, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), 0.0F, 0.0F, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        // TODO
+//        RenderSystem.setShaderColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
+//        RenderSystem.disableDepthTest();
+//        RenderSystem.depthMask(false);
+//        RenderSystem.enableBlend();
+//        RenderSystem.blendFunc(770, 1);
+//        RenderSystem.setShaderTexture(0, LOGO_LOCATION);
+//        Gui.blit(gfx, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), 0.0F, 0.0F, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE);
+//        RenderSystem.defaultBlendFunc();
+//        RenderSystem.disableBlend();
+//        RenderSystem.depthMask(true);
+//        RenderSystem.enableDepthTest();
+//        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
@@ -399,13 +398,13 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         }
 
         if (flags.contains(OptionFlag.REQUIRES_ASSET_RELOAD)) {
-            client.updateMaxMipLevel(client.options.mipmapLevels().get());
+            client.updateMaxMipLevel(client.options.mipmapLevels);
             client.delayTextureReload();
         }
 
         if (flags.contains(OptionFlag.REQUIRES_GAME_RESTART)) {
             Console.instance().logMessage(MessageLevel.WARN,
-                    Component.translatable("sodium.console.game_restart"), 10.0);
+                    new TranslatableComponent("sodium.console.game_restart"), 10.0);
         }
 
         for (OptionStorage<?> storage : dirtyStorages) {
@@ -443,11 +442,11 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
     static {
         DONATION_PROMPT_MESSAGE = List.of(
-                FormattedText.composite(Component.literal("Hello!")),
-                FormattedText.composite(Component.literal("It seems that you've been enjoying "), Component.literal("Embeddium").setStyle(Style.EMPTY.withColor(0x27eb92)), Component.literal(", a fork of Sodium for Minecraft.")),
-                FormattedText.composite(Component.literal("Sodium is complex, and requires "), Component.literal("thousands of hours").setStyle(Style.EMPTY.withColor(0xff6e00)), Component.literal(" of development, debugging, and tuning to create the experience that players have come to expect.")),
-                FormattedText.composite(Component.literal("If you'd like to show a token of appreciation, and support the development of Sodium in the process, then consider "), Component.literal("buying them a coffee").setStyle(Style.EMPTY.withColor(0xed49ce)), Component.literal(".")),
-                FormattedText.composite(Component.literal("And thanks again for using the mod! We hope it helps you (and your computer.)"))
+                FormattedText.composite(new TextComponent("Hello!")),
+                FormattedText.composite(new TextComponent("It seems that you've been enjoying "), new TextComponent("Embeddium").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x27eb92))), new TextComponent(", a fork of Sodium for Minecraft.")),
+                FormattedText.composite(new TextComponent("Sodium is complex, and requires "), new TextComponent("thousands of hours").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xff6e00))), new TextComponent(" of development, debugging, and tuning to create the experience that players have come to expect.")),
+                FormattedText.composite(new TextComponent("If you'd like to show a token of appreciation, and support the development of Sodium in the process, then consider "), new TextComponent("buying them a coffee").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xed49ce))), new TextComponent(".")),
+                FormattedText.composite(new TextComponent("And thanks again for using the mod! We hope it helps you (and your computer.)"))
         );
     }
 }

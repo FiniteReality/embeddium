@@ -13,6 +13,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionInfo;
 import me.jellysquid.mods.sodium.client.render.chunk.data.BuiltSectionMeshParts;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import me.jellysquid.mods.sodium.client.util.task.CancellationToken;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
@@ -20,19 +21,20 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.IModelData;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
 import org.embeddedt.embeddium.model.ModelDataSnapshotter;
@@ -40,6 +42,7 @@ import org.embeddedt.embeddium.model.UnwrappableBakedModel;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Rebuilds all the meshes of a chunk for each given render pass with non-occluded blocks. The result is then uploaded
@@ -49,15 +52,16 @@ import java.util.Objects;
  * array allocations, they are pooled to ensure that the garbage collector doesn't become overloaded.
  */
 public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> {
+    private static final RenderType[] LAYERS = RenderType.chunkBufferLayers().toArray(new RenderType[0]);
 
-    private final RandomSource random = new SingleThreadedRandomSource(42L);
+    private final Random random = new XoRoShiRoRandom(42L);
 
     private final RenderSection render;
     private final ChunkRenderContext renderContext;
 
     private final int buildTime;
 
-    private final Map<BlockPos, ModelData> modelDataMap;
+    private final Map<BlockPos, IModelData> modelDataMap;
 
     private Vec3 camera = Vec3.ZERO;
 
@@ -111,7 +115,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                     for (int x = minX; x < maxX; x++) {
                         BlockState blockState = slice.getBlockState(x, y, z);
 
-                        if (blockState.isAir() && !blockState.hasBlockEntity()) {
+                        if (blockState.isAir() && !blockState.hasTileEntity()) {
                             continue;
                         }
 
@@ -121,7 +125,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         if (blockState.getRenderShape() == RenderShape.MODEL) {
                             BakedModel model = cache.getBlockModels()
                                 .getBlockModel(blockState);
-                            ModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, modelDataMap.getOrDefault(blockPos, ModelData.EMPTY));
+                            IModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, modelDataMap.getOrDefault(blockPos, EmptyModelData.INSTANCE));
 
                             long seed = blockState.getSeed(blockPos);
                             random.setSeed(seed);
@@ -132,7 +136,11 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
                             random.setSeed(seed);
 
-                            for (RenderType layer : model.getRenderTypes(blockState, random, modelData)) {
+                            // TODO: reimplement caching to avoid synchronized predicate checks
+                            for (RenderType layer : LAYERS) {
+                                if(!ItemBlockRenderTypes.canRenderInLayer(blockState, layer)) {
+                                    continue;
+                                }
                                 context.update(blockPos, modelOffset, blockState, model, seed, modelData, layer);
                                 cache.getBlockRenderer()
                                         .renderModel(context, buffers);
@@ -145,11 +153,11 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                             cache.getFluidRenderer().render(slice, fluidState, blockPos, modelOffset, buffers);
                         }
 
-                        if (blockState.hasBlockEntity()) {
+                        if (blockState.hasTileEntity()) {
                             BlockEntity entity = slice.getBlockEntity(blockPos);
 
                             if (entity != null) {
-                                BlockEntityRenderer<BlockEntity> renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(entity);
+                                BlockEntityRenderer<BlockEntity> renderer = BlockEntityRenderDispatcher.instance.getRenderer(entity);
 
                                 if (renderer != null) {
                                     renderData.addBlockEntity(entity, !renderer.shouldRenderOffScreen(entity));
@@ -208,7 +216,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
         try {
             state = slice.getBlockState(pos);
         } catch (Exception ignored) {}
-        CrashReportCategory.populateBlockDetails(crashReportSection, slice, pos, state);
+        CrashReportCategory.populateBlockDetails(crashReportSection, pos, state);
 
         crashReportSection.setDetail("Chunk section", this.render);
         if (this.renderContext != null) {

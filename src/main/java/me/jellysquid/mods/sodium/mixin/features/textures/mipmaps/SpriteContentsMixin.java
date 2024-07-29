@@ -24,9 +24,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(TextureAtlasSprite.class)
 public class SpriteContentsMixin {
     @Shadow
-    @Mutable
     @Final
-    private ResourceLocation name;
+    @Mutable
+    private TextureAtlasSprite.Info info;
 
     // While Fabric allows us to @Inject into the constructor here, that's just a specific detail of FabricMC's mixin
     // fork. Upstream Mixin doesn't allow arbitrary @Inject usage in constructor. However, we can use @ModifyVariable
@@ -36,15 +36,15 @@ public class SpriteContentsMixin {
     // support Forge, since this works well on Fabric too, it's fine to ensure that the diff between Fabric and Forge
     // can remain minimal. Being less dependent on specific details of Fabric is good, since it means we can be more
     // cross-platform.
-    @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;name:Lnet/minecraft/resources/ResourceLocation;", opcode = Opcodes.PUTFIELD))
-    private void sodium$beforeGenerateMipLevels(TextureAtlasSprite instance, ResourceLocation name, TextureAtlas pAtlas, TextureAtlasSprite.Info pSpriteInfo, int pMipLevel, int pStorageX, int pStorageY, int pX, int pY, NativeImage pImage) {
+    @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;info:Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$Info;", opcode = Opcodes.PUTFIELD))
+    private void sodium$beforeGenerateMipLevels(TextureAtlasSprite instance, TextureAtlasSprite.Info info, TextureAtlas pAtlas, TextureAtlasSprite.Info pSpriteInfo, int pMipLevel, int pStorageX, int pStorageY, int pX, int pY, NativeImage pImage) {
         // Embeddium: Only fill in transparent colors if mipmaps are on and the texture name does not contain "leaves".
         // We're injecting after the "name" field has been set, so this is safe even though we're in a constructor.
-        if (Minecraft.getInstance().options.mipmapLevels().get() > 0 && !name.getPath().contains("leaves")) {
+        if (Minecraft.getInstance().options.mipmapLevels > 0 && !info.name().getPath().contains("leaves")) {
             sodium$fillInTransparentPixelColors(pImage);
         }
 
-        this.name = name;
+        this.info = info;
     }
 
     /**

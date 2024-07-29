@@ -1,9 +1,11 @@
 package me.jellysquid.mods.sodium.client.render.chunk.shader;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
+import me.jellysquid.mods.sodium.client.gl.compat.FogHelper;
 import me.jellysquid.mods.sodium.client.gl.shader.uniform.GlUniformFloat;
 import me.jellysquid.mods.sodium.client.gl.shader.uniform.GlUniformFloat4v;
 import me.jellysquid.mods.sodium.client.gl.shader.uniform.GlUniformInt;
+import net.minecraft.client.renderer.FogRenderer;
 
 /**
  * These shader implementations try to remain compatible with the deprecated fixed function pipeline by manually
@@ -45,11 +47,11 @@ public abstract class ChunkShaderFogComponent {
 
         @Override
         public void setup() {
-            this.uFogColor.set(RenderSystem.getShaderFogColor());
-            this.uFogShape.set(RenderSystem.getShaderFogShape().getIndex());
+            this.uFogColor.set(FogHelper.getFogColor());
+            this.uFogShape.set(0); // Always spherical in 1.16
 
-            this.uFogStart.setFloat(RenderSystem.getShaderFogStart());
-            this.uFogEnd.setFloat(RenderSystem.getShaderFogEnd());
+            this.uFogStart.setFloat(GlStateManager.FOG.start);
+            this.uFogEnd.setFloat(GlStateManager.FOG.end);
         }
     }
 

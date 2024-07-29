@@ -12,11 +12,11 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.ForgeConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Utility class for BlockRenderer, that delegates to the Forge lighting pipeline.
@@ -51,22 +51,22 @@ public class ForgeBlockRenderer {
     }
 
     public boolean renderBlock(LightMode mode, BlockRenderContext ctx, VertexConsumer buffer, PoseStack stack,
-                               RandomSource random, BlockOcclusionCache sideCache, ChunkModelBuilder renderData) {
+                               Random random, BlockOcclusionCache sideCache, ChunkModelBuilder renderData) {
         if (mode == LightMode.FLAT) {
-            forgeRenderer.tesselateWithoutAO(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), stack, buffer, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY, ctx.modelData(), ctx.renderLayer());
+            forgeRenderer.renderModelFlat(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), stack, buffer, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY, ctx.modelData());
         } else {
-            forgeRenderer.tesselateWithAO(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), stack, buffer, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY, ctx.modelData(), ctx.renderLayer());
+            forgeRenderer.renderModelSmooth(ctx.localSlice(), ctx.model(), ctx.state(), ctx.pos(), stack, buffer, true, random, ctx.seed(), OverlayTexture.NO_OVERLAY, ctx.modelData());
         }
 
         // Process the quads a second time for marking animated sprites and detecting emptiness
         boolean empty;
 
         random.setSeed(ctx.seed());
-        empty = markQuads(renderData, ctx.model().getQuads(ctx.state(), null, random, ctx.modelData(), ctx.renderLayer()));
+        empty = markQuads(renderData, ctx.model().getQuads(ctx.state(), null, random, ctx.modelData()));
 
         for(Direction side : DirectionUtil.ALL_DIRECTIONS) {
             random.setSeed(ctx.seed());
-            empty = markQuads(renderData, ctx.model().getQuads(ctx.state(), side, random, ctx.modelData(), ctx.renderLayer()));
+            empty = markQuads(renderData, ctx.model().getQuads(ctx.state(), side, random, ctx.modelData()));
         }
         return !empty;
     }

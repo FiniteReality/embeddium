@@ -32,11 +32,6 @@ public class FrustumMixin implements ViewportProvider {
         this.intersectionMatrix = new FrustumIntersection(JomlHelper.copy(pFrustum).mul(JomlHelper.copy(pProjection)), false);
     }
 
-    @Inject(method = "<init>(Lnet/minecraft/client/renderer/culling/Frustum;)V", at = @At("RETURN"))
-    private void copyFrustum(Frustum pOther, CallbackInfo ci) {
-        this.intersectionMatrix = ((FrustumMixin)(Object)pOther).intersectionMatrix;
-    }
-
     @Override
     public Viewport sodium$createViewport() {
         return new Viewport(new SimpleFrustum(this.intersectionMatrix), new Vector3d(this.camX, this.camY, this.camZ));

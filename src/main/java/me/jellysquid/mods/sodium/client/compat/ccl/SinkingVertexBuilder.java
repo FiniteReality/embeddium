@@ -147,17 +147,6 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return this;
     }
 
-    @Override
-    public void defaultColor(int r, int g, int b, int a) {
-        fixedColor = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
-        hasFixedColor = true;
-    }
-
-    @Override
-    public void unsetDefaultColor() {
-        hasFixedColor = false;
-    }
-
     @Nonnull
     @Override
     public VertexConsumer uv(float u, float v) {

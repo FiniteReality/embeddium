@@ -5,23 +5,16 @@ import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Holder.Reference;
-import net.minecraft.core.QuartPos;
-import net.minecraft.core.Registry;
 import net.minecraft.util.LinearCongruentialGenerator;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.chunk.PalettedContainerRO;
 
 public class BiomeSlice {
     private static final int SIZE = 3 * 4; // 3 chunks * 4 biomes per chunk
 
     // Arrays are in ZYX order
-    @SuppressWarnings("unchecked")
-    private final Holder<Biome>[] biomes = new Holder[SIZE * SIZE * SIZE];
+    private final Biome[] biomes = new Biome[SIZE * SIZE * SIZE];
     private final boolean[] uniform = new boolean[SIZE * SIZE * SIZE];
     private final BiasMap bias = new BiasMap();
 
@@ -29,9 +22,19 @@ public class BiomeSlice {
 
     private int worldX, worldY, worldZ;
 
+    private final boolean is3D;
+
+    public BiomeSlice() {
+        this(true);
+    }
+
+    public BiomeSlice(boolean is3D) {
+        this.is3D = is3D;
+    }
+
     public void update(ClientLevel world, ChunkRenderContext context) {
         this.worldX = context.getOrigin().minBlockX() - 16;
-        this.worldY = context.getOrigin().minBlockY() - 16;
+        this.worldY = (this.is3D ? context.getOrigin().minBlockY() : 0) - 16;
         this.worldZ = context.getOrigin().minBlockZ() - 16;
 
         this.biomeSeed = BiomeSeedProvider.getBiomeSeed(world);
@@ -43,22 +46,17 @@ public class BiomeSlice {
     }
 
     private void copyBiomeData(Level world, ChunkRenderContext context) {
-        var defaultValue = world.registryAccess()
-                .registryOrThrow(Registry.BIOME_REGISTRY)
-                .getHolderOrThrow(Biomes.PLAINS);
-
         for (int sectionX = 0; sectionX < 3; sectionX++) {
             for (int sectionY = 0; sectionY < 3; sectionY++) {
                 for (int sectionZ = 0; sectionZ < 3; sectionZ++) {
-                    this.copySectionBiomeData(context, sectionX, sectionY, sectionZ, defaultValue);
+                    this.copySectionBiomeData(context, sectionX, sectionY, sectionZ);
                 }
             }
         }
     }
 
-    private void copySectionBiomeData(ChunkRenderContext context, int sectionX, int sectionY, int sectionZ, Holder<Biome> defaultBiome) {
-        var section = context.getSections()[WorldSlice.getLocalSectionIndex(sectionX, sectionY, sectionZ)];
-        var biomeData = section.getBiomeData();
+    private void copySectionBiomeData(ChunkRenderContext context, int sectionX, int sectionY, int sectionZ) {
+        ClonedChunkSection section = context.getSections()[WorldSlice.getLocalSectionIndex(sectionX, sectionY, sectionZ)];
 
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 4; y++) {
@@ -67,13 +65,12 @@ public class BiomeSlice {
                     int biomeY = (sectionY * 4) + y;
                     int biomeZ = (sectionZ * 4) + z;
 
-                    var idx = dataArrayIndex(biomeX, biomeY, biomeZ);
+                    int idx = dataArrayIndex(biomeX, biomeY, biomeZ);
 
-                    if (biomeData == null) {
-                        this.biomes[idx] = defaultBiome;
-                    } else {
-                        this.biomes[idx] = biomeData.get(x, y, z);
-                    }
+                    int chunkX = x;
+                    int chunkY = y + sectionY * 4 + worldY / 4;
+                    int chunkZ = z;
+                    this.biomes[idx] = section.getBiomeData().getNoiseBiome(chunkX, chunkY, chunkZ);
                 }
             }
         }
@@ -121,15 +118,15 @@ public class BiomeSlice {
         seed = LinearCongruentialGenerator.next(seed, y);
         seed = LinearCongruentialGenerator.next(seed, z);
 
-        var gradX = getBias(seed); seed = LinearCongruentialGenerator.next(seed, this.biomeSeed);
-        var gradY = getBias(seed); seed = LinearCongruentialGenerator.next(seed, this.biomeSeed);
-        var gradZ = getBias(seed);
+        int gradX = getBias(seed); seed = LinearCongruentialGenerator.next(seed, this.biomeSeed);
+        int gradY = getBias(seed); seed = LinearCongruentialGenerator.next(seed, this.biomeSeed);
+        int gradZ = getBias(seed);
 
         this.bias.set(index, gradX, gradY, gradZ);
     }
 
     private boolean hasUniformNeighbors(int x, int y, int z) {
-        Biome biome = this.biomes[dataArrayIndex(x, y, z)].value();
+        Biome biome = this.biomes[dataArrayIndex(x, y, z)];
 
         int minX = x - 1, maxX = x + 1;
         int minY = y - 1, maxY = y + 1;
@@ -138,7 +135,7 @@ public class BiomeSlice {
         for (int adjX = minX; adjX <= maxX; adjX++) {
             for (int adjY = minY; adjY <= maxY; adjY++) {
                 for (int adjZ = minZ; adjZ <= maxZ; adjZ++) {
-                    if (this.biomes[dataArrayIndex(adjX, adjY, adjZ)].value() != biome) {
+                    if (this.biomes[dataArrayIndex(adjX, adjY, adjZ)] != biome) {
                         return false;
                     }
                 }
@@ -148,7 +145,11 @@ public class BiomeSlice {
         return true;
     }
 
-    public Holder<Biome> getBiome(int x, int y, int z) {
+    public Biome getBiome(int x, int y, int z) {
+        if (!this.is3D) {
+            y = 0;
+        }
+
         int relX = x - this.worldX;
         int relY = y - this.worldY;
         int relZ = z - this.worldZ;
@@ -165,7 +166,7 @@ public class BiomeSlice {
         return this.getBiomeUsingVoronoi(relX, relY, relZ);
     }
 
-    private Holder<Biome> getBiomeUsingVoronoi(int worldX, int worldY, int worldZ) {
+    private Biome getBiomeUsingVoronoi(int worldX, int worldY, int worldZ) {
         int x = worldX - 2;
         int y = worldY - 2;
         int z = worldZ - 2;

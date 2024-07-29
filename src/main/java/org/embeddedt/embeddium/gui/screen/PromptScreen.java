@@ -9,6 +9,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class PromptScreen extends Screen {
     private FlatButtonWidget closeButton, actionButton;
 
     public PromptScreen(Screen prev, List<FormattedText> promptText, int promptWidth, int promptHeight, Action action) {
-        super(Component.literal("Prompt"));
+        super(new TextComponent("Prompt"));
         this.prevScreen = prev;
         this.promptWidth = promptWidth;
         this.promptHeight = promptHeight;
@@ -30,9 +31,9 @@ public class PromptScreen extends Screen {
     }
 
     @Override
-    protected void rebuildWidgets() {
+    public void init(Minecraft minecraft, int width, int height) {
         prevScreen.resize(this.minecraft, this.width, this.height);
-        super.rebuildWidgets();
+        init();
     }
 
     public void init() {
@@ -40,14 +41,14 @@ public class PromptScreen extends Screen {
         int boxX = (prevScreen.width / 2) - (promptWidth / 2);
         int boxY = (prevScreen.height / 2) - (promptHeight / 2);
 
-        this.closeButton = new FlatButtonWidget(new Dim2i((boxX + promptWidth) - 84, (boxY + promptHeight) - 24, 80, 20), Component.literal("Close"), this::onClose);
+        this.closeButton = new FlatButtonWidget(new Dim2i((boxX + promptWidth) - 84, (boxY + promptHeight) - 24, 80, 20), new TextComponent("Close"), this::onClose);
         this.closeButton.setStyle(createButtonStyle());
 
         this.actionButton = new FlatButtonWidget(new Dim2i((boxX + promptWidth) - 198, (boxY + promptHeight) - 24, 110, 20), this.action.label, this::runAction);
         this.actionButton.setStyle(createButtonStyle());
 
-        this.addRenderableWidget(this.closeButton);
-        this.addRenderableWidget(this.actionButton);
+        this.addWidget(this.closeButton);
+        this.addWidget(this.actionButton);
     }
 
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
@@ -88,6 +89,9 @@ public class PromptScreen extends Screen {
 
             textY += 8;
         }
+
+        this.closeButton.render(matrices, mouseX, mouseY, delta);
+        this.actionButton.render(matrices, mouseX, mouseY, delta);
 
         super.render(matrices, mouseX, mouseY, delta);
 

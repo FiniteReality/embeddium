@@ -217,17 +217,6 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
     }
 
     @Override
-    public void defaultColor(int red, int green, int blue, int alpha) {
-        ((BufferBuilder)this.builder).defaultColor(red, green, blue, alpha);
-        this.packedFixedColor = ColorABGR.pack(red, green, blue, alpha);
-    }
-
-    @Override
-    public void unsetDefaultColor() {
-        ((BufferBuilder)this.builder).unsetDefaultColor();
-    }
-
-    @Override
     public VertexConsumer vertex(double x, double y, double z) {
         this.putPositionAttribute((float) x, (float) y, (float) z);
 
@@ -241,22 +230,6 @@ public class SodiumBufferBuilder implements VertexConsumer, VertexBufferWriter {
         }
 
         this.putColorAttribute(ColorABGR.pack(red, green, blue, alpha));
-
-        return this;
-    }
-
-    @Override
-    public VertexConsumer color(int argb) { // No, this isn't a typo. One method takes RGBA, but this one takes ARGB.
-        if (this.builder.sodium$usingFixedColor()) {
-            throw new IllegalStateException();
-        }
-
-        // This should be RGBA.
-        // There is no reason it should be anything other than RGBA.
-        // It should certainly never be ABGR.
-        // But it is.
-        // Why?
-        this.putColorAttribute(ColorARGB.toABGR(argb));
 
         return this;
     }

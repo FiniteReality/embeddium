@@ -3,8 +3,9 @@ package me.jellysquid.mods.sodium.client.render.viewport;
 import me.jellysquid.mods.sodium.client.render.viewport.frustum.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.extensions.IForgeBlockEntity;
+import net.minecraftforge.common.extensions.IForgeTileEntity;
 import org.joml.Vector3d;
 
 public final class Viewport {
@@ -19,16 +20,16 @@ public final class Viewport {
         this.transform = new CameraTransform(position.x, position.y, position.z);
 
         this.chunkCoords = SectionPos.of(
-                SectionPos.posToSectionCoord(position.x),
-                SectionPos.posToSectionCoord(position.y),
-                SectionPos.posToSectionCoord(position.z)
+                Mth.floor(position.x) / 16,
+                Mth.floor(position.y) / 16,
+                Mth.floor(position.z) / 16
         );
 
         this.blockCoords = new BlockPos(position.x, position.y, position.z);
     }
 
     public boolean isBoxVisible(AABB box) {
-        if (box.equals(IForgeBlockEntity.INFINITE_EXTENT_AABB)) {
+        if (box.equals(IForgeTileEntity.INFINITE_EXTENT_AABB)) {
             return true;
         }
 

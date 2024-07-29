@@ -1,21 +1,18 @@
 package me.jellysquid.mods.sodium.client.gui.widgets;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.narration.NarratedElementType;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.sounds.SoundEvents;
+import org.lwjgl.glfw.GLFW;
 
-public abstract class AbstractWidget implements Widget, GuiEventListener, NarratableEntry {
+public abstract class AbstractWidget implements Widget, GuiEventListener {
     protected final Font font;
     protected boolean focused;
     protected boolean hovered;
@@ -49,25 +46,6 @@ public abstract class AbstractWidget implements Widget, GuiEventListener, Narrat
         return this.font.width(text);
     }
 
-    public NarratableEntry.NarrationPriority narrationPriority() {
-        if (this.focused) {
-            return NarratableEntry.NarrationPriority.FOCUSED;
-        }
-        if (this.hovered) {
-            return NarratableEntry.NarrationPriority.HOVERED;
-        }
-        return NarratableEntry.NarrationPriority.NONE;
-    }
-
-    @Override
-    public void updateNarration(NarrationElementOutput builder) {
-        if (this.focused) {
-            builder.add(NarratedElementType.USAGE, Component.translatable("narration.button.usage.focused"));
-        } else if (this.hovered) {
-            builder.add(NarratedElementType.USAGE, Component.translatable("narration.button.usage.hovered"));
-        }
-    }
-
     public boolean isFocused() {
         return this.focused;
     }
@@ -84,6 +62,6 @@ public abstract class AbstractWidget implements Widget, GuiEventListener, Narrat
     }
 
     protected boolean keySelected(int keyCode) {
-        return keyCode == InputConstants.KEY_SPACE || keyCode == InputConstants.KEY_RETURN;
+        return keyCode == GLFW.GLFW_KEY_SPACE || keyCode == GLFW.GLFW_KEY_ENTER;
     }
 }

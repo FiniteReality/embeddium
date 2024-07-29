@@ -113,7 +113,7 @@ public class WorldRendererMixin {
             long ptr = buffer;
 
             for (int i = 0; i < 2; i++) {
-                LineVertex.put(ptr, x, y, z, color, normal);
+                LineVertex.put(ptr, x, y, z, color);
                 ptr += LineVertex.STRIDE;
             }
 

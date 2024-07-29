@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.Validate;
 import org.embeddedt.embeddium.gui.theme.DefaultColors;
@@ -140,7 +141,7 @@ public class OptionPageFrame extends AbstractFrame {
         OptionImpact impact = option.getImpact();
 
         if (impact != null) {
-            tooltip.add(Language.getInstance().getVisualOrder(Component.translatable("sodium.options.performance_impact_string", impact.getLocalizedName()).withStyle(ChatFormatting.GRAY)));
+            tooltip.add(Language.getInstance().getVisualOrder(new TranslatableComponent("sodium.options.performance_impact_string", impact.getLocalizedName()).withStyle(ChatFormatting.GRAY)));
         }
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;
@@ -162,7 +163,7 @@ public class OptionPageFrame extends AbstractFrame {
         this.drawBorder(drawContext, boxX, boxY, boxX + boxWidth, boxY + boxHeight, DefaultColors.ELEMENT_ACTIVATED);
 
         for (int i = 0; i < tooltip.size(); i++) {
-            Gui.drawString(drawContext, Minecraft.getInstance().font, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
+            Minecraft.getInstance().font.draw(drawContext, tooltip.get(i), boxX + textPadding, boxY + textPadding + (i * 12), 0xFFFFFFFF);
         }
         drawContext.popPose();
     }

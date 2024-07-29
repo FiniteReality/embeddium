@@ -45,48 +45,27 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Final
     private Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress;
 
-    @Shadow
-    private boolean needsFullRenderChunkUpdate;
-
-    @Shadow
-    private int ticks;
-
-    @Shadow
-    @Final
-    private Minecraft minecraft;
-
     @Unique
     private SodiumWorldRenderer renderer;
-
-    @Unique
-    private int frame;
 
     @Shadow public abstract boolean shouldShowEntityOutlines();
 
     @Shadow
-    @Nullable
-    private Frustum capturedFrustum;
-
-    @Shadow
-    private Frustum cullingFrustum;
-
-    @Shadow
-    @Final
-    private AtomicBoolean needsFrustumUpdate;
+    private boolean needsUpdate;
 
     @Override
     public SodiumWorldRenderer sodium$getWorldRenderer() {
         return this.renderer;
     }
 
-    @Redirect(method = "allChanged()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;getEffectiveRenderDistance()I", ordinal = 1))
+    @Redirect(method = "allChanged()V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;renderDistance:I", ordinal = 1))
     private int nullifyBuiltChunkStorage(Options options) {
         // Do not allow any resources to be allocated
         return 0;
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void init(Minecraft client, EntityRenderDispatcher entityRenderDispatcher, BlockEntityRenderDispatcher blockEntityRenderDispatcher, RenderBuffers bufferBuilderStorage, CallbackInfo ci) {
+    private void init(Minecraft client, RenderBuffers arg2, CallbackInfo ci) {
         this.renderer = new SodiumWorldRenderer(client);
     }
 
@@ -129,7 +108,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      * @author JellySquid
      */
     @Overwrite
-    private void renderChunkLayer(RenderType renderLayer, PoseStack matrices, double x, double y, double z, Matrix4f matrix) {
+    private void renderChunkLayer(RenderType renderLayer, PoseStack matrices, double x, double y, double z) {
         RenderDevice.enterManagedCode();
 
         try {
@@ -137,11 +116,6 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
         } finally {
             RenderDevice.exitManagedCode();
         }
-
-        // TODO: Avoid setting up and clearing the state a second time
-        renderLayer.setupRenderState();
-        ForgeHooksClient.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), matrices, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.capturedFrustum != null ? this.capturedFrustum : this.cullingFrustum);
-        renderLayer.clearRenderState();
     }
 
     /**
@@ -149,23 +123,23 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      * @author JellySquid
      */
     @Overwrite
-    private void setupRender(Camera camera, Frustum frustum, boolean hasForcedFrustum, boolean spectator) {
+    private void setupRender(Camera camera, Frustum frustum, boolean hasForcedFrustum, int frameCount, boolean spectator) {
         var viewport = ((ViewportProvider) frustum).sodium$createViewport();
 
         // Detect mods setting the vanilla update flags themselves
-        if (this.needsFullRenderChunkUpdate || this.needsFrustumUpdate.compareAndSet(true, false)) {
+        if (this.needsUpdate) {
             this.renderer.scheduleTerrainUpdate();
         }
 
         RenderDevice.enterManagedCode();
 
         try {
-            this.renderer.setupTerrain(camera, viewport, this.frame++, spectator, FlawlessFrames.isActive());
+            this.renderer.setupTerrain(camera, viewport, frameCount, spectator, FlawlessFrames.isActive());
         } finally {
             RenderDevice.exitManagedCode();
         }
 
-        this.needsFullRenderChunkUpdate = false; // We set this because third-party mods may use it (to loop themselves), even if Vanilla does not.
+        this.needsUpdate = false; // We set this because third-party mods may use it (to loop themselves), even if Vanilla does not.
     }
 
     /**
@@ -202,15 +176,6 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Overwrite
     private void setSectionDirty(int x, int y, int z, boolean important) {
         this.renderer.scheduleRebuildForChunk(x, y, z, important);
-    }
-
-    /**
-     * @reason Redirect chunk updates to our renderer
-     * @author JellySquid
-     */
-    @Overwrite
-    public boolean isChunkCompiled(BlockPos pos) {
-        return this.renderer.isSectionReady(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
     }
 
     @Inject(method = "allChanged()V", at = @At("RETURN"))

@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 
 public class EmbeddiumFluidSpriteCache {
     // Cache the sprites array to avoid reallocating it on every call
@@ -27,10 +26,10 @@ public class EmbeddiumFluidSpriteCache {
     }
 
     public TextureAtlasSprite[] getSprites(BlockAndTintGetter world, BlockPos pos, FluidState fluidState) {
-        IClientFluidTypeExtensions fluidExt = IClientFluidTypeExtensions.of(fluidState);
-        sprites[0] = getTexture(fluidExt.getStillTexture(fluidState, world, pos));
-        sprites[1] = getTexture(fluidExt.getFlowingTexture(fluidState, world, pos));
-        ResourceLocation overlay = fluidExt.getOverlayTexture(fluidState, world, pos);
+        var fluidExt = fluidState.getType().getAttributes();
+        sprites[0] = getTexture(fluidExt.getStillTexture(world, pos));
+        sprites[1] = getTexture(fluidExt.getFlowingTexture(world, pos));
+        ResourceLocation overlay = fluidExt.getOverlayTexture();
         sprites[2] = overlay != null ? getTexture(overlay) : null;
         return sprites;
     }

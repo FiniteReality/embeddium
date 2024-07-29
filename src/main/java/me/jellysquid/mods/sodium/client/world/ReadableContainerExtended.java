@@ -1,14 +1,14 @@
 package me.jellysquid.mods.sodium.client.world;
 
-import net.minecraft.world.level.chunk.PalettedContainerRO;
+import net.minecraft.world.level.chunk.PalettedContainer;
 
 public interface ReadableContainerExtended<T> {
     @SuppressWarnings("unchecked")
-    static <T> ReadableContainerExtended<T> of(PalettedContainerRO<T> container) {
+    static <T> ReadableContainerExtended<T> of(PalettedContainer<T> container) {
         return (ReadableContainerExtended<T>) container;
     }
 
-    static <T> PalettedContainerRO<T> clone(PalettedContainerRO<T> container) {
+    static <T> PalettedContainer<T> clone(PalettedContainer<T> container) {
         if (container == null) {
             return null;
         }
@@ -19,5 +19,5 @@ public interface ReadableContainerExtended<T> {
     void sodium$unpack(T[] values);
     void sodium$unpack(T[] values, int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
 
-    PalettedContainerRO<T> sodium$copy();
+    PalettedContainer<T> sodium$copy();
 }

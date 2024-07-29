@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
 import org.embeddedt.embeddium.gui.frame.AbstractFrame;
@@ -20,7 +21,7 @@ import java.util.function.Supplier;
 public record Tab<T extends AbstractFrame>(OptionIdentifier<Void> id, Component title, Supplier<Boolean> onSelectFunction, Function<Dim2i, T> frameFunction) {
 
     static MutableComponent idComponent(String namespace) {
-        return Component.literal(PlatformUtil.getModName(namespace));
+        return new TextComponent(PlatformUtil.getModName(namespace));
     }
 
     public static Tab.Builder<?> createBuilder() {

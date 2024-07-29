@@ -18,7 +18,7 @@ public class BackgroundRendererMixin {
         float u = Mth.clamp(Mth.cos(world.getTimeOfDay(tickDelta) * 6.2831855F) * 2.0F + 0.5F, 0.0F, 1.0F);
 
         return FastCubicSampler.sampleColor(pos,
-                (x, y, z) -> world.getBiomeManager().getNoiseBiomeAtQuart(x, y, z).value().getFogColor(),
+                (x, y, z) -> world.getBiomeManager().getNoiseBiomeAtQuart(x, y, z).getFogColor(),
                 (v) -> world.effects().getBrightnessDependentFogColor(v, u));
     }
 }

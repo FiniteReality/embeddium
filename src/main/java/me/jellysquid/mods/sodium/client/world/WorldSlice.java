@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -27,7 +26,6 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.client.model.data.ModelDataManager;
 import org.embeddedt.embeddium.api.ChunkMeshEvent;
 import org.embeddedt.embeddium.api.MeshAppender;
 import org.embeddedt.embeddium.asm.OptionalInterface;
@@ -59,7 +57,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
     private static final int NEIGHBOR_BLOCK_RADIUS = 2;
 
     // The radius of chunks around the origin chunk that should be copied.
-    private static final int NEIGHBOR_CHUNK_RADIUS = Mth.roundToward(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
+    private static final int NEIGHBOR_CHUNK_RADIUS = 1; // TODO //Mth.roundToward(NEIGHBOR_BLOCK_RADIUS, 16) >> 4;
 
     // The number of sections on each axis of this slice.
     private static final int SECTION_ARRAY_LENGTH = 1 + (NEIGHBOR_CHUNK_RADIUS * 2);
@@ -105,13 +103,13 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
 
     public static ChunkRenderContext prepare(Level world, SectionPos origin, ClonedChunkSectionCache sectionCache) {
         LevelChunk chunk = world.getChunk(origin.getX(), origin.getZ());
-        LevelChunkSection section = chunk.getSections()[world.getSectionIndexFromSectionY(origin.getY())];
+        LevelChunkSection section = chunk.getSections()[origin.getY() / 16];
 
         // If the chunk section is absent or empty, simply terminate now. There will never be anything in this chunk
         // section to render, so we need to signal that a chunk render task shouldn't created. This saves a considerable
         // amount of time in queueing instant build tasks and greatly accelerates how quickly the world can be loaded.
         List<MeshAppender> meshAppenders = ChunkMeshEvent.post(world, origin);
-        boolean isEmpty = (section == null || section.hasOnlyAir()) && meshAppenders.isEmpty();
+        boolean isEmpty = LevelChunkSection.isEmpty(section) && meshAppenders.isEmpty();
 
         if (isEmpty) {
             return null;
@@ -158,7 +156,7 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
         this.blockEntityRenderDataArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
 
         this.biomeSlice = new BiomeSlice();
-        this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius().get());
+        this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius);
 
         for (BlockState[] blockArray : this.blockArrays) {
             Arrays.fill(blockArray, EMPTY_BLOCK_STATE);
@@ -217,14 +215,14 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
         } else {
             var bounds = context.getVolume();
 
-            int minBlockX = Math.max(bounds.minX(), pos.minBlockX());
-            int maxBlockX = Math.min(bounds.maxX(), pos.maxBlockX());
+            int minBlockX = Math.max(bounds.x0, pos.minBlockX());
+            int maxBlockX = Math.min(bounds.x1, pos.maxBlockX());
 
-            int minBlockY = Math.max(bounds.minY(), pos.minBlockY());
-            int maxBlockY = Math.min(bounds.maxY(), pos.maxBlockY());
+            int minBlockY = Math.max(bounds.y0, pos.minBlockY());
+            int maxBlockY = Math.min(bounds.y1, pos.maxBlockY());
 
-            int minBlockZ = Math.max(bounds.minZ(), pos.minBlockZ());
-            int maxBlockZ = Math.min(bounds.maxZ(), pos.maxBlockZ());
+            int minBlockZ = Math.max(bounds.z0, pos.minBlockZ());
+            int maxBlockZ = Math.min(bounds.z1, pos.maxBlockZ());
 
             container.sodium$unpack(blockArray, minBlockX & 15, minBlockY & 15, minBlockZ & 15,
                     maxBlockX & 15, maxBlockY & 15, maxBlockZ & 15);
@@ -269,11 +267,6 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
     @Override
     public float getShade(Direction direction, boolean shaded) {
         return this.world.getShade(direction, shaded);
-    }
-
-    @Override
-    public float getShade(float normalX, float normalY, float normalZ, boolean shade) {
-        return this.world.getShade(normalX, normalY, normalZ, shade);
     }
 
     @Override
@@ -356,23 +349,8 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
     }
 
     @Override
-    public int getHeight() {
-        return this.world.getHeight();
-    }
-
-    @Override
-    public int getMinBuildHeight() {
-        return this.world.getMinBuildHeight();
-    }
-
-    @Override
     public int getColor(BiomeColorSource source, int x, int y, int z) {
         return this.biomeColors.getColor(source, x, y, z);
-    }
-
-    @Override
-    public @Nullable ModelDataManager getModelDataManager() {
-        return this.world.getModelDataManager();
     }
 
     @Override

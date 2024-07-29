@@ -3,9 +3,9 @@ package me.jellysquid.mods.sodium.client.compatibility.checks;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import me.jellysquid.mods.sodium.client.gui.console.Console;
 import me.jellysquid.mods.sodium.client.gui.console.message.MessageLevel;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -73,27 +73,27 @@ public class ResourcePackScanner {
         boolean shown = false;
 
         if (!incompatibleResourcePacks.isEmpty()) {
-            showConsoleMessage(Component.translatable("sodium.console.core_shaders_error"), MessageLevel.SEVERE);
+            showConsoleMessage(new TranslatableComponent("sodium.console.core_shaders_error"), MessageLevel.SEVERE);
 
             for (var entry : incompatibleResourcePacks) {
-                showConsoleMessage(Component.literal(getResourcePackName(entry.resourcePack)), MessageLevel.SEVERE);
+                showConsoleMessage(new TextComponent(getResourcePackName(entry.resourcePack)), MessageLevel.SEVERE);
             }
 
             shown = true;
         }
 
         if (!likelyIncompatibleResourcePacks.isEmpty()) {
-            showConsoleMessage(Component.translatable("sodium.console.core_shaders_warn"), MessageLevel.WARN);
+            showConsoleMessage(new TranslatableComponent("sodium.console.core_shaders_warn"), MessageLevel.WARN);
 
             for (var entry : likelyIncompatibleResourcePacks) {
-                showConsoleMessage(Component.literal(getResourcePackName(entry.resourcePack)), MessageLevel.WARN);
+                showConsoleMessage(new TextComponent(getResourcePackName(entry.resourcePack)), MessageLevel.WARN);
             }
 
             shown = true;
         }
 
         if (shown) {
-            showConsoleMessage(Component.translatable("sodium.console.core_shaders_info"), MessageLevel.INFO);
+            showConsoleMessage(new TranslatableComponent("sodium.console.core_shaders_info"), MessageLevel.INFO);
         }
     }
 
@@ -151,7 +151,7 @@ public class ResourcePackScanner {
         final var unsupportedShaderPrograms = new ArrayList<String>();
         final var unsupportedShaderIncludes = new ArrayList<String>();
 
-        pack.getResources(PackType.CLIENT_RESOURCES, ResourceLocation.DEFAULT_NAMESPACE, "shaders", p -> true).forEach((identifier) -> {
+        pack.getResources(PackType.CLIENT_RESOURCES, "minecraft", "shaders", Integer.MAX_VALUE, p -> true).forEach((identifier) -> {
             // Trim full shader file path to only contain the filename
             final var path = identifier.getPath();
             final var name = path.substring(path.lastIndexOf('/') + 1);

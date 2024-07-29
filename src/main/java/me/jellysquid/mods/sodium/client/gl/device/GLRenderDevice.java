@@ -34,7 +34,7 @@ public class GLRenderDevice implements RenderDevice {
             return;
         }
 
-        BufferUploader.reset();
+        //BufferUploader.reset();
 
         this.stateTracker.clear();
         this.isActive = true;

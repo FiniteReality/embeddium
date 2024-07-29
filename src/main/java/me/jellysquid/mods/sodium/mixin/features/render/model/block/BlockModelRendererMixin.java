@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.render.immediate.model.BakedModelEncoder
 import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import me.jellysquid.mods.sodium.client.render.vertex.VertexConsumerUtils;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.minecraft.client.renderer.RenderType;
@@ -13,10 +14,8 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
-import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.client.model.data.IModelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,18 +24,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
+import java.util.Random;
 
 @Mixin(ModelBlockRenderer.class)
 public class BlockModelRendererMixin {
     @Unique
-    private final RandomSource random = new SingleThreadedRandomSource(42L);
+    private final Random random = new XoRoShiRoRandom(42L);
 
     /**
      * @reason Use optimized vertex writer intrinsics, avoid allocations
      * @author JellySquid
      */
-    @Inject(method = "renderModel(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/resources/model/BakedModel;FFFIILnet/minecraftforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V", at = @At("HEAD"), cancellable = true, remap = false)
-    private void renderFast(PoseStack.Pose entry, VertexConsumer vertexConsumer, BlockState blockState, BakedModel bakedModel, float red, float green, float blue, int light, int overlay, ModelData modelData, RenderType renderType, CallbackInfo ci) {
+    @Inject(method = "renderModel(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/client/resources/model/BakedModel;FFFIILnet/minecraftforge/client/model/data/IModelData;)V", at = @At("HEAD"), cancellable = true, remap = false)
+    private void renderFast(PoseStack.Pose entry, VertexConsumer vertexConsumer, BlockState blockState, BakedModel bakedModel, float red, float green, float blue, int light, int overlay, IModelData modelData, CallbackInfo ci) {
         var writer = VertexConsumerUtils.convertOrLog(vertexConsumer);
         if(writer == null) {
             return;
@@ -44,7 +44,7 @@ public class BlockModelRendererMixin {
 
         ci.cancel();
 
-        RandomSource random = this.random;
+        Random random = this.random;
 
         // Clamp color ranges
         red = Mth.clamp(red, 0.0F, 1.0F);
@@ -55,7 +55,7 @@ public class BlockModelRendererMixin {
 
         for (Direction direction : DirectionUtil.ALL_DIRECTIONS) {
             random.setSeed(42L);
-            List<BakedQuad> quads = bakedModel.getQuads(blockState, direction, random, modelData, renderType);
+            List<BakedQuad> quads = bakedModel.getQuads(blockState, direction, random, modelData);
 
             if (!quads.isEmpty()) {
                 renderQuads(entry, writer, defaultColor, quads, light, overlay);
@@ -63,7 +63,7 @@ public class BlockModelRendererMixin {
         }
 
         random.setSeed(42L);
-        List<BakedQuad> quads = bakedModel.getQuads(blockState, null, random, modelData, renderType);
+        List<BakedQuad> quads = bakedModel.getQuads(blockState, null, random, modelData);
 
         if (!quads.isEmpty()) {
             renderQuads(entry, writer, defaultColor, quads, light, overlay);

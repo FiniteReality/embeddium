@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 
 import java.util.Arrays;
 
@@ -105,7 +104,7 @@ public class DefaultColorProviders {
                 return;
             }
 
-            Arrays.fill(output, ColorARGB.toABGR(IClientFluidTypeExtensions.of(state).getTintColor(state, view, pos)));
+            Arrays.fill(output, ColorARGB.toABGR(state.getType().getAttributes().getColor(view, pos)));
         }
     }
 }

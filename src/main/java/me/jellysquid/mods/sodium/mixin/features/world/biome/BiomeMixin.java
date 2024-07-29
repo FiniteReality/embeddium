@@ -57,8 +57,8 @@ public abstract class BiomeMixin {
 
     @Unique
     private int getDefaultColorIndex() {
-        double temperature = Mth.clamp(this.climateSettings.temperature(), 0.0F, 1.0F);
-        double humidity = Mth.clamp(this.climateSettings.downfall(), 0.0F, 1.0F);
+        double temperature = Mth.clamp(this.climateSettings.temperature, 0.0F, 1.0F);
+        double humidity = Mth.clamp(this.climateSettings.downfall, 0.0F, 1.0F);
 
         return BiomeColorMaps.getIndex(temperature, humidity);
     }

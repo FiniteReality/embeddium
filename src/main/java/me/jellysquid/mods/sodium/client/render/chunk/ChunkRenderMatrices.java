@@ -9,6 +9,6 @@ import org.joml.Matrix4fc;
 public record ChunkRenderMatrices(Matrix4fc projection, Matrix4fc modelView) {
     public static ChunkRenderMatrices from(PoseStack stack) {
         PoseStack.Pose entry = stack.last();
-        return new ChunkRenderMatrices(JomlHelper.copy(RenderSystem.getProjectionMatrix()), JomlHelper.copy(entry.pose()));
+        return new ChunkRenderMatrices(JomlHelper.copy(GameRendererContext.PROJECTION_MATRIX), JomlHelper.copy(entry.pose()));
     }
 }

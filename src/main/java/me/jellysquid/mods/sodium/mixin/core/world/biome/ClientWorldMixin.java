@@ -4,7 +4,6 @@ import me.jellysquid.mods.sodium.client.world.BiomeSeedProvider;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
@@ -23,17 +22,7 @@ public class ClientWorldMixin implements BiomeSeedProvider {
     private long biomeSeed;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void captureSeed(ClientPacketListener networkHandler,
-                             ClientLevel.ClientLevelData properties,
-                             ResourceKey<Level> registryRef,
-                             Holder<DimensionType> dimensionTypeEntry,
-                             int loadDistance,
-                             int simulationDistance,
-                             Supplier<ProfilerFiller> profiler,
-                             LevelRenderer worldRenderer,
-                             boolean debugWorld,
-                             long seed,
-                             CallbackInfo ci) {
+    private void captureSeed(ClientPacketListener arg, ClientLevel.ClientLevelData arg2, ResourceKey arg3, DimensionType arg4, int i, Supplier supplier, LevelRenderer arg5, boolean bl, long seed, CallbackInfo ci) {
         this.biomeSeed = seed;
     }
 

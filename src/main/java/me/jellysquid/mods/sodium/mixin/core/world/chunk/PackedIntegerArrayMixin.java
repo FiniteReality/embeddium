@@ -1,7 +1,7 @@
 package me.jellysquid.mods.sodium.mixin.core.world.chunk;
 
 import me.jellysquid.mods.sodium.client.world.PaletteStorageExtended;
-import net.minecraft.util.SimpleBitStorage;
+import net.minecraft.util.BitStorage;
 import net.minecraft.world.level.chunk.Palette;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Objects;
 
-@Mixin(SimpleBitStorage.class)
+@Mixin(BitStorage.class)
 public class PackedIntegerArrayMixin implements PaletteStorageExtended {
     @Shadow
     @Final
@@ -32,15 +32,14 @@ public class PackedIntegerArrayMixin implements PaletteStorageExtended {
     private int size;
 
     @Override
-    public <T> void sodium$unpack(T[] out, Palette<T> palette) {
+    public <T> void sodium$unpack(T[] out, Palette<T> palette, T defaultValue) {
         int idx = 0;
 
         for (long word : this.data) {
             long l = word;
 
             for (int j = 0; j < this.valuesPerLong; ++j) {
-                out[idx] = Objects.requireNonNull(palette.valueFor((int) (l & this.mask)),
-                        "Palette does not contain entry for value in storage");
+                out[idx] = Objects.requireNonNullElse(palette.valueFor((int) (l & this.mask)), defaultValue);
                 l >>= this.bits;
 
                 if (++idx >= this.size) {

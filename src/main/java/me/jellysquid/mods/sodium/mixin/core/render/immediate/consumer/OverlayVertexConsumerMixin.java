@@ -2,6 +2,10 @@ package me.jellysquid.mods.sodium.mixin.core.render.immediate.consumer;
 
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.CommonVertexAttribute;
@@ -10,8 +14,6 @@ import net.caffeinemc.mods.sodium.api.vertex.attributes.common.TextureAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
 import net.minecraft.core.Direction;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
-import org.embeddedt.embeddium.api.math.JomlHelper;
-import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Final;
@@ -38,9 +40,6 @@ public class OverlayVertexConsumerMixin implements VertexBufferWriter {
 
     @Unique
     private boolean isFullWriter;
-
-    @Unique
-    private Quaternionf jomlQuaternion = new Quaternionf();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(CallbackInfo ci) {
@@ -82,30 +81,30 @@ public class OverlayVertexConsumerMixin implements VertexBufferWriter {
 
         int color = ColorABGR.pack(1.0f, 1.0f, 1.0f, 1.0f);
 
-        var normal = new Vector3f(Float.NaN);
-        var position = new Vector4f(Float.NaN);
+        var normal = new Vector3f();
+        var position = new Vector4f();
 
         for (int vertexIndex = 0; vertexIndex < count; vertexIndex++) {
-            position.x = MemoryUtil.memGetFloat(ptr + offsetPosition + 0);
-            position.y = MemoryUtil.memGetFloat(ptr + offsetPosition + 4);
-            position.z = MemoryUtil.memGetFloat(ptr + offsetPosition + 8);
-            position.w = 1.0f;
+            position.setX(MemoryUtil.memGetFloat(ptr + offsetPosition + 0));
+            position.setY(MemoryUtil.memGetFloat(ptr + offsetPosition + 4));
+            position.setZ(MemoryUtil.memGetFloat(ptr + offsetPosition + 8));
+            position.setW(1.0f);
 
             int packedNormal = MemoryUtil.memGetInt(ptr + offsetNormal);
-            normal.x = NormI8.unpackX(packedNormal);
-            normal.y = NormI8.unpackY(packedNormal);
-            normal.z = NormI8.unpackZ(packedNormal);
+            normal.setX(NormI8.unpackX(packedNormal));
+            normal.setY(NormI8.unpackY(packedNormal));
+            normal.setZ(NormI8.unpackZ(packedNormal));
 
-            Vector3f transformedNormal = inverseNormalMatrix.transform(normal);
-            Direction direction = Direction.getNearest(transformedNormal.x(), transformedNormal.y(), transformedNormal.z());
+            normal.transform(inverseNormalMatrix);
+            Direction direction = Direction.getNearest(normal.x(), normal.y(), normal.z());
 
-            Vector4f transformedTexture = inverseTextureMatrix.transform(position);
-            transformedTexture.rotateY(3.1415927F);
-            transformedTexture.rotateX(-1.5707964F);
-            transformedTexture.rotate(JomlHelper.copy(jomlQuaternion, direction.getRotation()));
+            position.transform(inverseTextureMatrix);
+            position.transform(Vector3f.YP.rotation(3.1415927F));
+            position.transform(Vector3f.XP.rotation(-1.5707964F));
+            position.transform(direction.getRotation());
 
-            float textureU = -transformedTexture.x();
-            float textureV = -transformedTexture.y();
+            float textureU = -position.x();
+            float textureV = -position.y();
 
             ColorAttribute.set(ptr + offsetColor, color);
             TextureAttribute.put(ptr + offsetTexture, textureU, textureV);

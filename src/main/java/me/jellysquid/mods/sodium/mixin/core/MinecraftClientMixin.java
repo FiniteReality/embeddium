@@ -84,7 +84,7 @@ public class MinecraftClientMixin {
     /**
      * Check for problematic core shader resource packs after the initial game launch.
      */
-    @Inject(method = "lambda$new$2", at = @At("TAIL"), remap = false)
+    @Inject(method = "lambda$null$1", at = @At("TAIL"), remap = false)
     private void postInit(String s, int i, CallbackInfo ci) {
         ResourcePackScanner.checkIfCoreShaderLoaded(this.resourceManager);
     }

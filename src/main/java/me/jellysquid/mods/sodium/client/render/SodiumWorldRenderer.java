@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
+import me.jellysquid.mods.sodium.client.gl.compat.FogHelper;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.model.quad.blender.BlendedColorProvider;
@@ -173,7 +174,7 @@ public class SodiumWorldRenderer {
 
         this.useEntityCulling = SodiumClientMod.options().performance.useEntityCulling;
 
-        if (this.client.options.getEffectiveRenderDistance() != this.renderDistance) {
+        if (this.client.options.renderDistance != this.renderDistance) {
             this.reload();
         }
 
@@ -189,7 +190,7 @@ public class SodiumWorldRenderer {
         Vec3 pos = camera.getPosition();
         float pitch = camera.getXRot();
         float yaw = camera.getYRot();
-        float fogDistance = RenderSystem.getShaderFogEnd();
+        float fogDistance = FogHelper.getFogCutoff();
 
         boolean dirty = pos.x != this.lastCameraX || pos.y != this.lastCameraY || pos.z != this.lastCameraZ ||
                 pitch != this.lastCameraPitch || yaw != this.lastCameraYaw || fogDistance != this.lastFogDistance;
@@ -235,7 +236,7 @@ public class SodiumWorldRenderer {
 
         profiler.pop();
 
-        Entity.setViewScale(Mth.clamp((double) this.client.options.getEffectiveRenderDistance() / 8.0D, 1.0D, 2.5D) * this.client.options.entityDistanceScaling().get());
+        Entity.setViewScale(Mth.clamp((double) this.client.options.renderDistance / 8.0D, 1.0D, 2.5D) * this.client.options.entityDistanceScaling);
     }
 
     private void processChunkEvents() {
@@ -273,7 +274,7 @@ public class SodiumWorldRenderer {
             this.renderSectionManager = null;
         }
 
-        this.renderDistance = this.client.options.getEffectiveRenderDistance();
+        this.renderDistance = this.client.options.renderDistance;
 
         this.renderSectionManager = new RenderSectionManager(this.world, this.renderDistance, commandList);
 
@@ -283,7 +284,7 @@ public class SodiumWorldRenderer {
         // Forge workaround - reset VSync flag
         var window = Minecraft.getInstance().getWindow();
         if(window != null)
-            window.updateVsync(Minecraft.getInstance().options.enableVsync().get());
+            window.updateVsync(Minecraft.getInstance().options.enableVsync);
 
         BlendedColorProvider.checkBlendingEnabled();
     }
@@ -351,7 +352,7 @@ public class SodiumWorldRenderer {
         double y = cameraPos.y();
         double z = cameraPos.z();
 
-        BlockEntityRenderDispatcher blockEntityRenderer = Minecraft.getInstance().getBlockEntityRenderDispatcher();
+        BlockEntityRenderDispatcher blockEntityRenderer = BlockEntityRenderDispatcher.instance;
 
         this.blockEntityRequestedOutline = false;
 
@@ -395,10 +396,6 @@ public class SodiumWorldRenderer {
                     if(ENABLE_BLOCKENTITY_CULLING && !currentViewport.isBoxVisible(blockEntity.getRenderBoundingBox()))
                         continue;
 
-                    if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
-                        this.blockEntityRequestedOutline = true;
-                    }
-
                     renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
                 }
             }
@@ -424,10 +421,6 @@ public class SodiumWorldRenderer {
             for (var blockEntity : blockEntities) {
                 if(ENABLE_BLOCKENTITY_CULLING && !currentViewport.isBoxVisible(blockEntity.getRenderBoundingBox()))
                     continue;
-
-                if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
-                    this.blockEntityRequestedOutline = true;
-                }
 
                 renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
             }
@@ -527,17 +520,17 @@ public class SodiumWorldRenderer {
     public boolean isBoxVisible(double x1, double y1, double z1, double x2, double y2, double z2) {
         // Boxes outside the valid world height will never map to a rendered chunk
         // Always render these boxes or they'll be culled incorrectly!
-        if (y2 < this.world.getMinBuildHeight() + 0.5D || y1 > this.world.getMaxBuildHeight() - 0.5D) {
+        if (y2 < 0.5D || y1 > this.world.getMaxBuildHeight() - 0.5D) {
             return true;
         }
 
-        int minX = SectionPos.posToSectionCoord(x1 - 0.5D);
-        int minY = SectionPos.posToSectionCoord(y1 - 0.5D);
-        int minZ = SectionPos.posToSectionCoord(z1 - 0.5D);
+        int minX = SectionPos.blockToSectionCoord(Mth.floor(x1 - 0.5D));
+        int minY = SectionPos.blockToSectionCoord(Mth.floor(y1 - 0.5D));
+        int minZ = SectionPos.blockToSectionCoord(Mth.floor(z1 - 0.5D));
 
-        int maxX = SectionPos.posToSectionCoord(x2 + 0.5D);
-        int maxY = SectionPos.posToSectionCoord(y2 + 0.5D);
-        int maxZ = SectionPos.posToSectionCoord(z2 + 0.5D);
+        int maxX = SectionPos.blockToSectionCoord(Mth.floor(x2 + 0.5D));
+        int maxY = SectionPos.blockToSectionCoord(Mth.floor(y2 + 0.5D));
+        int maxZ = SectionPos.blockToSectionCoord(Mth.floor(z2 + 0.5D));
 
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {

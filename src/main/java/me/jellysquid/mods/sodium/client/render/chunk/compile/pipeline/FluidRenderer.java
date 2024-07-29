@@ -134,7 +134,7 @@ public class FluidRenderer {
         var context = Objects.requireNonNull(GlobalChunkBuildContext.get());
         context.setCaptureAdditionalSprites(true);
         fluidVertexBuilder.reset();
-        Minecraft.getInstance().getBlockRenderer().renderLiquid(blockPos, world, fluidVertexBuilder, world.getBlockState(blockPos), fluidState);
+        Minecraft.getInstance().getBlockRenderer().renderLiquid(blockPos, world, fluidVertexBuilder, fluidState);
         fluidVertexBuilder.flush(buffers, material, 0, 0, 0);
 
         var sprites = context.getAdditionalCapturedSprites();
@@ -153,7 +153,7 @@ public class FluidRenderer {
         var meshBuilder = buffers.get(material);
 
         // Embeddium: Delegate to vanilla liquid renderer if fluid has this tag.
-        if(fluidState.getType().is(EmbeddiumTags.RENDERS_WITH_VANILLA)) {
+        if(false) { // fluidState.getType().is(EmbeddiumTags.RENDERS_WITH_VANILLA)) {
             renderVanilla(world, fluidState, blockPos, meshBuilder, material);
             return;
         }

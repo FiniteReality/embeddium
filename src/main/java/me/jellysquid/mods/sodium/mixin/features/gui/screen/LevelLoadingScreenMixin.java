@@ -9,11 +9,11 @@ import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import org.embeddedt.embeddium.api.math.JomlHelper;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL20C;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.*;
 
@@ -55,17 +55,16 @@ public class LevelLoadingScreenMixin {
                     .forEach(entry -> STATUS_TO_COLOR_FAST.put(entry.getKey(), ColorARGB.toABGR(entry.getIntValue(), 0xFF)));
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
         Matrix4f matrix = JomlHelper.copy(matrices.last().pose());
 
         Tesselator tessellator = Tesselator.getInstance();
 
         RenderSystem.enableBlend();
+        RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
         
         BufferBuilder bufferBuilder = tessellator.getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(GL20C.GL_QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         var writer = VertexBufferWriter.of(bufferBuilder);
 
@@ -115,6 +114,7 @@ public class LevelLoadingScreenMixin {
 
         tessellator.end();
 
+        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 

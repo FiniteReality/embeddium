@@ -17,7 +17,7 @@ public abstract class BlendedColorProvider<T> implements ColorProvider<T> {
     private final BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 
     public static void checkBlendingEnabled() {
-        shouldUseVertexBlending = Minecraft.getInstance().options.biomeBlendRadius().get() > 0;
+        shouldUseVertexBlending = Minecraft.getInstance().options.biomeBlendRadius > 0;
     }
 
     @Override

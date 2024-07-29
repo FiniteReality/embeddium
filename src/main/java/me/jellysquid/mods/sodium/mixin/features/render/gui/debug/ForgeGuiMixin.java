@@ -7,16 +7,14 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.gui.ForgeIngameGui;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,13 +25,13 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(ForgeGui.class)
+@Mixin(ForgeIngameGui.class)
 public abstract class ForgeGuiMixin extends Gui {
     @Shadow
-    private Font font;
+    private Font fontrenderer;
 
-    public ForgeGuiMixin(Minecraft p_232355_, ItemRenderer p_232356_) {
-        super(p_232355_, p_232356_);
+    public ForgeGuiMixin(Minecraft p_232355_) {
+        super(p_232355_);
     }
 
     /**
@@ -41,7 +39,7 @@ public abstract class ForgeGuiMixin extends Gui {
      * @reason take over rendering of the actual list contents
      */
     @Inject(method = "renderHUDText", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, remap = false)
-    private void embeddium$renderTextFast(int width, int height, PoseStack poseStack, CallbackInfo ci, ArrayList<String> listL, ArrayList<String> listR, CustomizeGuiOverlayEvent.DebugText event) {
+    private void embeddium$renderTextFast(int width, int height, PoseStack poseStack, CallbackInfo ci, ArrayList<String> listL, ArrayList<String> listR, RenderGameOverlayEvent.Text event) {
         ci.cancel();
 
         renderForgeList(poseStack, listL, false);
@@ -66,13 +64,13 @@ public abstract class ForgeGuiMixin extends Gui {
 
             if (!Strings.isNullOrEmpty(string)) {
                 int height = 9;
-                int width = this.font.width(string);
+                int width = this.fontrenderer.width(string);
 
                 float x1 = right ? this.minecraft.getWindow().getGuiScaledWidth() - 2 - width : 2;
                 float y1 = 2 + (height * i);
 
-                this.font.drawInBatch(string, x1, y1, 0xe0e0e0, false, positionMatrix, immediate,
-                        false, 0, 15728880, this.font.isBidirectional());
+                this.fontrenderer.drawInBatch(string, x1, y1, 0xe0e0e0, false, positionMatrix, immediate,
+                        false, 0, 15728880, this.fontrenderer.isBidirectional());
             }
         }
 
@@ -92,9 +90,7 @@ public abstract class ForgeGuiMixin extends Gui {
         float k = (float) (color & 255) / 255.0F;
 
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         Matrix4f matrix = matrixStack.last()
                 .pose();
@@ -107,7 +103,7 @@ public abstract class ForgeGuiMixin extends Gui {
             }
 
             int height = 9;
-            int width = this.font.width(string);
+            int width = this.fontrenderer.width(string);
 
             int x = right ? this.minecraft.getWindow().getGuiScaledWidth() - 2 - width : 2;
             int y = 2 + height * i;
@@ -123,9 +119,9 @@ public abstract class ForgeGuiMixin extends Gui {
             bufferBuilder.vertex(matrix, x1, y1, 0.0F).color(g, h, k, f).endVertex();
         }
 
-        BufferBuilder.RenderedBuffer output = bufferBuilder.end();
+        bufferBuilder.end();
 
-        BufferUploader.drawWithShader(output);
+        BufferUploader.end(bufferBuilder);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }

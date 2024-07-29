@@ -19,6 +19,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -26,10 +27,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 import org.embeddedt.embeddium.api.model.EmbeddiumBakedModelExtension;
@@ -39,10 +38,11 @@ import org.embeddedt.embeddium.render.frapi.FRAPIRenderHandler;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class BlockRenderer {
     private static final PoseStack EMPTY_STACK = new PoseStack();
-    private final RandomSource random = new SingleThreadedRandomSource(42L);
+    private final Random random = new XoRoShiRoRandom(42L);
 
     private final ColorProviderRegistry colorProviderRegistry;
     private final BlockOcclusionCache occlusionCache;
@@ -128,7 +128,7 @@ public class BlockRenderer {
         var random = this.random;
         random.setSeed(ctx.seed());
 
-        return ctx.model().getQuads(ctx.state(), face, random, ctx.modelData(), ctx.renderLayer());
+        return ctx.model().getQuads(ctx.state(), face, random, ctx.modelData());
     }
 
     private boolean isFaceVisible(BlockRenderContext ctx, Direction face) {
@@ -139,18 +139,6 @@ public class BlockRenderer {
                                 ChunkModelBuilder builder, List<BakedQuad> quads, Direction cullFace) {
 
         this.useReorienting = true;
-
-        // noinspection ForLoopReplaceableByForEach
-        for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
-            if (!quads.get(i).hasAmbientOcclusion()) {
-                // We disable Sodium's quad orientation detection if a quad opts out of AO. This is
-                // because some mods place non-AO quads below/above AO quads with identical coordinates.
-                // This won't z-fight as-is, but if the AO quad gets reoriented it can be triangulated
-                // differently from the non-AO quad, and that will cause z-fighting.
-                this.useReorienting = false;
-                break;
-            }
-        }
 
         // This is a very hot allocation, iterate over it manually
         // noinspection ForLoopReplaceableByForEach
@@ -227,8 +215,8 @@ public class BlockRenderer {
     }
 
     private LightMode getLightingMode(BlockState state, BakedModel model, BlockAndTintGetter world, BlockPos pos, RenderType renderLayer) {
-        if (this.useAmbientOcclusion && model.useAmbientOcclusion(state, renderLayer)
-                && (((EmbeddiumBakedModelExtension)model).useAmbientOcclusionWithLightEmission(state, renderLayer) || state.getLightEmission(world, pos) == 0)) {
+        if (this.useAmbientOcclusion && model.isAmbientOcclusion(state)
+                && (((EmbeddiumBakedModelExtension)model).useAmbientOcclusionWithLightEmission(state, renderLayer) || state.getLightValue(world, pos) == 0)) {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;

@@ -20,10 +20,12 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer {
 
     @Override
     public void putBulkData(PoseStack.Pose matrices, BakedQuad bakedQuad, float r, float g, float b, int light, int overlay) {
+        ModelQuadView quad = (ModelQuadView) bakedQuad;
+
         if (!this.fastFormat) {
             super.putBulkData(matrices, bakedQuad, r, g, b, light, overlay);
 
-            SpriteUtil.markSpriteActive(bakedQuad.getSprite());
+            SpriteUtil.markSpriteActive(quad.getSprite());
 
             return;
         }
@@ -38,7 +40,6 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer {
 
         VertexBufferWriter writer = VertexBufferWriter.of(this);
 
-        ModelQuadView quad = (ModelQuadView) bakedQuad;
 
         int color = ColorABGR.pack(r, g, b, 1.0F);
         BakedModelEncoder.writeQuadVertices(writer, matrices, quad, color, light, overlay);
@@ -48,10 +49,12 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer {
 
     @Override
     public void putBulkData(PoseStack.Pose matrices, BakedQuad bakedQuad, float[] brightnessTable, float r, float g, float b, int[] light, int overlay, boolean colorize) {
+        ModelQuadView quad = (ModelQuadView) bakedQuad;
+
         if (!this.fastFormat) {
             super.putBulkData(matrices, bakedQuad, brightnessTable, r, g, b, light, overlay, colorize);
 
-            SpriteUtil.markSpriteActive(bakedQuad.getSprite());
+            SpriteUtil.markSpriteActive(quad.getSprite());
 
             return;
         }
@@ -65,8 +68,6 @@ public abstract class BufferBuilderMixin extends DefaultedVertexConsumer {
         }
 
         VertexBufferWriter writer = VertexBufferWriter.of(this);
-
-        ModelQuadView quad = (ModelQuadView) bakedQuad;
 
         BakedModelEncoder.writeQuadVertices(writer, matrices, quad, r, g, b, brightnessTable, colorize, light, overlay);
 

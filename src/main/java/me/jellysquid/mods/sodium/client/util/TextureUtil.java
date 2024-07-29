@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 
 public class TextureUtil {
 
@@ -8,13 +9,13 @@ public class TextureUtil {
      * NOTE: Must be called while a RenderLayer is active.
      */
     public static int getLightTextureId() {
-        return RenderSystem.getShaderTexture(2);
+        return Minecraft.getInstance().getTextureManager().getTexture(Minecraft.getInstance().gameRenderer.lightTexture().lightTextureLocation).getId();
     }
 
     /**
      * NOTE: Must be called while a RenderLayer is active.
      */
     public static int getBlockTextureId() {
-        return RenderSystem.getShaderTexture(0);
+        return Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).getId();
     }
 }

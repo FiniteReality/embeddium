@@ -11,10 +11,12 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.resource.PathPackResources;
-import net.minecraftforge.resource.ResourcePackLoader;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.fml.packs.ModFileResourcePack;
+import net.minecraftforge.fml.packs.ResourcePackLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,18 +34,18 @@ public class TabHeaderWidget extends FlatButtonWidget {
     public static MutableComponent getLabel(String modId) {
         return (switch(modId) {
             // TODO handle long mod names better, this is the only one we know of right now
-            case "sspb" -> Component.literal("SSPB");
+            case "sspb" -> new TextComponent("SSPB");
             default -> Tab.idComponent(modId);
         }).withStyle(s -> s.withUnderlined(true));
     }
 
     public TabHeaderWidget(Dim2i dim, String modId) {
         super(dim, getLabel(modId), () -> {});
-        Optional<String> logoFile = erroredLogos.contains(modId) ? Optional.empty() : ModList.get().getModContainerById(modId).flatMap(c -> c.getModInfo().getLogoFile());
+        Optional<String> logoFile = erroredLogos.contains(modId) ? Optional.empty() : ModList.get().getModContainerById(modId).flatMap(c -> ((ModInfo)c.getModInfo()).getLogoFile());
         ResourceLocation texture = null;
         if(logoFile.isPresent()) {
-            final PathPackResources resourcePack = ResourcePackLoader.getPackFor(modId)
-                    .orElse(ResourcePackLoader.getPackFor("forge").
+            final ModFileResourcePack resourcePack = ResourcePackLoader.getResourcePackFor(modId)
+                    .orElse(ResourcePackLoader.getResourcePackFor("forge").
                             orElseThrow(()->new RuntimeException("Can't find forge, WHAT!")));
             try {
                 InputStream logoResource = resourcePack.getRootResource(logoFile.get());
@@ -86,7 +88,7 @@ public class TabHeaderWidget extends FlatButtonWidget {
         ResourceLocation icon = Objects.requireNonNullElse(this.logoTexture, FALLBACK_LOCATION);
         int fontHeight = Minecraft.getInstance().font.lineHeight;
         int imgY = this.dim.getCenterY() - (fontHeight / 2);
-        RenderSystem.setShaderTexture(0, icon);
+        Minecraft.getInstance().getTextureManager().bind(icon);
         Gui.blit(drawContext, this.dim.x() + 5, imgY, 0.0f, 0.0f, fontHeight, fontHeight, fontHeight, fontHeight);
     }
 }

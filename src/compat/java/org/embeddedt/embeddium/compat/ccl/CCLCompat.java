@@ -3,15 +3,11 @@ package org.embeddedt.embeddium.compat.ccl;
 import codechicken.lib.render.block.BlockRenderingRegistry;
 import codechicken.lib.render.block.ICCBlockRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
-import net.minecraft.core.Holder;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.registries.IRegistryDelegate;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -25,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CCLCompat {
     private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-CCL");
-	private static Map<Holder<Block>, ICCBlockRenderer> customBlockRenderers;
-    private static Map<Holder<Fluid>, ICCBlockRenderer> customFluidRenderers;
+	private static Map<IRegistryDelegate<Block>, ICCBlockRenderer> customBlockRenderers;
+    private static Map<IRegistryDelegate<Fluid>, ICCBlockRenderer> customFluidRenderers;
     private static List<ICCBlockRenderer> customGlobalRenderers;
 
     private static final Map<ICCBlockRenderer, BlockRendererRegistry.Renderer> ccRendererToSodium = new ConcurrentHashMap<>();
@@ -37,7 +33,7 @@ public class CCLCompat {
      */
     private static BlockRendererRegistry.Renderer createBridge(ICCBlockRenderer r) {
         return ccRendererToSodium.computeIfAbsent(r, ccRenderer -> (ctx, random, consumer) -> {
-            ccRenderer.renderBlock(ctx.state(), ctx.pos(), ctx.world(), STACK_THREAD_LOCAL.get(), consumer, random, ctx.modelData(), ctx.renderLayer());
+            ccRenderer.renderBlock(ctx.state(), ctx.pos(), ctx.world(), STACK_THREAD_LOCAL.get(), consumer, random, ctx.modelData());
             return BlockRendererRegistry.RenderResult.OVERRIDE;
         });
     }
@@ -48,23 +44,23 @@ public class CCLCompat {
             BlockRendererRegistry.instance().registerRenderPopulator((resultList, ctx) -> {
                 if(!customGlobalRenderers.isEmpty()) {
                     for(ICCBlockRenderer r : customGlobalRenderers) {
-                        if(r.canHandleBlock(ctx.world(), ctx.pos(), ctx.state(), ctx.renderLayer())) {
+                        if(r.canHandleBlock(ctx.world(), ctx.pos(), ctx.state())) {
                             resultList.add(createBridge(r));
                         }
                     }
                 }
                 if(!customBlockRenderers.isEmpty()) {
                     Block block = ctx.state().getBlock();
-                    for(Map.Entry<Holder<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
-                        if(entry.getKey().get() == block && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state(), ctx.renderLayer())) {
+                    for(Map.Entry<IRegistryDelegate<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
+                        if(entry.getKey().get() == block && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state())) {
                             resultList.add(createBridge(entry.getValue()));
                         }
                     }
                 }
                 if(!customFluidRenderers.isEmpty()) {
                     Fluid fluid = ctx.state().getFluidState().getType();
-                    for(Map.Entry<Holder<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
-                        if(entry.getKey().get().isSame(fluid) && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state(), ctx.renderLayer())) {
+                    for(Map.Entry<IRegistryDelegate<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
+                        if(entry.getKey().get().isSame(fluid) && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state())) {
                             resultList.add(createBridge(entry.getValue()));
                         }
                     }
@@ -80,12 +76,12 @@ public class CCLCompat {
 			LOGGER.info("Retrieving block renderers");
             final Field blockRenderersField = BlockRenderingRegistry.class.getDeclaredField("blockRenderers");
             blockRenderersField.setAccessible(true);
-            customBlockRenderers = (Map<Holder<Block>, ICCBlockRenderer>) blockRenderersField.get(null);
+            customBlockRenderers = (Map<IRegistryDelegate<Block>, ICCBlockRenderer>) blockRenderersField.get(null);
 
             LOGGER.info("Retrieving fluid renderers");
             final Field fluidRenderersField = BlockRenderingRegistry.class.getDeclaredField("fluidRenderers");
             fluidRenderersField.setAccessible(true);
-            customFluidRenderers = (Map<Holder<Fluid>, ICCBlockRenderer>) fluidRenderersField.get(null);
+            customFluidRenderers = (Map<IRegistryDelegate<Fluid>, ICCBlockRenderer>) fluidRenderersField.get(null);
 
             LOGGER.info("Retrieving global renderers");
             final Field globalRenderersField = BlockRenderingRegistry.class.getDeclaredField("globalRenderers");

@@ -63,7 +63,7 @@ public class FlatLightPipeline implements LightPipeline {
 
         // Check emissivity of the origin state
         if (unpackEM(word)) {
-            return LightTexture.FULL_BRIGHT;
+            return LightDataAccess.FULL_BRIGHT;
         }
 
         // Use world light values from the offset pos, but luminance from the origin pos

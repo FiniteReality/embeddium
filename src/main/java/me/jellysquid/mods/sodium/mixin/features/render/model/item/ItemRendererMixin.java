@@ -6,6 +6,7 @@ import me.jellysquid.mods.sodium.client.render.texture.SpriteUtil;
 import me.jellysquid.mods.sodium.client.render.vertex.VertexConsumerUtils;
 import me.jellysquid.mods.sodium.client.model.color.interop.ItemColorsExtended;
 import me.jellysquid.mods.sodium.client.util.DirectionUtil;
+import me.jellysquid.mods.sodium.client.util.rand.XoRoShiRoRandom;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
 import net.minecraft.client.color.item.ItemColor;
@@ -14,9 +15,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -24,11 +23,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
+import java.util.Random;
 
 @Mixin(ItemRenderer.class)
 public class ItemRendererMixin {
     @Unique
-    private final RandomSource random = new SingleThreadedRandomSource(42L);
+    private final Random random = new XoRoShiRoRandom(42L);
 
     @Shadow
     @Final
@@ -48,7 +48,7 @@ public class ItemRendererMixin {
 
         ci.cancel();
 
-        RandomSource random = this.random;
+        Random random = this.random;
         PoseStack.Pose matrices = matrixStack.last();
 
         ItemColor colorProvider = null;

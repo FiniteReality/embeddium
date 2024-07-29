@@ -6,7 +6,7 @@ import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -16,8 +16,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.function.Consumer;
 
 @Mixin(ClientChunkCache.class)
 public class ClientChunkManagerMixin {
@@ -42,11 +40,11 @@ public class ClientChunkManagerMixin {
             method = "replaceWithPacketData",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/multiplayer/ClientLevel;onChunkLoaded(Lnet/minecraft/world/level/ChunkPos;)V",
+                    target = "Lnet/minecraft/client/multiplayer/ClientLevel;onChunkLoaded(II)V",
                     shift = At.Shift.AFTER
             )
     )
-    private void onChunkLoaded(int chunkX, int chunkZ, FriendlyByteBuf buf, CompoundTag nbt, Consumer<ClientboundLevelChunkPacketData.BlockEntityTagOutput> consumer, CallbackInfoReturnable<@Nullable LevelChunk> cir) {
+    private void onChunkLoaded(int chunkX, int chunkZ, @javax.annotation.Nullable ChunkBiomeContainer arg, FriendlyByteBuf arg2, CompoundTag arg3, int m, boolean bl, CallbackInfoReturnable<@Nullable LevelChunk> cir) {
         ChunkTrackerHolder.get(this.level)
                 .onChunkStatusAdded(chunkX, chunkZ, ChunkStatus.FLAG_HAS_BLOCK_DATA);
     }

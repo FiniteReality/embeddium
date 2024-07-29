@@ -7,6 +7,8 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
@@ -26,16 +28,16 @@ public class ConfigCorruptedScreen extends Screen {
         """;
 
     private static final List<Component> TEXT_BODY = Arrays.stream(TEXT_BODY_RAW.split("\n"))
-            .map(Component::literal)
+            .map(TextComponent::new)
             .collect(Collectors.toList());
 
-    private static final Component TEXT_BUTTON_RESTORE_DEFAULTS = Component.literal("Restore defaults");
-    private static final Component TEXT_BUTTON_CLOSE_GAME = Component.literal("Close game");
+    private static final Component TEXT_BUTTON_RESTORE_DEFAULTS = new TextComponent("Restore defaults");
+    private static final Component TEXT_BUTTON_CLOSE_GAME = new TextComponent("Close game");
 
     private final Supplier<Screen> child;
 
     public ConfigCorruptedScreen(Supplier<Screen> child) {
-        super(Component.literal("Config corruption detected"));
+        super(new TextComponent("Config corruption detected"));
 
         this.child = child;
     }
@@ -44,12 +46,12 @@ public class ConfigCorruptedScreen extends Screen {
     protected void init() {
         super.init();
 
-        this.addRenderableWidget(new Button(32, this.height - 40, 174, 20, TEXT_BUTTON_RESTORE_DEFAULTS, (btn) -> {
+        this.addButton(new Button(32, this.height - 40, 174, 20, TEXT_BUTTON_RESTORE_DEFAULTS, (btn) -> {
             SodiumClientMod.restoreDefaultOptions();
             Minecraft.getInstance().setScreen(this.child.get());
         }));
 
-        this.addRenderableWidget(new Button(this.width - 174 - 32, this.height - 40, 174, 20, TEXT_BUTTON_CLOSE_GAME, (btn) -> {
+        this.addButton(new Button(this.width - 174 - 32, this.height - 40, 174, 20, TEXT_BUTTON_CLOSE_GAME, (btn) -> {
             Minecraft.getInstance().stop();
         }));
     }

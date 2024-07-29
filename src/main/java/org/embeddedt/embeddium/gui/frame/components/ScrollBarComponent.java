@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.widgets.AbstractWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 import net.minecraft.util.Mth;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
@@ -134,18 +135,18 @@ public class ScrollBarComponent extends AbstractWidget {
             return false;
 
         if (this.mode == Mode.VERTICAL) {
-            if (keyCode == InputConstants.KEY_UP) {
+            if (keyCode == GLFW.GLFW_KEY_UP) {
                 this.setOffset(this.getOffset() - SCROLL_OFFSET);
                 return true;
-            } else if (keyCode == InputConstants.KEY_DOWN) {
+            } else if (keyCode == GLFW.GLFW_KEY_DOWN) {
                 this.setOffset(this.getOffset() + SCROLL_OFFSET);
                 return true;
             }
         } else {
-            if (keyCode == InputConstants.KEY_LEFT) {
+            if (keyCode == GLFW.GLFW_KEY_LEFT) {
                 this.setOffset(this.getOffset() - SCROLL_OFFSET);
                 return true;
-            } else if (keyCode == InputConstants.KEY_RIGHT) {
+            } else if (keyCode == GLFW.GLFW_KEY_RIGHT) {
                 this.setOffset(this.getOffset() + SCROLL_OFFSET);
                 return true;
             }
