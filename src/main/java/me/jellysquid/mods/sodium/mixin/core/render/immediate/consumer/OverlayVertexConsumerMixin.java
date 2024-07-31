@@ -30,11 +30,15 @@ public class OverlayVertexConsumerMixin implements VertexBufferWriter {
 
     @Shadow
     @Final
-    private Matrix3f normalInversePose;
+    private com.mojang.math.Matrix3f normalInversePose;
+
+    private Matrix3f jomlNormalInverse;
 
     @Shadow
     @Final
-    private Matrix4f cameraInversePose;
+    private com.mojang.math.Matrix4f cameraInversePose;
+
+    private Matrix4f jomlCameraInverse;
 
     @Unique
     private boolean isFullWriter;
@@ -45,6 +49,8 @@ public class OverlayVertexConsumerMixin implements VertexBufferWriter {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(CallbackInfo ci) {
         this.isFullWriter = VertexBufferWriter.tryOf(this.delegate) != null;
+        this.jomlNormalInverse = JomlHelper.copy(this.normalInversePose);
+        this.jomlCameraInverse = JomlHelper.copy(this.cameraInversePose);
     }
 
     @Override
@@ -54,8 +60,7 @@ public class OverlayVertexConsumerMixin implements VertexBufferWriter {
 
     @Override
     public void push(MemoryStack stack, long ptr, int count, VertexFormatDescription format) {
-        transform(ptr, count, format,
-                this.normalInversePose, this.cameraInversePose);
+        transform(ptr, count, format, this.jomlNormalInverse, this.jomlCameraInverse);
 
         VertexBufferWriter.of(this.delegate)
                 .push(stack, ptr, count, format);
