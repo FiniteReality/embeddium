@@ -1,3 +1,4 @@
+import org.embeddedt.embeddium.gradle.versioning.ProjectVersioner
 import org.w3c.dom.Element
 
 plugins {
@@ -5,10 +6,6 @@ plugins {
     id("net.minecraftforge.gradle") version("6.0.25")
     id("maven-publish")
     id("org.spongepowered.mixin") version("0.7.38")
-
-    // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
-    // more easily identified. TODO: Lazily load GrGit via a service only when builds are performed.
-    id("org.ajoberstar.grgit") version("5.0.0")
 
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
 
@@ -139,6 +136,7 @@ dependencies {
     // Mods
     compatCompileOnly(fg.deobf("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}"))
     compatCompileOnly(fg.deobf("curse.maven:immersiveengineering-231951:${"ie_fileid"()}"))
+    compatCompileOnly(fg.deobf("com.brandon3055.brandonscore:BrandonsCore:1.20.1-3.2.1.302:universal"))
 
     // Fabric API
     compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
@@ -283,25 +281,5 @@ publishMods {
 }
 
 fun getModVersion(): String {
-    var baseVersion: String = project.properties["mod_version"].toString()
-    val mcMetadata: String = "+mc" + project.properties["minecraft_version"]
-
-    if (project.hasProperty("build.release")) {
-        return baseVersion + mcMetadata // no tag whatsoever
-    }
-
-    // Increment patch version
-    baseVersion = baseVersion.split(".").mapIndexed {
-        index, s -> if(index == 2) (s.toInt() + 1) else s
-    }.joinToString(separator = ".")
-
-    val head = grgit.head()
-    var id = head.abbreviatedId
-
-    // Flag the build if the build tree is not clean
-    if (!grgit.status().isClean) {
-        id += "-dirty"
-    }
-
-    return baseVersion + "-git-${id}" + mcMetadata
+    return ProjectVersioner.computeVersion(project.projectDir, project.properties)
 }

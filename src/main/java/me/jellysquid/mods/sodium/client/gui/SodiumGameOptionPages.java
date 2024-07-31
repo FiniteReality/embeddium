@@ -21,6 +21,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuild
 import net.minecraft.client.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.ForgeConfig;
 import org.embeddedt.embeddium.client.gui.options.StandardOptions;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.lwjgl.opengl.GL;
@@ -33,6 +34,13 @@ public class SodiumGameOptionPages {
     private static final SodiumOptionsStorage sodiumOpts = new SodiumOptionsStorage();
     private static final MinecraftOptionsStorage vanillaOpts = new MinecraftOptionsStorage();
 
+    private static int computeMaxRangeForRenderDistance(@SuppressWarnings("SameParameterValue") int injectedRenderDistance) {
+        if(vanillaOpts.getData().renderDistance().values() instanceof OptionInstance.IntRange range) {
+            injectedRenderDistance = Math.max(injectedRenderDistance, range.maxInclusive());
+        }
+        return injectedRenderDistance;
+    }
+
     public static OptionPage general() {
         List<OptionGroup> groups = new ArrayList<>();
 
@@ -42,7 +50,7 @@ public class SodiumGameOptionPages {
                         .setId(StandardOptions.Option.RENDER_DISTANCE)
                         .setName(Component.translatable("options.renderDistance"))
                         .setTooltip(Component.translatable("sodium.options.view_distance.tooltip"))
-                        .setControl(option -> new SliderControl(option, 2, 32, 1, ControlValueFormatter.translateVariable("options.chunks")))
+                        .setControl(option -> new SliderControl(option, 2, computeMaxRangeForRenderDistance(32), 1, ControlValueFormatter.translateVariable("options.chunks")))
                         .setBinding((options, value) -> options.renderDistance().set(value), options -> options.renderDistance().get())
                         .setImpact(OptionImpact.HIGH)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
@@ -277,6 +285,18 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.VARIES)
                         .setBinding((opts, value) -> opts.performance.useTranslucentFaceSorting = value, opts -> opts.performance.useTranslucentFaceSorting)
                         .setEnabled(!ShaderModBridge.isNvidiumEnabled())
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build())
+                .build());
+
+        groups.add(OptionGroup.createBuilder()
+                .setId(StandardOptions.Group.LIGHTING)
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setId(StandardOptions.Option.USE_QUAD_NORMALS_FOR_LIGHTING)
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.LOW)
+                        .setBinding((opts, value) -> opts.quality.useQuadNormalsForShading = value, opts -> opts.quality.useQuadNormalsForShading)
+                        .setEnabled(!ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get())
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .build());

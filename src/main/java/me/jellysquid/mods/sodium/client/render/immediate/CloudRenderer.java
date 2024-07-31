@@ -34,6 +34,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 import org.embeddedt.embeddium.api.math.JomlHelper;
+import org.embeddedt.embeddium.api.render.clouds.ModifyCloudRenderingEvent;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL30C;
@@ -93,6 +94,12 @@ public class CloudRenderer {
         this.reloadTextures(factory);
     }
 
+    private static int fireModifyCloudRenderDistanceEvent(int distance) {
+        var event = new ModifyCloudRenderingEvent(distance);
+        ModifyCloudRenderingEvent.BUS.post(event);
+        return event.getCloudRenderDistance();
+    }
+
     public void render(@Nullable ClientLevel world, LocalPlayer player, PoseStack matrices, Matrix4f projectionMatrix, float ticks, float tickDelta, double cameraX, double cameraY, double cameraZ) {
         if (world == null) {
             return;
@@ -112,6 +119,8 @@ public class CloudRenderer {
         double cloudCenterZ = (cameraZ) + 3.96D;
 
         int renderDistance = Minecraft.getInstance().options.getEffectiveRenderDistance();
+        // This insanity (as opposed to just wrapping the call) is necessary to preserve the original assignment for mixin compat
+        renderDistance = fireModifyCloudRenderDistanceEvent(renderDistance);
         int cloudDistance = Math.max(this.cloudDistanceMinimum, (renderDistance * this.cloudDistanceMaximum) + 9);
 
         int centerCellX = (int) (Math.floor(cloudCenterX / this.cloudSizeX));

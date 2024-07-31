@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 
 public class ColorProviderRegistry {
     private final Reference2ReferenceMap<Block, ColorProvider<BlockState>> blocks = new Reference2ReferenceOpenHashMap<>();
@@ -41,7 +42,10 @@ public class ColorProviderRegistry {
                 Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
                 Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES);
 
-        DefaultColorProviders.VertexBlendedBiomeColorAdapter.VanillaBiomeColor waterGetter = (getter, pos) -> BiomeColors.getAverageWaterColor(getter, pos) | 0xFF000000;
+        var waterExtensions = IClientFluidTypeExtensions.of(Fluids.WATER);
+        var waterState = Fluids.WATER.defaultFluidState();
+        DefaultColorProviders.VertexBlendedBiomeColorAdapter.VanillaBiomeColor waterGetter = (getter, pos) -> waterExtensions.getTintColor(waterState, getter, pos);
+
         this.registerBlocks(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(waterGetter),
                 Blocks.WATER, Blocks.BUBBLE_COLUMN);
 

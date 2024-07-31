@@ -1,13 +1,11 @@
 package me.jellysquid.mods.sodium.client.render.vertex;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import me.jellysquid.mods.sodium.mixin.core.render.VertexFormatAccessor;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.CommonVertexAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import it.unimi.dsi.fastutil.ints.IntList;
+
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.NoSuchElementException;
@@ -40,7 +38,7 @@ public class VertexFormatDescriptionImpl implements VertexFormatDescription {
         for (int elementIndex = 0; elementIndex < elementList.size(); elementIndex++) {
             var element = elementList.get(elementIndex);
             var commonType = CommonVertexAttribute.getCommonType(element);
-            if (element != DefaultVertexFormat.ELEMENT_PADDING && (commonType == null || !attributeSet.add(commonType))) {
+            if (element.getUsage() != VertexFormatElement.Usage.PADDING && (commonType == null || !attributeSet.add(commonType))) {
                 return false;
             }
         }

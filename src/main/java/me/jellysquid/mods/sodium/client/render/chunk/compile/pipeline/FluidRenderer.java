@@ -49,6 +49,7 @@ public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
     // TODO: move fluid rendering to a separate render pass and control glPolygonOffset and glDepthFunc to fix this properly
     private static final float EPSILON = 0.001f;
+    private static final float ALIGNED_EQUALS_EPSILON = 0.011f;
 
     private final BlockPos.MutableBlockPos scratchPos = new BlockPos.MutableBlockPos();
     private final MutableFloat scratchHeight = new MutableFloat(0);
@@ -127,6 +128,10 @@ public class FluidRenderer {
         }
 
         return true;
+    }
+
+    private static boolean isAlignedEquals(float a, float b) {
+        return Math.abs(a - b) <= ALIGNED_EQUALS_EPSILON;
     }
 
     private void renderVanilla(WorldSlice world, FluidState fluidState, BlockPos blockPos, ChunkModelBuilder buffers, Material material) {
@@ -215,7 +220,7 @@ public class FluidRenderer {
         LightMode lightMode = isWater && Minecraft.useAmbientOcclusion() ? LightMode.SMOOTH : LightMode.FLAT;
         LightPipeline lighter = this.lighters.getLighter(lightMode);
 
-        quad.setFlags(0);
+        quad.setFlags(ModelQuadFlags.IS_VANILLA_SHADED);
 
         if (!sfUp && this.isSideExposed(world, posX, posY, posZ, Direction.UP, Math.min(Math.min(northWestHeight, southWestHeight), Math.min(southEastHeight, northEastHeight)))) {
             northWestHeight -= EPSILON;
@@ -274,10 +279,29 @@ public class FluidRenderer {
 
             quad.setSprite(sprite);
 
-            setVertex(quad, 0, 0.0f, northWestHeight, 0.0f, u1, v1);
-            setVertex(quad, 1, 0.0f, southWestHeight, 1.0F, u2, v2);
-            setVertex(quad, 2, 1.0F, southEastHeight, 1.0F, u3, v3);
-            setVertex(quad, 3, 1.0F, northEastHeight, 0.0f, u4, v4);
+            // top surface alignedness is calculated with a more relaxed epsilon
+            boolean aligned = isAlignedEquals(northEastHeight, northWestHeight)
+                    && isAlignedEquals(northWestHeight, southEastHeight)
+                    && isAlignedEquals(southEastHeight, southWestHeight)
+                    && isAlignedEquals(southWestHeight, northEastHeight);
+
+            boolean creaseNorthEastSouthWest = aligned
+                    || northEastHeight > northWestHeight && northEastHeight > southEastHeight
+                    || northEastHeight < northWestHeight && northEastHeight < southEastHeight
+                    || southWestHeight > northWestHeight && southWestHeight > southEastHeight
+                    || southWestHeight < northWestHeight && southWestHeight < southEastHeight;
+
+            if (creaseNorthEastSouthWest) {
+                setVertex(quad, 1, 0.0f, northWestHeight, 0.0f, u1, v1);
+                setVertex(quad, 2, 0.0f, southWestHeight, 1.0F, u2, v2);
+                setVertex(quad, 3, 1.0F, southEastHeight, 1.0F, u3, v3);
+                setVertex(quad, 0, 1.0F, northEastHeight, 0.0f, u4, v4);
+            } else {
+                setVertex(quad, 0, 0.0f, northWestHeight, 0.0f, u1, v1);
+                setVertex(quad, 1, 0.0f, southWestHeight, 1.0F, u2, v2);
+                setVertex(quad, 2, 1.0F, southEastHeight, 1.0F, u3, v3);
+                setVertex(quad, 3, 1.0F, northEastHeight, 0.0f, u4, v4);
+            }
 
             this.updateQuad(quad, world, blockPos, lighter, Direction.UP, 1.0F, colorProvider, fluidState);
             this.writeQuad(meshBuilder, material, offset, quad, facing, false);
@@ -309,7 +333,7 @@ public class FluidRenderer {
 
         }
 
-        quad.setFlags(ModelQuadFlags.IS_PARALLEL | ModelQuadFlags.IS_ALIGNED);
+        quad.setFlags(ModelQuadFlags.IS_VANILLA_SHADED | ModelQuadFlags.IS_PARALLEL | ModelQuadFlags.IS_ALIGNED);
 
         for (Direction dir : DirectionUtil.HORIZONTAL_DIRECTIONS) {
             float c1;
@@ -445,7 +469,7 @@ public class FluidRenderer {
         var vertices = this.vertices;
 
         for (int i = 0; i < 4; i++) {
-            var out = vertices[flip ? 3 - i : i];
+            var out = vertices[flip ? (3 - i + 1) & 0b11 : i];
             out.x = offset.getX() + quad.getX(i);
             out.y = offset.getY() + quad.getY(i);
             out.z = offset.getZ() + quad.getZ(i);

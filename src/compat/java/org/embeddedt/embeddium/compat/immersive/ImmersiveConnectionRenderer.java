@@ -37,6 +37,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This class, in combination with ImmersiveEmptyChunkChecker, implements support
+ * for IE wire rendering in Embeddium, on versions that predate the standard chunk
+ * meshing event in NeoForge. This code originates from https://github.com/malte0811/rubie,
+ * made by one of the IE authors, and was distributed in Rubidium with permission
+ * under LGPL3.
+ */
 public class ImmersiveConnectionRenderer implements ResourceManagerReloadListener {
     private static final LoadingCache<SegmentsKey, List<RenderedSegment>> SEGMENT_CACHE = CacheBuilder.newBuilder()
             .expireAfterAccess(120, TimeUnit.SECONDS)

@@ -1,10 +1,12 @@
 package me.jellysquid.mods.sodium.client.model.light.flat;
 
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
+import net.caffeinemc.mods.sodium.api.util.NormI8;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
@@ -25,8 +27,14 @@ public class FlatLightPipeline implements LightPipeline {
      */
     private final LightDataAccess lightCache;
 
+    /**
+     * Whether or not to even attempt to shade quads using their normals rather than light face.
+     */
+    private final boolean useQuadNormalsForShading;
+
     public FlatLightPipeline(LightDataAccess lightCache) {
         this.lightCache = lightCache;
+        this.useQuadNormalsForShading = SodiumClientMod.options().quality.useQuadNormalsForShading;
     }
 
     @Override
@@ -48,7 +56,16 @@ public class FlatLightPipeline implements LightPipeline {
         }
 
         Arrays.fill(out.lm, lightmap);
-        Arrays.fill(out.br, this.lightCache.getWorld().getShade(lightFace, shade));
+        if((quad.getFlags() & ModelQuadFlags.IS_VANILLA_SHADED) != 0 || !this.useQuadNormalsForShading) {
+            Arrays.fill(out.br, this.lightCache.getWorld().getShade(lightFace, shade));
+        } else {
+            this.applySidedBrightnessFromNormals(quad, out, shade);
+        }
+    }
+
+    private void applySidedBrightnessFromNormals(ModelQuadView quad, QuadLightData out, boolean shade) {
+        int normal = quad.getModFaceNormal();
+        Arrays.fill(out.br, this.lightCache.getWorld().getShade(NormI8.unpackX(normal), NormI8.unpackY(normal), NormI8.unpackZ(normal), shade));
     }
 
     /**
