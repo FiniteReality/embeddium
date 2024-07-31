@@ -1,5 +1,6 @@
 package org.embeddedt.embeddium.impl;
 
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
@@ -17,7 +18,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.io.IOException;
 
-@Mod(Embeddium.MODID)
+@Mod(value = Embeddium.MODID, dist = Dist.CLIENT)
 public class Embeddium {
     public static final String MODID = EmbeddiumConstants.MODID;
     public static final String MODNAME = EmbeddiumConstants.MODNAME;
