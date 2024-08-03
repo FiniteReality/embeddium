@@ -52,7 +52,7 @@ public class BakedQuadMixin implements BakedQuadView {
     @Unique
     private ModelQuadFacing normalFace;
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "/<init>/", at = @At("RETURN"))
     private void init(CallbackInfo ci) {
         this.normal = ModelQuadUtil.calculateNormal(this);
         this.normalFace = ModelQuadUtil.findNormalFace(this.normal);
