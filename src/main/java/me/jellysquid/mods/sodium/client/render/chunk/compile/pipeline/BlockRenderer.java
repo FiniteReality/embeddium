@@ -116,17 +116,26 @@ public class BlockRenderer {
             return;
         }
 
+        boolean canReorientNullCullface = true;
+
         for (Direction face : DirectionUtil.ALL_DIRECTIONS) {
             List<BakedQuad> quads = this.getGeometry(ctx, face);
 
             if (!quads.isEmpty() && this.isFaceVisible(ctx, face)) {
+                this.useReorienting = true;
                 this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, meshBuilder, quads, face);
+                if (!this.useReorienting) {
+                    // Reorienting was disabled on this side, make sure it's disabled for the null cullface too, in case
+                    // a mod layers textures in different lists
+                    canReorientNullCullface = false;
+                }
             }
         }
 
         List<BakedQuad> all = this.getGeometry(ctx, null);
 
         if (!all.isEmpty()) {
+            this.useReorienting = canReorientNullCullface;
             this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, meshBuilder, all, null);
         }
     }
@@ -144,8 +153,6 @@ public class BlockRenderer {
 
     private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3 offset,
                                 ChunkModelBuilder builder, List<BakedQuad> quads, Direction cullFace) {
-
-        this.useReorienting = true;
 
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
