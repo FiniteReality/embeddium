@@ -42,6 +42,7 @@ public class EntityRenderer {
 
 
     private static final long SCRATCH_BUFFER = MemoryUtil.nmemAlignedAlloc(64, NUM_CUBE_FACES * NUM_FACE_VERTICES * ModelVertex.STRIDE);
+    private static final MemoryStack STACK = MemoryStack.create();
 
     private static final Vector3f[] CUBE_CORNERS = new Vector3f[NUM_CUBE_VERTICES];
     private static final int[][] CUBE_VERTICES = new int[][] {
@@ -129,9 +130,9 @@ public class EntityRenderer {
 
             var vertexCount = emitQuads(cuboid, color, overlay, light);
 
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                writer.push(stack, SCRATCH_BUFFER, vertexCount, ModelVertex.FORMAT);
-            }
+            STACK.push();
+            writer.push(STACK, SCRATCH_BUFFER, vertexCount, ModelVertex.FORMAT);
+            STACK.pop();
         }
     }
 
@@ -140,9 +141,9 @@ public class EntityRenderer {
 
         var vertexCount = emitQuads(cuboid, color, overlay, light);
 
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            writer.push(stack, SCRATCH_BUFFER, vertexCount, ModelVertex.FORMAT);
-        }
+        STACK.push();
+        writer.push(STACK, SCRATCH_BUFFER, vertexCount, ModelVertex.FORMAT);
+        STACK.pop();
     }
 
     private static int emitQuads(ModelCuboid cuboid, int color, int overlay, int light) {
