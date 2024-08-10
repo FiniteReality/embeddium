@@ -2,10 +2,7 @@ package org.embeddedt.embeddium.impl.gametest.content;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
-import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraft.client.gui.screens.ReceivingLevelScreen;
-import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
@@ -109,7 +106,7 @@ public class TestRegistry {
 
         @SubscribeEvent
         public static void onScreenInit(ScreenEvent.Init.Post event) {
-            if(IS_AUTOMATED_TEST_RUN && event.getScreen() instanceof TitleScreen && !hasSeenMainMenu) {
+            if(IS_AUTOMATED_TEST_RUN && (event.getScreen() instanceof TitleScreen || event.getScreen() instanceof AccessibilityOnboardingScreen) && !hasSeenMainMenu) {
                 // Go for main engine start (create a new superflat automatically)
                 hasSeenMainMenu = true;
                 var mc = Minecraft.getInstance();
