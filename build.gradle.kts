@@ -1,3 +1,4 @@
+import net.minecraftforge.gradle.common.tasks.DownloadAssets
 import net.minecraftforge.gradle.common.util.RunConfig
 import org.embeddedt.embeddium.gradle.versioning.ProjectVersioner
 import org.w3c.dom.Element
@@ -199,6 +200,11 @@ tasks.processResources {
 
 tasks.withType<JavaCompile> {
     options.release = 17
+}
+
+tasks.named<DownloadAssets>("downloadAssets") {
+    // Try to work around asset download failures
+    concurrentDownloads = 1
 }
 
 
