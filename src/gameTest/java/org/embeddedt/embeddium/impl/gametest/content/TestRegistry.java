@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.impl.gametest.content;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.block.BlockModelShaper;
@@ -68,6 +69,8 @@ public class TestRegistry {
     public static final ResourceLocation EMPTY_TEMPLATE = new ResourceLocation(EmbeddiumConstants.MODID, "empty_structure");
     public static final String EMPTY_TEMPLATE_STR = EMPTY_TEMPLATE.toString();
 
+    public static final boolean IS_AUTOMATED_TEST_RUN = Boolean.getBoolean("embeddium.runAutomatedTests");
+
     /**
      * Register our test content with various registries.
      */
@@ -106,10 +109,11 @@ public class TestRegistry {
 
         @SubscribeEvent
         public static void onScreenInit(ScreenEvent.Init.Post event) {
-            if(event.getScreen() instanceof TitleScreen && !hasSeenMainMenu) {
+            if(IS_AUTOMATED_TEST_RUN && event.getScreen() instanceof TitleScreen && !hasSeenMainMenu) {
                 // Go for main engine start (create a new superflat automatically)
                 hasSeenMainMenu = true;
                 var mc = Minecraft.getInstance();
+                mc.options.renderDebug = true;
                 mc.forceSetScreen(new GenericDirtMessageScreen(Component.literal("Bootstrapping gametests...")));
                 String levelName = "embeddium-test-" + UUID.randomUUID();
                 LevelSettings settings = new LevelSettings(levelName, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
@@ -119,11 +123,19 @@ public class TestRegistry {
             }
         }
 
+        @SubscribeEvent
+        public static void onScreenOpen(ScreenEvent.Opening event) {
+            if(IS_AUTOMATED_TEST_RUN && event.getScreen() instanceof PauseScreen && !Minecraft.getInstance().isWindowActive()) {
+                // Prevent pause screen from opening if window isn't active
+                event.setCanceled(true);
+            }
+        }
+
         private static final Semaphore LATCH = new Semaphore(0);
 
         @SubscribeEvent
         public static void onScreenChange(ScreenEvent.Closing event) {
-            if(event.getScreen() instanceof ReceivingLevelScreen) {
+            if(IS_AUTOMATED_TEST_RUN && event.getScreen() instanceof ReceivingLevelScreen) {
                 // Booster ignition
                 LATCH.release();
             }

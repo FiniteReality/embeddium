@@ -1,18 +1,21 @@
 package org.embeddedt.embeddium.impl.gametest.util;
 
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.concurrent.*;
 
 public class TestUtils {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private static final ExecutorService WAITING_EXECUTOR = Executors.newCachedThreadPool();
 
     public static Vec3 getClientPosition() {
@@ -24,13 +27,15 @@ public class TestUtils {
 
     public static boolean isChunkVisible(Vec3 position) {
         return Minecraft.getInstance().submit(() -> {
-            return Minecraft.getInstance().levelRenderer.isChunkCompiled(BlockPos.containing(position.x, position.y, position.z));
+            // Verify chunk is rendered
+            BlockPos pos = BlockPos.containing(position.x, position.y, position.z);
+            return Minecraft.getInstance().levelRenderer.isChunkCompiled(pos);
         }).join();
     }
 
     public static void sleepForMillis(long millis) {
         try {
-            Thread.sleep(100L);
+            Thread.sleep(millis);
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -45,7 +50,7 @@ public class TestUtils {
                 playerPos = getClientPosition();
             }
             // Client is at new position, wait for chunk underneath to render
-            Minecraft.getInstance().submit(() -> Minecraft.getInstance().levelRenderer.allChanged());
+            Minecraft.getInstance().submit(() -> Minecraft.getInstance().levelRenderer.allChanged()).join();
             while(!isChunkVisible(position)) {
                 sleepForMillis(100);
             }
@@ -82,24 +87,27 @@ public class TestUtils {
         player.teleportTo(realPos.getX(), realPos.getY(), realPos.getZ());
         waitTillClientIsCloseTo(new Vec3(realPos.getX(), realPos.getY(), realPos.getZ()));
         // Update camera on client
-        Minecraft.getInstance().execute(() -> {
+        Minecraft.getInstance().submit(() -> {
             var cplayer = Minecraft.getInstance().player;
             cplayer.setXRot(90);
             cplayer.setYRot(0);
-        });
+        }).join();
     }
 
     public static void obtainScreenshot(String name) {
         var mc = Minecraft.getInstance();
         mc.submit(() -> {
-            RenderTarget rendertarget = null;
+            NativeImage nativeimage = Screenshot.takeScreenshot(mc.getMainRenderTarget());
+            File screenShotDir = new File(mc.gameDirectory, "screenshots");
+            screenShotDir.mkdir();
+            File screenShot = new File(screenShotDir, name + ".png");
+            screenShot.delete();
             try {
-                rendertarget = new TextureTarget(mc.getWindow().getWidth(), mc.getWindow().getHeight(), true, Minecraft.ON_OSX);
-                Screenshot.grab(mc.gameDirectory, name + ".png", rendertarget, component -> {});
+                nativeimage.writeToFile(screenShot);
+            } catch(Exception e) {
+                LOGGER.warn("Screenshot failed", e);
             } finally {
-                if(rendertarget != null) {
-                    rendertarget.destroyBuffers();
-                }
+                nativeimage.close();
             }
         }).join();
     }

@@ -1,3 +1,4 @@
+import net.minecraftforge.gradle.common.util.RunConfig
 import org.embeddedt.embeddium.gradle.versioning.ProjectVersioner
 import org.w3c.dom.Element
 
@@ -107,12 +108,22 @@ minecraft {
 
         val client = create("client")
 
-        create("gameTestClient") {
-            parent(client)
-            property("forge.enableGameTest", "true")
-            mods.named("embeddium") {
+
+        fun configureGameTestRun(run: RunConfig) {
+            run.parent(client)
+            run.property("forge.enableGameTest", "true")
+            run.mods.named("embeddium") {
                 sources(sourceSets["gameTest"])
             }
+        }
+
+        create("gameTestClient") {
+            configureGameTestRun(this)
+        }
+
+        create("gameTestCiClient") {
+            configureGameTestRun(this)
+            property("embeddium.runAutomatedTests", "true")
         }
     }
 }
