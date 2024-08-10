@@ -29,13 +29,15 @@ jobs:
       - name: Initialize FG cache
         uses: actions/cache@v4
         with:
-          key: ${{ steps.mod_props.outputs.minecraft_version }}-${{ steps.mod_props.outputs.parchment_version }}-${{ steps.gradle_props.outputs.forge_version }}
+          key: ${{ steps.mod_props.outputs.minecraft_version }}-${{ steps.mod_props.outputs.parchment_version }}-${{ steps.mod_props.outputs.forge_version }}
           path: |
             build/fg_cache
             build/createMcpToSrg
             build/downloadMCMeta
             build/downloadMcpConfig
             build/extractSrg
+          restore-keys: |
+            ${{ steps.mod_props.outputs.minecraft_version }}-${{ steps.mod_props.outputs.parchment_version }}-
       - name: Initialize caches
         uses: actions/cache@v3
         with:
