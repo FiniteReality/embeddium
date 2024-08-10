@@ -40,6 +40,13 @@ val extraSourceSets = arrayOf("legacy", "compat")
 sourceSets {
     val main = getByName("main")
 
+    create("gameTest") {
+        java {
+            compileClasspath += main.compileClasspath
+            compileClasspath += main.output
+        }
+    }
+
     extraSourceSets.forEach {
         val sourceset = create(it)
         sourceset.apply {
@@ -98,7 +105,15 @@ minecraft {
             }
         }
 
-        create("client") {}
+        val client = create("client")
+
+        create("gameTestClient") {
+            parent(client)
+            property("forge.enableGameTest", "true")
+            mods.named("embeddium") {
+                sources(sourceSets["gameTest"])
+            }
+        }
     }
 }
 
