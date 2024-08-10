@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import org.embeddedt.embeddium.impl.gametest.network.SyncS2CPacket;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -85,6 +86,7 @@ public class TestUtils {
         player.setXRot(90);
         player.setYRot(0);
         player.teleportTo(realPos.getX(), realPos.getY(), realPos.getZ());
+        clientBarrier();
         waitTillClientIsCloseTo(new Vec3(realPos.getX(), realPos.getY(), realPos.getZ()));
         // Update camera on client
         Minecraft.getInstance().submit(() -> {
@@ -114,5 +116,16 @@ public class TestUtils {
                 nativeimage.close();
             }
         }).join();
+    }
+
+    /**
+     * Wait until the client thread has processed all packets up to this point.
+     */
+    public static void clientBarrier() {
+        // Broadcast chunk changes
+        ServerLifecycleHooks.getCurrentServer().overworld().getChunkSource().tick(() -> false, true);
+        // Send barrier packet
+        SyncS2CPacket packet = new SyncS2CPacket();
+        packet.applyBarrier();
     }
 }

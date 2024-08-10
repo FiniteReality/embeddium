@@ -1,6 +1,5 @@
 package org.embeddedt.embeddium.impl.gametest.content;
 
-import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.renderer.block.BlockModelShaper;
@@ -18,13 +17,11 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,14 +33,18 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.impl.gametest.content.client.TestModel;
+import org.embeddedt.embeddium.impl.gametest.network.SyncS2CPacket;
 import org.embeddedt.embeddium.impl.gametest.tests.EmbeddiumGameTests;
 import org.embeddedt.embeddium.impl.gametest.util.TestUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -55,7 +56,7 @@ import java.util.concurrent.Semaphore;
 
 @Mod.EventBusSubscriber(modid = EmbeddiumConstants.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TestRegistry {
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LoggerFactory.getLogger("Embeddium/TestSystem");
 
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, EmbeddiumConstants.MODID);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, EmbeddiumConstants.MODID);
@@ -68,6 +69,14 @@ public class TestRegistry {
 
     public static final boolean IS_AUTOMATED_TEST_RUN = Boolean.getBoolean("embeddium.runAutomatedTests");
 
+    private static final String PROTOCOL_VERSION = "1";
+    public static final SimpleChannel NETWORK_CHANNEL = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(EmbeddiumConstants.MODID, "gametests"),
+            () -> PROTOCOL_VERSION,
+            PROTOCOL_VERSION::equals,
+            PROTOCOL_VERSION::equals
+    );
+
     /**
      * Register our test content with various registries.
      */
@@ -77,6 +86,8 @@ public class TestRegistry {
         BLOCKS.register(bus);
         BLOCK_ENTITIES.register(bus);
         MinecraftForge.EVENT_BUS.register(GameEvents.class);
+
+        NETWORK_CHANNEL.registerMessage(0, SyncS2CPacket.class, SyncS2CPacket::encode, SyncS2CPacket::new, SyncS2CPacket::handle);
     }
 
     static class GameEvents {
