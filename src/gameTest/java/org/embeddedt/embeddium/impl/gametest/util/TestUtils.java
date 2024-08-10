@@ -97,6 +97,8 @@ public class TestUtils {
     public static void obtainScreenshot(String name) {
         var mc = Minecraft.getInstance();
         mc.submit(() -> {
+            // Render a frame by force
+            mc.gameRenderer.render(1f, 0, true);
             NativeImage nativeimage = Screenshot.takeScreenshot(mc.getMainRenderTarget());
             File screenShotDir = new File(mc.gameDirectory, "screenshots");
             screenShotDir.mkdir();
