@@ -8,6 +8,7 @@ import org.embeddedt.embeddium.api.options.OptionIdentifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class OptionGroup {
     private final ImmutableList<Option<?>> options;
@@ -48,6 +49,14 @@ public class OptionGroup {
 
         public Builder add(Option<?> option) {
             this.options.add(option);
+
+            return this;
+        }
+
+        public Builder addConditionally(boolean shouldAdd, Supplier<Option<?>> option) {
+            if (shouldAdd) {
+                add(option.get());
+            }
 
             return this;
         }

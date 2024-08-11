@@ -32,6 +32,7 @@ public final class StandardOptions {
         public static final ResourceLocation BRIGHTNESS = ResourceLocation.fromNamespaceAndPath("minecraft", "brightness");
         public static final ResourceLocation GUI_SCALE = ResourceLocation.fromNamespaceAndPath("minecraft", "gui_scale");
         public static final ResourceLocation FULLSCREEN = ResourceLocation.fromNamespaceAndPath("minecraft", "fullscreen");
+        public static final ResourceLocation FULLSCREEN_RESOLUTION = ResourceLocation.fromNamespaceAndPath("minecraft", "fullscreen_resolution");
         public static final ResourceLocation VSYNC = ResourceLocation.fromNamespaceAndPath("minecraft", "vsync");
         public static final ResourceLocation MAX_FRAMERATE = ResourceLocation.fromNamespaceAndPath("minecraft", "max_frame_rate");
         public static final ResourceLocation VIEW_BOBBING = ResourceLocation.fromNamespaceAndPath("minecraft", "view_bobbing");
