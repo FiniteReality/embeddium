@@ -50,15 +50,13 @@ import org.embeddedt.embeddium.impl.gametest.util.TestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @EventBusSubscriber(modid = EmbeddiumConstants.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class TestRegistry {
@@ -151,22 +149,28 @@ public class TestRegistry {
             }
         }
 
+        private static WeakReference<Screen> nextOpeningScreen;
+
         @SubscribeEvent
         public static void onScreenOpen(ScreenEvent.Opening event) {
             if(IS_AUTOMATED_TEST_RUN && event.getScreen() instanceof PauseScreen && !Minecraft.getInstance().isWindowActive()) {
                 // Prevent pause screen from opening if window isn't active
                 event.setCanceled(true);
+                return;
             }
+
+            nextOpeningScreen = new WeakReference<>(event.getScreen());
         }
 
         private static final Semaphore LATCH = new Semaphore(0);
 
         @SubscribeEvent
         public static void onScreenChange(ScreenEvent.Closing event) {
-            if(IS_AUTOMATED_TEST_RUN && event.getScreen() instanceof ReceivingLevelScreen) {
+            if(IS_AUTOMATED_TEST_RUN && !(nextOpeningScreen.get() instanceof ReceivingLevelScreen) && event.getScreen() instanceof ReceivingLevelScreen) {
                 // Booster ignition
                 LATCH.release();
             }
+            nextOpeningScreen = new WeakReference<>(null);
         }
 
         private static MultipleTestTracker testTracker;
