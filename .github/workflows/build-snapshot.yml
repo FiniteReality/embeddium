@@ -53,4 +53,4 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: Embeddium-TestData
-          path: run
+          path: runs/gameTestCiClient
