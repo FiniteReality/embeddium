@@ -5,14 +5,21 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.embeddedt.embeddium.impl.gametest.network.SyncS2CPacket;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.concurrent.*;
+import java.util.function.BooleanSupplier;
 
 public class TestUtils {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -39,6 +46,20 @@ public class TestUtils {
             Thread.sleep(millis);
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void waitForConditionMetOnClient(BooleanSupplier condition) {
+        var future = CompletableFuture.runAsync(() -> {
+            while(!condition.getAsBoolean()) {
+                sleepForMillis(100);
+            }
+        }, WAITING_EXECUTOR);
+
+        try {
+            future.get(10, TimeUnit.SECONDS);
+        } catch(TimeoutException | InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Client did not meet condition quickly enough", e);
         }
     }
 
@@ -127,5 +148,44 @@ public class TestUtils {
         // Send barrier packet
         SyncS2CPacket packet = new SyncS2CPacket();
         packet.applyBarrier();
+    }
+
+    private static final Method getBoundsMethod = ObfuscationReflectionHelper.findMethod(GameTestHelper.class, "getBounds");
+
+    public static boolean isAABBLoaded(AABB bounds) {
+        int minX = SectionPos.posToSectionCoord(bounds.minX - 0.5D);
+        int minY = SectionPos.posToSectionCoord(bounds.minY - 0.5D);
+        int minZ = SectionPos.posToSectionCoord(bounds.minZ - 0.5D);
+
+        int maxX = SectionPos.posToSectionCoord(bounds.maxX + 0.5D);
+        int maxY = SectionPos.posToSectionCoord(bounds.maxY + 0.5D);
+        int maxZ = SectionPos.posToSectionCoord(bounds.maxZ + 0.5D);
+
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+
+        var levelRenderer = Minecraft.getInstance().levelRenderer;
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    pos.set(x << 4, y << 4, z << 4);
+                    if (!levelRenderer.isChunkCompiled(pos)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public static void waitForTestAreaToLoad(GameTestHelper helper) {
+        AABB bounds;
+        try {
+            bounds = (AABB)getBoundsMethod.invoke(helper);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+
+        waitForConditionMetOnClient(() -> isAABBLoaded(bounds));
     }
 }

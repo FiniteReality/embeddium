@@ -25,7 +25,11 @@ import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import net.minecraftforge.client.gui.overlay.NamedGuiOverlay;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterGameTestsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -56,6 +60,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber(modid = EmbeddiumConstants.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TestRegistry {
@@ -139,6 +145,15 @@ public class TestRegistry {
             }
         }
 
+        private static final Set<NamedGuiOverlay> HIDDEN_OVERLAYS = Stream.of(VanillaGuiOverlay.CHAT_PANEL, VanillaGuiOverlay.VIGNETTE).map(VanillaGuiOverlay::type).collect(Collectors.toUnmodifiableSet());
+
+        @SubscribeEvent
+        public static void hideGuiLayers(RenderGuiOverlayEvent.Pre event) {
+            if(IS_AUTOMATED_TEST_RUN && HIDDEN_OVERLAYS.contains(event.getOverlay())) {
+                event.setCanceled(true);
+            }
+        }
+
         @SubscribeEvent
         public static void onScreenOpen(ScreenEvent.Opening event) {
             if(IS_AUTOMATED_TEST_RUN && event.getScreen() instanceof PauseScreen && !Minecraft.getInstance().isWindowActive()) {
@@ -211,6 +226,7 @@ public class TestRegistry {
         } finally {
             // Run client side of test by executing any side effects that may occur on the block
             TestUtils.movePlayerToPosition(helper, new BlockPos(4, 12, 4));
+            TestUtils.waitForTestAreaToLoad(helper);
             // Capture screenshot
             TestUtils.obtainScreenshot(testMethod.getName());
         }
