@@ -1,4 +1,5 @@
 import org.embeddedt.embeddium.gradle.Constants
+import net.neoforged.gradle.dsl.common.runs.run.Run
 
 plugins {
     id("embeddium-common")
@@ -8,6 +9,15 @@ plugins {
 apply(plugin = "embeddium-fabric-remapper")
 
 val neoForgePr = if(rootProject.hasProperty("neoforge_pr")) rootProject.properties["neoforge_pr"].toString() else null
+
+sourceSets {
+    val main = getByName("main")
+
+    create("gameTest") {
+        compileClasspath += main.compileClasspath
+        compileClasspath += main.output
+    }
+}
 
 repositories {
     if(neoForgePr != null) {
@@ -43,7 +53,23 @@ if(project.hasProperty("parchment_version")) {
 
 runs {
     // Create the default client run
-    create("client")
+    val client = create("client")
+
+    fun configureGameTestRun(run: Run) {
+        run.gameTest(true)
+        run.modSource(sourceSets["gameTest"])
+    }
+
+    create("gameTestClient") {
+        configure("client")
+        configureGameTestRun(this)
+    }
+
+    create("gameTestCiClient") {
+        configure("client")
+        configureGameTestRun(this)
+        systemProperty("embeddium.runAutomatedTests", "true")
+    }
 }
 
 tasks.jar {

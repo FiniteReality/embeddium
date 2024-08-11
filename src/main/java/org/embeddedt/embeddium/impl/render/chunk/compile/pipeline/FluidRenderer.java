@@ -175,7 +175,9 @@ public class FluidRenderer {
             return;
         }
 
-        boolean isWater = fluidState.is(FluidTags.WATER);
+        // LVT name kept for 1.20.1 in case a mixin captures it, the meaning of this variable is now "does the fluid
+        // support AO"
+        boolean isWater = fluid.getFluidType().getLightLevel(fluidState, world, blockPos) == 0;
 
         final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid);
 
