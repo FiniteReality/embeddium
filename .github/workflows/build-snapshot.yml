@@ -62,6 +62,7 @@ jobs:
           run: ./gradlew runGameTestCiClient
       - name: Upload test artifacts
         uses: actions/upload-artifact@v2
+        if: ${{ !cancelled() }}
         with:
           name: Embeddium-TestData
           path: run
