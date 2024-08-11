@@ -208,11 +208,12 @@ public class TestRegistry {
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Error invoking method", e);
+        } finally {
+            // Run client side of test by executing any side effects that may occur on the block
+            TestUtils.movePlayerToPosition(helper, new BlockPos(4, 12, 4));
+            // Capture screenshot
+            TestUtils.obtainScreenshot(testMethod.getName());
         }
-        // Run client side of test by executing any side effects that may occur on the block
-        TestUtils.movePlayerToPosition(helper, new BlockPos(4, 12, 4));
-        // Capture screenshot
-        TestUtils.obtainScreenshot(testMethod.getName());
     }
 
     /**
