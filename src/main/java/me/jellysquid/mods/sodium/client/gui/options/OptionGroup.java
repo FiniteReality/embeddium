@@ -8,6 +8,7 @@ import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class OptionGroup {
     public static final OptionIdentifier<Void> DEFAULT_ID = OptionIdentifier.create(SodiumClientMod.MODID, "empty");
@@ -50,6 +51,14 @@ public class OptionGroup {
 
         public Builder add(Option<?> option) {
             this.options.add(option);
+
+            return this;
+        }
+
+        public Builder addConditionally(boolean shouldAdd, Supplier<Option<?>> option) {
+            if (shouldAdd) {
+                add(option.get());
+            }
 
             return this;
         }
