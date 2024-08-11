@@ -34,11 +34,11 @@ public class TestModel extends BakedModelWrapper<BakedModel> {
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
-        if(!Objects.equals(TEST_MODEL_PROPERTY, TEST_MODEL_VALUE)) {
+        if(!Objects.equals(extraData.get(TEST_MODEL_PROPERTY), TEST_MODEL_VALUE)) {
             throw new IllegalStateException("Missing model data value injected by BakedModel#getModelData");
         }
-        if(!Objects.equals(TestBlockEntity.TEST_PROPERTY, TestBlockEntity.TEST_VALUE)) {
-            throw new IllegalStateException("Missing model data value injected by BakedModel#getModelData");
+        if(!Objects.equals(extraData.get(TestBlockEntity.TEST_PROPERTY), TestBlockEntity.TEST_VALUE)) {
+            throw new IllegalStateException("Missing model data value injected by BlockEntity#getModelData");
         }
         return super.getQuads(state, side, rand, extraData, renderType);
     }

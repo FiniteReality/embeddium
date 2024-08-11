@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.impl.gametest.content;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -39,6 +41,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
+import org.embeddedt.embeddium.impl.gametest.content.client.InstrumentingModelWrapper;
 import org.embeddedt.embeddium.impl.gametest.content.client.TestModel;
 import org.embeddedt.embeddium.impl.gametest.network.SyncS2CPacket;
 import org.embeddedt.embeddium.impl.gametest.tests.EmbeddiumGameTests;
@@ -62,6 +65,7 @@ public class TestRegistry {
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, EmbeddiumConstants.MODID);
 
     public static final RegistryObject<TestBlock> TEST_BLOCK = BLOCKS.register("test_block", TestBlock::new);
+    public static final RegistryObject<NotAnAirBlock> NOT_AN_AIR_BLOCK = BLOCKS.register("not_an_air_block", NotAnAirBlock::new);
     public static final RegistryObject<BlockEntityType<?>> TEST_BLOCK_ENTITY = BLOCK_ENTITIES.register("test_block_entity", () -> BlockEntityType.Builder.of(TestBlockEntity::new, TEST_BLOCK.get()).build(null));
 
     public static final ResourceLocation EMPTY_TEMPLATE = new ResourceLocation(EmbeddiumConstants.MODID, "empty_structure");
@@ -90,18 +94,22 @@ public class TestRegistry {
         NETWORK_CHANNEL.registerMessage(0, SyncS2CPacket.class, SyncS2CPacket::encode, SyncS2CPacket::new, SyncS2CPacket::handle);
     }
 
-    static class GameEvents {
-        /**
-         * Inject the custom model for the test block.
-         */
-        @SubscribeEvent
-        public static void onBakingModify(ModelEvent.ModifyBakingResult event) {
-            var testModel = new TestModel(event.getModels().get(ModelBakery.MISSING_MODEL_LOCATION));
-            for(BlockState state : TEST_BLOCK.get().getStateDefinition().getPossibleStates()) {
-                event.getModels().put(BlockModelShaper.stateToModelLocation(state), testModel);
-            }
+    private static void registerModelForAllStates(ModelEvent.ModifyBakingResult event, Block block, BakedModel model) {
+        for(BlockState state : block.getStateDefinition().getPossibleStates()) {
+            event.getModels().put(BlockModelShaper.stateToModelLocation(state), model);
         }
+    }
 
+    /**
+     * Inject custom models for test content.
+     */
+    @SubscribeEvent
+    public static void onBakingModify(ModelEvent.ModifyBakingResult event) {
+        registerModelForAllStates(event, TEST_BLOCK.get(), new TestModel(event.getModels().get(ModelBakery.MISSING_MODEL_LOCATION)));
+        registerModelForAllStates(event, NOT_AN_AIR_BLOCK.get(), new InstrumentingModelWrapper<>(event.getModels().get(BlockModelShaper.stateToModelLocation(Blocks.STONE.defaultBlockState()))));
+    }
+
+    static class GameEvents {
         /**
          * Inject the fake structure template used to allow creating gametests without dedicated structures.
          */
