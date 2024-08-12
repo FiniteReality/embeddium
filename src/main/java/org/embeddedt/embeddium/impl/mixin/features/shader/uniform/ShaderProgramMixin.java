@@ -1,22 +1,19 @@
 package org.embeddedt.embeddium.impl.mixin.features.shader.uniform;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import net.minecraft.client.renderer.ShaderInstance;
 
@@ -77,17 +74,30 @@ public abstract class ShaderProgramMixin {
         return Collections.emptyList();
     }
 
-    private static final int NUM_SAMPLERS = 12;
-    private static final String[] SAMPLER_IDS = IntStream.range(0, NUM_SAMPLERS).mapToObj(i -> "Sampler" + i).toArray(String[]::new);
+    private static final int DEFAULT_NUM_SAMPLERS = 12;
+    private static String[] SAMPLER_IDS = embeddium$makeSamplerIds(DEFAULT_NUM_SAMPLERS);
+
+    private static String[] embeddium$makeSamplerIds(int len) {
+        String[] samplerIds = new String[len];
+        for(int i = 0; i < len; i++) {
+            samplerIds[i] = "Sampler" + i;
+        }
+        return samplerIds;
+    }
 
     /**
      * @author embeddedt
      * @reason Avoid regenerating the sampler ID strings every time a buffer is drawn
      */
-    @ModifyConstant(method = "setDefaultUniforms", constant = @Constant(intValue = NUM_SAMPLERS, ordinal = 0))
-    private int setSamplersManually(int constant) {
-        for(int i = 0; i < constant; i++) {
-            setSampler(SAMPLER_IDS[i], RenderSystem.getShaderTexture(i));
+    @ModifyExpressionValue(method = "setDefaultUniforms", at = @At(value = "CONSTANT", args = "intValue=" + DEFAULT_NUM_SAMPLERS, ordinal = 0))
+    private int setSamplersManually(int numSamplers) {
+        String[] samplerIds = SAMPLER_IDS;
+        if (samplerIds.length < numSamplers) {
+            samplerIds = embeddium$makeSamplerIds(numSamplers);
+            SAMPLER_IDS = samplerIds;
+        }
+        for(int i = 0; i < numSamplers; i++) {
+            setSampler(samplerIds[i], RenderSystem.getShaderTexture(i));
         }
         return 0;
     }
