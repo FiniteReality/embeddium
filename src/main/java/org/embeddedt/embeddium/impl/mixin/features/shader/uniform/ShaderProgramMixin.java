@@ -22,7 +22,8 @@ import net.minecraft.client.renderer.ShaderInstance;
  * to happen when glGetUniformLocation and glGetInteger are called. In our case, this is rather unnecessary, since
  * these uniform locations can be trivially cached.
  */
-@Mixin(ShaderInstance.class)
+// High priority so replacement happens before other mods increase the sampler count, so that we see the updated value
+@Mixin(value = ShaderInstance.class, priority = 500)
 public abstract class ShaderProgramMixin {
     @Shadow
     @Final
