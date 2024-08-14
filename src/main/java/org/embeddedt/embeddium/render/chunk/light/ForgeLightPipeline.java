@@ -29,7 +29,8 @@ public class ForgeLightPipeline implements LightPipeline {
     private final BlockAndTintGetter level;
     private final LightDataConsumer consumer = new LightDataConsumer();
     private final int[] mutableQuadVertexData = new int[32];
-    private final BakedQuad mutableQuad = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, UnitTextureAtlasSprite.INSTANCE, false);
+    private final BakedQuad mutableQuadWithoutShade = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, UnitTextureAtlasSprite.INSTANCE, false);
+    private final BakedQuad mutableQuadWithShade = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, UnitTextureAtlasSprite.INSTANCE, true);
     private static final PoseStack.Pose EMPTY = new PoseStack.Pose(new Matrix4f(), new Matrix3f());
 
     private long cachedPos = Long.MIN_VALUE;
@@ -55,7 +56,7 @@ public class ForgeLightPipeline implements LightPipeline {
         }
     }
 
-    private BakedQuad generateForgeQuad(ModelQuadView quad) {
+    private BakedQuad generateForgeQuad(ModelQuadView quad, boolean hasShade) {
         int[] vData = this.mutableQuadVertexData;
         for(int i = 0; i < 4; i++) {
             int vertexBase = i * IQuadTransformer.STRIDE;
@@ -63,9 +64,10 @@ public class ForgeLightPipeline implements LightPipeline {
             vData[vertexBase + IQuadTransformer.POSITION + 1] = Float.floatToIntBits(quad.getY(i));
             vData[vertexBase + IQuadTransformer.POSITION + 2] = Float.floatToIntBits(quad.getZ(i));
             vData[vertexBase + IQuadTransformer.NORMAL] = quad.getForgeNormal(i);
-            vData[vertexBase + IQuadTransformer.UV2] = quad.getLight(i);
+            // Do not tell Forge about the packed light, so that it doesn't use it in the lightmap calculation
+            vData[vertexBase + IQuadTransformer.UV2] = 0;
         }
-        return mutableQuad;
+        return hasShade ? this.mutableQuadWithShade : this.mutableQuadWithoutShade;
     }
 
     @Override
@@ -73,9 +75,9 @@ public class ForgeLightPipeline implements LightPipeline {
         this.computeLightData(pos);
         BakedQuad forgeQuad;
         if(quad instanceof BakedQuad) {
-            forgeQuad = (BakedQuad)quad;
+            forgeQuad = generateForgeQuad(quad, ((BakedQuad)quad).isShade());
         } else {
-            forgeQuad = generateForgeQuad(quad);
+            forgeQuad = generateForgeQuad(quad, false);
         }
         forgeLighter.process(consumer, EMPTY, forgeQuad, OverlayTexture.NO_OVERLAY);
         System.arraycopy(consumer.lm, 0, out.lm, 0, 4);
