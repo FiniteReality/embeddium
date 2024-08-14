@@ -2,7 +2,6 @@ package org.embeddedt.embeddium.impl.gui;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.Monitor;
 import com.mojang.blaze3d.platform.Window;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForgeConfig;
@@ -22,6 +21,7 @@ import org.embeddedt.embeddium.api.options.control.SliderControl;
 import org.embeddedt.embeddium.api.options.control.TickBoxControl;
 import org.embeddedt.embeddium.api.options.storage.MinecraftOptionsStorage;
 import org.embeddedt.embeddium.api.options.structure.OptionStorage;
+import org.embeddedt.embeddium.impl.gui.options.FullscreenResolutionHelper;
 import org.embeddedt.embeddium.impl.gui.options.storage.EmbeddiumOptionsStorage;
 import org.embeddedt.embeddium.impl.render.chunk.compile.executor.ChunkBuilder;
 import net.minecraft.client.*;
@@ -33,48 +33,10 @@ import org.lwjgl.opengl.GLCapabilities;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 public class EmbeddiumGameOptionPages {
     private static final EmbeddiumOptionsStorage sodiumOpts = new EmbeddiumOptionsStorage();
     private static final MinecraftOptionsStorage vanillaOpts = MinecraftOptionsStorage.INSTANCE;
-
-    private static boolean isFullscreenResAlreadyAdded() {
-        return ModList.get().isLoaded("embeddium_extra") || ModList.get().isLoaded("rubidium_extra");
-    }
-
-    private static OptionImpl<?, ?> createFullScreenResolutionOption() {
-        Window window = Minecraft.getInstance().getWindow();
-        Monitor monitor = window.findBestMonitor();
-        int maxMode;
-        if (monitor != null) {
-            maxMode = monitor.getModeCount() - 1;
-        } else {
-            maxMode = -1;
-        }
-        ControlValueFormatter formatter = value -> {
-            if (monitor == null) {
-                return Component.translatable("options.fullscreen.unavailable");
-            } else if (value == -1) {
-                return Component.translatable("options.fullscreen.current");
-            } else {
-                return Component.literal(monitor.getMode(value).toString());
-            }
-        };
-        return OptionImpl.createBuilder(int.class, vanillaOpts)
-            .setId(StandardOptions.Option.FULLSCREEN_RESOLUTION)
-            .setName(Component.translatable("options.fullscreen.resolution"))
-            .setTooltip(Component.translatable("embeddium.options.fullscreen.resolution.tooltip"))
-            .setControl(option -> new SliderControl(option, -1, maxMode, 1, formatter))
-            .setBinding((opts, value) -> {
-                if (monitor != null) {
-                    window.setPreferredFullscreenVideoMode(value == -1 ? Optional.empty() : Optional.of(monitor.getMode(value)));
-                    window.changeFullscreenVideoMode();
-                }
-            }, (opts) -> monitor != null ? window.getPreferredFullscreenVideoMode().map(monitor::getVideoModeIndex).orElse(-1) : -1)
-            .build();
-    }
 
     private static int computeMaxRangeForRenderDistance(@SuppressWarnings("SameParameterValue") int injectedRenderDistance) {
         if(vanillaOpts.getData().renderDistance().values() instanceof OptionInstance.IntRange range) {
@@ -148,7 +110,7 @@ public class EmbeddiumGameOptionPages {
                             }
                         }, (opts) -> opts.fullscreen().get())
                         .build())
-                .addConditionally(!isFullscreenResAlreadyAdded(), EmbeddiumGameOptionPages::createFullScreenResolutionOption)
+                .addConditionally(!FullscreenResolutionHelper.isFullscreenResAlreadyAdded(), FullscreenResolutionHelper::createFullScreenResolutionOption)
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
                         .setId(StandardOptions.Option.VSYNC)
                         .setName(Component.translatable("options.vsync"))
