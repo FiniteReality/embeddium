@@ -48,6 +48,7 @@
       "net/minecraft/class_2586": ["org/embeddedt/embeddium/fabric/injectors/BlockEntityInjector"],
       "net/minecraft/class_827": ["org/embeddedt/embeddium/fabric/injectors/BlockEntityRendererInjector"],
       "net/minecraft/class_4970\u0024class_4971": ["org/embeddedt/embeddium/fabric/injectors/BlockStateBaseInjector"],
+      "net/minecraft/class_3611": ["org/embeddedt/embeddium/fabric/injectors/FluidInjector"],
       "net/minecraft/class_2818": ["org/embeddedt/embeddium/fabric/injectors/LevelChunkInjector"],
       "net/minecraft/class_1937": ["org/embeddedt/embeddium/fabric/injectors/LevelInjector"],
       "net/minecraft/class_1921": ["org/embeddedt/embeddium/fabric/injectors/RenderTypeInjector"],

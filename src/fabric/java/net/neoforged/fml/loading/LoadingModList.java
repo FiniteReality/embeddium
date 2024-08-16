@@ -2,6 +2,7 @@ package net.neoforged.fml.loading;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingIssue;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import net.neoforged.fml.loading.moddiscovery.ModInfo;
 
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -19,6 +21,8 @@ public class LoadingModList {
     private final List<ModInfo> modList = List.copyOf(modContainers.values().stream().map(ModContainer::getModInfo).toList());
     private final Map<String, ModFileInfo> modFileInfoMap;
     private final List<ModFileInfo> modFileList;
+
+    private final List<ModLoadingIssue> loadingIssues = new CopyOnWriteArrayList<>();
 
     public LoadingModList() {
         this.modFileInfoMap = new HashMap<>();
@@ -50,5 +54,9 @@ public class LoadingModList {
 
     public List<ModFileInfo> getModFiles() {
         return modFileList;
+    }
+
+    public List<ModLoadingIssue> getModLoadingIssues() {
+        return loadingIssues;
     }
 }

@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class VanillaClientFluidTypeExtensions implements IClientFluidTypeExtensions {
     @Override
     public int getTintColor(FluidState state, BlockAndTintGetter view, BlockPos pos) {
-        return state.is(FluidTags.LAVA) ? 16777215 : BiomeColors.getAverageWaterColor(view, pos);
+        return (state.is(FluidTags.LAVA) ? 16777215 : BiomeColors.getAverageWaterColor(view, pos)) | 0xFF000000;
     }
 
     @Override

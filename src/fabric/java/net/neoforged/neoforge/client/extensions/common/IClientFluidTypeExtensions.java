@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +14,10 @@ public interface IClientFluidTypeExtensions {
     IClientFluidTypeExtensions INSTANCE = FabricLoader.getInstance().isModLoaded("fabric-rendering-fluids-v1") ? new FabricClientFluidTypeExtensions() : new VanillaClientFluidTypeExtensions();
 
     static IClientFluidTypeExtensions of(FluidState state) {
+        return INSTANCE;
+    }
+
+    static IClientFluidTypeExtensions of(Fluid fluid) {
         return INSTANCE;
     }
 

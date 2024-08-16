@@ -10,4 +10,8 @@ public record ModContainer(net.fabricmc.loader.api.ModContainer fabricContainer,
     public ModInfo getModInfo() {
         return info;
     }
+
+    public <T> void registerExtensionPoint(Class<T> clz, T extensionPoint) {
+
+    }
 }

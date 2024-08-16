@@ -33,7 +33,7 @@ public class FabricClientFluidTypeExtensions implements IClientFluidTypeExtensio
 
     @Override
     public int getTintColor(FluidState state, BlockAndTintGetter view, BlockPos pos) {
-        return getHandler(state).getFluidColor(view, pos, state);
+        return (getHandler(state).getFluidColor(view, pos, state) | 0xFF000000);
     }
 
     @Override
