@@ -139,12 +139,12 @@ public class ScrollableFrame extends AbstractFrame {
                 this.drawBorder(drawContext, this.dim.x(), this.dim.y(), this.dim.getLimitX(), this.dim.getLimitY(), 0xFFAAAAAA);
             }
             boolean mouseInViewport = this.viewPortDimension.containsCursor(mouseX, mouseY);
-            this.applyScissor(this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.width(), this.viewPortDimension.height(), () -> {
-                drawContext.pose().pushPose();
-                drawContext.pose().translate(applyOffset(this.horizontalScrollBar, 0, true), applyOffset(this.verticalScrollBar, 0, true), 0);
-                super.render(drawContext, mouseInViewport ? (int)applyOffset(this.horizontalScrollBar, mouseX, false) : -1, mouseInViewport ? (int)applyOffset(this.verticalScrollBar, mouseY, false) : -1, delta);
-                drawContext.pose().popPose();
-            });
+            drawContext.enableScissor(this.viewPortDimension.x(), this.viewPortDimension.y(), this.viewPortDimension.getLimitX(), this.viewPortDimension.getLimitY());
+            drawContext.pose().pushPose();
+            drawContext.pose().translate(applyOffset(this.horizontalScrollBar, 0, true), applyOffset(this.verticalScrollBar, 0, true), 0);
+            super.render(drawContext, mouseInViewport ? (int)applyOffset(this.horizontalScrollBar, mouseX, false) : -1, mouseInViewport ? (int)applyOffset(this.verticalScrollBar, mouseY, false) : -1, delta);
+            drawContext.pose().popPose();
+            drawContext.disableScissor();
         } else {
             super.render(drawContext, mouseX, mouseY, delta);
         }
