@@ -1,7 +1,6 @@
 package org.embeddedt.embeddium.impl.gui;
 
 import com.google.common.collect.Multimap;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
@@ -17,7 +16,6 @@ import org.embeddedt.embeddium.api.options.structure.OptionPage;
 import org.embeddedt.embeddium.api.options.structure.OptionStorage;
 import org.embeddedt.embeddium.impl.gui.widgets.FlatButtonWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
-import org.embeddedt.embeddium.api.util.ColorARGB;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -300,15 +298,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         super.renderBackground(gfx, mouseX, mouseY, partialTick);
 
         // Render watermarks
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(770, 1);
-        gfx.blit(RenderType::guiTextured, LOGO_LOCATION, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, DefaultColors.ELEMENT_ACTIVATED);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
+        gfx.blit(RenderType::guiTextured, LOGO_LOCATION, this.logoDim.x(), this.logoDim.y(), 0, 0, this.logoDim.width(), this.logoDim.height(), LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, DefaultColors.ELEMENT_ACTIVATED);
     }
 
     @Override
