@@ -80,14 +80,11 @@ public class SpriteContentsInterpolationMixin {
                     int rgba1 = MemoryUtil.memGetInt(pRgba1);
                     int rgba2 = MemoryUtil.memGetInt(pRgba2);
 
-                    // Mix the RGB components and truncate the A component
-                    int mixedRgb = ColorMixer.mix(rgba1, rgba2, mix) & 0x00FFFFFF;
-
-                    // Take the A component from the source pixel
-                    int alpha = rgba1 & 0xFF000000;
+                    // Mix the colors
+                    int mixedRgb = ColorMixer.mix(rgba1, rgba2, mix);
 
                     // Update the pixel within the interpolated frame using the combined RGB and A components
-                    MemoryUtil.memPutInt(ppDstPixel, mixedRgb | alpha);
+                    MemoryUtil.memPutInt(ppDstPixel, mixedRgb);
 
                     pRgba1 += STRIDE;
                     pRgba2 += STRIDE;
