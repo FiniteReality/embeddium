@@ -8,4 +8,8 @@ public interface BakedQuadView extends ModelQuadView {
     boolean hasShade();
 
     void setFlags(int flags);
+
+    boolean hasVanillaLightEmission();
+
+    int getVanillaLightEmission();
 }

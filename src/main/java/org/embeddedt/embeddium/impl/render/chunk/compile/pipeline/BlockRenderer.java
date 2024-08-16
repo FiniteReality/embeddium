@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.impl.render.chunk.compile.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.client.renderer.LightTexture;
 import org.embeddedt.embeddium.api.render.chunk.BlockRenderContext;
 import org.embeddedt.embeddium.impl.model.color.ColorProvider;
 import org.embeddedt.embeddium.impl.model.color.ColorProviderRegistry;
@@ -226,7 +227,13 @@ public class BlockRenderer {
             out.u = quad.getTexU(srcIndex);
             out.v = quad.getTexV(srcIndex);
 
-            out.light = ModelQuadUtil.mergeBakedLight(quad.getLight(srcIndex), light.lm[srcIndex]);
+            int lightmap = ModelQuadUtil.mergeBakedLight(quad.getLight(srcIndex), light.lm[srcIndex]);
+
+            if (quad.hasVanillaLightEmission()) {
+                lightmap = LightTexture.lightCoordsWithEmission(lightmap, quad.getVanillaLightEmission());
+            }
+
+            out.light = lightmap;
         }
 
         var vertexBuffer = builder.getVertexBuffer(normalFace);

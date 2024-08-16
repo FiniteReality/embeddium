@@ -43,6 +43,9 @@ public class BakedQuadMixin implements BakedQuadView {
     @Final
     private boolean hasAmbientOcclusion;
 
+    @Shadow
+    @Final
+    private int lightEmission;
     @Unique
     private int flags;
 
@@ -144,5 +147,15 @@ public class BakedQuadMixin implements BakedQuadView {
     @Override
     public boolean hasAmbientOcclusion() {
         return this.hasAmbientOcclusion;
+    }
+
+    @Override
+    public boolean hasVanillaLightEmission() {
+        return this.lightEmission > 0;
+    }
+
+    @Override
+    public int getVanillaLightEmission() {
+        return this.lightEmission;
     }
 }
