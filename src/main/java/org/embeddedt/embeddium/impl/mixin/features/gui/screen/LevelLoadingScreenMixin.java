@@ -1,21 +1,22 @@
 package org.embeddedt.embeddium.impl.mixin.features.gui.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import net.minecraft.client.renderer.RenderType;
 import org.embeddedt.embeddium.api.vertex.format.common.ColorVertex;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
 import org.embeddedt.embeddium.api.util.ColorABGR;
 import org.embeddedt.embeddium.api.util.ColorARGB;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Re-implements the loading screen with considerations to reduce draw calls and other sources of overhead. This can
@@ -46,8 +47,16 @@ public class LevelLoadingScreenMixin {
      * @reason Significantly optimized implementation.
      * @author JellySquid
      */
-    @Overwrite
-    public static void renderChunks(GuiGraphics drawContext, StoringChunkProgressListener tracker, int mapX, int mapY, int mapScale, int mapPadding) {
+    @Inject(method = "renderChunks", at = @At("HEAD"), cancellable = true)
+    private static void renderChunksFast(GuiGraphics drawContext, StoringChunkProgressListener tracker, int mapX, int mapY, int mapScale, int mapPadding, CallbackInfo ci) {
+        VertexBufferWriter writer = VertexBufferWriter.tryOf(drawContext.bufferSource().getBuffer(RenderType.gui()));
+
+        if (writer == null) {
+            return;
+        }
+
+        ci.cancel();
+
         if (STATUS_TO_COLOR_FAST == null) {
             STATUS_TO_COLOR_FAST = new Reference2IntOpenHashMap<>(COLORS.size());
             STATUS_TO_COLOR_FAST.put(null, NULL_STATUS_COLOR);
@@ -55,18 +64,7 @@ public class LevelLoadingScreenMixin {
                     .forEach(entry -> STATUS_TO_COLOR_FAST.put(entry.getKey(), ColorARGB.toABGR(entry.getIntValue(), 0xFF)));
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
         Matrix4f matrix = drawContext.pose().last().pose();
-
-        Tesselator tessellator = Tesselator.getInstance();
-
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        
-        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-
-        var writer = VertexBufferWriter.of(bufferBuilder);
 
         int centerSize = tracker.getFullDiameter();
         int size = tracker.getDiameter();
@@ -111,14 +109,6 @@ public class LevelLoadingScreenMixin {
                 addRect(writer, matrix, tileX, tileY, tileX + mapScale, tileY + mapScale, color);
             }
         }
-
-        var data = bufferBuilder.build();
-
-        if (data != null) {
-            BufferUploader.drawWithShader(data);
-        }
-
-        RenderSystem.disableBlend();
     }
 
     @Unique
