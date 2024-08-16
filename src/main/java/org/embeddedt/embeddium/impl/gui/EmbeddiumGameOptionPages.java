@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.impl.gui;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
+import net.minecraft.server.level.ParticleStatus;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.embeddedt.embeddium.api.options.structure.OptionFlag;
@@ -32,6 +33,7 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class EmbeddiumGameOptionPages {
@@ -126,8 +128,17 @@ public class EmbeddiumGameOptionPages {
                         .setControl(option -> new SliderControl(option, 10, 260, 10, ControlValueFormatter.fpsLimit()))
                         .setBinding((opts, value) -> {
                             opts.framerateLimit().set(value);
-                            Minecraft.getInstance().getWindow().setFramerateLimit(value);
+                            Minecraft.getInstance().getFramerateLimitTracker().setFramerateLimit(value);
                         }, opts -> opts.framerateLimit().get())
+                        .build())
+                .add(OptionImpl.createBuilder(InactivityFpsLimit.class, vanillaOpts)
+                        .setId(StandardOptions.Option.INACTIVITY_FPS_LIMIT)
+                        .setName(Component.translatable("options.inactivityFpsLimit"))
+                        .setTooltip(Component.translatable("embeddium.options.inactivity_fps_limit.tooltip"))
+                        .setControl(option -> new CyclingControl<>(option, InactivityFpsLimit.class, Arrays.stream(InactivityFpsLimit.values()).map(InactivityFpsLimit::getKey).map(Component::translatable).toArray(Component[]::new)))
+                        .setBinding((opts, value) -> {
+                            opts.inactivityFpsLimit().set(value);
+                        }, opts -> opts.inactivityFpsLimit().get())
                         .build())
                 .build());
 
@@ -190,7 +201,7 @@ public class EmbeddiumGameOptionPages {
                             if (Minecraft.useShaderTransparency()) {
                                 RenderTarget framebuffer = Minecraft.getInstance().levelRenderer.getCloudsTarget();
                                 if (framebuffer != null) {
-                                    framebuffer.clear(Minecraft.ON_OSX);
+                                    framebuffer.clear();
                                 }
                             }
                         }, opts -> opts.cloudStatus().get())

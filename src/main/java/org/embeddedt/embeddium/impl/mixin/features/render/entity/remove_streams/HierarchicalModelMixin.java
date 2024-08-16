@@ -1,6 +1,6 @@
 package org.embeddedt.embeddium.impl.mixin.features.render.entity.remove_streams;
 
-import net.minecraft.client.model.HierarchicalModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import org.embeddedt.embeddium.render.entity.ModelPartExtended;
 import org.spongepowered.asm.mixin.Mixin;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Optional;
 
-@Mixin(HierarchicalModel.class)
+@Mixin(Model.class)
 public abstract class HierarchicalModelMixin {
     @Shadow
     public abstract ModelPart root();

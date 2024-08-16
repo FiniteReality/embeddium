@@ -35,6 +35,7 @@ public final class StandardOptions {
         public static final ResourceLocation FULLSCREEN_RESOLUTION = ResourceLocation.fromNamespaceAndPath("minecraft", "fullscreen_resolution");
         public static final ResourceLocation VSYNC = ResourceLocation.fromNamespaceAndPath("minecraft", "vsync");
         public static final ResourceLocation MAX_FRAMERATE = ResourceLocation.fromNamespaceAndPath("minecraft", "max_frame_rate");
+        public static final ResourceLocation INACTIVITY_FPS_LIMIT = ResourceLocation.fromNamespaceAndPath("minecraft", "inactivity_fps_limit");
         public static final ResourceLocation VIEW_BOBBING = ResourceLocation.fromNamespaceAndPath("minecraft", "view_bobbing");
         public static final ResourceLocation ATTACK_INDICATOR = ResourceLocation.fromNamespaceAndPath("minecraft", "attack_indicator");
         public static final ResourceLocation AUTOSAVE_INDICATOR = ResourceLocation.fromNamespaceAndPath("minecraft", "autosave_indicator");

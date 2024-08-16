@@ -250,8 +250,7 @@ public class RenderSectionManager {
         final boolean useOcclusionCulling;
         BlockPos origin = camera.getBlockPosition();
 
-        if (spectator && this.world.getBlockState(origin)
-                .isSolidRender(this.world, origin))
+        if (spectator && this.world.getBlockState(origin).isSolidRender())
         {
             useOcclusionCulling = false;
         } else {
@@ -628,17 +627,16 @@ public class RenderSectionManager {
     }
 
     private float getEffectiveRenderDistance() {
-        var color = RenderSystem.getShaderFogColor();
-        var distance = RenderSystem.getShaderFogEnd();
+        var fogParams = RenderSystem.getShaderFog();
 
         var renderDistance = this.getRenderDistance();
 
         // The fog must be fully opaque in order to skip rendering of chunks behind it
-        if (!Mth.equal(color[3], 1.0f)) {
+        if (!Mth.equal(fogParams.alpha(), 1.0f)) {
             return renderDistance;
         }
 
-        return Math.min(renderDistance, distance + 0.5f);
+        return Math.min(renderDistance, fogParams.end() + 0.5f);
     }
 
     private float getRenderDistance() {

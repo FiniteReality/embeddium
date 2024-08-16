@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface IBlockAndTintGetterExtension {
     default float getShade(float normalX, float normalY, float normalZ, boolean shade) {
-        return ((BlockAndTintGetter)this).getShade(Direction.getNearest(normalX, normalY, normalX), shade);
+        return ((BlockAndTintGetter)this).getShade(Direction.getApproximateNearest(normalX, normalY, normalX), shade);
     }
 
     default ModelData getModelData(BlockPos pos) {

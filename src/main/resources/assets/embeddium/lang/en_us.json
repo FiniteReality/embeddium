@@ -70,5 +70,6 @@
   "embeddium.options.added_by_mod_string": "Added by mod: %s",
   "embeddium.options.fullscreen.resolution.tooltip": "Controls the resolution of the game in fullscreen mode.",
   "embeddium.options.use_quad_normals_for_lighting.name": "Use Accurate Quad Shading",
-  "embeddium.options.use_quad_normals_for_lighting.tooltip": "When enabled, Embeddium will apply shading to non-vanilla block faces based on the true direction they are facing, not their axis-aligned direction. This can improve lighting quality when the Forge experimental light pipeline is disabled (which is recommended for best performance).\n\nIt has no effect if the experimental light pipeline is enabled."
+  "embeddium.options.use_quad_normals_for_lighting.tooltip": "When enabled, Embeddium will apply shading to non-vanilla block faces based on the true direction they are facing, not their axis-aligned direction. This can improve lighting quality when the Forge experimental light pipeline is disabled (which is recommended for best performance).\n\nIt has no effect if the experimental light pipeline is enabled.",
+  "embeddium.options.inactivity_fps_limit.tooltip": "Controls how the game limits framerate when inactive. Minimized only limits the framerate if the game is minimized. AFK also limits the framerate if the player is inactive for long enough."
 }

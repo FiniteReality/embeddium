@@ -37,8 +37,8 @@ public class BlockOcclusionCache {
         if (selfState.skipRendering(adjState, facing) || (adjState.hidesNeighborFace(view, adjPos, selfState, facing.getOpposite()) && selfState.supportsExternalFaceHiding())) {
             return false;
         } else if (adjState.canOcclude()) {
-            VoxelShape selfShape = selfState.getFaceOcclusionShape(view, pos, facing);
-            VoxelShape adjShape = adjState.getFaceOcclusionShape(view, adjPos, facing.getOpposite());
+            VoxelShape selfShape = selfState.getFaceOcclusionShape(facing);
+            VoxelShape adjShape = adjState.getFaceOcclusionShape(facing.getOpposite());
 
             if (selfShape == Shapes.block() && adjShape == Shapes.block()) {
                 return false;

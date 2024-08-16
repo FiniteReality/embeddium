@@ -39,4 +39,6 @@ transitive-accessible field net/minecraft/world/level/GrassColor pixels [I
 transitive-accessible field net/minecraft/world/level/FoliageColor pixels [I
 # public net.minecraft.client.renderer.FogRenderer getPriorityFogFunction(Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/FogRenderer$MobEffectFogFunction;
 transitive-accessible method net/minecraft/client/renderer/FogRenderer getPriorityFogFunction (Lnet/minecraft/world/entity/Entity;F)Lnet/minecraft/client/renderer/FogRenderer$MobEffectFogFunction;
+# public net.minecraft.client.renderer.entity.EntityRenderer getBoundingBoxForCulling(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/phys/AABB;
+transitive-accessible method net/minecraft/client/renderer/entity/EntityRenderer getBoundingBoxForCulling (Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/world/phys/AABB;
 # }

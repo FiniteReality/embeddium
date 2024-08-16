@@ -1,5 +1,6 @@
 package org.embeddedt.embeddium.impl.mixin.core.render.world;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.renderer.*;
 import org.embeddedt.embeddium.impl.gl.device.RenderDevice;
@@ -7,7 +8,6 @@ import org.embeddedt.embeddium.impl.render.EmbeddiumWorldRenderer;
 import org.embeddedt.embeddium.impl.render.viewport.ViewportProvider;
 import org.embeddedt.embeddium.impl.world.WorldRendererExtended;
 import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -24,7 +24,6 @@ import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -48,11 +47,6 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Final
     private Minecraft minecraft;
 
-    @Shadow(remap = false)
-    public Frustum getFrustum() {
-        return null;
-    }
-
     @Unique
     private EmbeddiumWorldRenderer renderer;
 
@@ -68,6 +62,9 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
     @Shadow
     @Final
     private SectionOcclusionGraph sectionOcclusionGraph;
+
+    @Shadow
+    private Frustum cullingFrustum;
 
     @Override
     public EmbeddiumWorldRenderer sodium$getWorldRenderer() {
@@ -144,7 +141,7 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
 
         // TODO: Avoid setting up and clearing the state a second time
         renderLayer.setupRenderState();
-        ClientHooks.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), pose, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.getFrustum());
+        ClientHooks.dispatchRenderStage(renderLayer, ((LevelRenderer)(Object)this), pose, matrix, this.ticks, this.minecraft.gameRenderer.getMainCamera(), this.cullingFrustum);
         renderLayer.clearRenderState();
     }
 
@@ -226,9 +223,13 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
         }
     }
 
-    @Inject(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0))
-    private void onRenderBlockEntities(DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightmapTextureManager, Matrix4f pose, Matrix4f positionMatrix, CallbackInfo ci) {
-        this.renderer.renderBlockEntities(pose, this.renderBuffers, this.destructionProgress, camera, deltaTracker.getGameTimeDeltaPartialTick(false));
+    /**
+     * @author embeddedt
+     * @reason take over block entity rendering
+     */
+    @Overwrite
+    private void renderBlockEntities(PoseStack stack, MultiBufferSource.BufferSource bufferSource, MultiBufferSource.BufferSource bufferSource2, Camera camera, float partialTick) {
+        this.renderer.renderBlockEntities(stack.last().pose(), this.renderBuffers, this.destructionProgress, camera, partialTick);
     }
 
     /**
@@ -237,10 +238,13 @@ public abstract class WorldRendererMixin implements WorldRendererExtended {
      *
      * NOTE: When updating Embeddium to newer versions of the game, this injection point must be checked.
      */
+    // TODO 24w33a
+    /*
     @ModifyVariable(method = "renderLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", shift = At.Shift.BEFORE, ordinal = 0), ordinal = 3)
     private boolean changeEntityOutlineFlag(boolean bl) {
         return bl || (this.renderer.didBlockEntityRequestOutline() && this.shouldShowEntityOutlines());
     }
+     */
 
     /**
      * @reason Replace the debug string

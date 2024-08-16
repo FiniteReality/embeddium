@@ -22,8 +22,8 @@ public class ForgeLightPipeline implements LightPipeline {
     private final QuadLighter forgeLighter;
     private final BlockAndTintGetter level;
     private final int[] mutableQuadVertexData = new int[32];
-    private final BakedQuad mutableQuadWithoutShade = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, UnitTextureAtlasSprite.INSTANCE, false);
-    private final BakedQuad mutableQuadWithShade = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, UnitTextureAtlasSprite.INSTANCE, true);
+    private final BakedQuad mutableQuadWithoutShade = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, UnitTextureAtlasSprite.INSTANCE, false, 0);
+    private final BakedQuad mutableQuadWithShade = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, UnitTextureAtlasSprite.INSTANCE, true, 0);
 
     private long cachedPos = Long.MIN_VALUE;
 

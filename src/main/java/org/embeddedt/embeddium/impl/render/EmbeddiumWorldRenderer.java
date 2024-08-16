@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.gl.device.CommandList;
 import org.embeddedt.embeddium.impl.gl.device.RenderDevice;
@@ -187,7 +188,7 @@ public class EmbeddiumWorldRenderer {
         Vec3 pos = camera.getPosition();
         float pitch = camera.getXRot();
         float yaw = camera.getYRot();
-        float fogDistance = RenderSystem.getShaderFogEnd();
+        float fogDistance = RenderSystem.getShaderFog().end();
 
         boolean dirty = pos.x != this.lastCameraX || pos.y != this.lastCameraY || pos.z != this.lastCameraZ ||
                 pitch != this.lastCameraPitch || yaw != this.lastCameraYaw || fogDistance != this.lastFogDistance;
@@ -557,7 +558,7 @@ public class EmbeddiumWorldRenderer {
      * Returns whether or not the entity intersects with any visible chunks in the graph.
      * @return True if the entity is visible, otherwise false
      */
-    public boolean isEntityVisible(Entity entity) {
+    public <T extends Entity> boolean isEntityVisible(T entity, EntityRenderer<T, ?> renderer) {
         if (!this.useEntityCulling) {
             return true;
         }
@@ -567,7 +568,7 @@ public class EmbeddiumWorldRenderer {
             return true;
         }
 
-        AABB box = entity.getBoundingBoxForCulling();
+        AABB box = renderer.getBoundingBoxForCulling(entity);
 
         if (isInfiniteExtentsBox(box)) {
             return true;

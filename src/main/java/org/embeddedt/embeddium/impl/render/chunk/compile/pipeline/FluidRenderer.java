@@ -1,6 +1,5 @@
 package org.embeddedt.embeddium.impl.render.chunk.compile.pipeline;
 
-import org.embeddedt.embeddium.api.util.ColorMixer;
 import org.embeddedt.embeddium.impl.model.light.LightMode;
 import org.embeddedt.embeddium.impl.model.light.LightPipeline;
 import org.embeddedt.embeddium.impl.model.light.LightPipelineProvider;
@@ -13,7 +12,6 @@ import org.embeddedt.embeddium.impl.model.quad.properties.ModelQuadFlags;
 import org.embeddedt.embeddium.impl.model.color.ColorProviderRegistry;
 import org.embeddedt.embeddium.impl.model.color.ColorProvider;
 import org.embeddedt.embeddium.impl.model.color.DefaultColorProviders;
-import org.embeddedt.embeddium.impl.render.ShaderModBridge;
 import org.embeddedt.embeddium.impl.render.chunk.ChunkColorWriter;
 import org.embeddedt.embeddium.impl.render.chunk.compile.ChunkBuildBuffers;
 import org.embeddedt.embeddium.impl.render.chunk.compile.buffers.ChunkModelBuilder;
@@ -26,7 +24,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
@@ -92,7 +89,7 @@ public class FluidRenderer {
             return false;
         }
 
-        VoxelShape sideShape = blockState.getFaceOcclusionShape(world, pos, dir);
+        VoxelShape sideShape = blockState.getFaceOcclusionShape(dir);
         if (sideShape == Shapes.block()) {
             // The face fills the 1x1 area, so the fluid is occluded
             return true;
@@ -110,7 +107,7 @@ public class FluidRenderer {
         BlockState blockState = world.getBlockState(pos);
 
         if (blockState.canOcclude()) {
-            VoxelShape shape = blockState.getOcclusionShape(world, pos);
+            VoxelShape shape = blockState.getOcclusionShape();
 
             // Hoist these checks to avoid allocating the shape below
             if (shape == Shapes.block()) {

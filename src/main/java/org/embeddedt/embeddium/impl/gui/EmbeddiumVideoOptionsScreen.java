@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.impl.gui;
 
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import org.embeddedt.embeddium.impl.Embeddium;
@@ -299,17 +300,15 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         super.renderBackground(gfx, mouseX, mouseY, partialTick);
 
         // Render watermarks
-        gfx.setColor(ColorARGB.unpackRed(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackGreen(DefaultColors.ELEMENT_ACTIVATED) / 255f, ColorARGB.unpackBlue(DefaultColors.ELEMENT_ACTIVATED) / 255f, 0.8F);
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(770, 1);
-        gfx.blit(LOGO_LOCATION, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), 0.0F, 0.0F, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE);
+        gfx.blit(RenderType::guiTextured, LOGO_LOCATION, this.logoDim.x(), this.logoDim.y(), this.logoDim.width(), this.logoDim.height(), LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, LOGO_SIZE, DefaultColors.ELEMENT_ACTIVATED);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        gfx.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
