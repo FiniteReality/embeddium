@@ -62,6 +62,10 @@ tasks.create<GenerateAWFromATTask>("convertTransformerToWidener") {
     overwriteAccessWidener = true
 }
 
+tasks.create("runGameTestCiClient") {
+
+}
+
 tasks.jar {
     from(sourceSets["fabric"].output.classesDirs)
     from(sourceSets["fabric"].output.resourcesDir)
