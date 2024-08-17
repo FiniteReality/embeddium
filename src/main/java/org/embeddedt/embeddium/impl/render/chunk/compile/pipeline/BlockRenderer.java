@@ -144,19 +144,51 @@ public class BlockRenderer {
         return this.occlusionCache.shouldDrawSide(ctx.state(), ctx.localSlice(), ctx.pos(), face);
     }
 
+    private static int computeLightFlagMask(BakedQuad quad) {
+        int flag = 0;
+
+        if (quad.hasAmbientOcclusion()) {
+            flag |= 1;
+        }
+
+        if (quad.isShade()) {
+            flag |= 2;
+        }
+
+        return flag;
+    }
+
+    /**
+     * {@return true if all quads in the given list use similar enough lighting configuration that reorientation is
+     * unlikely to lead to z-fighting}
+     */
+    private static boolean checkQuadsHaveSameLightingConfig(List<BakedQuad> quads) {
+        int quadsSize = quads.size();
+
+        // By definition, singleton or empty lists of quads have a common lighting config. Only check larger lists
+        if (quadsSize >= 2) {
+            int flagMask = -1;
+            // noinspection ForLoopReplaceableByForEach
+            for (int i = 0; i < quadsSize; i++) {
+                int newFlag = computeLightFlagMask(quads.get(i));
+                if (flagMask == -1) {
+                    flagMask = newFlag;
+                } else if(newFlag != flagMask) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3 offset,
                                 ChunkModelBuilder builder, List<BakedQuad> quads, Direction cullFace) {
 
-        // noinspection ForLoopReplaceableByForEach
-        for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
-            if (!quads.get(i).hasAmbientOcclusion()) {
-                // We disable Sodium's quad orientation detection if a quad opts out of AO. This is
-                // because some mods place non-AO quads below/above AO quads with identical coordinates.
-                // This won't z-fight as-is, but if the AO quad gets reoriented it can be triangulated
-                // differently from the non-AO quad, and that will cause z-fighting.
-                this.useReorienting = false;
-                break;
-            }
+        if(!checkQuadsHaveSameLightingConfig(quads)) {
+            // Disable reorienting if quads use different light configurations, as otherwise layered quads
+            // may be triangulated differently from others in the stack, and that will cause z-fighting.
+            this.useReorienting = false;
         }
 
         // This is a very hot allocation, iterate over it manually
