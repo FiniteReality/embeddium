@@ -587,7 +587,7 @@ public class EmbeddiumWorldRenderer {
     public boolean isBoxVisible(double x1, double y1, double z1, double x2, double y2, double z2) {
         // Boxes outside the valid world height will never map to a rendered chunk
         // Always render these boxes or they'll be culled incorrectly!
-        if (y2 < this.world.getMinBuildHeight() + 0.5D || y1 > this.world.getMaxBuildHeight() - 0.5D) {
+        if (y2 < this.world.getMinY() + 0.5D || y1 > this.world.getMaxY() - 0.5D) {
             return true;
         }
 

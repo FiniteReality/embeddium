@@ -202,14 +202,14 @@ public class OcclusionCuller {
     {
         var origin = viewport.getChunkCoord();
 
-        if (origin.getY() < this.world.getMinSection()) {
+        if (origin.getY() < this.world.getMinSectionY()) {
             // below the world
             this.initOutsideWorldHeight(queue, viewport, searchDistance, frame,
-                    this.world.getMinSection(), GraphDirectionSet.of(GraphDirection.DOWN));
-        } else if (origin.getY() >= this.world.getMaxSection()) {
+                    this.world.getMinSectionY(), GraphDirectionSet.of(GraphDirection.DOWN));
+        } else if (origin.getY() > this.world.getMaxSectionY()) {
             // above the world
             this.initOutsideWorldHeight(queue, viewport, searchDistance, frame,
-                    this.world.getMaxSection() - 1, GraphDirectionSet.of(GraphDirection.UP));
+                    this.world.getMaxSectionY(), GraphDirectionSet.of(GraphDirection.UP));
         } else if(this.getRenderSection(origin.getX(), origin.getY(), origin.getZ()) == null) {
             // inside the world height-wise, but in an unloaded section
             this.initOutsideWorldHeight(queue, viewport, searchDistance, frame,

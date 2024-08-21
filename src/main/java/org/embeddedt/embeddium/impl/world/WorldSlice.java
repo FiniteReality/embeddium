@@ -384,8 +384,8 @@ public class WorldSlice implements EmbeddiumBlockAndTintGetter, FabricBlockView,
     }
 
     @Override
-    public int getMinBuildHeight() {
-        return this.world.getMinBuildHeight();
+    public int getMinY() {
+        return this.world.getMinY();
     }
 
     @Override
