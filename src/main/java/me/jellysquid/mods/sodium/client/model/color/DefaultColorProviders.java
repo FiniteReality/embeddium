@@ -66,9 +66,17 @@ public class DefaultColorProviders {
         }
     }
 
+    /**
+     * Adapter for {@link BlendedColorProvider} that accepts a BiomeColors method reference (or any biome color
+     * getter using a similar interface) and uses it to perform per-vertex biome blending.
+     */
     public static class VertexBlendedBiomeColorAdapter<T> extends BlendedColorProvider<T> {
         private final VanillaBiomeColor vanillaGetter;
 
+        /**
+         * Interface whose signature matches those of the getAverageXYZColor functions in BiomeColors, allowing
+         * for method references to be passed to {@link VertexBlendedBiomeColorAdapter}'s constructor.
+         */
         @FunctionalInterface
         public interface VanillaBiomeColor {
             int getAverageColor(BlockAndTintGetter getter, BlockPos pos);

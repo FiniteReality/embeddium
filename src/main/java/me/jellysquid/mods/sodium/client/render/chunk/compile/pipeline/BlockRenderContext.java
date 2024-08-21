@@ -13,6 +13,10 @@ import org.embeddedt.embeddium.render.world.WorldSliceLocalGenerator;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
+/**
+ * Holds the context for the current block being rendered in a chunk section. This container is reused rather than
+ * being freshly constructed for each block to avoid allocations.
+ */
 public class BlockRenderContext {
     private final WorldSlice world;
     private final BlockAndTintGetter localSlice;
