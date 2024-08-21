@@ -81,4 +81,8 @@ public interface ModelQuadView {
     }
 
     default boolean hasAmbientOcclusion() { return true; }
+
+    default int getVanillaLightEmission() {
+        return 0;
+    }
 }

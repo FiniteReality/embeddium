@@ -156,17 +156,18 @@ public class ModelQuadUtil {
         return packedNormal;
     }
 
-    public static int mergeBakedLight(int packedLight, int calcLight) {
+    public static int mergeBakedLight(int packedLight, int vanillaLightEmission, int calcLight) {
         // bail early in most cases
-        if (packedLight == 0)
+        if (packedLight == 0 && vanillaLightEmission == 0)
             return calcLight;
 
         int psl = (packedLight >> 16) & 0xFF;
         int csl = (calcLight >> 16) & 0xFF;
         int pbl = (packedLight) & 0xFF;
         int cbl = (calcLight) & 0xFF;
-        int bl = Math.max(pbl, cbl);
-        int sl = Math.max(psl, csl);
+        // TODO need to check what priority NeoForge decides to give to these
+        int bl = Math.max(Math.max(pbl, cbl), vanillaLightEmission);
+        int sl = Math.max(Math.max(psl, csl), vanillaLightEmission);
         return (sl << 16) | bl;
     }
 

@@ -150,11 +150,6 @@ public class BakedQuadMixin implements BakedQuadView {
     }
 
     @Override
-    public boolean hasVanillaLightEmission() {
-        return this.lightEmission > 0;
-    }
-
-    @Override
     public int getVanillaLightEmission() {
         return this.lightEmission;
     }

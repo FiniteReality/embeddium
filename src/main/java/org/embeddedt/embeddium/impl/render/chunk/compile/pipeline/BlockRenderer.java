@@ -227,13 +227,7 @@ public class BlockRenderer {
             out.u = quad.getTexU(srcIndex);
             out.v = quad.getTexV(srcIndex);
 
-            int lightmap = ModelQuadUtil.mergeBakedLight(quad.getLight(srcIndex), light.lm[srcIndex]);
-
-            if (quad.hasVanillaLightEmission()) {
-                lightmap = LightTexture.lightCoordsWithEmission(lightmap, quad.getVanillaLightEmission());
-            }
-
-            out.light = lightmap;
+            out.light = ModelQuadUtil.mergeBakedLight(quad.getLight(srcIndex), quad.getVanillaLightEmission(), light.lm[srcIndex]);
         }
 
         var vertexBuffer = builder.getVertexBuffer(normalFace);

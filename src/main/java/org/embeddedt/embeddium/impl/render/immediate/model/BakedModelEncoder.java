@@ -44,7 +44,7 @@ public class BakedModelEncoder {
                 float yt = MatrixHelper.transformPositionY(matPosition, x, y, z);
                 float zt = MatrixHelper.transformPositionZ(matPosition, x, y, z);
 
-                ModelVertex.write(ptr, xt, yt, zt, colorize ? multARGBInts(quad.getColor(i), color) : color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light), mergeNormalAndMult(quad.getForgeNormal(i), normal, matNormal));
+                ModelVertex.write(ptr, xt, yt, zt, colorize ? multARGBInts(quad.getColor(i), color) : color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), quad.getVanillaLightEmission(), light), mergeNormalAndMult(quad.getForgeNormal(i), normal, matNormal));
                 ptr += ModelVertex.STRIDE;
             }
 
@@ -102,7 +102,7 @@ public class BakedModelEncoder {
 
                 int color = ColorABGR.pack(fR, fG, fB, a);
 
-                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), light[i]), mergeNormalAndMult(quad.getForgeNormal(i), normal, matNormal));
+                ModelVertex.write(ptr, xt, yt, zt, color, quad.getTexU(i), quad.getTexV(i), overlay, ModelQuadUtil.mergeBakedLight(quad.getLight(i), quad.getVanillaLightEmission(), light[i]), mergeNormalAndMult(quad.getForgeNormal(i), normal, matNormal));
                 ptr += ModelVertex.STRIDE;
             }
 
