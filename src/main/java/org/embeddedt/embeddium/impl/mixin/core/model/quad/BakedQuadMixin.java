@@ -54,6 +54,10 @@ public class BakedQuadMixin implements BakedQuadView {
 
     @Inject(method = "/<init>/", at = @At("RETURN"))
     private void init(CallbackInfo ci) {
+        if (this.normalFace != null) {
+            // injector already ran on other constructor, skip
+            return;
+        }
         this.normal = ModelQuadUtil.calculateNormal(this);
         this.normalFace = ModelQuadUtil.findNormalFace(this.normal);
 
