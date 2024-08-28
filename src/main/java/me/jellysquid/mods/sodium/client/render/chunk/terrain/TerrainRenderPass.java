@@ -1,5 +1,9 @@
 package me.jellysquid.mods.sodium.client.render.chunk.terrain;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.experimental.Accessors;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.material.Material;
 import net.minecraft.client.renderer.RenderType;
@@ -12,38 +16,45 @@ import net.minecraft.client.renderer.RenderType;
  * Geometry that shares the same terrain render pass may still be able to specify some more dynamic properties. See {@link Material}
  * for more information.
  */
+@Builder
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Accessors(fluent = true)
 public class TerrainRenderPass {
-    @Deprecated(forRemoval = true)
+    /**
+     * The RenderType that is used to set up/clear GPU pipeline state.
+     */
     private final RenderType layer;
 
-    private final boolean useReverseOrder;
-    private final boolean fragmentDiscard;
-
     /**
-     * Constructs a new terrain render pass. The provided RenderType is only used to set up/clear GPU pipeline state,
-     * and otherwise has no special meaning to the renderer.
-     * <p>
-     * Refer to the public getters for documentation on the other parameters.
+     * Whether sections on this render pass should be rendered farthest-to-nearest, rather than nearest-to-farthest.
      */
+    private final boolean useReverseOrder;
+    /**
+     * Whether fragment alpha testing should be enabled for this render pass.
+     */
+    private final boolean fragmentDiscard;
+    /**
+     * Whether this render pass wants to opt in to translucency sorting if enabled.
+     */
+    private final boolean useTranslucencySorting;
+
+    @Deprecated
     public TerrainRenderPass(RenderType layer, boolean useReverseOrder, boolean allowFragmentDiscard) {
         this.layer = layer;
 
         this.useReverseOrder = useReverseOrder;
         this.fragmentDiscard = allowFragmentDiscard;
+        this.useTranslucencySorting = useReverseOrder;
     }
 
-    /**
-     * {@return whether sections on this render pass should be rendered farthest-to-nearest, rather than nearest-to-farthest}
-     */
+
     public boolean isReverseOrder() {
         return this.useReverseOrder;
     }
 
-    /**
-     * {@return whether this render pass wants to opt in to translucency sorting}
-     */
+
     public boolean isSorted() {
-        return this.useReverseOrder && SodiumClientMod.canApplyTranslucencySorting();
+        return this.useTranslucencySorting && SodiumClientMod.canApplyTranslucencySorting();
     }
 
     @Deprecated
@@ -56,9 +67,7 @@ public class TerrainRenderPass {
         this.layer.clearRenderState();
     }
 
-    /**
-     * {@return whether the fragment discard check should be enabled for this render pass}
-     */
+
     public boolean supportsFragmentDiscard() {
         return this.fragmentDiscard;
     }

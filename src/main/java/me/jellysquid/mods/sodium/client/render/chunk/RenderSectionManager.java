@@ -176,7 +176,7 @@ public class RenderSectionManager {
                     continue;
                 }
 
-                boolean hasTranslucentData = section.containsTranslucentGeometry() && section.getSortState() != null && section.getSortState().requiresDynamicSorting();
+                boolean hasTranslucentData = section.isNeedsDynamicTranslucencySorting();
 
                 if (!hasTranslucentData) {
                     // Sections without sortable translucent data are not relevant
@@ -415,7 +415,7 @@ public class RenderSectionManager {
                 this.updateSectionInfo(result.render, result.info);
                 if (this.translucencySorting) {
                     // We only change the translucency info on full rebuilds, as sorts can keep using the same data
-                    this.updateTranslucencyInfo(result.render, result.meshes.get(DefaultTerrainRenderPasses.TRANSLUCENT));
+                    this.updateTranslucencyInfo(result.render, result.meshes);
                 }
             }
 
@@ -429,10 +429,14 @@ public class RenderSectionManager {
         }
     }
 
-    private void updateTranslucencyInfo(RenderSection render, BuiltSectionMeshParts translucencyMesh) {
-        if(translucencyMesh == null)
-            return;
-        render.setSortState(translucencyMesh.getSortState());
+    private void updateTranslucencyInfo(RenderSection render, Map<TerrainRenderPass, BuiltSectionMeshParts> meshes) {
+        Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> sortStates = new Reference2ObjectArrayMap<>();
+        for(var entry : meshes.entrySet()) {
+            if(entry.getKey().isSorted()) {
+                sortStates.put(entry.getKey(), entry.getValue().getSortState().compactForStorage());
+            }
+        }
+        render.setTranslucencySortStates(sortStates.isEmpty() ? Collections.emptyMap() : sortStates);
     }
 
     private void updateSectionInfo(RenderSection render, BuiltSectionInfo info) {
@@ -508,7 +512,7 @@ public class RenderSectionManager {
 
                 if (!type.isSort()) {
                     // Prevent further sorts from being performed on this section
-                    section.setSortState(null);
+                    section.setTranslucencySortStates(Collections.emptyMap());
                 }
             } else {
                 var result = ChunkJobResult.successfully(new ChunkBuildOutput(section, BuiltSectionInfo.EMPTY, Collections.emptyMap(), frame));
@@ -533,12 +537,10 @@ public class RenderSectionManager {
     }
 
     public ChunkBuilderSortTask createSortTask(RenderSection render, int frame) {
-        Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> meshes = new Reference2ReferenceOpenHashMap<>();
-        var sortBuffer = render.getSortState();
-        if(sortBuffer == null || !sortBuffer.requiresDynamicSorting())
+        Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> sortStates = render.getTranslucencySortStates();
+        if(sortStates.isEmpty() || sortStates.values().stream().noneMatch(TranslucentQuadAnalyzer.SortState::requiresDynamicSorting))
             return null;
-        meshes.put(DefaultTerrainRenderPasses.TRANSLUCENT, sortBuffer);
-        return new ChunkBuilderSortTask(render, (float)cameraPosition.x, (float)cameraPosition.y, (float)cameraPosition.z, frame, meshes);
+        return new ChunkBuilderSortTask(render, (float)cameraPosition.x, (float)cameraPosition.y, (float)cameraPosition.z, frame, sortStates);
     }
 
     public void markGraphDirty() {
@@ -686,12 +688,11 @@ public class RenderSectionManager {
                 while(listIter.hasNext()) {
                     RenderSection section = region.getSection(listIter.nextByteAsInt());
                     // Do not count sections without translucent data
-                    if(section == null || !section.containsTranslucentGeometry()) {
+                    if(section == null || section.getTranslucencySortStates().isEmpty()) {
                         continue;
                     }
-                    var data = section.getSortState();
-                    var level = data != null ? data.level() : TranslucentQuadAnalyzer.Level.NONE;
-                    sectionCounts[level.ordinal()]++;
+
+                    sectionCounts[section.getHighestSortingLevel().ordinal()]++;
                 }
             }
         }
@@ -717,10 +718,8 @@ public class RenderSectionManager {
             if(hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                 var pos = ((BlockHitResult)hitResult).getBlockPos();
                 var self = this.getRenderSection(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
-                if(self != null && self.containsTranslucentGeometry()) {
-                    var selfData = self.getSortState();
-                    var level = selfData != null ? selfData.level() : TranslucentQuadAnalyzer.Level.NONE;
-                    list.add("Targeted Section: " + level.name());
+                if(self != null && !self.getTranslucencySortStates().isEmpty() && self.getTranslucencySortStates().keySet().stream().anyMatch(TerrainRenderPass::isSorted)) {
+                    list.add("Targeted Section: " + self.getHighestSortingLevel().name());
                 }
             }
         }

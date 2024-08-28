@@ -61,6 +61,7 @@ sourceSets {
 }
 
 repositories {
+    mavenCentral()
     maven("https://maven.minecraftforge.net/")
     maven("https://maven.fabricmc.net")
     maven("https://maven.tterrag.com/")
@@ -173,6 +174,10 @@ dependencies {
 
     compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
+
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.5")) {
         jarJar.ranged(this, "[0.3.5,)")
     }

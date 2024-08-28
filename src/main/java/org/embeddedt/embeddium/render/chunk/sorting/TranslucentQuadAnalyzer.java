@@ -50,7 +50,7 @@ public class TranslucentQuadAnalyzer {
         }
 
         public SortState compactForStorage() {
-            if(requiresDynamicSorting()) {
+            if(this == NONE || requiresDynamicSorting()) {
                 return this;
             } else {
                 return new SortState(level, null, null, null);
