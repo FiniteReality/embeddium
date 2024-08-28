@@ -2,7 +2,6 @@ package org.embeddedt.embeddium.impl.mixin;
 
 import net.neoforged.fml.ModLoadingIssue;
 import org.embeddedt.embeddium.impl.EmbeddiumPreLaunch;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.moddiscovery.ModFile;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
@@ -12,6 +11,7 @@ import org.embeddedt.embeddium.impl.asm.AnnotationProcessingEngine;
 import org.embeddedt.embeddium.impl.config.ConfigMigrator;
 import org.embeddedt.embeddium_integrity.MixinTaintDetector;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.service.MixinService;
@@ -139,7 +139,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
-        if (FMLLoader.getDist() != Dist.CLIENT) {
+        if (MixinEnvironment.getCurrentEnvironment().getSide() == MixinEnvironment.Side.SERVER) {
             return null;
         }
 
