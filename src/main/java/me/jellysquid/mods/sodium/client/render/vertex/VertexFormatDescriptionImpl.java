@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.render.vertex;
 
-import me.jellysquid.mods.sodium.mixin.core.render.VertexFormatAccessor;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.CommonVertexAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -52,7 +51,7 @@ public class VertexFormatDescriptionImpl implements VertexFormatDescription {
         Arrays.fill(commonElementOffsets, -1);
 
         var elementList = format.getElements();
-        var elementOffsets = ((VertexFormatAccessor) format).getOffsets();
+        var elementOffsets = format.offsets;
 
         for (int elementIndex = 0; elementIndex < elementList.size(); elementIndex++) {
             var element = elementList.get(elementIndex);

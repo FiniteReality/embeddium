@@ -37,7 +37,7 @@ base {
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 // java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-val extraSourceSets = arrayOf("legacy", "compat")
+val extraSourceSets = arrayOf("legacy", "compat", "mixin")
 
 sourceSets {
     val main = getByName("main")
@@ -150,7 +150,7 @@ repositories {
 
 mixin {
     // MixinGradle Settings
-    add(sourceSets["main"], "embeddium-refmap.json")
+    add(sourceSets["mixin"], "embeddium-refmap.json")
     config("embeddium.mixins.json")
 }
 
@@ -170,10 +170,10 @@ dependencies {
     compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
     compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 
-    annotationProcessor("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
+    "mixinAnnotationProcessor"("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
 
     compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
+    "mixinAnnotationProcessor"("io.github.llamalad7:mixinextras-common:0.3.5")
 
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
