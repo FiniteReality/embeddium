@@ -97,7 +97,6 @@ public class RenderSectionManager {
     private Vec3 cameraPosition = Vec3.ZERO;
 
     private final boolean translucencySorting;
-    private final int translucencyBlockRenderDistance;
 
     public RenderSectionManager(ClientLevel world, int renderDistance, CommandList commandList) {
         ChunkVertexType vertexType = SodiumClientMod.canUseVanillaVertices() ? ChunkMeshFormats.VANILLA_LIKE : ChunkMeshFormats.COMPACT;
@@ -125,7 +124,6 @@ public class RenderSectionManager {
         }
 
         this.translucencySorting = SodiumClientMod.canApplyTranslucencySorting();
-        this.translucencyBlockRenderDistance = Math.min(9216, (renderDistance << 4) * (renderDistance << 4));
     }
 
     public void runAsyncTasks() {

@@ -76,7 +76,7 @@ public class FluidRenderer {
     private final SinkingVertexBuilder fluidVertexBuilder = new SinkingVertexBuilder();
 
     private final ChunkColorWriter colorEncoder = ChunkColorWriter.get();
-;
+
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
 

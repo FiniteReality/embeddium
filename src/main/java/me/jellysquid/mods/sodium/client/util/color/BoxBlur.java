@@ -61,6 +61,7 @@ public class BoxBlur {
 
             for (int x = 0; x < width; x++) {
                 // The x and y coordinates are transposed to flip the output image
+                //noinspection SuspiciousNameCombination
                 dst[ColorBuffer.getIndex(y, x, width)] = averageRGB(red, green, blue, multiplier);
 
                 {
