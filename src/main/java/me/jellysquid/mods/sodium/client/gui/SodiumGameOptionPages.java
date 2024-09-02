@@ -17,6 +17,7 @@ import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStor
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.ForgeConfig;
@@ -163,7 +164,7 @@ public class SodiumGameOptionPages {
                         .setId(StandardOptions.Option.GRAPHICS_MODE)
                         .setName(Component.translatable("options.graphics"))
                         .setTooltip(Component.translatable("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy"), Component.translatable("options.graphics.fabulous") }))
+                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy"), Component.translatable("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC) }))
                         .setBinding(
                                 (opts, value) -> opts.graphicsMode().set(value),
                                 opts -> opts.graphicsMode().get())
