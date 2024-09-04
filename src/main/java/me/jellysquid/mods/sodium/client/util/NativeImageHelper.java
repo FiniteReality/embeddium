@@ -1,7 +1,8 @@
 package me.jellysquid.mods.sodium.client.util;
 
-import me.jellysquid.mods.sodium.mixin.features.textures.NativeImageAccessor;
 import com.mojang.blaze3d.platform.NativeImage;
+import org.embeddedt.embeddium.impl.mixinterface.NativeImageAccessor;
+
 import java.util.Locale;
 
 public class NativeImageHelper {
@@ -12,6 +13,6 @@ public class NativeImageHelper {
         }
 
         return ((NativeImageAccessor) (Object) nativeImage) // duck type since NativeImage is final
-                .getPointer();
+                .embeddium$getPixels();
     }
 }

@@ -45,6 +45,12 @@ import org.embeddedt.embeddium.tags.EmbeddiumTags;
 
 import java.util.Objects;
 
+/**
+ * The Embeddium equivalent to vanilla's ModelBlockRenderer. It is the complement of {@link BlockRenderer} for
+ * emitting fluid geometry.
+ * <p>
+ * This class does not need to be thread-safe, as a separate instance is allocated per meshing thread.
+ */
 public class FluidRenderer {
     // TODO: allow this to be changed by vertex format
     // TODO: move fluid rendering to a separate render pass and control glPolygonOffset and glDepthFunc to fix this properly
@@ -70,7 +76,7 @@ public class FluidRenderer {
     private final SinkingVertexBuilder fluidVertexBuilder = new SinkingVertexBuilder();
 
     private final ChunkColorWriter colorEncoder = ChunkColorWriter.get();
-;
+
     public FluidRenderer(ColorProviderRegistry colorProviderRegistry, LightPipelineProvider lighters) {
         this.quad.setLightFace(Direction.UP);
 
@@ -78,6 +84,15 @@ public class FluidRenderer {
         this.colorProviderRegistry = colorProviderRegistry;
     }
 
+    /**
+     * {@return true if a fluid's face is occluded by surrounding block/fluid geometry and thus does not need to be rendered}
+     * @param world the block getter that can be used to obtain more context about surrounding blocks
+     * @param x the X coordinate of the current fluid
+     * @param y the Y coordinate of the current fluid
+     * @param z the Z coordinate of the current fluid
+     * @param dir the face to check for occlusion on
+     * @param fluid the type of the current fluid
+     */
     private boolean isFluidOccluded(BlockAndTintGetter world, int x, int y, int z, Direction dir, Fluid fluid) {
         // Check if the fluid adjacent to us in the given direction is the same
         if (world.getFluidState(this.scratchPos.set(x + dir.getStepX(), y + dir.getStepY(), z + dir.getStepZ())).getType().isSame(fluid)) {
@@ -91,6 +106,8 @@ public class FluidRenderer {
         BlockState blockState = world.getBlockState(pos);
 
         if (!blockState.canOcclude() || !blockState.isFaceSturdy(world, pos, dir, SupportType.FULL)) {
+            // The blockstate we're inside doesn't occlude or isn't sturdy on this side, so it cannot possibly
+            // be hiding the fluid
             return false;
         }
 
@@ -169,6 +186,7 @@ public class FluidRenderer {
 
         Fluid fluid = fluidState.getType();
 
+        // Each variable represents whether fluid rendering should be skipped on this side
         boolean sfUp = this.isFluidOccluded(world, posX, posY, posZ, Direction.UP, fluid);
         boolean sfDown = this.isFluidOccluded(world, posX, posY, posZ, Direction.DOWN, fluid) ||
                 !this.isSideExposed(world, posX, posY, posZ, Direction.DOWN, 0.8888889F);
@@ -181,7 +199,9 @@ public class FluidRenderer {
             return;
         }
 
-        boolean isWater = fluidState.is(FluidTags.WATER);
+        // LVT name kept for 1.20.1 in case a mixin captures it, the meaning of this variable is now "does the fluid
+        // support AO"
+        boolean isWater = fluid.getFluidType().getLightLevel(fluidState, world, blockPos) == 0;
 
         final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid);
 

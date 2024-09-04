@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
@@ -40,6 +41,12 @@ import org.embeddedt.embeddium.render.frapi.FRAPIRenderHandler;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The Embeddium equivalent to vanilla's ModelBlockRenderer. This is the primary component of the chunk meshing logic;
+ * it is responsible for accepting {@link BlockRenderContext} and generating the appropriate geometry.
+ * <p>
+ * This class does not need to be thread-safe, as a separate instance is allocated per meshing thread.
+ */
 public class BlockRenderer {
     private static final PoseStack EMPTY_STACK = new PoseStack();
     private final RandomSource random = new SingleThreadedRandomSource(42L);
@@ -57,8 +64,17 @@ public class BlockRenderer {
 
     private final int[] quadColors = new int[4];
 
+    /**
+     * Tracks whether the MC-138211 quad reorienting fix should be applied during emission of quad geometry.
+     * This fix must be disabled with certain modded models that use superimposed quads, as it can alter the triangulation
+     * of some layers but not others, resulting in Z-fighting.
+     */
     private boolean useReorienting;
 
+    /**
+     * The list of registered custom block renderers. These may augment or fully bypass the model system for the
+     * block.
+     */
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
     private final SinkingVertexBuilder sinkingVertexBuilder = new SinkingVertexBuilder();
@@ -76,6 +92,11 @@ public class BlockRenderer {
         this.fabricModelRenderingHandler = null;
     }
 
+    /**
+     * Renders all geometry for a block into the given chunk build buffers.
+     * @param ctx the context for the current block being rendered
+     * @param buffers the buffer to output geometry to
+     */
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
         var material = DefaultMaterials.forRenderLayer(ctx.renderLayer());
         var meshBuilder = buffers.get(material);
@@ -109,17 +130,26 @@ public class BlockRenderer {
             return;
         }
 
+        boolean canReorientNullCullface = true;
+
         for (Direction face : DirectionUtil.ALL_DIRECTIONS) {
             List<BakedQuad> quads = this.getGeometry(ctx, face);
 
             if (!quads.isEmpty() && this.isFaceVisible(ctx, face)) {
+                this.useReorienting = true;
                 this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, meshBuilder, quads, face);
+                if (!this.useReorienting) {
+                    // Reorienting was disabled on this side, make sure it's disabled for the null cullface too, in case
+                    // a mod layers textures in different lists
+                    canReorientNullCullface = false;
+                }
             }
         }
 
         List<BakedQuad> all = this.getGeometry(ctx, null);
 
         if (!all.isEmpty()) {
+            this.useReorienting = canReorientNullCullface;
             this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, meshBuilder, all, null);
         }
     }
@@ -135,21 +165,51 @@ public class BlockRenderer {
         return this.occlusionCache.shouldDrawSide(ctx.state(), ctx.localSlice(), ctx.pos(), face);
     }
 
+    private static int computeLightFlagMask(BakedQuad quad) {
+        int flag = 0;
+
+        if (quad.hasAmbientOcclusion()) {
+            flag |= 1;
+        }
+
+        if (quad.isShade()) {
+            flag |= 2;
+        }
+
+        return flag;
+    }
+
+    /**
+     * {@return true if all quads in the given list use similar enough lighting configuration that reorientation is
+     * unlikely to lead to z-fighting}
+     */
+    private static boolean checkQuadsHaveSameLightingConfig(List<BakedQuad> quads) {
+        int quadsSize = quads.size();
+
+        // By definition, singleton or empty lists of quads have a common lighting config. Only check larger lists
+        if (quadsSize >= 2) {
+            int flagMask = -1;
+            // noinspection ForLoopReplaceableByForEach
+            for (int i = 0; i < quadsSize; i++) {
+                int newFlag = computeLightFlagMask(quads.get(i));
+                if (flagMask == -1) {
+                    flagMask = newFlag;
+                } else if(newFlag != flagMask) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3 offset,
                                 ChunkModelBuilder builder, List<BakedQuad> quads, Direction cullFace) {
 
-        this.useReorienting = true;
-
-        // noinspection ForLoopReplaceableByForEach
-        for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++) {
-            if (!quads.get(i).hasAmbientOcclusion()) {
-                // We disable Sodium's quad orientation detection if a quad opts out of AO. This is
-                // because some mods place non-AO quads below/above AO quads with identical coordinates.
-                // This won't z-fight as-is, but if the AO quad gets reoriented it can be triangulated
-                // differently from the non-AO quad, and that will cause z-fighting.
-                this.useReorienting = false;
-                break;
-            }
+        if(!checkQuadsHaveSameLightingConfig(quads)) {
+            // Disable reorienting if quads use different light configurations, as otherwise layered quads
+            // may be triangulated differently from others in the stack, and that will cause z-fighting.
+            this.useReorienting = false;
         }
 
         // This is a very hot allocation, iterate over it manually

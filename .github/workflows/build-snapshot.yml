@@ -16,11 +16,28 @@ jobs:
         id: ref
       - name: Checkout sources
         uses: actions/checkout@v3
+      - uses: madhead/read-java-properties@latest
+        id: mod_props
+        with:
+          file: gradle.properties
+          all: true
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
           java-version: 17
+      - name: Initialize FG cache
+        uses: actions/cache@v4
+        with:
+          key: ${{ steps.mod_props.outputs.minecraft_version }}-${{ steps.mod_props.outputs.parchment_version }}-${{ steps.mod_props.outputs.forge_version }}
+          path: |
+            build/fg_cache
+            build/createMcpToSrg
+            build/downloadMCMeta
+            build/downloadMcpConfig
+            build/extractSrg
+          restore-keys: |
+            ${{ steps.mod_props.outputs.minecraft_version }}-${{ steps.mod_props.outputs.parchment_version }}-
       - name: Initialize caches
         uses: actions/cache@v3
         with:
@@ -28,6 +45,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/loom-cache
             ~/.gradle/wrapper
+            ~/.minecraft/assets
           key: ${{ runner.os }}-${{ github.ref }}-build-snapshot-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-${{ github.ref }}-build-snapshot-
@@ -38,3 +56,13 @@ jobs:
         with:
           name: Embeddium
           path: build/libs
+      - name: Run automated tests
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: ./gradlew runGameTestCiClient
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v2
+        if: ${{ !cancelled() }}
+        with:
+          name: Embeddium-TestData
+          path: run

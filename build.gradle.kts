@@ -1,3 +1,5 @@
+import net.minecraftforge.gradle.common.tasks.DownloadAssets
+import net.minecraftforge.gradle.common.util.RunConfig
 import org.embeddedt.embeddium.gradle.versioning.ProjectVersioner
 import org.w3c.dom.Element
 
@@ -35,10 +37,17 @@ base {
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 // java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-val extraSourceSets = arrayOf("legacy", "compat")
+val extraSourceSets = arrayOf("legacy", "compat", "mixin")
 
 sourceSets {
     val main = getByName("main")
+
+    create("gameTest") {
+        java {
+            compileClasspath += main.compileClasspath
+            compileClasspath += main.output
+        }
+    }
 
     extraSourceSets.forEach {
         val sourceset = create(it)
@@ -52,6 +61,7 @@ sourceSets {
 }
 
 repositories {
+    mavenCentral()
     maven("https://maven.minecraftforge.net/")
     maven("https://maven.fabricmc.net")
     maven("https://maven.tterrag.com/")
@@ -98,7 +108,25 @@ minecraft {
             }
         }
 
-        create("client") {}
+        val client = create("client")
+
+
+        fun configureGameTestRun(run: RunConfig) {
+            run.parent(client)
+            run.property("forge.enableGameTest", "true")
+            run.mods.named("embeddium") {
+                sources(sourceSets["gameTest"])
+            }
+        }
+
+        create("gameTestClient") {
+            configureGameTestRun(this)
+        }
+
+        create("gameTestCiClient") {
+            configureGameTestRun(this)
+            property("embeddium.runAutomatedTests", "true")
+        }
     }
 }
 
@@ -122,7 +150,7 @@ repositories {
 
 mixin {
     // MixinGradle Settings
-    add(sourceSets["main"], "embeddium-refmap.json")
+    add(sourceSets["mixin"], "embeddium-refmap.json")
     config("embeddium.mixins.json")
 }
 
@@ -144,10 +172,14 @@ dependencies {
 
     "runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))
 
-    annotationProcessor("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
+    "mixinAnnotationProcessor"("net.fabricmc:sponge-mixin:0.12.5+mixin.0.8.5")
 
     compileOnly("io.github.llamalad7:mixinextras-common:0.3.5")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
+    "mixinAnnotationProcessor"("io.github.llamalad7:mixinextras-common:0.3.5")
+
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.3.5")) {
         jarJar.ranged(this, "[0.3.5,)")
     }
@@ -179,6 +211,11 @@ tasks.processResources {
 
 tasks.withType<JavaCompile> {
     options.release = 17
+}
+
+tasks.named<DownloadAssets>("downloadAssets") {
+    // Try to work around asset download failures
+    concurrentDownloads = 1
 }
 
 

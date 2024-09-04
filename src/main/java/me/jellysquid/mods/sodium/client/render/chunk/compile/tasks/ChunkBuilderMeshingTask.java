@@ -111,7 +111,8 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                     for (int x = minX; x < maxX; x++) {
                         BlockState blockState = slice.getBlockState(x, y, z);
 
-                        if (blockState.isAir() && !blockState.hasBlockEntity()) {
+                        // Fast path - skip blocks that are air and don't have any custom logic
+                        if (blockState.isAir() && blockState.getRenderShape() == RenderShape.INVISIBLE && !blockState.hasBlockEntity()) {
                             continue;
                         }
 

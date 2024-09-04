@@ -8,6 +8,7 @@ import net.minecraft.client.main.GameConfig;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import me.jellysquid.mods.sodium.client.compatibility.checks.ResourcePackScanner;
+import org.embeddedt.embeddium.impl.mixinterface.MinecraftAccessor;
 import org.lwjgl.opengl.GL32C;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,10 +21,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(Minecraft.class)
-public class MinecraftClientMixin {
+public class MinecraftClientMixin implements MinecraftAccessor {
     @Shadow
     @Final
     private ReloadableResourceManager resourceManager;
+    @Shadow
+    private Thread gameThread;
     @Unique
     private final LongArrayFIFOQueue fences = new LongArrayFIFOQueue();
 
@@ -97,4 +100,8 @@ public class MinecraftClientMixin {
         ResourcePackScanner.checkIfCoreShaderLoaded(this.resourceManager);
     }
 
+    @Override
+    public Thread embeddium$getGameThread() {
+        return this.gameThread;
+    }
 }

@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.gui;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.modernui.MuiGuiScaleHook;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.Workarounds;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.MappedStagingBuffer;
@@ -18,11 +17,12 @@ import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStor
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfig;
 import org.embeddedt.embeddium.client.gui.options.StandardOptions;
+import org.embeddedt.embeddium.impl.gui.options.FullscreenResolutionHelper;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
@@ -106,6 +106,7 @@ public class SodiumGameOptionPages {
                             }
                         }, (opts) -> opts.fullscreen().get())
                         .build())
+                .addConditionally(!FullscreenResolutionHelper.isFullscreenResAlreadyAdded(), FullscreenResolutionHelper::createFullScreenResolutionOption)
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
                         .setId(StandardOptions.Option.VSYNC)
                         .setName(Component.translatable("options.vsync"))
@@ -163,7 +164,7 @@ public class SodiumGameOptionPages {
                         .setId(StandardOptions.Option.GRAPHICS_MODE)
                         .setName(Component.translatable("options.graphics"))
                         .setTooltip(Component.translatable("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy"), Component.translatable("options.graphics.fabulous") }))
+                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy"), Component.translatable("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC) }))
                         .setBinding(
                                 (opts, value) -> opts.graphicsMode().set(value),
                                 opts -> opts.graphicsMode().get())

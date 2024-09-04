@@ -22,6 +22,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTracker;
 import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTrackerHolder;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
 import me.jellysquid.mods.sodium.client.render.chunk.terrain.DefaultTerrainRenderPasses;
+import me.jellysquid.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import me.jellysquid.mods.sodium.client.render.viewport.Viewport;
 import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import me.jellysquid.mods.sodium.client.util.iterator.ByteIterator;
@@ -250,11 +251,13 @@ public class SodiumWorldRenderer {
     public void drawChunkLayer(RenderType renderLayer, PoseStack matrixStack, double x, double y, double z) {
         ChunkRenderMatrices matrices = ChunkRenderMatrices.from(matrixStack);
 
-        if (renderLayer == RenderType.solid()) {
-            this.renderSectionManager.renderLayer(matrices, DefaultTerrainRenderPasses.SOLID, x, y, z);
-            this.renderSectionManager.renderLayer(matrices, DefaultTerrainRenderPasses.CUTOUT, x, y, z);
-        } else if (renderLayer == RenderType.translucent()) {
-            this.renderSectionManager.renderLayer(matrices, DefaultTerrainRenderPasses.TRANSLUCENT, x, y, z);
+        List<TerrainRenderPass> passes = DefaultTerrainRenderPasses.RENDER_PASS_MAPPINGS.get(renderLayer);
+
+        if (passes != null) {
+            //noinspection ForLoopReplaceableByForEach
+            for (int i = 0; i < passes.size(); i++) {
+                this.renderSectionManager.renderLayer(matrices, passes.get(i), x, y, z);
+            }
         }
     }
 
