@@ -6,22 +6,22 @@ import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraftforge.client.event.ModelEvent;
@@ -100,7 +100,7 @@ public class TestRegistry {
         NETWORK_CHANNEL.registerMessage(0, SyncS2CPacket.class, SyncS2CPacket::encode, SyncS2CPacket::new, SyncS2CPacket::handle);
     }
 
-    private static void registerModelForAllStates(ModelEvent.ModifyBakingResult event, Block block, BakedModel model) {
+    private static void registerModelForAllStates(ModelEvent.BakingCompleted event, Block block, BakedModel model) {
         for(BlockState state : block.getStateDefinition().getPossibleStates()) {
             event.getModels().put(BlockModelShaper.stateToModelLocation(state), model);
         }
@@ -110,7 +110,7 @@ public class TestRegistry {
      * Inject custom models for test content.
      */
     @SubscribeEvent
-    public static void onBakingModify(ModelEvent.ModifyBakingResult event) {
+    public static void onBakingModify(ModelEvent.BakingCompleted event) {
         registerModelForAllStates(event, TEST_BLOCK.get(), new TestModel(event.getModels().get(ModelBakery.MISSING_MODEL_LOCATION)));
         registerModelForAllStates(event, NOT_AN_AIR_BLOCK.get(), new InstrumentingModelWrapper<>(event.getModels().get(BlockModelShaper.stateToModelLocation(Blocks.STONE.defaultBlockState()))));
     }
@@ -131,17 +131,17 @@ public class TestRegistry {
 
         @SubscribeEvent
         public static void onScreenInit(ScreenEvent.Init.Post event) {
-            if(IS_AUTOMATED_TEST_RUN && (event.getScreen() instanceof TitleScreen || event.getScreen() instanceof AccessibilityOnboardingScreen) && !hasSeenMainMenu) {
+            if(IS_AUTOMATED_TEST_RUN && (event.getScreen() instanceof TitleScreen) && !hasSeenMainMenu) {
                 // Go for main engine start (create a new superflat automatically)
                 hasSeenMainMenu = true;
                 var mc = Minecraft.getInstance();
                 mc.options.renderDebug = true;
                 mc.forceSetScreen(new GenericDirtMessageScreen(Component.literal("Bootstrapping gametests...")));
                 String levelName = "embeddium-test-" + UUID.randomUUID();
-                LevelSettings settings = new LevelSettings(levelName, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
-                mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings, new WorldOptions(1024, false, false), registry -> {
-                    return registry.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions();
-                });
+                LevelSettings settings = new LevelSettings(levelName, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, new GameRules(), DataPackConfig.DEFAULT);
+                RegistryAccess registry = RegistryAccess.builtinCopy().freeze();
+                mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings, registry,
+                    registry.registryOrThrow(Registry.WORLD_PRESET_REGISTRY).getHolderOrThrow(WorldPresets.FLAT).value().createWorldGenSettings(1024, false, false));
             }
         }
 

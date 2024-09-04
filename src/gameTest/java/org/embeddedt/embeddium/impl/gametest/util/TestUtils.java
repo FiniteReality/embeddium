@@ -36,7 +36,7 @@ public class TestUtils {
     public static boolean isChunkVisible(Vec3 position) {
         return Minecraft.getInstance().submit(() -> {
             // Verify chunk is rendered
-            BlockPos pos = BlockPos.containing(position.x, position.y, position.z);
+            BlockPos pos = new BlockPos(position.x, position.y, position.z);
             return Minecraft.getInstance().levelRenderer.isChunkCompiled(pos);
         }).join();
     }
