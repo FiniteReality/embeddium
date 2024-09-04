@@ -2,6 +2,7 @@ package org.embeddedt.embeddium.impl.mixin.features.gui.screen;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import org.embeddedt.embeddium.api.vertex.format.common.ColorVertex;
 import org.embeddedt.embeddium.api.vertex.buffer.VertexBufferWriter;
@@ -49,7 +50,7 @@ public class LevelLoadingScreenMixin {
      */
     @Inject(method = "renderChunks", at = @At("HEAD"), cancellable = true)
     private static void renderChunksFast(GuiGraphics drawContext, StoringChunkProgressListener tracker, int mapX, int mapY, int mapScale, int mapPadding, CallbackInfo ci) {
-        VertexBufferWriter writer = VertexBufferWriter.tryOf(drawContext.bufferSource().getBuffer(RenderType.gui()));
+        VertexBufferWriter writer = VertexBufferWriter.tryOf(Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.gui()));
 
         if (writer == null) {
             return;
