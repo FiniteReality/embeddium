@@ -46,8 +46,6 @@ public class BuiltSectionInfo {
 
         if (!blockRenderPasses.isEmpty()) {
             flags |= 1 << RenderSectionFlags.HAS_BLOCK_GEOMETRY;
-            if(blockRenderPasses.contains(DefaultTerrainRenderPasses.TRANSLUCENT))
-                flags |= 1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA;
         }
 
         if (!culledBlockEntities.isEmpty()) {

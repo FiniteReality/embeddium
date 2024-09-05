@@ -1,10 +1,12 @@
 package org.embeddedt.embeddium.impl.render.chunk;
 
+import lombok.Getter;
 import org.embeddedt.embeddium.impl.render.chunk.data.BuiltSectionInfo;
 import org.embeddedt.embeddium.impl.render.chunk.occlusion.GraphDirection;
 import org.embeddedt.embeddium.impl.render.chunk.occlusion.GraphDirectionSet;
 import org.embeddedt.embeddium.impl.render.chunk.occlusion.VisibilityEncoding;
 import org.embeddedt.embeddium.impl.render.chunk.region.RenderRegion;
+import org.embeddedt.embeddium.impl.render.chunk.terrain.TerrainRenderPass;
 import org.embeddedt.embeddium.impl.util.task.CancellationToken;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -13,6 +15,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.embeddedt.embeddium.impl.render.chunk.sorting.TranslucentQuadAnalyzer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * The render state object for a chunk section. This contains all the graphics state for each render pass along with
@@ -49,8 +54,20 @@ public class RenderSection {
     private BlockEntity @Nullable[] culledBlockEntities;
     private TextureAtlasSprite @Nullable[] animatedSprites;
 
-    private TranslucentQuadAnalyzer.SortState sortState;
+    /**
+     * A mapping from translucent render passes to the sort state for that particular pass (which contains data needed
+     * to perform a resort of the geometry as the camera moves). Will be empty for sections without any translucent
+     * render passes.
+     */
+    @Getter
+    @NotNull
+    private Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> translucencySortStates = Collections.emptyMap();
 
+    @Getter
+    private TranslucentQuadAnalyzer.Level highestSortingLevel = TranslucentQuadAnalyzer.Level.NONE;
+
+    @Getter
+    private boolean needsDynamicTranslucencySorting;
 
     // Pending Update State
     @Nullable
@@ -321,17 +338,27 @@ public class RenderSection {
         return this.globalBlockEntities;
     }
 
-    @Nullable
-    public TranslucentQuadAnalyzer.SortState getSortState() {
-        return this.sortState;
+    @Deprecated
+    public boolean containsSortableGeometry() {
+        return !translucencySortStates.isEmpty();
     }
 
-    public boolean containsTranslucentGeometry() {
-        return (this.getFlags() & (1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA)) != 0;
-    }
+    public void setTranslucencySortStates(@NotNull Map<TerrainRenderPass, TranslucentQuadAnalyzer.SortState> sortStates) {
+        this.translucencySortStates = sortStates;
 
-    public void setSortState(@Nullable TranslucentQuadAnalyzer.SortState data) {
-        this.sortState = data != null ? data.compactForStorage() : null;
+        TranslucentQuadAnalyzer.Level level = TranslucentQuadAnalyzer.Level.NONE;
+        boolean needsDynamicSorting = false;
+
+        if (!sortStates.isEmpty()) {
+            // Find highest level among all sort states
+            for (TranslucentQuadAnalyzer.SortState state : sortStates.values()) {
+                level = state.level().ordinal() > level.ordinal() ? state.level() : level;
+                needsDynamicSorting |= state.requiresDynamicSorting();
+            }
+        }
+
+        this.highestSortingLevel = level;
+        this.needsDynamicTranslucencySorting = needsDynamicSorting;
     }
 
     public @Nullable CancellationToken getBuildCancellationToken() {

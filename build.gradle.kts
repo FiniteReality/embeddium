@@ -33,6 +33,7 @@ base {
 
 repositories {
     maven("https://libraries.minecraft.net")
+    mavenCentral()
     maven("https://maven.fabricmc.net")
     maven("https://maven.tterrag.com/")
     maven("https://maven.blamejared.com")
@@ -68,6 +69,9 @@ dependencies {
 
     // Mods
     compatCompileOnly("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
+
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
 }
 
 tasks.processResources {

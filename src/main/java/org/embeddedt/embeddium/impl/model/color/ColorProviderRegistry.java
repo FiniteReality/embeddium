@@ -14,6 +14,11 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
+/**
+ * The color provider registry holds the map of {@link ColorProvider}s that are currently in use by the renderer. Most
+ * are adapters for a vanilla/modded BlockColor implementation. However, certain vanilla BlockColors are detected
+ * and replaced to enable per-vertex biome blending.
+ */
 public class ColorProviderRegistry {
     private final Reference2ReferenceMap<Block, ColorProvider<BlockState>> blocks = new Reference2ReferenceOpenHashMap<>();
     private final Reference2ReferenceMap<Fluid, ColorProvider<FluidState>> fluids = new Reference2ReferenceOpenHashMap<>();
@@ -42,6 +47,10 @@ public class ColorProviderRegistry {
                 Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
                 Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES);
 
+        // We cannot use BiomeColors::getAverageWaterColor as it bypasses mods that inject their own logic into Forge's
+        // default getTintColor implementation on water.
+        // Note: any injections must not assume the provided state matches the in-world state at that BlockPos, because
+        // per-vertex biome blending does not uphold that invariant.
         var waterExtensions = IClientFluidTypeExtensions.of(Fluids.WATER);
         var waterState = Fluids.WATER.defaultFluidState();
         DefaultColorProviders.VertexBlendedBiomeColorAdapter.VanillaBiomeColor waterGetter = (getter, pos) -> waterExtensions.getTintColor(waterState, getter, pos);

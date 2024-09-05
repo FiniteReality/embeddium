@@ -36,6 +36,12 @@ import org.embeddedt.embeddium.impl.render.frapi.IndigoBlockRenderContext;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The Embeddium equivalent to vanilla's ModelBlockRenderer. This is the primary component of the chunk meshing logic;
+ * it is responsible for accepting {@link BlockRenderContext} and generating the appropriate geometry.
+ * <p>
+ * This class does not need to be thread-safe, as a separate instance is allocated per meshing thread.
+ */
 public class BlockRenderer {
     private static final PoseStack EMPTY_STACK = new PoseStack();
     private final RandomSource random = new SingleThreadedRandomSource(42L);
@@ -53,8 +59,17 @@ public class BlockRenderer {
 
     private final int[] quadColors = new int[4];
 
+    /**
+     * Tracks whether the MC-138211 quad reorienting fix should be applied during emission of quad geometry.
+     * This fix must be disabled with certain modded models that use superimposed quads, as it can alter the triangulation
+     * of some layers but not others, resulting in Z-fighting.
+     */
     private boolean useReorienting;
 
+    /**
+     * The list of registered custom block renderers. These may augment or fully bypass the model system for the
+     * block.
+     */
     private final List<BlockRendererRegistry.Renderer> customRenderers = new ObjectArrayList<>();
 
     private final FRAPIRenderHandler fabricModelRenderingHandler;
@@ -70,6 +85,11 @@ public class BlockRenderer {
         this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
     }
 
+    /**
+     * Renders all geometry for a block into the given chunk build buffers.
+     * @param ctx the context for the current block being rendered
+     * @param buffers the buffer to output geometry to
+     */
     public void renderModel(BlockRenderContext ctx, ChunkBuildBuffers buffers) {
         var material = DefaultMaterials.forRenderLayer(ctx.renderLayer());
         var meshBuilder = buffers.get(material);
