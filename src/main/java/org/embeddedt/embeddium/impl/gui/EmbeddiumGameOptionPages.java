@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.impl.gui;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
+import net.minecraft.ChatFormatting;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.embeddedt.embeddium.api.options.structure.OptionFlag;
@@ -168,7 +169,7 @@ public class EmbeddiumGameOptionPages {
                         .setId(StandardOptions.Option.GRAPHICS_MODE)
                         .setName(Component.translatable("options.graphics"))
                         .setTooltip(Component.translatable("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy"), Component.translatable("options.graphics.fabulous") }))
+                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { Component.translatable("options.graphics.fast"), Component.translatable("options.graphics.fancy"), Component.translatable("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC) }))
                         .setBinding(
                                 (opts, value) -> opts.graphicsMode().set(value),
                                 opts -> opts.graphicsMode().get())
