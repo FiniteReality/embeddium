@@ -23,3 +23,11 @@ mandatory = true
 versionRange = "[21.1.15,)" #mandatory
 ordering = "NONE"
 side = "CLIENT"
+
+[[dependencies.embeddium]] #optional
+modId = "sodium" #mandatory
+type = "incompatible" #mandatory
+reason="Embeddium cannot be used if Sodium is present. If you want to use Embeddium you will have to remove Sodium."
+versionRange = "[0,)" #mandatory
+ordering = "NONE"
+side = "CLIENT"
