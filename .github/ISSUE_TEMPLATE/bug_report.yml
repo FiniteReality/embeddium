@@ -9,6 +9,8 @@ body:
         have found a defect, and you are able to point to where the problem is, you should not open an issue.
         <br><br>
         Additionally, please make sure you have done the following:
+
+        - **Are you playing on a modern version of Minecraft?** We currently support 1.20.1 and 1.21.1. Older versions are no longer supported.
         
         - **Have you ensured that all of your mods (including Embeddium) are up-to-date?** The latest version of Embeddium
         can always be found [on Modrinth](https://modrinth.com/mod/embeddium).

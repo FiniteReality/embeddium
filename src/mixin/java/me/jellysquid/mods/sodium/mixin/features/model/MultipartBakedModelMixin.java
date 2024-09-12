@@ -125,7 +125,11 @@ public class MultipartBakedModelMixin {
             random.setSeed(seed);
 
             // Embeddium: Filter render types as Forge does, but only if we actually need to do so. This avoids
-            // the overhead of getRenderTypes() for all vanilla models.
+            // the overhead of getRenderTypes() for all vanilla models. This optimization breaks mods that blindly call
+            // MultiPartBakedModel#getQuads() on all render types rather than just the ones returned by getRenderTypes().
+            // The original implementation accidentally handled these as a result of doing the filtering in getQuads.
+            // We consider this a worthwhile tradeoff, because the API contract for chunk meshing requires iterating over
+            // the return value of getRenderTypes(). To date, only Windowlogged is known to be broken by this change.
             if (!checkSubmodelTypes || renderLayer == null || model.getRenderTypes(state, random, modelData).contains(renderLayer)) {
                 List<BakedQuad> submodelQuads = model.getQuads(state, face, random, MultipartModelData.resolve(modelData, model), renderLayer);
                 if(models.length == 1) {
