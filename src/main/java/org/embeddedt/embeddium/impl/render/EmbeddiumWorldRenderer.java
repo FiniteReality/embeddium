@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.util.profiling.Profiler;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.gl.device.CommandList;
 import org.embeddedt.embeddium.impl.gl.device.RenderDevice;
@@ -176,7 +177,7 @@ public class EmbeddiumWorldRenderer {
             this.reload();
         }
 
-        ProfilerFiller profiler = this.client.getProfiler();
+        ProfilerFiller profiler = Profiler.get();
         profiler.push("camera_setup");
 
         LocalPlayer player = this.client.player;

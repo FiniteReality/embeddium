@@ -1,5 +1,6 @@
 package org.embeddedt.embeddium.impl.mixin.features.gui.hooks.console;
 
+import net.minecraft.util.profiling.Profiler;
 import org.embeddedt.embeddium.impl.gui.console.ConsoleHooks;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -38,7 +39,7 @@ public class GameRendererMixin {
             }
         }
 
-        this.minecraft.getProfiler()
+        Profiler.get()
                 .push("sodium_console_overlay");
 
         GuiGraphics drawContext = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
@@ -47,7 +48,7 @@ public class GameRendererMixin {
 
         drawContext.flush();
 
-        this.minecraft.getProfiler()
+        Profiler.get()
                 .pop();
 
         HAS_RENDERED_OVERLAY_ONCE = true;
