@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.impl.render.chunk.compile;
 
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildContext;
+import me.jellysquid.mods.sodium.mixin.core.render.MinecraftAccessor;
 import net.minecraft.client.Minecraft;
-import org.embeddedt.embeddium.impl.mixinterface.MinecraftAccessor;
 import org.jetbrains.annotations.Nullable;
 
 public final class GlobalChunkBuildContext {
