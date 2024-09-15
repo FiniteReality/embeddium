@@ -117,6 +117,10 @@ loom {
     createRemapConfigurations(sourceSets["compat"])
 }
 
+fun fAPIModule(name: String): Dependency {
+    return fabricApiModuleFinder.module(name, "fabric_version"())
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:${"minecraft_version"()}")
     mappings(loom.layered {
@@ -136,7 +140,10 @@ dependencies {
     modLocalRuntime("curse.maven:lazydfu-460819:3249059")
 
     // Fabric API
-    compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
+    "fabricCompileOnly"(fAPIModule("fabric-api-base"))
+    "fabricCompileOnly"(fAPIModule("fabric-renderer-api-v1"))
+    "fabricCompileOnly"(fAPIModule("fabric-rendering-data-attachment-v1"))
+    "fabricCompileOnly"(fAPIModule("fabric-renderer-indigo"))
     compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 
     //"runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))

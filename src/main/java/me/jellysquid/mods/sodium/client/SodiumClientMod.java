@@ -39,7 +39,16 @@ public class SodiumClientMod {
 
         TaintDetector.init();
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
+        var eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        if("true".equals(System.getProperty("embeddium.enableGameTest"))) {
+            try {
+                eventBus.register(Class.forName("org.embeddedt.embeddium.impl.gametest.content.TestRegistry"));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        eventBus.addListener(this::onClientSetup);
 
         try {
             updateFingerprint();
