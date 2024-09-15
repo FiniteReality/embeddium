@@ -5,7 +5,7 @@ import org.w3c.dom.Element
 
 plugins {
     id("idea")
-    id("net.minecraftforge.gradle") version("6.0.25")
+    id("net.minecraftforge.gradle") version("6.0.29")
     id("maven-publish")
     id("org.spongepowered.mixin") version("0.7.38")
 
@@ -41,13 +41,6 @@ val extraSourceSets = arrayOf("legacy", "compat")
 
 sourceSets {
     val main = getByName("main")
-
-    create("gameTest") {
-        java {
-            compileClasspath += main.compileClasspath
-            compileClasspath += main.output
-        }
-    }
 
     extraSourceSets.forEach {
         val sourceset = create(it)
@@ -114,9 +107,7 @@ minecraft {
         fun configureGameTestRun(run: RunConfig) {
             run.parent(client)
             run.property("forge.enableGameTest", "true")
-            run.mods.named("embeddium") {
-                sources(sourceSets["gameTest"])
-            }
+            run.property("embeddium.enableGameTest", "true")
         }
 
         create("gameTestClient") {
@@ -158,6 +149,10 @@ fun DependencyHandlerScope.compatCompileOnly(dependency: Dependency) {
     "compatCompileOnly"(dependency)
 }
 
+fun fAPIModule(name: String): Dependency {
+    return fabricApiModuleFinder.module(name, "fabric_version"())
+}
+
 dependencies {
     minecraft("net.minecraftforge:forge:${"minecraft_version"()}-${"forge_version"()}")
 
@@ -167,7 +162,10 @@ dependencies {
     compatCompileOnly(fg.deobf("com.brandon3055.brandonscore:BrandonsCore:1.20.1-3.2.1.302:universal"))
 
     // Fabric API
-    compileOnly("net.fabricmc.fabric-api:fabric-api:${"fabric_version"()}")
+    "fabricCompileOnly"(fAPIModule("fabric-api-base"))
+    "fabricCompileOnly"(fAPIModule("fabric-renderer-api-v1"))
+    "fabricCompileOnly"(fAPIModule("fabric-rendering-data-attachment-v1"))
+    "fabricCompileOnly"(fAPIModule("fabric-renderer-indigo"))
     compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 
     "runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))
@@ -205,7 +203,7 @@ tasks.processResources {
     inputs.property("version", "version"())
 
     filesMatching("META-INF/mods.toml") {
-        expand("version" to "version"())
+        expand("file" to mapOf("jarVersion" to inputs.properties["version"]))
     }
 }
 
