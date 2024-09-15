@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.taint.scanning;
+package me.jellysquid.mods.sodium.mixin;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
