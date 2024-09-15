@@ -50,11 +50,12 @@ public class WorldRendererMixin {
         Vec3 cameraPosition = camera.getPosition();
         Entity cameraEntity = camera.getEntity();
 
+        boolean isSubmersed = !camera.getFluidInCamera().isEmpty();
         boolean hasBlindness = cameraEntity instanceof LivingEntity && ((LivingEntity) cameraEntity).hasEffect(MobEffects.BLINDNESS);
         boolean useThickFog = this.minecraft.level.effects().isFoggyAt(Mth.floor(cameraPosition.x()),
                 Mth.floor(cameraPosition.y())) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
 
-        if (hasBlindness || useThickFog) {
+        if (isSubmersed || hasBlindness || useThickFog) {
             ci.cancel();
         }
     }
