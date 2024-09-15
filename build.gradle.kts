@@ -136,6 +136,7 @@ dependencies {
 
     // Mods
     "modCompatCompileOnly"("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
+    "modCompatCompileOnly"("curse.maven:flywheel-486392:3535459")
 
     modLocalRuntime("curse.maven:lazydfu-460819:3249059")
 
