@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
+import lombok.Getter;
 import me.jellysquid.mods.sodium.client.model.color.ColorProviderRegistry;
 import me.jellysquid.mods.sodium.client.model.light.LightPipelineProvider;
 import me.jellysquid.mods.sodium.client.model.light.data.ArrayLightDataCache;
@@ -8,6 +9,7 @@ import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.BlockModelShaper;
+import org.embeddedt.embeddium.impl.render.EmbeddiumRenderLayerCache;
 
 /**
  * Holds important caches and working data structures for a single chunk meshing thread. All objects within
@@ -24,6 +26,9 @@ public class BlockRenderCache {
     private final BlockModelShaper blockModels;
     private final WorldSlice worldSlice;
 
+    @Getter
+    private final EmbeddiumRenderLayerCache renderLayerCache;
+
     public BlockRenderCache(Minecraft client, ClientLevel world) {
         this.worldSlice = new WorldSlice(world);
         this.lightDataCache = new ArrayLightDataCache(this.worldSlice);
@@ -37,6 +42,8 @@ public class BlockRenderCache {
         this.lightPipelineProvider = lightPipelineProvider;
 
         this.blockModels = client.getModelManager().getBlockModelShaper();
+
+        this.renderLayerCache = new EmbeddiumRenderLayerCache();
     }
 
     public BlockModelShaper getBlockModels() {

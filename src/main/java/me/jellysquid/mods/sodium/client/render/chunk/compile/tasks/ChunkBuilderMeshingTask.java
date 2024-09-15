@@ -137,11 +137,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
                             random.setSeed(seed);
 
-                            // TODO: reimplement caching to avoid synchronized predicate checks
-                            for (RenderType layer : LAYERS) {
-                                if(!ItemBlockRenderTypes.canRenderInLayer(blockState, layer)) {
-                                    continue;
-                                }
+                            for (RenderType layer : cache.getRenderLayerCache().forState(blockState)) {
                                 context.update(blockPos, modelOffset, blockState, model, seed, modelData, layer);
                                 cache.getBlockRenderer()
                                         .renderModel(context, buffers);
