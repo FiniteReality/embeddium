@@ -20,9 +20,9 @@ public final class Viewport {
         this.transform = new CameraTransform(position.x, position.y, position.z);
 
         this.chunkCoords = SectionPos.of(
-                Mth.floor(position.x) / 16,
-                Mth.floor(position.y) / 16,
-                Mth.floor(position.z) / 16
+                Mth.floor(position.x) >> 4,
+                Mth.floor(position.y) >> 4,
+                Mth.floor(position.z) >> 4
         );
 
         this.blockCoords = new BlockPos(position.x, position.y, position.z);
