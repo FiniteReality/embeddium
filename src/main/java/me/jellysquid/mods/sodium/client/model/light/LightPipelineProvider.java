@@ -20,7 +20,7 @@ public class LightPipelineProvider {
 
     public LightPipelineProvider(LightDataAccess cache) {
         this.lightData = cache;
-        if (ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get()) {
+        if (false && ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get()) {
             this.lighters.put(LightMode.SMOOTH, ForgeLightPipeline.smooth(cache));
             this.lighters.put(LightMode.FLAT, ForgeLightPipeline.flat(cache));
         } else {
