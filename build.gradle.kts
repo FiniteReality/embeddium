@@ -185,6 +185,7 @@ tasks.named<ShadowJar>("shadowJar").configure {
     archiveClassifier = "dev-shadow"
     configurations = listOf(project.configurations.shadow.get())
     relocate("com.llamalad7.mixinextras", "org.embeddedt.embeddium.impl.shadow.mixinextras")
+    relocate("org.joml", "org.embeddedt.embeddium.impl.shadow.joml")
     mergeServiceFiles()
 }
 
