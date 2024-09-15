@@ -7,7 +7,8 @@ import java.util.function.Function;
 
 public enum ChunkFogMode {
     NONE(ChunkShaderFogComponent.None::new, ImmutableList.of()),
-    SMOOTH(ChunkShaderFogComponent.Smooth::new, ImmutableList.of("USE_FOG", "USE_FOG_SMOOTH"));
+    SMOOTH(ChunkShaderFogComponent.Smooth::new, ImmutableList.of("USE_FOG", "USE_FOG_SMOOTH")),
+    EXP2(ChunkShaderFogComponent.Exp2::new, ImmutableList.of("USE_FOG", "USE_FOG_EXP2"));
 
     private final Function<ShaderBindingContext, ChunkShaderFogComponent> factory;
     private final List<String> defines;

@@ -42,4 +42,21 @@ public class FogHelper {
     public static float[] getFogColor() {
         return new float[]{FogRenderer.fogRed, FogRenderer.fogGreen, FogRenderer.fogBlue, 1.0F};
     }
+
+    public static ChunkFogMode getFogMode() {
+        int mode = GlStateManager.FOG.mode;
+
+        if(mode == 0 || !GlStateManager.FOG.enable.enabled)
+            return ChunkFogMode.NONE;
+
+        switch (mode) {
+            case GL20.GL_EXP2:
+            case GL20.GL_EXP:
+                return ChunkFogMode.EXP2;
+            case GL20.GL_LINEAR:
+                return ChunkFogMode.SMOOTH;
+            default:
+                throw new UnsupportedOperationException("Unknown fog mode: " + mode);
+        }
+    }
 }

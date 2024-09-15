@@ -12,8 +12,15 @@ in float v_MaterialAlphaCutoff;
 uniform sampler2D u_BlockTex; // The block texture
 
 uniform vec4 u_FogColor; // The color of the shader fog
+
+#ifdef USE_FOG_SMOOTH
 uniform float u_FogStart; // The starting position of the shader fog
 uniform float u_FogEnd; // The ending position of the shader fog
+#endif
+
+#ifdef USE_FOG_EXP2
+uniform float u_FogDensity; // The density of the shader fog
+#endif
 
 out vec4 fragColor; // The output fragment for the color framebuffer
 
@@ -37,5 +44,9 @@ void main() {
     diffuseColor.rgb *= v_Color.a;
 #endif
 
+#ifdef USE_FOG_EXP2
+    fragColor = _exp2Fog(diffuseColor, v_FragDistance, u_FogColor, u_FogDensity);
+#else
     fragColor = _linearFog(diffuseColor, v_FragDistance, u_FogColor, u_FogStart, u_FogEnd);
+#endif
 }

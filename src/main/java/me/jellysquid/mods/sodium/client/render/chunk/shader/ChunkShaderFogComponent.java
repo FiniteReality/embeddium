@@ -31,6 +31,22 @@ public abstract class ChunkShaderFogComponent {
         }
     }
 
+    public static class Exp2 extends ChunkShaderFogComponent {
+        private final GlUniformFloat4v uFogColor;
+        private final GlUniformFloat uFogDensity;
+
+        public Exp2(ShaderBindingContext context) {
+            this.uFogColor = context.bindUniform("u_FogColor", GlUniformFloat4v::new);
+            this.uFogDensity = context.bindUniform("u_FogDensity", GlUniformFloat::new);
+        }
+
+        @Override
+        public void setup() {
+            this.uFogColor.set(FogHelper.getFogColor());
+            this.uFogDensity.set(FogHelper.getFogDensity());
+        }
+    }
+
     public static class Smooth extends ChunkShaderFogComponent {
         private final GlUniformFloat4v uFogColor;
 
