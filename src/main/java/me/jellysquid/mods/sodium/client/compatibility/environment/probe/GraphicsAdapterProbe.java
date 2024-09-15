@@ -1,8 +1,8 @@
 package me.jellysquid.mods.sodium.client.compatibility.environment.probe;
 
 import me.jellysquid.mods.sodium.client.compatibility.environment.OSInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import oshi.SystemInfo;
 import oshi.util.ExecutingCommand;
 
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
 public class GraphicsAdapterProbe {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-GraphicsAdapterProbe");
+    private static final Logger LOGGER = LogManager.getLogger(MODNAME + "-GraphicsAdapterProbe");
 
     private static List<GraphicsAdapterInfo> ADAPTERS;
 

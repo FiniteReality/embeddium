@@ -10,15 +10,15 @@ import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ResourcePackScanner {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Sodium-ResourcePackScanner");
+    private static final Logger LOGGER = LogManager.getLogger("Sodium-ResourcePackScanner");
 
     private static final Set<String> SHADER_PROGRAM_BLACKLIST = Set.of(
             "rendertype_solid.vsh",

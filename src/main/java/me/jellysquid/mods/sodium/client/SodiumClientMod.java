@@ -9,13 +9,13 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
 import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 import org.embeddedt.embeddium.util.sodium.FlawlessFrames;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -24,7 +24,7 @@ public class SodiumClientMod {
     public static final String MODID = EmbeddiumConstants.MODID;
     public static final String MODNAME = EmbeddiumConstants.MODNAME;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME);
+    private static final Logger LOGGER = LogManager.getLogger(MODNAME);
     private static SodiumGameOptions CONFIG = loadConfig();
 
     private static String MOD_VERSION;

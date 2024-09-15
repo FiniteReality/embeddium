@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import net.fabricmc.loom.task.RemapJarTask
 import org.embeddedt.embeddium.gradle.versioning.ProjectVersioner
 import org.w3c.dom.Element
 
@@ -9,6 +11,8 @@ plugins {
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
 
     id("embeddium-fabric-remapper")
+
+    id("com.gradleup.shadow") version "8.3.0"
 }
 
 operator fun String.invoke(): String {
@@ -77,6 +81,7 @@ configurations {
         isCanBeResolved = false
     }
     runtimeClasspath.get().extendsFrom(runtimeOnlyNonPublishable)
+    implementation.get().extendsFrom(getByName("shadow"))
 }
 
 val extraModsDir = "extra-mods-${"minecraft_version"()}"
@@ -136,13 +141,13 @@ dependencies {
 
     //"runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))
 
-    implementation("io.github.llamalad7:mixinextras-common:0.3.5")
+    shadow("io.github.llamalad7:mixinextras-common:0.3.5")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
 
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
 
-    implementation("org.joml:joml:1.10.5")
+    shadow("org.joml:joml:1.10.5")
 }
 
 tasks.processResources {
@@ -161,10 +166,6 @@ java {
     withSourcesJar()
 }
 
-tasks.named<Jar>("jar").configure {
-    archiveClassifier = "slim"
-}
-
 tasks.named<Jar>("jar") {
     from("COPYING", "COPYING.LESSER", "README.md")
 
@@ -180,13 +181,26 @@ tasks.named<Jar>("sourcesJar").configure {
     }
 }
 
+tasks.named<ShadowJar>("shadowJar").configure {
+    archiveClassifier = "dev-shadow"
+    configurations = listOf(project.configurations.shadow.get())
+    relocate("com.llamalad7.mixinextras", "org.embeddedt.embeddium.impl.shadow.mixinextras")
+    mergeServiceFiles()
+}
+
+tasks.named<RemapJarTask>("remapJar") {
+    dependsOn("shadowJar")
+    archiveClassifier = ""
+    inputFile = tasks.getByName<ShadowJar>("shadowJar").archiveFile.get()
+}
+
 publishing {
     tasks.publish {
         dependsOn(tasks.build)
     }
     publications {
         this.create<MavenPublication>("mavenJava") {
-            artifact(tasks.named("remapJar"))
+            artifact(tasks.named("shadowJar"))
             artifact(tasks.named("remapSourcesJar"))
         }
     }
@@ -197,7 +211,7 @@ publishing {
 }
 
 publishMods {
-    file = tasks.remapJar.get().archiveFile
+    file = tasks.shadowJar.get().archiveFile
     changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
     type = STABLE
     modLoaders.add("forge")

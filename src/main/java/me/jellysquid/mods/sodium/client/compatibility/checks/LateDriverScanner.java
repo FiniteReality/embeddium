@@ -7,10 +7,10 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import me.jellysquid.mods.sodium.client.compatibility.environment.GLContextInfo;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.ARBDebugOutput;
 import org.lwjgl.opengl.GL11;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
@@ -19,7 +19,7 @@ import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
  * context creation, and uses the implementation details of the OpenGL context to perform validation.
  */
 public class LateDriverScanner {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-PostlaunchChecks");
+    private static final Logger LOGGER = LogManager.getLogger(MODNAME + "-PostlaunchChecks");
 
     public static void onContextInitialized() {
         checkContextImplementation();

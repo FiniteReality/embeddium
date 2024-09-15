@@ -3,10 +3,10 @@ package org.embeddedt.embeddium_integrity;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.objectweb.asm.tree.ClassNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.mixin.transformer.ClassInfo;
@@ -42,7 +42,7 @@ public class MixinTaintDetector implements IExtension {
      * about mixins before they are applied.
      */
     private static final MethodHandle GET_MIXINS_ON_CLASS_INFO;
-    private static final Logger LOGGER = LoggerFactory.getLogger("Embeddium-MixinTaintDetector");
+    private static final Logger LOGGER = LogManager.getLogger("Embeddium-MixinTaintDetector");
     private static final EnforceLevel DEFAULT_ENFORCE_LEVEL = EnforceLevel.WARN;
 
     /**

@@ -6,8 +6,8 @@ import me.jellysquid.mods.sodium.client.render.vertex.serializers.generated.Vert
 import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
 import net.caffeinemc.mods.sodium.api.vertex.serializer.VertexSerializer;
 import net.caffeinemc.mods.sodium.api.vertex.serializer.VertexSerializerRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.concurrent.locks.StampedLock;
 
 public class VertexSerializerRegistryImpl implements VertexSerializerRegistry {
-    private static final Logger LOGGER = LoggerFactory.getLogger(VertexSerializerRegistryImpl.class);
+    private static final Logger LOGGER = LogManager.getLogger(VertexSerializerRegistryImpl.class);
 
     private static final Path CLASS_DUMP_PATH;
 

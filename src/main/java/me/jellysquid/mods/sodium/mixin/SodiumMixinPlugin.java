@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin;
 
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import me.jellysquid.mods.sodium.client.SodiumPreLaunch;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -34,6 +35,8 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
+        MixinExtrasBootstrap.init();
+
         try {
             this.config = MixinConfig.load(ConfigMigrator.handleConfigMigration("embeddium-mixins.properties").toFile());
         } catch (Exception e) {

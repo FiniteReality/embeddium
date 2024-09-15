@@ -5,8 +5,8 @@ import me.jellysquid.mods.sodium.client.compatibility.environment.OSInfo.OS;
 import me.jellysquid.mods.sodium.client.compatibility.environment.probe.GraphicsAdapterInfo;
 import me.jellysquid.mods.sodium.client.compatibility.environment.probe.GraphicsAdapterProbe;
 import me.jellysquid.mods.sodium.client.compatibility.environment.probe.GraphicsAdapterVendor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
 
 public class Workarounds {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MODNAME + "-Workarounds");
+    private static final Logger LOGGER = LogManager.getLogger(MODNAME + "-Workarounds");
 
     private static final AtomicReference<Set<Reference>> ACTIVE_WORKAROUNDS = new AtomicReference<>(EnumSet.noneOf(Reference.class));
 
