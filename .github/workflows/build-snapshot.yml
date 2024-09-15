@@ -38,7 +38,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ github.ref }}-build-snapshot-
       - name: Build artifacts
-        run: ./gradlew reobfJarJar
+        run: ./gradlew reobfJar
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
