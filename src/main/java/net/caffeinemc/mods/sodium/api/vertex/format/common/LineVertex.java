@@ -11,7 +11,7 @@ public final class LineVertex  {
     public static final VertexFormatDescription FORMAT = VertexFormatRegistry.instance()
             .get(DefaultVertexFormat.POSITION_COLOR);
 
-    public static final int STRIDE = 20;
+    public static final int STRIDE = 16;
 
     private static final int OFFSET_POSITION = 0;
     private static final int OFFSET_COLOR = 12;
