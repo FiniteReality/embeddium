@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.asm.AnnotationProcessingEngine;
 import org.embeddedt.embeddium.config.ConfigMigrator;
-import org.embeddedt.embeddium.taint.mixin.MixinTaintDetector;
+import org.embeddedt.embeddium_integrity.MixinTaintDetector;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -97,7 +97,7 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
 
     private static String mixinClassify(Path baseFolder, Path path) {
         try {
-            String className = baseFolder.relativize(path).toString().replace('/', '.');
+            String className = baseFolder.relativize(path).toString().replace('/', '.').replace('\\', '.');
             return className.substring(0, className.length() - 6);
         } catch(RuntimeException e) {
             throw new IllegalStateException("Error relativizing " + path + " to " + baseFolder, e);

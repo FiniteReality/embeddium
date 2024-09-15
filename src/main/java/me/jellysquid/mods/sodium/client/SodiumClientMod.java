@@ -7,6 +7,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.render.ShaderModBridge;
@@ -31,6 +32,10 @@ public class SodiumClientMod {
     public SodiumClientMod() {
         MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
         //ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+
+        if (!FMLLoader.getDist().isClient()) {
+            return;
+        }
 
         TaintDetector.init();
 

@@ -3,7 +3,6 @@ package me.jellysquid.mods.sodium.client.gui;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
-import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.modernui.MuiGuiScaleHook;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.Workarounds;
 import me.jellysquid.mods.sodium.client.gl.arena.staging.MappedStagingBuffer;
@@ -18,12 +17,15 @@ import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStor
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.executor.ChunkBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.*;
 import net.minecraft.client.Option;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.ForgeConfig;
 import org.embeddedt.embeddium.client.gui.options.StandardOptions;
+import org.embeddedt.embeddium.impl.gui.options.FullscreenResolutionHelper;
 import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
@@ -91,6 +93,7 @@ public class SodiumGameOptionPages {
                             }
                         }, (opts) -> opts.fullscreen)
                         .build())
+                .addConditionally(!FullscreenResolutionHelper.isFullscreenResAlreadyAdded(), FullscreenResolutionHelper::createFullScreenResolutionOption)
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
                         .setId(StandardOptions.Option.VSYNC)
                         .setName(new TranslatableComponent("options.vsync"))
@@ -141,7 +144,7 @@ public class SodiumGameOptionPages {
                         .setId(StandardOptions.Option.GRAPHICS_MODE)
                         .setName(new TranslatableComponent("options.graphics"))
                         .setTooltip(new TranslatableComponent("sodium.options.graphics_quality.tooltip"))
-                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { new TranslatableComponent("options.graphics.fast"), new TranslatableComponent("options.graphics.fancy"), new TranslatableComponent("options.graphics.fabulous") }))
+                        .setControl(option -> new CyclingControl<>(option, GraphicsStatus.class, new Component[] { new TranslatableComponent("options.graphics.fast"), new TranslatableComponent("options.graphics.fancy"), new TranslatableComponent("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC) }))
                         .setBinding(
                                 (opts, value) -> opts.graphicsMode = value,
                                 opts -> opts.graphicsMode)
@@ -263,6 +266,18 @@ public class SodiumGameOptionPages {
                         .setImpact(OptionImpact.VARIES)
                         .setBinding((opts, value) -> opts.performance.useTranslucentFaceSorting = value, opts -> opts.performance.useTranslucentFaceSorting)
                         .setEnabled(!ShaderModBridge.isNvidiumEnabled())
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build())
+                .build());
+
+        groups.add(OptionGroup.createBuilder()
+                .setId(StandardOptions.Group.LIGHTING)
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setId(StandardOptions.Option.USE_QUAD_NORMALS_FOR_LIGHTING)
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.LOW)
+                        .setBinding((opts, value) -> opts.quality.useQuadNormalsForShading = value, opts -> opts.quality.useQuadNormalsForShading)
+                        .setEnabled(!ForgeConfig.CLIENT.experimentalForgeLightPipelineEnabled.get())
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .build());

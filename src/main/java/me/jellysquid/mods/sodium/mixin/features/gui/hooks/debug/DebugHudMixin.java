@@ -8,6 +8,7 @@ import me.jellysquid.mods.sodium.client.util.NativeBuffer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
+import org.embeddedt.embeddium_integrity.MixinTaintDetector;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +25,7 @@ public abstract class DebugHudMixin {
     private ArrayList<String> redirectRightTextEarly(Object[] elements) {
         ArrayList<String> strings = Lists.newArrayList((String[]) elements);
         strings.add("");
-        strings.add("%s%s Renderer (%s)".formatted(getVersionColor(), MODNAME, SodiumClientMod.getVersion()));
+        strings.add("%s%s Renderer (%s)".formatted(MixinTaintDetector.getTaintingMods().isEmpty() ? ChatFormatting.GREEN : ChatFormatting.RED, MODNAME, SodiumClientMod.getVersion()));
 
         // Embeddium: Show a lot less with reduced debug info
         if(Minecraft.getInstance().showOnlyReducedInfo()) {
@@ -48,20 +49,6 @@ public abstract class DebugHudMixin {
         }
 
         return strings;
-    }
-
-    @Unique
-    private static ChatFormatting getVersionColor() {
-        String version = SodiumClientMod.getVersion();
-        ChatFormatting color;
-
-        if (version.contains("git.")) {
-            color = ChatFormatting.RED;
-        } else {
-            color = ChatFormatting.GREEN;
-        }
-
-        return color;
     }
 
     @Unique

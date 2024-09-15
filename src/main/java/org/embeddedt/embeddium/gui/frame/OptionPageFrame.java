@@ -14,14 +14,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.Validate;
+import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
 import org.embeddedt.embeddium.gui.theme.DefaultColors;
+import org.embeddedt.embeddium.util.PlatformUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class OptionPageFrame extends AbstractFrame {
@@ -121,6 +125,17 @@ public class OptionPageFrame extends AbstractFrame {
         }
     }
 
+    private static String normalizeModForTooltip(@Nullable String mod) {
+        if(mod == null) {
+            return null;
+        } else {
+            return switch(mod) {
+                case "minecraft" -> "embeddium";
+                default -> mod;
+            };
+        }
+    }
+
     private void renderOptionTooltip(PoseStack drawContext, ControlElement<?> element) {
         if (this.lastTime + 500 > System.currentTimeMillis()) return;
 
@@ -142,6 +157,12 @@ public class OptionPageFrame extends AbstractFrame {
 
         if (impact != null) {
             tooltip.add(Language.getInstance().getVisualOrder(new TranslatableComponent("sodium.options.performance_impact_string", impact.getLocalizedName()).withStyle(ChatFormatting.GRAY)));
+        }
+
+        var id = option.getId();
+
+        if (OptionIdentifier.isPresent(page.getId()) && OptionIdentifier.isPresent(id) && !Objects.equals(normalizeModForTooltip(page.getId().getModId()), normalizeModForTooltip(id.getModId()))) {
+            tooltip.add(Language.getInstance().getVisualOrder(new TranslatableComponent("embeddium.options.added_by_mod_string", new TextComponent(PlatformUtil.getModName(id.getModId())).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY)));
         }
 
         int boxHeight = (tooltip.size() * 12) + boxPadding;

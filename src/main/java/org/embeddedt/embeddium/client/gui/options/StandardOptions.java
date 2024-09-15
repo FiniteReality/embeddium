@@ -15,6 +15,7 @@ public final class StandardOptions {
         public static final ResourceLocation RENDERING_CULLING = new ResourceLocation(SodiumClientMod.MODID, "rendering_culling");
         public static final ResourceLocation CPU_SAVING = new ResourceLocation(SodiumClientMod.MODID, "cpu_saving");
         public static final ResourceLocation SORTING = new ResourceLocation(SodiumClientMod.MODID, "sorting");
+        public static final ResourceLocation LIGHTING = new ResourceLocation(SodiumClientMod.MODID, "lighting");
     }
 
     public static class Pages {
@@ -30,6 +31,7 @@ public final class StandardOptions {
         public static final ResourceLocation BRIGHTNESS = new ResourceLocation("minecraft", "brightness");
         public static final ResourceLocation GUI_SCALE = new ResourceLocation("minecraft", "gui_scale");
         public static final ResourceLocation FULLSCREEN = new ResourceLocation("minecraft", "fullscreen");
+        public static final ResourceLocation FULLSCREEN_RESOLUTION = new ResourceLocation("minecraft", "fullscreen_resolution");
         public static final ResourceLocation VSYNC = new ResourceLocation("minecraft", "vsync");
         public static final ResourceLocation MAX_FRAMERATE = new ResourceLocation("minecraft", "max_frame_rate");
         public static final ResourceLocation VIEW_BOBBING = new ResourceLocation("minecraft", "view_bobbing");
@@ -57,5 +59,6 @@ public final class StandardOptions {
         public static final ResourceLocation PERSISTENT_MAPPING = new ResourceLocation(SodiumClientMod.MODID, "persistent_mapping");
         public static final ResourceLocation CPU_FRAMES_AHEAD = new ResourceLocation(SodiumClientMod.MODID, "cpu_render_ahead_limit");
         public static final ResourceLocation TRANSLUCENT_FACE_SORTING = new ResourceLocation(SodiumClientMod.MODID, "translucent_face_sorting");
+        public static final ResourceLocation USE_QUAD_NORMALS_FOR_LIGHTING = new ResourceLocation(SodiumClientMod.MODID, "use_quad_normals_for_lighting");
     }
 }

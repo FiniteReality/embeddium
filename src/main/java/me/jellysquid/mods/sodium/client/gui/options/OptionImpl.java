@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 public class OptionImpl<S, T> implements Option<T> {
@@ -34,7 +35,7 @@ public class OptionImpl<S, T> implements Option<T> {
     private T value;
     private T modifiedValue;
 
-    private final boolean enabled;
+    private final BooleanSupplier enabled;
 
     private OptionImpl(OptionStorage<S> storage,
                        OptionIdentifier<T> id,
@@ -44,7 +45,7 @@ public class OptionImpl<S, T> implements Option<T> {
                        Function<OptionImpl<S, T>, Control<T>> control,
                        EnumSet<OptionFlag> flags,
                        OptionImpact impact,
-                       boolean enabled) {
+                       BooleanSupplier enabled) {
         this.id = id;
         this.storage = storage;
         this.name = name;
@@ -106,7 +107,7 @@ public class OptionImpl<S, T> implements Option<T> {
 
     @Override
     public boolean isAvailable() {
-        return this.enabled;
+        return this.enabled.getAsBoolean();
     }
 
     @Override
@@ -139,7 +140,9 @@ public class OptionImpl<S, T> implements Option<T> {
         private Function<OptionImpl<S, T>, Control<T>> control;
         private OptionImpact impact;
         private final EnumSet<OptionFlag> flags = EnumSet.noneOf(OptionFlag.class);
-        private boolean enabled = true;
+        private static final BooleanSupplier ALWAYS_ENABLED = () -> true;
+        private static final BooleanSupplier ALWAYS_DISABLED = () -> false;
+        private BooleanSupplier enabled = ALWAYS_ENABLED;
 
         private Builder(OptionStorage<S> storage, Class<T> type) {
             this.storage = storage;
@@ -209,8 +212,14 @@ public class OptionImpl<S, T> implements Option<T> {
             return this;
         }
 
-        public Builder<S, T> setEnabled(boolean value) {
+        public Builder<S, T> setEnabledPredicate(BooleanSupplier value) {
             this.enabled = value;
+
+            return this;
+        }
+
+        public Builder<S, T> setEnabled(boolean value) {
+            setEnabledPredicate(value ? ALWAYS_ENABLED : ALWAYS_DISABLED);
 
             return this;
         }

@@ -9,6 +9,9 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+/**
+ * The block occlusion cache is responsible for performing occlusion testing of neighboring block faces.
+ */
 public class BlockOcclusionCache {
     private static final byte UNCACHED_VALUE = (byte) 127;
 
@@ -35,35 +38,26 @@ public class BlockOcclusionCache {
         BlockState adjState = view.getBlockState(adjPos);
 
         if (selfState.skipRendering(adjState, facing)) {
+            // Explicitly asked to skip rendering this face
             return false;
         } else if (adjState.canOcclude()) {
             VoxelShape selfShape = selfState.getFaceOcclusionShape(view, pos, facing);
             VoxelShape adjShape = adjState.getFaceOcclusionShape(view, adjPos, facing.getOpposite());
 
             if (selfShape == Shapes.block() && adjShape == Shapes.block()) {
+                // If both blocks use full-cube occlusion shapes, then the neighbor certainly occludes us, and we
+                // shouldn't render this face
                 return false;
-            }
-
-            if (selfShape.isEmpty()) {
-                // Upstream Sodium only returns true under stricter conditions than this, in order to cull faces in
-                // unusual block arrangements like a potted cacti under a solid block.
-                // However, that fix has the side effect of causing block models with improperly specified cullfaces
-                // to not render sometimes, and also breaks powder snow culling on 1.17+.
-                // It's not clear that the stricter check provides a significant performance uplift, so we err
-                // on the side of compatibility and use the same weaker check as vanilla.
+            } else if (selfShape.isEmpty()) {
+                // If our occlusion shape is empty, then we cannot be occluded by anything, and we should render
+                // this face
                 return true;
-                /*
-                if (adjShape.isEmpty()){
-                    return true; //example: top face of potted plants if top slab is placed above
-                }
-                else if (!adjState.isSideSolid(view,adjPos,facing.getOpposite(), SideShapeType.FULL)){
-                    return true; //example: face of potted plants rendered if top stair placed above
-                }
-                */
             }
 
+            // Consult the occlusion cache & do the voxel shape calculations if necessary
             return this.calculate(selfShape, adjShape);
         } else {
+            // The neighboring block never occludes, we need to render this face
             return true;
         }
     }

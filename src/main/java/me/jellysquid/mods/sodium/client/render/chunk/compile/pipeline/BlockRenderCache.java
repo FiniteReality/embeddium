@@ -9,6 +9,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 
+/**
+ * Holds important caches and working data structures for a single chunk meshing thread. All objects within
+ * this class do not need to be thread-safe or lightweight to construct, as a separate instance is allocated per thread
+ * and reused for the lifetime of that thread.
+ */
 public class BlockRenderCache {
     private final ArrayLightDataCache lightDataCache;
 
@@ -46,6 +51,9 @@ public class BlockRenderCache {
         return this.fluidRenderer;
     }
 
+    /**
+     * Initialize the render cache for a new chunk.
+     */
     public void init(ChunkRenderContext context) {
         this.lightDataCache.reset(context.getOrigin());
         this.lightPipelineProvider.reset();

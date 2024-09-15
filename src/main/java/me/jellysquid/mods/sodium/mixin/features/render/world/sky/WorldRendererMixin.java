@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,6 +43,9 @@ public class WorldRendererMixin {
      */
     @Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
     private void preRenderSky(PoseStack matrices, float tickDelta, CallbackInfo ci) {
+        if (ShaderModBridge.areShadersEnabled())
+            return;
+
         Camera camera = this.minecraft.gameRenderer.getMainCamera();
         Vec3 cameraPosition = camera.getPosition();
         Entity cameraEntity = camera.getEntity();

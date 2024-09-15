@@ -7,12 +7,10 @@ import com.mojang.math.Matrix4f;
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
 import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuad;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -27,7 +25,8 @@ public class ForgeLightPipeline implements LightPipeline {
     private final BlockAndTintGetter level;
     private final LightDataConsumer consumer = new LightDataConsumer();
     private final int[] mutableQuadVertexData = new int[32];
-    private final BakedQuad mutableQuad = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, null, false);
+    private final BakedQuad mutableQuadWithoutShade = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, null, false);
+    private final BakedQuad mutableQuadWithShade = new BakedQuad(mutableQuadVertexData, -1, Direction.UP, null, true);
     private static final PoseStack.Pose EMPTY = new PoseStack.Pose(new Matrix4f(), new Matrix3f());
 
     private long cachedPos = Long.MIN_VALUE;
@@ -55,7 +54,7 @@ public class ForgeLightPipeline implements LightPipeline {
         }
     }
 
-    private BakedQuad generateForgeQuad(ModelQuadView quad) {
+    private BakedQuad generateForgeQuad(ModelQuadView quad, boolean hasShade) {
         int[] vData = this.mutableQuadVertexData;
         for(int i = 0; i < 4; i++) {
             int vertexBase = i * ModelQuadUtil.VERTEX_SIZE;
@@ -63,9 +62,9 @@ public class ForgeLightPipeline implements LightPipeline {
             vData[vertexBase + ModelQuadUtil.POSITION_INDEX + 1] = Float.floatToIntBits(quad.getY(i));
             vData[vertexBase + ModelQuadUtil.POSITION_INDEX + 2] = Float.floatToIntBits(quad.getZ(i));
             vData[vertexBase + ModelQuadUtil.NORMAL_INDEX] = quad.getForgeNormal(i);
-            vData[vertexBase + ModelQuadUtil.LIGHT_INDEX] = quad.getLight(i);
+            vData[vertexBase + ModelQuadUtil.LIGHT_INDEX] = 0;
         }
-        return mutableQuad;
+        return hasShade ? this.mutableQuadWithShade : this.mutableQuadWithoutShade;
     }
 
     @Override
@@ -73,9 +72,9 @@ public class ForgeLightPipeline implements LightPipeline {
         this.computeLightData(pos);
         BakedQuad forgeQuad;
         if(quad instanceof BakedQuad) {
-            forgeQuad = (BakedQuad)quad;
+            forgeQuad = generateForgeQuad(quad, ((BakedQuad)quad).isShade());
         } else {
-            forgeQuad = generateForgeQuad(quad);
+            forgeQuad = generateForgeQuad(quad, false);
         }
         if(true) throw new UnsupportedOperationException("TODO");
         //forgeLighter.process(consumer, EMPTY, forgeQuad, OverlayTexture.NO_OVERLAY);

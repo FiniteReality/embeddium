@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -95,6 +96,10 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
 
             Enum<T> value = this.option.getValue();
             Component name = this.names[value.ordinal()];
+
+            if(!this.option.isAvailable()) {
+                name = new TextComponent("").append(name).withStyle(ChatFormatting.GRAY, ChatFormatting.STRIKETHROUGH);
+            }
 
             int strWidth = this.getStringWidth(name);
             this.drawString(drawContext, name, this.dim.getLimitX() - strWidth - 6, this.dim.getCenterY() - 4, 0xFFFFFFFF);

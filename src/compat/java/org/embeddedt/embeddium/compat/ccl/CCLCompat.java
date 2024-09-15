@@ -51,18 +51,18 @@ public class CCLCompat {
                 }
                 if(!customBlockRenderers.isEmpty()) {
                     Block block = ctx.state().getBlock();
-                    for(Map.Entry<IRegistryDelegate<Block>, ICCBlockRenderer> entry : customBlockRenderers.entrySet()) {
-                        if(entry.getKey().get() == block && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state())) {
-                            resultList.add(createBridge(entry.getValue()));
-                        }
+                    var holder = block.delegate;
+                    var renderer = customBlockRenderers.get(holder);
+                    if (renderer != null && renderer.canHandleBlock(ctx.world(), ctx.pos(), ctx.state())) {
+                        resultList.add(createBridge(renderer));
                     }
                 }
                 if(!customFluidRenderers.isEmpty()) {
                     Fluid fluid = ctx.state().getFluidState().getType();
-                    for(Map.Entry<IRegistryDelegate<Fluid>, ICCBlockRenderer> entry : customFluidRenderers.entrySet()) {
-                        if(entry.getKey().get().isSame(fluid) && entry.getValue().canHandleBlock(ctx.world(), ctx.pos(), ctx.state())) {
-                            resultList.add(createBridge(entry.getValue()));
-                        }
+                    var holder = fluid.delegate;
+                    var renderer = customFluidRenderers.get(holder);
+                    if (renderer != null && renderer.canHandleBlock(ctx.world(), ctx.pos(), ctx.state())) {
+                        resultList.add(createBridge(renderer));
                     }
                 }
             });

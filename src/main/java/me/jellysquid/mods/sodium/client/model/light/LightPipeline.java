@@ -6,8 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 
 /**
- * Light pipelines allow model quads for any location in the world to be lit using various backends, including fluids
- * and block entities. 
+ * Light pipelines allow model quads for any location in the world to be lit regardless of what produced them
+ * (blocks, fluids, or block entities).
  */
 public interface LightPipeline {
     /**

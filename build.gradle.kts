@@ -1,13 +1,10 @@
+import org.embeddedt.embeddium.gradle.versioning.ProjectVersioner
 import org.w3c.dom.Element
 
 plugins {
     id("idea")
     id("dev.architectury.loom") version("1.6.397")
     id("maven-publish")
-
-    // This dependency is only used to determine the state of the Git working tree so that build artifacts can be
-    // more easily identified. TODO: Lazily load GrGit via a service only when builds are performed.
-    id("org.ajoberstar.grgit") version("5.0.0")
 
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
 
@@ -52,6 +49,7 @@ sourceSets {
 }
 
 repositories {
+    mavenCentral()
     maven("https://maven.minecraftforge.net/")
     maven("https://maven.fabricmc.net")
     maven("https://maven.tterrag.com/")
@@ -140,6 +138,10 @@ dependencies {
 
     implementation("io.github.llamalad7:mixinextras-common:0.3.5")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
+
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
+
     implementation("org.joml:joml:1.10.5")
 }
 
@@ -154,7 +156,6 @@ tasks.processResources {
 tasks.withType<JavaCompile> {
     options.release = 17
 }
-
 
 java {
     withSourcesJar()
@@ -233,25 +234,5 @@ publishMods {
 }
 
 fun getModVersion(): String {
-    var baseVersion: String = project.properties["mod_version"].toString()
-    val mcMetadata: String = "+mc" + project.properties["minecraft_version"]
-
-    if (project.hasProperty("build.release")) {
-        return baseVersion + mcMetadata // no tag whatsoever
-    }
-
-    // Increment patch version
-    baseVersion = baseVersion.split(".").mapIndexed {
-        index, s -> if(index == 2) (s.toInt() + 1) else s
-    }.joinToString(separator = ".")
-
-    val head = grgit.head()
-    var id = head.abbreviatedId
-
-    // Flag the build if the build tree is not clean
-    if (!grgit.status().isClean) {
-        id += "-dirty"
-    }
-
-    return baseVersion + "-git-${id}" + mcMetadata
+    return ProjectVersioner.computeVersion(project.projectDir, project.properties)
 }

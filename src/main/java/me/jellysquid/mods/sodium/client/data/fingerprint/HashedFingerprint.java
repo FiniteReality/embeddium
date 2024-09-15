@@ -12,26 +12,38 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public record HashedFingerprint(
-        @SerializedName("v")
-        Integer version,
-
-        @NotNull
-        @SerializedName("s")
-        String saltHex,
-
-        @NotNull
-        @SerializedName("u")
-        String uuidHashHex,
-
-        @NotNull
-        @SerializedName("p")
-        String pathHashHex,
-
-        @SerializedName("t")
-        long timestamp)
-{
+public final class HashedFingerprint {
     public static final int CURRENT_VERSION = 1;
+    @SerializedName("v")
+    private final Integer version;
+    @SerializedName("s")
+    private final @NotNull String saltHex;
+    @SerializedName("u")
+    private final @NotNull String uuidHashHex;
+    @SerializedName("p")
+    private final @NotNull String pathHashHex;
+    @SerializedName("t")
+    private final long timestamp;
+
+    public HashedFingerprint(
+            Integer version,
+
+            @NotNull
+            String saltHex,
+
+            @NotNull
+            String uuidHashHex,
+
+            @NotNull
+            String pathHashHex,
+
+            long timestamp) {
+        this.version = version;
+        this.saltHex = saltHex;
+        this.uuidHashHex = uuidHashHex;
+        this.pathHashHex = pathHashHex;
+        this.timestamp = timestamp;
+    }
 
     public static @Nullable HashedFingerprint loadFromDisk() {
         Path path = getFilePath();
@@ -71,4 +83,52 @@ public record HashedFingerprint(
         return FMLPaths.CONFIGDIR.get()
                 .resolve("embeddium-fingerprint.json");
     }
+
+    public Integer version() {
+        return version;
+    }
+
+    public @NotNull String saltHex() {
+        return saltHex;
+    }
+
+    public @NotNull String uuidHashHex() {
+        return uuidHashHex;
+    }
+
+    public @NotNull String pathHashHex() {
+        return pathHashHex;
+    }
+
+    public long timestamp() {
+        return timestamp;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (HashedFingerprint) obj;
+        return Objects.equals(this.version, that.version) &&
+                Objects.equals(this.saltHex, that.saltHex) &&
+                Objects.equals(this.uuidHashHex, that.uuidHashHex) &&
+                Objects.equals(this.pathHashHex, that.pathHashHex) &&
+                this.timestamp == that.timestamp;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(version, saltHex, uuidHashHex, pathHashHex, timestamp);
+    }
+
+    @Override
+    public String toString() {
+        return "HashedFingerprint[" +
+                "version=" + version + ", " +
+                "saltHex=" + saltHex + ", " +
+                "uuidHashHex=" + uuidHashHex + ", " +
+                "pathHashHex=" + pathHashHex + ", " +
+                "timestamp=" + timestamp + ']';
+    }
+
 }

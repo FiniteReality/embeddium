@@ -10,6 +10,8 @@ import me.jellysquid.mods.sodium.client.util.collections.WriteQueue;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import org.embeddedt.embeddium.api.render.chunk.RenderSectionDistanceFilter;
+import org.embeddedt.embeddium.api.render.chunk.RenderSectionDistanceFilterEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -170,9 +172,7 @@ public class OcclusionCuller {
         float dy = nearestToZero(oy, oy + 16) - camera.fracY;
         float dz = nearestToZero(oz, oz + 16) - camera.fracZ;
 
-        // vanilla's "cylindrical fog" algorithm
-        // max(length(distance.xz), abs(distance.y))
-        return (((dx * dx) + (dz * dz)) < (maxDistance * maxDistance)) && (Math.abs(dy) < maxDistance);
+        return DistanceFilterHolder.INSTANCE.isWithinDistance(dx, dy, dz, maxDistance);
     }
 
     @SuppressWarnings("ManualMinMaxCalculation") // we know what we are doing.
@@ -316,5 +316,15 @@ public class OcclusionCuller {
 
     public interface Visitor {
         void visit(RenderSection section, boolean visible);
+    }
+
+    private static class DistanceFilterHolder {
+        private static final RenderSectionDistanceFilter INSTANCE;
+
+        static {
+            var event = new RenderSectionDistanceFilterEvent();
+            RenderSectionDistanceFilterEvent.BUS.post(event);
+            INSTANCE = event.getFilter();
+        }
     }
 }

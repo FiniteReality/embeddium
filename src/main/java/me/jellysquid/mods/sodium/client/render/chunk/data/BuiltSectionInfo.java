@@ -11,11 +11,13 @@ import net.minecraft.client.renderer.chunk.VisibilitySet;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.embeddedt.embeddium.api.render.chunk.SectionInfoBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 
 /**
  * The render data for a chunk render container containing all the information about which meshes are attached, the
@@ -44,8 +46,6 @@ public class BuiltSectionInfo {
 
         if (!blockRenderPasses.isEmpty()) {
             flags |= 1 << RenderSectionFlags.HAS_BLOCK_GEOMETRY;
-            if(blockRenderPasses.contains(DefaultTerrainRenderPasses.TRANSLUCENT))
-                flags |= 1 << RenderSectionFlags.HAS_TRANSLUCENT_DATA;
         }
 
         if (!culledBlockEntities.isEmpty()) {
@@ -61,7 +61,7 @@ public class BuiltSectionInfo {
         this.visibilityData = VisibilityEncoding.encode(occlusionData);
     }
 
-    public static class Builder {
+    public static class Builder implements SectionInfoBuilder {
         private final List<TerrainRenderPass> blockRenderPasses = new ArrayList<>();
         private final List<BlockEntity> globalBlockEntities = new ArrayList<>();
         private final List<BlockEntity> culledBlockEntities = new ArrayList<>();
@@ -77,24 +77,22 @@ public class BuiltSectionInfo {
             this.occlusionData = data;
         }
 
-        /**
-         * Adds a sprite to this data container for tracking. If the sprite is tickable, it will be ticked every frame
-         * before rendering as necessary.
-         * @param sprite The sprite
-         */
+        @Override
         public void addSprite(TextureAtlasSprite sprite) {
             if (SpriteUtil.hasAnimation(sprite)) {
                 this.animatedSprites.add(sprite);
             }
         }
 
-        /**
-         * Adds a block entity to the data container.
-         * @param entity The block entity itself
-         * @param cull True if the block entity can be culled to this chunk render's volume, otherwise false
-         */
+        @Override
         public void addBlockEntity(BlockEntity entity, boolean cull) {
             (cull ? this.culledBlockEntities : this.globalBlockEntities).add(entity);
+        }
+
+        @Override
+        public void removeBlockEntitiesIf(Predicate<BlockEntity> filter) {
+            this.culledBlockEntities.removeIf(filter);
+            this.globalBlockEntities.removeIf(filter);
         }
 
         public BuiltSectionInfo build() {

@@ -1,10 +1,30 @@
 package me.jellysquid.mods.sodium.client.render.chunk;
 
+/**
+ * Represents the type of chunk update task.
+ */
 public enum ChunkUpdateType {
+    /**
+     * Chunk is being built for the first time.
+     */
     INITIAL_BUILD(128),
+    /**
+     * Chunk geometry is being sorted based on camera position change.
+     */
     SORT(Integer.MAX_VALUE),
+    /**
+     * Like {@link ChunkUpdateType#SORT}, but will block the main thread if the camera is near enough to guarantee
+     * the sort results are reflected quickly.
+     */
     IMPORTANT_SORT(Integer.MAX_VALUE),
+    /**
+     * Chunk data has changed and remeshing is required.
+     */
     REBUILD(Integer.MAX_VALUE),
+    /**
+     * Like {@link ChunkUpdateType#REBUILD}, but will block the main thread if the camera is near enough to guarantee
+     * the rebuild is seen quickly.
+     */
     IMPORTANT_REBUILD(Integer.MAX_VALUE);
 
     private final int maximumQueueSize;
@@ -34,14 +54,23 @@ public enum ChunkUpdateType {
         return null;
     }
 
+    /**
+     * {@return the maximum size the rebuild queue should be allowed to grow to for this update type}
+     */
     public int getMaximumQueueSize() {
         return this.maximumQueueSize;
     }
 
+    /**
+     * {@return true if the task is "important" and should block the main thread if the camera is near enough}
+     */
     public boolean isImportant() {
         return this == IMPORTANT_REBUILD || this == IMPORTANT_SORT;
     }
 
+    /**
+     * {@return true if the task only sorts rather than performing a full chunk rebuild}
+     */
     public boolean isSort() {
         return this == SORT || this == IMPORTANT_SORT;
     }
