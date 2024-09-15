@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.world.biome.*;
 import me.jellysquid.mods.sodium.client.world.cloned.ChunkRenderContext;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSection;
 import me.jellysquid.mods.sodium.client.world.cloned.ClonedChunkSectionCache;
+import me.jellysquid.mods.sodium.mixin.core.world.biome.BiomeManagerAccessor;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -155,8 +157,9 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
         this.blockEntityArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
         this.blockEntityRenderDataArrays = new Int2ReferenceMap[SECTION_ARRAY_SIZE];
 
-        this.biomeSlice = new BiomeSlice();
-        this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius);
+        boolean is3DBiomes = ((BiomeManagerAccessor)this.world.getBiomeManager()).getZoomer() != FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE;
+        this.biomeSlice = new BiomeSlice(is3DBiomes);
+        this.biomeColors = new BiomeColorCache(this.biomeSlice, Minecraft.getInstance().options.biomeBlendRadius, is3DBiomes);
 
         for (BlockState[] blockArray : this.blockArrays) {
             Arrays.fill(blockArray, EMPTY_BLOCK_STATE);

@@ -9,6 +9,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
 
+import java.util.Arrays;
+
 public class BiomeColorCache {
     private static final int NEIGHBOR_BLOCK_RADIUS = 2;
     private final BiomeSlice biomeData;
@@ -25,9 +27,12 @@ public class BiomeColorCache {
 
     private final int sizeXZ, sizeY;
 
-    public BiomeColorCache(BiomeSlice biomeData, int blendRadius) {
+    private final boolean uses3DBiomes;
+
+    public BiomeColorCache(BiomeSlice biomeData, int blendRadius, boolean is3D) {
         this.biomeData = biomeData;
         this.blendRadius = Math.min(7, blendRadius);
+        this.uses3DBiomes = is3D;
 
         this.sizeXZ = 16 + ((NEIGHBOR_BLOCK_RADIUS + this.blendRadius) * 2);
         this.sizeY = 16 + (NEIGHBOR_BLOCK_RADIUS * 2);
@@ -82,8 +87,15 @@ public class BiomeColorCache {
         var slice = new Slice[this.sizeY];
         this.slices.put(resolver, slice);
 
-        for (int y = 0; y < this.sizeY; y++) {
-            slice[y] = new Slice(this.sizeXZ);
+        if (this.uses3DBiomes) {
+            // Use a unique slice for each Y level
+            for (int y = 0; y < this.sizeY; y++) {
+                slice[y] = new Slice(this.sizeXZ);
+            }
+        } else {
+            // Use the same slice for all Y levels
+            // On 1.16, this gives a free speedup in the overworld since Y level is ignored for biome calculation
+            Arrays.fill(slice, new Slice(this.sizeXZ));
         }
     }
 
