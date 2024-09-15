@@ -256,6 +256,8 @@ public class SodiumWorldRenderer {
         } else if (renderLayer == RenderType.translucent()) {
             this.renderSectionManager.renderLayer(matrices, DefaultTerrainRenderPasses.TRANSLUCENT, x, y, z);
         }
+
+        RenderSystem.clearCurrentColor();
     }
 
     public void reload() {
