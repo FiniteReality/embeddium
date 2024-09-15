@@ -15,7 +15,7 @@ import java.util.Set;
 
 @Mixin(BCClientEventHandler.class)
 public class BCClientEventHandlerMixin {
-    @Redirect(method = "renderLevelStage", slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", ordinal = 0)), at = @At(value = "INVOKE", target = "Ljava/util/Set;iterator()Ljava/util/Iterator;", ordinal = 0), require = 0)
+    @Redirect(method = "renderLevelStage", slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/LevelRenderer;globalBlockEntities:Ljava/util/Set;", ordinal = 0)), at = @At(value = "INVOKE", target = "Ljava/util/Set;iterator()Ljava/util/Iterator;", ordinal = 0), require = 0, remap = false)
     private Iterator<BlockEntity> useEmbeddiumBEIterator(Set instance) {
         return SodiumWorldRenderer.instance().blockEntityIterator();
     }

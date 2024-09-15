@@ -3,7 +3,7 @@ loaderVersion="[47,)"
 license="LGPL-3.0-only"
 [[mods]]
 modId="embeddium"
-version="${version}"
+version="${file.jarVersion}"
 displayName="Embeddium"
 logoFile="icon.png"
 description='''
