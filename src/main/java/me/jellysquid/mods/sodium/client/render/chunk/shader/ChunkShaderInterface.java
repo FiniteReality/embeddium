@@ -38,16 +38,16 @@ public class ChunkShaderInterface {
 
     @Deprecated // the shader interface should not modify pipeline state
     public void setupState() {
-        this.bindTexture(ChunkShaderTextureSlot.BLOCK);
-        this.bindTexture(ChunkShaderTextureSlot.LIGHT);
+        this.bindTexture(ChunkShaderTextureSlot.BLOCK, 0);
+        this.bindTexture(ChunkShaderTextureSlot.LIGHT, 2);
 
         this.fogShader.setup();
     }
 
     @Deprecated(forRemoval = true) // should be handled properly in GFX instead.
-    private void bindTexture(ChunkShaderTextureSlot slot) {
+    private void bindTexture(ChunkShaderTextureSlot slot, int textureId) {
         var uniform = this.uniformTextures.get(slot);
-        uniform.setInt(slot.ordinal());
+        uniform.setInt(textureId);
     }
 
     public void setProjectionMatrix(Matrix4fc matrix) {
