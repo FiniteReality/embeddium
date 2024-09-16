@@ -5,7 +5,7 @@ import org.w3c.dom.Element
 
 plugins {
     id("idea")
-    id("dev.architectury.loom") version("1.6.397")
+    id("dev.architectury.loom") version("1.7.413")
     id("maven-publish")
 
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
@@ -101,7 +101,6 @@ loom {
     forge {
         mixinConfigs.add("embeddium.mixins.json")
     }
-    mixin.defaultRefmapName = "embeddium-refmap.json"
     runs {
         this["client"].apply {
             mods {
