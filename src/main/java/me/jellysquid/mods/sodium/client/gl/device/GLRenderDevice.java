@@ -46,6 +46,8 @@ public class GLRenderDevice implements RenderDevice {
             return;
         }
 
+        VertexBuffer.unbind();
+
         this.stateTracker.clear();
         this.isActive = false;
     }
