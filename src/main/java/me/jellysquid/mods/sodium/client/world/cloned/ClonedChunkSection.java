@@ -3,6 +3,7 @@ package me.jellysquid.mods.sodium.client.world.cloned;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMap;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceMaps;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;
+import me.jellysquid.mods.sodium.client.world.ChunkBiomeContainerExtended;
 import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
@@ -86,7 +87,7 @@ public class ClonedChunkSection {
             }
         }
 
-        biomeData = chunk.getBiomes();
+        biomeData = ChunkBiomeContainerExtended.clone(chunk.getBiomes());
 
         this.blockData = blockData;
         this.biomeData = biomeData;
