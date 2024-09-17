@@ -5,8 +5,11 @@ import me.jellysquid.mods.sodium.client.world.ReadableContainerExtended;
 import net.minecraft.core.IdMapper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.BitStorage;
+import net.minecraft.world.level.chunk.GlobalPalette;
+import net.minecraft.world.level.chunk.LinearPalette;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PalettedContainer;
+import org.embeddedt.embeddium.impl.world.ClonedPalette;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -88,10 +91,14 @@ public abstract class PalettedContainerMixin<T> implements ReadableContainerExte
 
     @Override
     public PalettedContainer<T> sodium$copy() {
-        // TODO-1.16
-        return (PalettedContainer<T>)(Object)this;
-        //PalettedContainer<T> container = new PalettedContainer<>(this.globalPalette, this.registry, this.reader, this.writer, this.defaultValue);
-        //((PalettedContainerMixin<T>)(Object)container).storage = new BitStorage(this.bits, 4096, this.storage.getRaw());
-        //((PalettedContainerMixin<T>)(Object)container).palette = new BitStorage(this.bits, 4096, this.storage.getRaw());
+        PalettedContainer<T> container = new PalettedContainer<>(this.globalPalette, this.registry, this.reader, this.writer, this.defaultValue);
+        ((PalettedContainerMixin<T>)(Object)container).storage = new BitStorage(this.bits, 4096, this.storage.getRaw().clone());
+        ((PalettedContainerMixin<T>)(Object)container).bits = this.bits;
+        if (this.palette instanceof GlobalPalette<T>) {
+            ((PalettedContainerMixin<T>)(Object)container).palette = this.palette;
+        } else {
+            ((PalettedContainerMixin<T>)(Object)container).palette = new ClonedPalette<>(this.palette, this.bits);
+        }
+        return container;
     }
 }
