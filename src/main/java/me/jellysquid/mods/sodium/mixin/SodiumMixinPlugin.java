@@ -12,16 +12,15 @@ import org.embeddedt.embeddium.asm.AnnotationProcessingEngine;
 import org.embeddedt.embeddium.config.ConfigMigrator;
 import org.embeddedt.embeddium_integrity.MixinTaintDetector;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.util.JavaVersion;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static me.jellysquid.mods.sodium.client.SodiumClientMod.MODNAME;
@@ -36,6 +35,11 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
         MixinExtrasBootstrap.init();
+
+        if (!FMLLoader.isProduction() && JavaVersion.current() >= 17.0) {
+            this.logger.warn("Raising compatibility level to fix dev environment");
+            MixinEnvironment.setCompatibilityLevel(MixinEnvironment.CompatibilityLevel.JAVA_17);
+        }
 
         try {
             this.config = MixinConfig.load(ConfigMigrator.handleConfigMigration("embeddium-mixins.properties").toFile());
