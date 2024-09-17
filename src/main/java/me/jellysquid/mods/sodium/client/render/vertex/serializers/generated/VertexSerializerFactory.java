@@ -5,6 +5,8 @@ import net.caffeinemc.mods.sodium.api.vertex.format.VertexFormatDescription;
 import net.caffeinemc.mods.sodium.api.vertex.serializer.VertexSerializer;
 import org.lwjgl.system.MemoryUtil;
 import org.objectweb.asm.*;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,7 @@ public class VertexSerializerFactory {
         var name = "me/jellysquid/mods/sodium/client/render/vertex/serializers/generated/VertexSerializer$Impl$" + identifier;
 
         ClassWriter classWriter = new ClassWriter(0);
-        classWriter.visit(Opcodes.V17, Opcodes.ACC_FINAL | Opcodes.ACC_PUBLIC, name, null,
+        classWriter.visit(MixinEnvironment.getCompatibilityLevel().getClassVersion(), Opcodes.ACC_FINAL | Opcodes.ACC_PUBLIC, name, null,
                 Type.getInternalName(Object.class),
                 new String[] { Type.getInternalName(VertexSerializer.class) });
 

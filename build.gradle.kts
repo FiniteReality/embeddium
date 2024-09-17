@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.task.RemapJarTask
 import org.embeddedt.embeddium.gradle.versioning.ProjectVersioner
-import org.w3c.dom.Element
+import xyz.wagyourtail.jvmdg.gradle.task.ShadeJar
 
 plugins {
     id("idea")
@@ -13,6 +13,8 @@ plugins {
     id("embeddium-fabric-remapper")
 
     id("com.gradleup.shadow") version "8.3.0"
+
+    id("xyz.wagyourtail.jvmdowngrader") version "1.0.0"
 }
 
 operator fun String.invoke(): String {
@@ -197,9 +199,9 @@ tasks.named<ShadowJar>("shadowJar").configure {
 }
 
 tasks.named<RemapJarTask>("remapJar") {
-    dependsOn("shadowJar")
+    dependsOn("shadeDowngradedApi")
     archiveClassifier = ""
-    inputFile = tasks.getByName<ShadowJar>("shadowJar").archiveFile.get()
+    inputFile = tasks.getByName<ShadeJar>("shadeDowngradedApi").archiveFile.get()
 }
 
 publishing {

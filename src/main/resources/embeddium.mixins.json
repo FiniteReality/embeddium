@@ -3,7 +3,7 @@
   "refmap": "embeddium-refmap.json",
   "required" : true,
   "minVersion": "0.8",
-  "compatibilityLevel" : "JAVA_17",
+  "compatibilityLevel" : "JAVA_8",
   "plugin" : "me.jellysquid.mods.sodium.mixin.SodiumMixinPlugin",
   "injectors" : {
     "defaultRequire" : 1
