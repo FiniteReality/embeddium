@@ -14,7 +14,7 @@ plugins {
 
     id("com.gradleup.shadow") version "8.3.0"
 
-    id("xyz.wagyourtail.jvmdowngrader") version "1.0.0"
+    id("xyz.wagyourtail.jvmdowngrader") version "1.1.3"
 }
 
 operator fun String.invoke(): String {
