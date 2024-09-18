@@ -36,7 +36,7 @@ public class BufferSourceMixin {
         return vertexConsumer;
     }
 
-    @ModifyVariable(method = { "func_228464_c_", "lambda$endBatch$0" }, at = @At(value = "LOAD", ordinal = 0))
+    @ModifyVariable(method = { "lambda$endBatch$0" }, at = @At(value = "LOAD", ordinal = 0))
     private VertexConsumer changeComparedVertexConsumer(VertexConsumer input) {
         if (input instanceof SodiumBufferBuilder replacement) {
             return replacement.getOriginalBufferBuilder();

@@ -28,8 +28,9 @@ import java.util.function.Supplier;
 // Use a very low priority so most injects into doAnimateTick will still work
 @Mixin(value = ClientLevel.class, priority = 500)
 public abstract class ClientLevelMixin extends Level {
-    protected ClientLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, DimensionType dimensionType, Supplier<ProfilerFiller> profiler, boolean isClientSide, boolean isDebug, long biomeZoomSeed) {
-        super(levelData, dimension, dimensionType, profiler, isClientSide, isDebug, biomeZoomSeed);
+
+    protected ClientLevelMixin(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, ResourceKey<DimensionType> resourceKey2, DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+        super(writableLevelData, resourceKey, resourceKey2, dimensionType, supplier, bl, bl2, l);
     }
 
     @Shadow

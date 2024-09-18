@@ -33,7 +33,8 @@ public abstract class MatrixStackMixin implements CachingPoseStack {
 
         if (this.cacheEnabled > 0 && !this.cache.isEmpty()) {
             entry = this.cache.removeLast();
-            entry.pose().set(prev.pose());
+            entry.pose().setIdentity();
+            entry.pose().multiply(prev.pose());
             entry.normal().load(prev.normal());
         } else {
             entry = new PoseStack.Pose(new Matrix4f(prev.pose()), new Matrix3f(prev.normal()));

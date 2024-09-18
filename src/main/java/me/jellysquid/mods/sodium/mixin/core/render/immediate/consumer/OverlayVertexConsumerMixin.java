@@ -85,15 +85,15 @@ public class OverlayVertexConsumerMixin implements VertexBufferWriter {
         var position = new Vector4f();
 
         for (int vertexIndex = 0; vertexIndex < count; vertexIndex++) {
-            position.setX(MemoryUtil.memGetFloat(ptr + offsetPosition + 0));
-            position.setY(MemoryUtil.memGetFloat(ptr + offsetPosition + 4));
-            position.setZ(MemoryUtil.memGetFloat(ptr + offsetPosition + 8));
-            position.setW(1.0f);
+            position.set(
+                    MemoryUtil.memGetFloat(ptr + offsetPosition + 0),
+                    MemoryUtil.memGetFloat(ptr + offsetPosition + 4),
+                    MemoryUtil.memGetFloat(ptr + offsetPosition + 8),
+                    1.0f
+            );
 
             int packedNormal = MemoryUtil.memGetInt(ptr + offsetNormal);
-            normal.setX(NormI8.unpackX(packedNormal));
-            normal.setY(NormI8.unpackY(packedNormal));
-            normal.setZ(NormI8.unpackZ(packedNormal));
+            normal.set(NormI8.unpackX(packedNormal), NormI8.unpackY(packedNormal), NormI8.unpackZ(packedNormal));
 
             normal.transform(inverseNormalMatrix);
             Direction direction = Direction.getNearest(normal.x(), normal.y(), normal.z());

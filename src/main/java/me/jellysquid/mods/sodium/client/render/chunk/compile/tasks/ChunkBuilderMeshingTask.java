@@ -28,16 +28,14 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
 import org.embeddedt.embeddium.api.ChunkDataBuiltEvent;
 import org.embeddedt.embeddium.chunk.MeshAppenderRenderer;
-import org.embeddedt.embeddium.model.ModelDataSnapshotter;
 import org.embeddedt.embeddium.model.UnwrappableBakedModel;
 
 import java.util.Map;
@@ -61,16 +59,12 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
     private final int buildTime;
 
-    private final Map<BlockPos, IModelData> modelDataMap;
-
     private Vec3 camera = Vec3.ZERO;
 
     public ChunkBuilderMeshingTask(RenderSection render, ChunkRenderContext renderContext, int time) {
         this.render = render;
         this.renderContext = renderContext;
         this.buildTime = time;
-
-        this.modelDataMap = ModelDataSnapshotter.getModelDataForSection(Minecraft.getInstance().level, this.renderContext.getOrigin());
     }
 
     public ChunkBuilderMeshingTask withCameraPosition(Vec3 camera) {
@@ -116,7 +110,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         BlockState blockState = slice.getBlockState(x, y, z);
 
                         // Fast path - skip blocks that are air and don't have any custom logic
-                        if (blockState.isAir() && blockState.getRenderShape() == RenderShape.INVISIBLE && !blockState.hasTileEntity()) {
+                        if (blockState.isAir() && !(blockState.getBlock() instanceof EntityBlock)) {
                             continue;
                         }
 
@@ -126,7 +120,6 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                         if (blockState.getRenderShape() == RenderShape.MODEL) {
                             BakedModel model = cache.getBlockModels()
                                 .getBlockModel(blockState);
-                            IModelData modelData = model.getModelData(context.localSlice(), blockPos, blockState, modelDataMap.getOrDefault(blockPos, EmptyModelData.INSTANCE));
 
                             long seed = blockState.getSeed(blockPos);
                             random.setSeed(seed);
@@ -137,11 +130,11 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
 
                             random.setSeed(seed);
 
-                            for (RenderType layer : cache.getRenderLayerCache().forState(blockState)) {
-                                context.update(blockPos, modelOffset, blockState, model, seed, modelData, layer);
-                                cache.getBlockRenderer()
-                                        .renderModel(context, buffers);
-                            }
+                            RenderType layer = ItemBlockRenderTypes.getChunkRenderType(blockState);
+
+                            context.update(blockPos, modelOffset, blockState, model, seed, layer);
+                            cache.getBlockRenderer()
+                                    .renderModel(context, buffers);
                         }
 
                         FluidState fluidState = blockState.getFluidState();
@@ -150,7 +143,7 @@ public class ChunkBuilderMeshingTask extends ChunkBuilderTask<ChunkBuildOutput> 
                             cache.getFluidRenderer().render(slice, fluidState, blockPos, modelOffset, buffers);
                         }
 
-                        if (blockState.hasTileEntity()) {
+                        if (blockState.getBlock() instanceof EntityBlock) {
                             BlockEntity entity = slice.getBlockEntity(blockPos);
 
                             if (entity != null) {

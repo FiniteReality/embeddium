@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.extensions.IForgeTileEntity;
 import org.joml.Vector3d;
 
 public final class Viewport {
@@ -29,10 +28,6 @@ public final class Viewport {
     }
 
     public boolean isBoxVisible(AABB box) {
-        if (box.equals(IForgeTileEntity.INFINITE_EXTENT_AABB)) {
-            return true;
-        }
-
         return this.frustum.testAab(
                 (float)(box.minX - this.transform.intX) - this.transform.fracX,
                 (float)(box.minY - this.transform.intY) - this.transform.fracY,

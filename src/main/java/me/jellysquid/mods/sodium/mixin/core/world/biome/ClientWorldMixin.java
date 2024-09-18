@@ -22,7 +22,7 @@ public class ClientWorldMixin implements BiomeSeedProvider {
     private long biomeSeed;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void captureSeed(ClientPacketListener arg, ClientLevel.ClientLevelData arg2, ResourceKey arg3, DimensionType arg4, int i, Supplier supplier, LevelRenderer arg5, boolean bl, long seed, CallbackInfo ci) {
+    private void captureSeed(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, ResourceKey resourceKey2, DimensionType dimensionType, int i, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long seed, CallbackInfo ci) {
         this.biomeSeed = seed;
     }
 

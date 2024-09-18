@@ -1,7 +1,5 @@
 package org.embeddedt.embeddium.api.eventbus;
 
-import net.minecraftforge.eventbus.api.Event;
-
 /**
  * The base class which all Embeddium-posted events are derived from.
  * <p></p>
@@ -9,22 +7,21 @@ import net.minecraftforge.eventbus.api.Event;
  * <p></p>
  * On Fabric, it extends nothing.
  */
-public abstract class EmbeddiumEvent extends Event {
+public abstract class EmbeddiumEvent {
+    private boolean canceled;
+
     /**
      * Subclasses must override and return true if they want the event to be canceled.
      */
-    @Override
     public boolean isCancelable() {
         return false;
     }
 
-    @Override
     public boolean isCanceled() {
-        return super.isCanceled();
+        return canceled;
     }
 
-    @Override
     public void setCanceled(boolean cancel) {
-        super.setCanceled(cancel);
+        canceled = cancel;
     }
 }

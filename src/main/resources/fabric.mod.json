@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "embeddium",
+  "version": "${version}",
+  "name": "Embeddium",
+  "description": "Embeddium is a fork of Sodium which focuses on mod compatibility",
+  "authors": [
+    {
+      "name": "embeddedt"
+    },
+    {
+      "name": "jellysquid3",
+      "contact": {
+        "email": "jellysquid@pm.me",
+        "homepage": "https://jellysquid.me"
+      }
+    }
+  ],
+  "contributors": [
+    "@IMS212",
+    "@bytzo",
+    "@PepperCode1",
+    "@FlashyReese",
+    "@altrisi",
+    "@Grayray75",
+    "@Madis0",
+    "@Johni0702",
+    "@comp500",
+    "@coderbot16",
+    "@Moulberry",
+    "@MCRcortex",
+    "@Altirix",
+    "@pajicadvance",
+    "@Kroppeb",
+    "@douira",
+    "@burgerindividual",
+    "@TwistedZero",
+    "@Leo40Git"
+  ],
+  "contact": {
+    "homepage": "https://github.com/embeddedt/embeddium",
+    "sources": "https://github.com/embeddedt/embeddium",
+    "issues": "https://github.com/embeddedt/embeddium/issues"
+  },
+  "license": "LGPL-3.0-only",
+  "icon": "icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "me.jellysquid.mods.sodium.client.SodiumClientMod"
+    ],
+    "preLaunch": [
+      "me.jellysquid.mods.sodium.client.SodiumPreLaunch"
+    ]
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/rN9Y7caguP",
+        "modmenu.curseforge": "https://www.curseforge.com/minecraft/mc-mods/embeddium",
+        "modmenu.modrinth": "https://modrinth.com/mod/embeddium"
+      }
+    }
+  },
+  "accessWidener": "embeddium.accesswidener",
+  "mixins": [
+    "embeddium.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.16.1",
+    "fabricloader": ">=0.15.6",
+    "fabric-rendering-fluids-v1": "*"
+  },
+  "breaks": {
+    "optifabric": "*",
+    "canvas": "*"
+  }
+}

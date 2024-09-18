@@ -9,7 +9,6 @@ import me.jellysquid.mods.sodium.client.gui.options.control.SliderControl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.fml.ModList;
 import org.embeddedt.embeddium.client.gui.options.StandardOptions;
 
 import java.util.Optional;
@@ -19,7 +18,7 @@ import java.util.Optional;
  */
 public class FullscreenResolutionHelper {
     public static boolean isFullscreenResAlreadyAdded() {
-        return ModList.get().isLoaded("embeddium_extra") || ModList.get().isLoaded("rubidium_extra");
+        return false;
     }
 
     public static OptionImpl<?, ?> createFullScreenResolutionOption() {

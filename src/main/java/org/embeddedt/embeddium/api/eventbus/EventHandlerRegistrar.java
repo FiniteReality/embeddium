@@ -1,7 +1,5 @@
 package org.embeddedt.embeddium.api.eventbus;
 
-import net.minecraftforge.common.MinecraftForge;
-
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -42,7 +40,7 @@ public class EventHandlerRegistrar<T extends EmbeddiumEvent> {
     }
 
     private static <T extends EmbeddiumEvent> boolean postPlatformSpecificEvent(T event) {
-        return MinecraftForge.EVENT_BUS.post(event);
+        return false;
     }
 
     @FunctionalInterface

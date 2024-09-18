@@ -158,7 +158,7 @@ public class BlockRenderer {
         var random = this.random;
         random.setSeed(ctx.seed());
 
-        return ctx.model().getQuads(ctx.state(), face, random, ctx.modelData());
+        return ctx.model().getQuads(ctx.state(), face, random);
     }
 
     private boolean isFaceVisible(BlockRenderContext ctx, Direction face) {
@@ -282,8 +282,8 @@ public class BlockRenderer {
     }
 
     private LightMode getLightingMode(BlockState state, BakedModel model, BlockAndTintGetter world, BlockPos pos, RenderType renderLayer) {
-        if (this.useAmbientOcclusion && model.isAmbientOcclusion(state)
-                && (((EmbeddiumBakedModelExtension)model).useAmbientOcclusionWithLightEmission(state, renderLayer) || state.getLightValue(world, pos) == 0)) {
+        if (this.useAmbientOcclusion && model.useAmbientOcclusion()
+                && (((EmbeddiumBakedModelExtension)model).useAmbientOcclusionWithLightEmission(state, renderLayer) || state.getLightEmission() == 0)) {
             return LightMode.SMOOTH;
         } else {
             return LightMode.FLAT;

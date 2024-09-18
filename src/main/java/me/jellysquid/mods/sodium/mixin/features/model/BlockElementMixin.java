@@ -33,9 +33,7 @@ public class BlockElementMixin implements EpsilonizableBlockElement {
     }
 
     private static void embeddium$epsilonize(Vector3f v) {
-        v.setX(embeddium$epsilonize(v.x()));
-        v.setY(embeddium$epsilonize(v.y()));
-        v.setZ(embeddium$epsilonize(v.z()));
+        v.set(embeddium$epsilonize(v.x()), embeddium$epsilonize(v.y()), embeddium$epsilonize(v.z()));
     }
 
     private static final float EMBEDDIUM$MINIMUM_EPSILON = 0.008f;

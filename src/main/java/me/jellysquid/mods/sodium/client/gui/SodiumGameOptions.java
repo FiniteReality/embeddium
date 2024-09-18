@@ -7,10 +7,10 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.JsonSyntaxException;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.options.TextProvider;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.embeddedt.embeddium.config.ConfigMigrator;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -144,7 +144,7 @@ public class SodiumGameOptions {
     }
 
     private static Path getConfigPath(String name) {
-        return ConfigMigrator.handleConfigMigration(name);
+        return FabricLoader.getInstance().getConfigDir().resolve(name);
     }
 
     @Deprecated

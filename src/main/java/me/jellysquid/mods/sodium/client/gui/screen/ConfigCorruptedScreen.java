@@ -62,15 +62,15 @@ public class ConfigCorruptedScreen extends Screen {
 
         super.render(drawContext, mouseX, mouseY, delta);
 
-        Gui.drawString(drawContext, this.font, "Sodium Renderer", 32, 32, 0xffffff);
-        Gui.drawString(drawContext, this.font, "Could not load configuration file", 32, 48, 0xff0000);
+        this.font.drawShadow(drawContext, "Sodium Renderer", 32, 32, 0xffffff);
+        this.font.drawShadow(drawContext, "Could not load configuration file", 32, 48, 0xff0000);
 
         for (int i = 0; i < TEXT_BODY.size(); i++) {
             if (TEXT_BODY.get(i).getString().isEmpty()) {
                 continue;
             }
 
-            Gui.drawString(drawContext, this.font, TEXT_BODY.get(i), 32, 68 + (i * 12), 0xffffff);
+            this.font.drawShadow(drawContext, TEXT_BODY.get(i), 32, 68 + (i * 12), 0xffffff);
         }
     }
 }

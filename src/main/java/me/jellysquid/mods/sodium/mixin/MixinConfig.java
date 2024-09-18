@@ -1,8 +1,6 @@
 package me.jellysquid.mods.sodium.mixin;
 
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.LoadingModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -92,19 +90,11 @@ public class MixinConfig {
 
         Pattern replacePattern = Pattern.compile("[^\\w]");
 
-        if (FMLLoader.getLoadingModList().getErrors().isEmpty()) {
-            for (ModInfo modInfo : FMLLoader.getLoadingModList().getMods()) {
-                // Convert anything but alphabets and numbers to _
-                String sanitizedModId = replacePattern.matcher(modInfo.getModId()).replaceAll("_");
-                this.addMixinRule("modcompat." + sanitizedModId, true);
-            }
-        }
-
         this.applyBuiltInCompatOverrides();
     }
 
     private static boolean isModLoaded(String modId) {
-        return LoadingModList.get().getModFileById(modId) != null;
+        return FabricLoader.getInstance().getModContainer(modId).isPresent();
     }
 
     private void applyBuiltInCompatOverrides() {
@@ -166,6 +156,7 @@ public class MixinConfig {
         // [mods."sodium:options"]
         // "features.chunk_rendering"=false
         // ...
+        /*
         for (var meta : LoadingModList.get().getMods()) {
             meta.getConfigElement(JSON_KEY_SODIUM_OPTIONS).ifPresent(overridesObj -> {
                 if (overridesObj instanceof Map overrides && overrides.keySet().stream().allMatch(key -> key instanceof String)) {
@@ -177,6 +168,8 @@ public class MixinConfig {
                 }
             });
         }
+
+         */
     }
 
     private void applyModOverride(String modid, String name, Object value) {

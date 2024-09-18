@@ -22,11 +22,11 @@ public abstract class AbstractWidget implements Widget, GuiEventListener {
     }
 
     protected void drawString(PoseStack drawContext, String str, int x, int y, int color) {
-        Gui.drawString(drawContext, this.font, str, x, y, color);
+        this.font.drawShadow(drawContext, str, x, y, color);
     }
 
     protected void drawString(PoseStack drawContext, Component text, int x, int y, int color) {
-        Gui.drawString(drawContext, this.font, text, x, y, color);
+        this.font.drawShadow(drawContext, text, x, y, color);
     }
 
     public boolean isHovered() {

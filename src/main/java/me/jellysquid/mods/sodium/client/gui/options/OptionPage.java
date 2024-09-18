@@ -5,7 +5,6 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.embeddedt.embeddium.api.OptionPageConstructionEvent;
-import org.embeddedt.embeddium.client.gui.options.OptionIdGenerator;
 import org.embeddedt.embeddium.client.gui.options.OptionIdentifier;
 import org.embeddedt.embeddium.client.gui.options.StandardOptions;
 
@@ -30,13 +29,13 @@ public class OptionPage {
                     case "sodium.options.pages.quality" -> StandardOptions.Pages.QUALITY;
                     case "sodium.options.pages.advanced" -> StandardOptions.Pages.ADVANCED;
                     case "sodium.options.pages.performance" -> StandardOptions.Pages.PERFORMANCE;
-                    default -> OptionIdGenerator.generateId(key);
+                    default -> null;
                 };
             } else {
-                id = OptionIdGenerator.generateId(key);
+                id = null;
             }
         } else {
-            id = OptionIdGenerator.generateId(name.getString());
+            id = null;
         }
         if(id != null) {
             SodiumClientMod.logger().debug("Guessed ID for legacy OptionPage '{}': {}", name.getString(), id);

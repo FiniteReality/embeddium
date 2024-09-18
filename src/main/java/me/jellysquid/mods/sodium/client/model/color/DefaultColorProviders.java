@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.model.quad.blender.BlendedColorProvider;
 import me.jellysquid.mods.sodium.client.world.biome.BiomeColorSource;
 import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import net.caffeinemc.mods.sodium.api.util.ColorARGB;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -112,7 +113,14 @@ public class DefaultColorProviders {
                 return;
             }
 
-            Arrays.fill(output, ColorARGB.toABGR(state.getType().getAttributes().getColor(view, pos)));
+            var handler = FluidRenderHandlerRegistry.INSTANCE.get(state.getType());
+
+            if (handler == null) {
+                Arrays.fill(output, -1);
+                return;
+            }
+
+            Arrays.fill(output, ColorARGB.toABGR(0xFF000000 | handler.getFluidColor(view, pos, state)));
         }
     }
 }

@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.mixin.features.render.gui.debug;
 
 import com.google.common.base.Strings;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -11,46 +12,44 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.gui.ForgeIngameGui;
 import org.lwjgl.opengl.GL11;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(ForgeIngameGui.class)
-public abstract class ForgeGuiMixin extends Gui {
+@Mixin(DebugScreenOverlay.class)
+public abstract class ForgeGuiMixin extends GuiComponent {
+
     @Shadow
-    private Font fontrenderer;
+    @Final
+    private Font font;
 
-    public ForgeGuiMixin(Minecraft p_232355_) {
-        super(p_232355_);
-    }
+    @Shadow
+    @Final
+    private Minecraft minecraft;
 
-    /**
-     * @author embeddedt
-     * @reason take over rendering of the actual list contents
-     */
-    @Inject(method = "renderHUDText", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, remap = false)
-    private void embeddium$renderTextFast(int width, int height, PoseStack poseStack, CallbackInfo ci, ArrayList<String> listL, ArrayList<String> listR, RenderGameOverlayEvent.Text event) {
+    @Inject(method = "drawGameInformation", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"), cancellable = true)
+    private void drawGameInfoFast(PoseStack poseStack, CallbackInfo ci, @Local(ordinal = 0) List<String> list) {
         ci.cancel();
 
-        renderForgeList(poseStack, listL, false);
-        renderForgeList(poseStack, listR, true);
-
-        minecraft.getProfiler().pop();
+        renderBackdrop(poseStack, list, false);
+        renderStrings(poseStack, list, false);
     }
 
-    private void renderForgeList(PoseStack matrixStack, List<String> list, boolean right) {
-        renderBackdrop(matrixStack, list, right);
-        renderStrings(matrixStack, list, right);
+    @Inject(method = "drawSystemInformation", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"), cancellable = true)
+    private void drawSystemInfoFast(PoseStack poseStack, CallbackInfo ci, @Local(ordinal = 0) List<String> list) {
+        ci.cancel();
+
+        renderBackdrop(poseStack, list, true);
+        renderStrings(poseStack, list, true);
     }
 
     private void renderStrings(PoseStack matrixStack, List<String> list, boolean right) {
@@ -64,13 +63,13 @@ public abstract class ForgeGuiMixin extends Gui {
 
             if (!Strings.isNullOrEmpty(string)) {
                 int height = 9;
-                int width = this.fontrenderer.width(string);
+                int width = this.font.width(string);
 
                 float x1 = right ? this.minecraft.getWindow().getGuiScaledWidth() - 2 - width : 2;
                 float y1 = 2 + (height * i);
 
-                this.fontrenderer.drawInBatch(string, x1, y1, 0xe0e0e0, false, positionMatrix, immediate,
-                        false, 0, 15728880, this.fontrenderer.isBidirectional());
+                this.font.drawInBatch(string, x1, y1, 0xe0e0e0, false, positionMatrix, immediate,
+                        false, 0, 15728880, this.font.isBidirectional());
             }
         }
 
@@ -103,7 +102,7 @@ public abstract class ForgeGuiMixin extends Gui {
             }
 
             int height = 9;
-            int width = this.fontrenderer.width(string);
+            int width = this.font.width(string);
 
             int x = right ? this.minecraft.getWindow().getGuiScaledWidth() - 2 - width : 2;
             int y = 2 + height * i;

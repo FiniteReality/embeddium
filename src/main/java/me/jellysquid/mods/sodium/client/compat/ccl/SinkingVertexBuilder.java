@@ -9,12 +9,9 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEn
 import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import org.embeddedt.embeddium.render.frapi.SpriteFinderCache;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3fc;
 
-import javax.annotation.Nonnull;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,7 +23,6 @@ import java.util.Arrays;
  *
  * @author KitsuneAlex, embeddedt
  */
-@OnlyIn(Dist.CLIENT)
 public final class SinkingVertexBuilder implements VertexConsumer {
     private static final int VERTEX_SIZE_BYTES = 32;
     private static final int INITIAL_CAPACITY = 16384; // Seems to generally be enough for your average subchunk
@@ -135,7 +131,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return newBuf;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer vertex(double x, double y, double z) {
         this.x = (float) x;
@@ -144,7 +140,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer color(int r, int g, int b, int a) {
         color = ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
@@ -152,7 +148,7 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer uv(float u, float v) {
         this.u = u;
@@ -160,20 +156,20 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer overlayCoords(int u, int v) {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer uv2(int u, int v) {
         light = (v << 16) | u; // Compose lightmap coords into raw light value 0xVVVV_UUUU
         return this;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public VertexConsumer normal(float x, float y, float z) {
         return this;
@@ -230,11 +226,11 @@ public final class SinkingVertexBuilder implements VertexConsumer {
         return currentVertex == 0;
     }
 
-    public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, Vector3fc origin) {
+    public boolean flush(@NotNull ChunkModelBuilder buffers, Material material, Vector3fc origin) {
         return flush(buffers, material, origin.x(), origin.y(), origin.z());
     }
 
-    public boolean flush(@Nonnull ChunkModelBuilder buffers, Material material, float oX, float oY, float oZ) {
+    public boolean flush(@NotNull ChunkModelBuilder buffers, Material material, float oX, float oY, float oZ) {
         if(currentVertex == 0) {
             return false;
         }
@@ -287,12 +283,6 @@ public final class SinkingVertexBuilder implements VertexConsumer {
                 midV += sodiumVertex.v;
                 sodiumVertex.color = buffer.getInt();
                 sodiumVertex.light = buffer.getInt();
-            }
-
-            // Detect sprite
-            TextureAtlasSprite sprite = SpriteFinderCache.forBlockAtlas().findNearestSprite(midU / 4, midV / 4);
-            if(sprite != null) {
-                buffers.addSprite(sprite);
             }
 
             sink.push(sodiumQuad, material);

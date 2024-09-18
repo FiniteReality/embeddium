@@ -46,10 +46,7 @@ public class ColorProviderRegistry {
                 Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
                 Blocks.DARK_OAK_LEAVES, Blocks.VINE);
 
-        // We cannot use BiomeColors::getAverageWaterColor as it bypasses mods that inject their own logic into Forge's
-        // default getTintColor implementation on water.
-        var waterExtensions = Fluids.WATER.getAttributes();
-        DefaultColorProviders.VertexBlendedBiomeColorAdapter.VanillaBiomeColor waterGetter = waterExtensions::getColor;
+        DefaultColorProviders.VertexBlendedBiomeColorAdapter.VanillaBiomeColor waterGetter = (world, pos) -> BiomeColors.getAverageWaterColor(world, pos) | 0xFF000000;
 
         this.registerBlocks(new DefaultColorProviders.VertexBlendedBiomeColorAdapter<>(waterGetter),
                 Blocks.WATER, Blocks.BUBBLE_COLUMN);

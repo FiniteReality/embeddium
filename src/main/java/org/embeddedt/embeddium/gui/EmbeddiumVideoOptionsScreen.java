@@ -146,7 +146,7 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
 
 
     private void registerTextures() {
-        Minecraft.getInstance().textureManager.register(LOGO_LOCATION, new SimpleTexture(LOGO_LOCATION));
+        Minecraft.getInstance().getTextureManager().register(LOGO_LOCATION, new SimpleTexture(LOGO_LOCATION));
     }
 
 

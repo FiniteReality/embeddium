@@ -1,25 +1,23 @@
 package org.embeddedt.embeddium.gui.frame.tab;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.fml.packs.ModFileResourcePack;
-import net.minecraftforge.fml.packs.ResourcePackLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,32 +34,23 @@ public class TabHeaderWidget extends FlatButtonWidget {
             // TODO handle long mod names better, this is the only one we know of right now
             case "sspb" -> new TextComponent("SSPB");
             default -> Tab.idComponent(modId);
-        }).withStyle(s -> s.withUnderlined(true));
+        }).withStyle(s -> s.applyFormat(ChatFormatting.UNDERLINE));
     }
 
     public TabHeaderWidget(Dim2i dim, String modId) {
         super(dim, getLabel(modId), () -> {});
-        Optional<String> logoFile = erroredLogos.contains(modId) ? Optional.empty() : ModList.get().getModContainerById(modId).flatMap(c -> ((ModInfo)c.getModInfo()).getLogoFile());
+        Optional<Path> logoFile = erroredLogos.contains(modId) ? Optional.empty() : FabricLoader.getInstance().getModContainer(modId).flatMap(c -> c.getMetadata().getIconPath(32).flatMap(c::findPath));
         ResourceLocation texture = null;
         if(logoFile.isPresent()) {
-            final ModFileResourcePack resourcePack = ResourcePackLoader.getResourcePackFor(modId)
-                    .orElse(ResourcePackLoader.getResourcePackFor("forge").
-                            orElseThrow(()->new RuntimeException("Can't find forge, WHAT!")));
-            try {
-                InputStream logoResource = resourcePack.getRootResource(logoFile.get());
-                if (logoResource != null) {
-                    NativeImage logo;
-                    try {
-                        logo = NativeImage.read(logoResource);
-                    } finally {
-                        logoResource.close();
-                    }
+            try(InputStream is = Files.newInputStream(logoFile.get())) {
+                if (is != null) {
+                    NativeImage logo = NativeImage.read(is);
                     if(logo.getWidth() != logo.getHeight()) {
                         logo.close();
                         throw new IOException("Logo " + logoFile.get() + " for " + modId + " is not square");
                     }
                     texture = new ResourceLocation(SodiumClientMod.MODID, "logo/" + modId);
-                    Minecraft.getInstance().textureManager.register(texture, new DynamicTexture(logo));
+                    Minecraft.getInstance().getTextureManager().register(texture, new DynamicTexture(logo));
                 }
             } catch(IOException e) {
                 erroredLogos.add(modId);

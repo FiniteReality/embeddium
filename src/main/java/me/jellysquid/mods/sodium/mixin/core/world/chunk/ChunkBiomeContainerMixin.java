@@ -12,14 +12,10 @@ import org.spongepowered.asm.mixin.Shadow;
 public class ChunkBiomeContainerMixin implements ChunkBiomeContainerExtended {
     @Shadow
     @Final
-    private IdMap<Biome> biomeRegistry;
-
-    @Shadow
-    @Final
     private Biome[] biomes;
 
     @Override
     public ChunkBiomeContainer embeddium$copy() {
-        return new ChunkBiomeContainer(this.biomeRegistry, this.biomes.clone());
+        return new ChunkBiomeContainer(this.biomes.clone());
     }
 }

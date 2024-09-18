@@ -9,9 +9,9 @@ import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -70,14 +70,12 @@ public class ConsoleRenderer {
                     continue;
                 }
 
-                List<FormattedCharSequence> lines = new ArrayList<>();
+                List<FormattedText> lines;
 
                 var messageWidth = 270;
 
                 StringSplitter textHandler = client.font.getSplitter();
-                textHandler.splitLines(message.text(), messageWidth - 20, Style.EMPTY, (text, lastLineWrapped) -> {
-                    lines.add(Language.getInstance().getVisualOrder(text));
-                });
+                lines = textHandler.splitLines(message.text(), messageWidth - 20, Style.EMPTY, null);
 
                 var messageHeight = (client.font.lineHeight * lines.size()) + (paddingHeight * 2);
 
@@ -209,7 +207,7 @@ public class ConsoleRenderer {
 
     }
 
-    private record MessageRender(int x, int y, int width, int height, MessageLevel level, List<FormattedCharSequence> lines, double opacity) {
+    private record MessageRender(int x, int y, int width, int height, MessageLevel level, List<FormattedText> lines, double opacity) {
 
     }
 }

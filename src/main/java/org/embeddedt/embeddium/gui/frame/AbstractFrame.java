@@ -1,5 +1,6 @@
 package org.embeddedt.embeddium.gui.frame;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL20C;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,10 +58,11 @@ public abstract class AbstractFrame extends AbstractWidget implements ContainerE
 
     public void applyScissor(int x, int y, int width, int height, Runnable action) {
         double scale = Minecraft.getInstance().getWindow().getGuiScale();
-        RenderSystem.enableScissor((int) (x * scale), (int) (Minecraft.getInstance().getWindow().getHeight() - (y + height) * scale),
+        GL20C.glEnable(GL20C.GL_SCISSOR_TEST);
+        GL20C.glScissor((int) (x * scale), (int) (Minecraft.getInstance().getWindow().getHeight() - (y + height) * scale),
                 (int) (width * scale), (int) (height * scale));
         action.run();
-        RenderSystem.disableScissor();
+        GL20C.glDisable(GL20C.GL_SCISSOR_TEST);
     }
 
     public void registerFocusListener(Consumer<GuiEventListener> focusListener) {

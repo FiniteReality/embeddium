@@ -7,8 +7,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.data.IModelData;
 import org.embeddedt.embeddium.render.matrix_stack.CachingPoseStack;
 import org.embeddedt.embeddium.render.world.WorldSliceLocalGenerator;
 import org.joml.Vector3f;
@@ -33,7 +31,6 @@ public class BlockRenderContext {
 
     private long seed;
 
-    private IModelData modelData;
     private RenderType renderLayer;
 
 
@@ -43,7 +40,7 @@ public class BlockRenderContext {
         ((CachingPoseStack)this.stack).embeddium$setCachingEnabled(true);
     }
 
-    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, IModelData modelData, RenderType renderLayer) {
+    public void update(BlockPos pos, BlockPos origin, BlockState state, BakedModel model, long seed, RenderType renderLayer) {
         this.pos.set(pos);
         this.origin.set(origin.getX(), origin.getY(), origin.getZ());
 
@@ -52,10 +49,7 @@ public class BlockRenderContext {
 
         this.seed = seed;
 
-        this.modelData = modelData;
         this.renderLayer = renderLayer;
-
-        ForgeHooksClient.setRenderLayer(renderLayer);
     }
 
     /**
@@ -112,13 +106,6 @@ public class BlockRenderContext {
      */
     public long seed() {
         return this.seed;
-    }
-
-    /**
-     * @return The additional data for model instance
-     */
-    public IModelData modelData() {
-        return this.modelData;
     }
 
     /**

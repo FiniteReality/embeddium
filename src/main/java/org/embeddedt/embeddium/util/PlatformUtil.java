@@ -1,22 +1,21 @@
 package org.embeddedt.embeddium.util;
 
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class PlatformUtil {
     public static boolean isLoadValid() {
-        return FMLLoader.getLoadingModList().getErrors().isEmpty();
+        return true;
     }
 
     public static boolean modPresent(String modid) {
-        return FMLLoader.getLoadingModList().getModFileById(modid) != null;
+        return FabricLoader.getInstance().isModLoaded(modid);
     }
 
     public static String getModName(String modId) {
-        return ModList.get().getModContainerById(modId).map(container -> container.getModInfo().getDisplayName()).orElse(modId);
+        return FabricLoader.getInstance().getModContainer(modId).map(container -> container.getMetadata().getName()).orElse(modId);
     }
 
     public static boolean isDevelopmentEnvironment() {
-        return !FMLLoader.isProduction();
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 }

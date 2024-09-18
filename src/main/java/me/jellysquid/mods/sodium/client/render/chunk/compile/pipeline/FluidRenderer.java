@@ -24,10 +24,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SupportType;
+import net.minecraft.world.level.block.HalfTransparentBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -103,7 +105,7 @@ public class FluidRenderer {
         BlockPos pos = this.scratchPos.set(x, y, z);
         BlockState blockState = world.getBlockState(pos);
 
-        if (!blockState.canOcclude() || !blockState.isFaceSturdy(world, pos, dir, SupportType.FULL)) {
+        if (!blockState.canOcclude() || !blockState.isFaceSturdy(world, pos, dir)) {
             // The blockstate we're inside doesn't occlude or isn't sturdy on this side, so it cannot possibly
             // be hiding the fluid
             return false;
@@ -199,7 +201,7 @@ public class FluidRenderer {
 
         // LVT name kept for 1.20.1 in case a mixin captures it, the meaning of this variable is now "does the fluid
         // support AO"
-        boolean isWater = fluid.getAttributes().getLuminosity(world, blockPos) == 0;
+        boolean isWater = FluidTags.WATER.contains(fluid);
 
         final ColorProvider<FluidState> colorProvider = this.getColorProvider(fluid);
 
@@ -422,9 +424,9 @@ public class FluidRenderer {
 
                 if (sprites.length > 2) {
                     BlockPos adjPos = this.scratchPos.set(adjX, adjY, adjZ);
-                    BlockState adjBlock = world.getBlockState(adjPos);
+                    Block adjBlock = world.getBlockState(adjPos).getBlock();
 
-                    if (sprites[2] != null && adjBlock.shouldDisplayFluidOverlay(world, adjPos, fluidState)) {
+                    if (sprites[2] != null && (adjBlock instanceof HalfTransparentBlock || adjBlock instanceof LeavesBlock)) {
                         sprite = sprites[2];
                         isOverlay = true;
                     }

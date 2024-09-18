@@ -1,0 +1,30 @@
+accessWidener v2 named
+
+accessible class net/minecraft/client/model/geom/ModelPart$Polygon
+accessible field net/minecraft/client/model/geom/ModelPart$Cube polygons [Lnet/minecraft/client/model/geom/ModelPart$Polygon;
+accessible field net/minecraft/client/model/geom/ModelPart$Polygon normal Lcom/mojang/math/Vector3f;
+accessible class net/minecraft/client/model/geom/ModelPart$Vertex
+accessible field net/minecraft/client/model/geom/ModelPart$Polygon vertices [Lnet/minecraft/client/model/geom/ModelPart$Vertex;
+accessible field net/minecraft/client/model/geom/ModelPart$Vertex pos Lcom/mojang/math/Vector3f;
+accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$InterpolationData uploadInterpolatedFrame ()V
+
+
+
+accessible class net/minecraft/client/resources/model/WeightedBakedModel$WeightedModel
+accessible field net/minecraft/client/resources/model/WeightedBakedModel$WeightedModel model Lnet/minecraft/client/resources/model/BakedModel;
+
+accessible class net/minecraft/client/renderer/texture/TextureAtlasSprite$InterpolationData
+
+accessible field com/mojang/blaze3d/platform/GlStateManager FOG Lcom/mojang/blaze3d/platform/GlStateManager$FogState;
+accessible class com/mojang/blaze3d/platform/GlStateManager$FogState
+accessible field net/minecraft/client/renderer/FogRenderer fogRed F
+accessible field net/minecraft/client/renderer/FogRenderer fogGreen F
+accessible field net/minecraft/client/renderer/FogRenderer fogBlue F
+accessible class com/mojang/blaze3d/platform/GlStateManager$BooleanState
+accessible field com/mojang/blaze3d/platform/GlStateManager$BooleanState enabled Z
+accessible method com/mojang/blaze3d/vertex/PoseStack$Pose <init> (Lcom/mojang/math/Matrix4f;Lcom/mojang/math/Matrix3f;)V
+
+accessible field net/minecraft/client/renderer/LightTexture lightTextureLocation Lnet/minecraft/resources/ResourceLocation;
+
+accessible field net/minecraft/world/level/GrassColor pixels [I
+accessible field net/minecraft/world/level/FoliageColor pixels [I

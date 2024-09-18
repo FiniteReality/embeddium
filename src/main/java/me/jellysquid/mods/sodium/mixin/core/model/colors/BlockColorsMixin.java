@@ -5,8 +5,8 @@ import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.model.color.interop.BlockColorsExtended;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,7 +35,7 @@ public class BlockColorsMixin implements BlockColorsExtended {
                     // it means a mod is using custom logic and we need to disable per-vertex coloring
                     if (this.blocksToColor.put(block, provider) != null) {
                         this.overridenBlocks.add(block);
-                        SodiumClientMod.logger().info("Block {} had its color provider replaced and will not use per-vertex coloring", ForgeRegistries.BLOCKS.getKey(block));
+                        SodiumClientMod.logger().info("Block {} had its color provider replaced and will not use per-vertex coloring", Registry.BLOCK.getKey(block));
                     }
                 }
             }

@@ -10,8 +10,6 @@ plugins {
 
     id("me.modmuss50.mod-publish-plugin") version("0.3.4")
 
-    id("embeddium-fabric-remapper")
-
     id("com.gradleup.shadow") version "8.3.0"
 
     id("xyz.wagyourtail.jvmdowngrader") version "1.1.3"
@@ -100,26 +98,12 @@ fun DependencyHandlerScope.compatCompileOnly(dependency: Any) {
 }
 
 loom {
-    forge {
-        mixinConfigs.add("embeddium.mixins.json")
-    }
-    runs {
-        this["client"].apply {
-            mods {
-                create("archives_base_name"()) {
-                    sourceSet(sourceSets["main"])
-                    extraSourceSets.forEach {
-                        sourceSet(sourceSets[it])
-                    }
-                }
-            }
-        }
-    }
+    accessWidenerPath = file("src/main/resources/embeddium.accesswidener")
     createRemapConfigurations(sourceSets["compat"])
 }
 
 fun fAPIModule(name: String): Dependency {
-    return fabricApiModuleFinder.module(name, "fabric_version"())
+    return fabricApi.module(name, "fabric_version"())
 }
 
 dependencies {
@@ -133,25 +117,20 @@ dependencies {
             parchment("org.parchmentmc.data:parchment-${parchment_version[1]}:${parchment_version[0]}@zip")
         }
     })
-    forge("net.minecraftforge:forge:${"minecraft_version"()}-${"forge_version"()}")
 
-    // Mods
-    "modCompatCompileOnly"("curse.maven:codechickenlib-242818:${"codechicken_fileid"()}")
-    "modCompatCompileOnly"("curse.maven:flywheel-486392:3535459")
-
-    modLocalRuntime("curse.maven:lazydfu-460819:3249059")
+    modLocalRuntime("curse.maven:lazydfu-433518:3209972")
 
     // Fabric API
-    "fabricCompileOnly"(fAPIModule("fabric-api-base"))
-    "fabricCompileOnly"(fAPIModule("fabric-renderer-api-v1"))
-    "fabricCompileOnly"(fAPIModule("fabric-rendering-data-attachment-v1"))
-    "fabricCompileOnly"(fAPIModule("fabric-renderer-indigo"))
-    compileOnly("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
+    "modImplementation"(fAPIModule("fabric-api-base"))
+    "include"(fAPIModule("fabric-api-base"))
+    "modCompileOnly"(fAPIModule("fabric-renderer-api-v1"))
+    "modCompileOnly"(fAPIModule("fabric-rendering-data-attachment-v1"))
+    "modImplementation"(fAPIModule("fabric-rendering-fluids-v1"))
+    "include"(fAPIModule("fabric-rendering-fluids-v1"))
+    "modCompileOnly"(fAPIModule("fabric-renderer-indigo"))
+    "modImplementation"("net.fabricmc:fabric-loader:${"fabric_loader_version"()}")
 
     //"runtimeOnlyNonPublishable"(fg.deobf("curse.maven:modernfix-790626:5288170"))
-
-    shadow("io.github.llamalad7:mixinextras-common:0.3.5")
-    annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.5")
 
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
@@ -162,7 +141,7 @@ dependencies {
 tasks.processResources {
     inputs.property("version", "version"())
 
-    filesMatching("META-INF/mods.toml") {
+    filesMatching("fabric.mod.json") {
         expand("version" to "version"())
     }
 }
@@ -193,7 +172,6 @@ tasks.named<Jar>("sourcesJar").configure {
 tasks.named<ShadowJar>("shadowJar").configure {
     archiveClassifier = "dev-shadow"
     configurations = listOf(project.configurations.shadow.get())
-    relocate("com.llamalad7.mixinextras", "org.embeddedt.embeddium.impl.shadow.mixinextras")
     relocate("org.joml", "org.embeddedt.embeddium.impl.shadow.joml")
     mergeServiceFiles()
 }
@@ -224,8 +202,7 @@ publishMods {
     file = tasks.shadowJar.get().archiveFile
     changelog = "https://github.com/embeddedt/embeddium/wiki/Changelog"
     type = STABLE
-    modLoaders.add("forge")
-    modLoaders.add("neoforge")
+    modLoaders.add("fabric")
 
     curseforge {
         projectId = "908741"

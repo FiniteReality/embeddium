@@ -2,20 +2,15 @@ package me.jellysquid.mods.sodium.mixin;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import me.jellysquid.mods.sodium.client.SodiumPreLaunch;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.moddiscovery.ModFile;
-import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.asm.AnnotationProcessingEngine;
-import org.embeddedt.embeddium.config.ConfigMigrator;
-import org.embeddedt.embeddium_integrity.MixinTaintDetector;
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.asm.util.JavaVersion;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,23 +31,14 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     public void onLoad(String mixinPackage) {
         MixinExtrasBootstrap.init();
 
-        if (!FMLLoader.isProduction() && JavaVersion.current() >= 17.0) {
-            this.logger.warn("Raising compatibility level to fix dev environment");
-            MixinEnvironment.setCompatibilityLevel(MixinEnvironment.CompatibilityLevel.JAVA_17);
-        }
-
         try {
-            this.config = MixinConfig.load(ConfigMigrator.handleConfigMigration("embeddium-mixins.properties").toFile());
+            this.config = MixinConfig.load(FabricLoader.getInstance().getConfigDir().resolve("embeddium-mixins.properties").toFile());
         } catch (Exception e) {
             throw new RuntimeException("Could not load configuration file for " + MODNAME, e);
         }
 
         this.logger.info("Loaded configuration file for " + MODNAME + ": {} options available, {} override(s) found",
                 this.config.getOptionCount(), this.config.getOptionOverrideCount());
-
-        SodiumPreLaunch.onPreLaunch();
-
-        MixinTaintDetector.initialize();
     }
 
     @Override
@@ -111,26 +97,30 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
         }
     }
 
+    private static Path findPathInMod(ModContainer modFile, String... pathComponents) {
+        return modFile.findPath(String.join("/", pathComponents)).orElse(null);
+    }
+
     @Override
     public List<String> getMixins() {
-        if (FMLLoader.getDist() != Dist.CLIENT) {
+        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
             return null;
         }
 
-        ModFileInfo modFileInfo = FMLLoader.getLoadingModList().getModFileById("embeddium");
+        var modFileOpt = FabricLoader.getInstance().getModContainer("embeddium");
 
-        if (modFileInfo == null) {
+        if (modFileOpt.isEmpty()) {
             // Probably a load error
             logger.error("Could not find embeddium mod, there is likely a dependency error. Skipping mixin application.");
             return null;
         }
 
-        ModFile modFile = modFileInfo.getFile();
+        ModContainer modFile = modFileOpt.get();
         Set<Path> rootPaths = new HashSet<>();
         // This allows us to see it from multiple sourcesets if need be
         for(String basePackage : new String[] { "core", "modcompat" }) {
-            Path mixinPackagePath = modFile.findResource(String.join("/", "me", "jellysquid", "mods", "sodium", "mixin", basePackage));
-            if(Files.exists(mixinPackagePath)) {
+            Path mixinPackagePath = findPathInMod(modFile, "me", "jellysquid", "mods", "sodium", "mixin", basePackage);
+            if(mixinPackagePath != null && Files.exists(mixinPackagePath)) {
                 rootPaths.add(mixinPackagePath.getParent().toAbsolutePath());
             }
         }

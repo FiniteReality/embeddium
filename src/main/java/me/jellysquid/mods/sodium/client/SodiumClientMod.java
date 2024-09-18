@@ -3,24 +3,18 @@ package me.jellysquid.mods.sodium.client;
 import me.jellysquid.mods.sodium.client.data.fingerprint.FingerprintMeasure;
 import me.jellysquid.mods.sodium.client.data.fingerprint.HashedFingerprint;
 import me.jellysquid.mods.sodium.client.gui.SodiumGameOptions;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLLoader;
 
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.render.ShaderModBridge;
-import org.embeddedt.embeddium.taint.incompats.IncompatibleModManager;
-import org.embeddedt.embeddium.taint.scanning.TaintDetector;
 import org.embeddedt.embeddium.util.sodium.FlawlessFrames;
 
 import java.io.IOException;
 
-@Mod(SodiumClientMod.MODID)
-public class SodiumClientMod {
+public class SodiumClientMod implements ClientModInitializer {
     public static final String MODID = EmbeddiumConstants.MODID;
     public static final String MODNAME = EmbeddiumConstants.MODNAME;
 
@@ -29,36 +23,17 @@ public class SodiumClientMod {
 
     private static String MOD_VERSION;
 
-    public SodiumClientMod() {
-        MOD_VERSION = ModList.get().getModContainerById(MODID).get().getModInfo().getVersion().toString();
+    @Override
+    public void onInitializeClient() {
+        MOD_VERSION = FabricLoader.getInstance().getModContainer(MODID).get().getMetadata().getVersion().toString();
         //ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-
-        if (!FMLLoader.getDist().isClient()) {
-            return;
-        }
-
-        TaintDetector.init();
-
-        var eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        if("true".equals(System.getProperty("embeddium.enableGameTest"))) {
-            try {
-                eventBus.register(Class.forName("org.embeddedt.embeddium.impl.gametest.content.TestRegistry"));
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        eventBus.addListener(this::onClientSetup);
 
         try {
             updateFingerprint();
         } catch (Throwable t) {
             LOGGER.error("Failed to update fingerprint", t);
         }
-    }
 
-    public void onClientSetup(final FMLClientSetupEvent event) {
-        IncompatibleModManager.checkMods(event);
         FlawlessFrames.onClientInitialization();
     }
 
