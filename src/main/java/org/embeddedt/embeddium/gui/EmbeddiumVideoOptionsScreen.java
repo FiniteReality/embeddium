@@ -170,7 +170,8 @@ public class EmbeddiumVideoOptionsScreen extends Screen {
         if(firstInit) {
             this.setFocused(this.searchTextField);
             firstInit = false;
-            this.checkPromptTimers();
+            // TODO port to 1.16 properly
+            //this.checkPromptTimers();
         }
     }
 
