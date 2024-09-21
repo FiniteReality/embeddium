@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.*;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.gl.compat.FogHelper;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import me.jellysquid.mods.sodium.client.gl.device.CommandList;
@@ -282,7 +283,8 @@ public class RenderSectionManager {
         this.sectionByPosition.put(key, renderSection);
 
         ChunkAccess chunk = this.world.getChunk(x, z);
-        LevelChunkSection section = chunk.getSections()[y / 16];
+        var sectionArray = chunk.getSections();
+        LevelChunkSection section = y >= 0 && y < sectionArray.length ? sectionArray[y] : LevelChunk.EMPTY_SECTION;
 
         boolean isEmpty = LevelChunkSection.isEmpty(section) && ChunkMeshEvent.post(this.world, SectionPos.of(x, y, z)).isEmpty();
         if (isEmpty) {

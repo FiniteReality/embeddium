@@ -105,7 +105,8 @@ public class WorldSlice implements BlockAndTintGetter, BiomeColorView, RenderAtt
 
     public static ChunkRenderContext prepare(Level world, SectionPos origin, ClonedChunkSectionCache sectionCache) {
         LevelChunk chunk = world.getChunk(origin.getX(), origin.getZ());
-        LevelChunkSection section = chunk.getSections()[origin.getY() / 16];
+        var sectionArray = chunk.getSections();
+        LevelChunkSection section = origin.getY() >= 0 && origin.getY() < sectionArray.length ? sectionArray[origin.getY()] : LevelChunk.EMPTY_SECTION;
 
         // If the chunk section is absent or empty, simply terminate now. There will never be anything in this chunk
         // section to render, so we need to signal that a chunk render task shouldn't created. This saves a considerable
