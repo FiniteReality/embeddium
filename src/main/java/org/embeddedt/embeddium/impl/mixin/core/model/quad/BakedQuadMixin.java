@@ -11,9 +11,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static org.embeddedt.embeddium.impl.util.ModelQuadUtil.*;
 
@@ -51,18 +48,6 @@ public class BakedQuadMixin implements BakedQuadView {
 
     @Unique
     private ModelQuadFacing normalFace;
-
-    @Inject(method = "/<init>/", at = @At("RETURN"))
-    private void init(CallbackInfo ci) {
-        if (this.normalFace != null) {
-            // injector already ran on other constructor, skip
-            return;
-        }
-        this.normal = ModelQuadUtil.calculateNormal(this);
-        this.normalFace = ModelQuadUtil.findNormalFace(this.normal);
-
-        this.flags = ModelQuadFlags.getQuadFlags(this, this.direction);
-    }
 
     @Override
     public float getX(int idx) {
@@ -111,7 +96,11 @@ public class BakedQuadMixin implements BakedQuadView {
 
     @Override
     public int getFlags() {
-        return this.flags;
+        int f = this.flags;
+        if (f == 0) {
+            this.flags = f = ModelQuadFlags.getQuadFlags(this, direction);
+        }
+        return f;
     }
 
     @Override
@@ -126,12 +115,20 @@ public class BakedQuadMixin implements BakedQuadView {
 
     @Override
     public ModelQuadFacing getNormalFace() {
-        return this.normalFace;
+        var face = this.normalFace;
+        if (face == null) {
+            this.normalFace = face = ModelQuadUtil.findNormalFace(getComputedFaceNormal());
+        }
+        return face;
     }
 
     @Override
     public int getComputedFaceNormal() {
-        return this.normal;
+        int n = this.normal;
+        if (n == 0) {
+            this.normal = n = ModelQuadUtil.calculateNormal(this);
+        }
+        return n;
     }
 
     @Override
