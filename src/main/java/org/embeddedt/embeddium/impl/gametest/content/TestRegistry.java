@@ -58,7 +58,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
-@EventBusSubscriber(modid = EmbeddiumConstants.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class TestRegistry {
     public static final Logger LOGGER = LoggerFactory.getLogger("Embeddium/TestSystem");
 

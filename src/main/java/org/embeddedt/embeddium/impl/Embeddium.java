@@ -33,6 +33,14 @@ public class Embeddium {
         MOD_VERSION = modContainer.getModInfo().getVersion().toString();
         modContainer.registerExtensionPoint(IConfigScreenFactory.class, (mc, screen) -> new EmbeddiumVideoOptionsScreen(screen, EmbeddiumVideoOptionsScreen.makePages()));
 
+        if("true".equals(System.getProperty("embeddium.enableGameTest"))) {
+            try {
+                modEventBus.register(Class.forName("org.embeddedt.embeddium.impl.gametest.content.TestRegistry"));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         try {
             updateFingerprint();
         } catch (Throwable t) {

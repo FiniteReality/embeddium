@@ -1,4 +1,5 @@
 import org.embeddedt.embeddium.gradle.Constants
+import org.embeddedt.embeddium.gradle.fabric.remapper.FabricApiModuleFinder
 import net.neoforged.gradle.dsl.common.runs.run.Run
 
 plugins {
@@ -12,11 +13,6 @@ val neoForgePr = if(rootProject.hasProperty("neoforge_pr")) rootProject.properti
 
 sourceSets {
     val main = getByName("main")
-
-    create("gameTest") {
-        compileClasspath += main.compileClasspath
-        compileClasspath += main.output
-    }
 }
 
 repositories {
@@ -57,7 +53,7 @@ runs {
 
     fun configureGameTestRun(run: Run) {
         run.gameTest(true)
-        run.modSource(sourceSets["gameTest"])
+        run.systemProperty("embeddium.enableGameTest", "true")
     }
 
     create("gameTestClient") {
@@ -86,10 +82,18 @@ runs {
     }
 }
 
+fun fAPIModule(name: String): Dependency {
+    return the<FabricApiModuleFinder>().module(name, project.properties["fabric_version"].toString())
+}
+
 dependencies {
     implementation("net.neoforged:neoforge:${project.properties["forge_version"].toString()}")
 
     // Fabric API
-    compileOnly("net.fabricmc.fabric-api:fabric-api:${project.properties["fabric_version"].toString()}")
+    "fabricCompileOnly"(fAPIModule("fabric-api-base"))
+    "fabricCompileOnly"(fAPIModule("fabric-block-view-api-v2"))
+    "fabricCompileOnly"(fAPIModule("fabric-renderer-api-v1"))
+    "fabricCompileOnly"(fAPIModule("fabric-rendering-data-attachment-v1"))
+    "fabricCompileOnly"(fAPIModule("fabric-renderer-indigo"))
     compileOnly("net.fabricmc:fabric-loader:${project.properties["fabric_loader_version"].toString()}")
 }
