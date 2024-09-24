@@ -1,4 +1,4 @@
-package org.embeddedt.embeddium.fabric.injectors;
+package net.neoforged.neoforge.client.extensions;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface BakedModelInjector {
+public interface IBakedModelExtension {
     default List<BakedQuad> getQuads(@Nullable BlockState p_235039_, @Nullable Direction p_235040_, RandomSource p_235041_, net.neoforged.neoforge.client.model.data.ModelData data, net.minecraft.client.renderer.RenderType renderType) {
        return ((BakedModel)this).getQuads(p_235039_, p_235040_, p_235041_);
     }

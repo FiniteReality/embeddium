@@ -15,6 +15,10 @@ public abstract class QuadLighter {
         throw new AssertionError();
     }
 
+    public void computeLightingForQuad(int[] vertexData, boolean shade) {
+        throw new AssertionError();
+    }
+
     public void computeLightingForQuad(BakedQuad forgeQuad) {
         throw new AssertionError();
     }

@@ -42,7 +42,7 @@
   "custom": {
     "loom:injected_interfaces": {
       "net/minecraft/class_238": ["org/embeddedt/embeddium/fabric/injectors/AABBInjector"],
-      "net/minecraft/class_1087": ["org/embeddedt/embeddium/fabric/injectors/BakedModelInjector"],
+      "net/minecraft/class_1087": ["net/neoforged/neoforge/client/extensions/IBakedModelExtension"],
       "net/minecraft/class_777": ["org/embeddedt/embeddium/fabric/injectors/BakedQuadInjector"],
       "net/minecraft/class_1920": ["org/embeddedt/embeddium/fabric/injectors/BlockAndTintGetterInjector"],
       "net/minecraft/class_2586": ["org/embeddedt/embeddium/fabric/injectors/BlockEntityInjector"],
