@@ -10,8 +10,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.embeddedt.embeddium.impl.gametest.network.SyncS2CPacket;
 import org.slf4j.Logger;
 
@@ -91,7 +89,7 @@ public class TestUtils {
      */
     public static void movePlayerToPosition(GameTestHelper helper, BlockPos pos) {
         BlockPos realPos = helper.absolutePos(pos);
-        var playerList = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
+        var playerList = Minecraft.getInstance().getSingleplayerServer().getPlayerList().getPlayers();
         if(playerList.size() != 1) {
             throw new IllegalStateException("Unexpected number of players: " + playerList.size());
         }
@@ -147,13 +145,22 @@ public class TestUtils {
      */
     public static void clientBarrier() {
         // Broadcast chunk changes
-        ServerLifecycleHooks.getCurrentServer().overworld().getChunkSource().tick(() -> false, true);
+        Minecraft.getInstance().getSingleplayerServer().overworld().getChunkSource().tick(() -> false, true);
         // Send barrier packet
         SyncS2CPacket packet = new SyncS2CPacket();
         packet.applyBarrier();
     }
 
-    private static final Method getBoundsMethod = ObfuscationReflectionHelper.findMethod(GameTestHelper.class, "getBounds");
+    private static final Method getBoundsMethod;
+
+    static {
+        try {
+            getBoundsMethod = GameTestHelper.class.getDeclaredMethod("getBounds");
+            getBoundsMethod.setAccessible(true);
+        } catch(ReflectiveOperationException e) {
+            throw new AssertionError();
+        }
+    }
 
     public static boolean isAABBLoaded(AABB bounds) {
         int minX = SectionPos.posToSectionCoord(bounds.minX - 0.5D);

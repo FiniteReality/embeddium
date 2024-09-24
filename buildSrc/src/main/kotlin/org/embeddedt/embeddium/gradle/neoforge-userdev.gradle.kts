@@ -13,6 +13,8 @@ val neoForgePr = if(rootProject.hasProperty("neoforge_pr")) rootProject.properti
 
 sourceSets {
     val main = getByName("main")
+
+    main.java.srcDirs("src/gametest/java")
 }
 
 repositories {

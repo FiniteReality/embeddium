@@ -14,4 +14,8 @@ public class ModelData {
     public <T> ModelData with(ModelProperty<T> prop, T val) {
         return this;
     }
+
+    public <T> T get(ModelProperty<T> prop) {
+        return null;
+    }
 }

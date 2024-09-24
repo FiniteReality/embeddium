@@ -1,13 +1,13 @@
 package org.embeddedt.embeddium.impl.gametest.network;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.embeddedt.embeddium.api.EmbeddiumConstants;
 import org.embeddedt.embeddium.impl.gametest.content.TestRegistry;
 
@@ -44,7 +44,7 @@ public class SyncS2CPacket implements CustomPacketPayload {
             throw new IllegalStateException("Existing latch found for barrier UUID: " + this.uuid);
         }
         TestRegistry.LOGGER.debug("Waiting at barrier {}", this.uuid);
-        var player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers().getFirst();
+        var player = Minecraft.getInstance().getSingleplayerServer().getPlayerList().getPlayers().getFirst();
         // 1.21 - need to enable flushing so packets reach the client synchronously
         player.connection.resumeFlushing();
         PacketDistributor.sendToAllPlayers(this);
