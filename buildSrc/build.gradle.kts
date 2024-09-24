@@ -13,7 +13,7 @@ dependencies {
     implementation("org.ow2.asm:asm-commons:9.7")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r")
-    implementation("net.neoforged.gradle:userdev:7.0.163") // NeoGradle
+    implementation("net.neoforged.gradle:userdev:7.0.165") // NeoGradle
     implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:1.6.397") // Loom
     implementation("com.github.johnrengelman:shadow:8.1.1") // Shadow
 }
