@@ -7,6 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
+import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevel;
+import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevelHolder;
 import org.lwjgl.system.MemoryUtil;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -18,10 +20,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * This Mixin is ported from Iris at <a href="https://github.com/IrisShaders/Iris/blob/41095ac23ea0add664afd1b85c414d1f1ed94066/src/main/java/net/coderbot/iris/mixin/bettermipmaps/MixinTextureAtlasSprite.java">MixinTextureAtlasSprite</a>.
+ * This Mixin is partially ported from Iris at <a href="https://github.com/IrisShaders/Iris/blob/41095ac23ea0add664afd1b85c414d1f1ed94066/src/main/java/net/coderbot/iris/mixin/bettermipmaps/MixinTextureAtlasSprite.java">MixinTextureAtlasSprite</a>.
  */
 @Mixin(SpriteContents.class)
-public class SpriteContentsMixin {
+public class SpriteContentsMixin implements SpriteTransparencyLevelHolder {
     @Mutable
     @Shadow
     @Final
@@ -30,6 +32,9 @@ public class SpriteContentsMixin {
     @Shadow
     @Final
     private ResourceLocation name;
+
+    @Unique
+    private SpriteTransparencyLevel embeddium$transparencyLevel;
 
     // While Fabric allows us to @Inject into the constructor here, that's just a specific detail of FabricMC's mixin
     // fork. Upstream Mixin doesn't allow arbitrary @Inject usage in constructor. However, we can use @ModifyVariable
@@ -41,11 +46,9 @@ public class SpriteContentsMixin {
     // cross-platform.
     @Redirect(method = "<init>(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/client/resources/metadata/animation/FrameSize;Lcom/mojang/blaze3d/platform/NativeImage;Lnet/minecraft/client/resources/metadata/animation/AnimationMetadataSection;Lnet/minecraftforge/client/textures/ForgeTextureMetadata;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/texture/SpriteContents;originalImage:Lcom/mojang/blaze3d/platform/NativeImage;", opcode = Opcodes.PUTFIELD))
     private void sodium$beforeGenerateMipLevels(SpriteContents instance, NativeImage nativeImage, ResourceLocation identifier) {
-        // Embeddium: Only fill in transparent colors if mipmaps are on and the texture name does not contain "leaves".
+        // Only fill in transparent colors if mipmaps are on and the texture name does not contain "leaves".
         // We're injecting after the "name" field has been set, so this is safe even though we're in a constructor.
-        if (Minecraft.getInstance().options.mipmapLevels().get() > 0 && !this.name.getPath().contains("leaves")) {
-            sodium$fillInTransparentPixelColors(nativeImage);
-        }
+        embeddium$processTransparentImages(nativeImage, Minecraft.getInstance().options.mipmapLevels().get() > 0 && !this.name.getPath().contains("leaves"));
 
         this.originalImage = nativeImage;
     }
@@ -59,7 +62,7 @@ public class SpriteContentsMixin {
      * black color does not leak over into sampling.
      */
     @Unique
-    private static void sodium$fillInTransparentPixelColors(NativeImage nativeImage) {
+    private void embeddium$processTransparentImages(NativeImage nativeImage, boolean shouldRewriteColors) {
         final long ppPixel = NativeImageHelper.getPointerRGBA(nativeImage);
         final int pixelCount = nativeImage.getHeight() * nativeImage.getWidth();
 
@@ -71,6 +74,8 @@ public class SpriteContentsMixin {
 
         float totalWeight = 0.0f;
 
+        SpriteTransparencyLevel level = SpriteTransparencyLevel.OPAQUE;
+
         for (int pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
             long pPixel = ppPixel + (pixelIndex * 4);
 
@@ -78,20 +83,32 @@ public class SpriteContentsMixin {
             int alpha = FastColor.ABGR32.alpha(color);
 
             // Ignore all fully-transparent pixels for the purposes of computing an average color.
-            if (alpha != 0) {
-                float weight = (float) alpha;
+            if (alpha > 0) {
+                if(alpha < 255) {
+                    level = level.chooseNextLevel(SpriteTransparencyLevel.TRANSLUCENT);
+                } else {
+                    level = level.chooseNextLevel(SpriteTransparencyLevel.OPAQUE);
+                }
 
-                // Make sure to convert to linear space so that we don't lose brightness.
-                r += ColorSRGB.srgbToLinear(FastColor.ABGR32.red(color)) * weight;
-                g += ColorSRGB.srgbToLinear(FastColor.ABGR32.green(color)) * weight;
-                b += ColorSRGB.srgbToLinear(FastColor.ABGR32.blue(color)) * weight;
+                if (shouldRewriteColors) {
+                    float weight = (float) alpha;
 
-                totalWeight += weight;
+                    // Make sure to convert to linear space so that we don't lose brightness.
+                    r += ColorSRGB.srgbToLinear(FastColor.ABGR32.red(color)) * weight;
+                    g += ColorSRGB.srgbToLinear(FastColor.ABGR32.green(color)) * weight;
+                    b += ColorSRGB.srgbToLinear(FastColor.ABGR32.blue(color)) * weight;
+
+                    totalWeight += weight;
+                }
+            } else {
+                level = level.chooseNextLevel(SpriteTransparencyLevel.TRANSPARENT);
             }
         }
 
-        // Bail if none of the pixels are semi-transparent.
-        if (totalWeight == 0.0f) {
+        this.embeddium$transparencyLevel = level;
+
+        // Bail if none of the pixels are semi-transparent or we aren't supposed to rewrite colors.
+        if (!shouldRewriteColors || totalWeight == 0.0f) {
             return;
         }
 
@@ -114,5 +131,10 @@ public class SpriteContentsMixin {
                 MemoryUtil.memPutInt(pPixel, averageColor);
             }
         }
+    }
+
+    @Override
+    public SpriteTransparencyLevel embeddium$getTransparencyLevel() {
+        return this.embeddium$transparencyLevel;
     }
 }
