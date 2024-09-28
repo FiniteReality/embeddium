@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.block.model.FaceBakery;
+import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,18 +26,21 @@ public class BakedQuadFactoryMixin {
      */
     @ModifyReturnValue(method = "bakeQuad", at = @At("RETURN"))
     private BakedQuad setMaterialClassification(BakedQuad quad, @Local(ordinal = 0, argsOnly = true) BlockElementFace face, @Local(ordinal = 0, argsOnly = true) TextureAtlasSprite sprite) {
-        float[] uvs = face.uv.uvs;
-        float minUV = Float.MAX_VALUE, maxUV = Float.MIN_VALUE;
+        if (sprite.getClass() == TextureAtlasSprite.class && sprite.contents().getClass() == SpriteContents.class) {
+            float[] uvs = face.uv.uvs;
+            float minUV = Float.MAX_VALUE, maxUV = Float.MIN_VALUE;
 
-        for (float uv : uvs) {
-            minUV = Math.min(minUV, uv);
-            maxUV = Math.max(maxUV, uv);
-        }
+            for (float uv : uvs) {
+                minUV = Math.min(minUV, uv);
+                maxUV = Math.max(maxUV, uv);
+            }
 
-        if (minUV >= 0 && maxUV <= 16) {
-            // Quad UVs do not extend outside texture boundary, we can trust the given sprite
-            BakedQuadView view = (BakedQuadView)quad;
-            view.setFlags(view.getFlags() | ModelQuadFlags.IS_TRUSTED_SPRITE);
+            if (minUV >= 0 && maxUV <= 16) {
+                // Quad UVs do not extend outside texture boundary, we can trust the given sprite
+                BakedQuadView view = (BakedQuadView)quad;
+                view.setFlags(view.getFlags() | ModelQuadFlags.IS_TRUSTED_SPRITE);
+            }
+
         }
 
         return quad;
