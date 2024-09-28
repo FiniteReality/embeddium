@@ -37,6 +37,7 @@ import org.embeddedt.embeddium.api.BlockRendererRegistry;
 import org.embeddedt.embeddium.api.model.EmbeddiumBakedModelExtension;
 import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevel;
 import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevelHolder;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 import org.embeddedt.embeddium.render.frapi.FRAPIModelUtils;
 import org.embeddedt.embeddium.render.frapi.FRAPIRenderHandler;
@@ -96,7 +97,7 @@ public class BlockRenderer {
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
         this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
-        this.useRenderPassOptimization = SodiumClientMod.options().performance.useRenderPassOptimization;
+        this.useRenderPassOptimization = SodiumClientMod.options().performance.useRenderPassOptimization && !ShaderModBridge.areShadersEnabled();
     }
 
     /**
