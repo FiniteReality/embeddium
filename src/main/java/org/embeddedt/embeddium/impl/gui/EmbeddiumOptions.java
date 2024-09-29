@@ -51,6 +51,7 @@ public class EmbeddiumOptions {
         public boolean useCompactVertexFormat = true;
         @SerializedName("use_translucent_face_sorting_v2")
         public boolean useTranslucentFaceSorting = true;
+        public boolean useRenderPassOptimization = true;
         public boolean useNoErrorGLContext = true;
     }
 

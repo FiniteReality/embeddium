@@ -3,6 +3,7 @@ package org.embeddedt.embeddium.impl.render.chunk.compile.pipeline;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.embeddedt.embeddium.api.render.chunk.BlockRenderContext;
+import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.model.color.ColorProvider;
 import org.embeddedt.embeddium.impl.model.color.ColorProviderRegistry;
 import org.embeddedt.embeddium.impl.model.light.LightMode;
@@ -11,9 +12,13 @@ import org.embeddedt.embeddium.impl.model.light.LightPipelineProvider;
 import org.embeddedt.embeddium.impl.model.light.data.QuadLightData;
 import org.embeddedt.embeddium.impl.model.quad.BakedQuadView;
 import org.embeddedt.embeddium.impl.model.quad.properties.ModelQuadFacing;
+import org.embeddedt.embeddium.impl.model.quad.properties.ModelQuadFlags;
 import org.embeddedt.embeddium.impl.model.quad.properties.ModelQuadOrientation;
+import org.embeddedt.embeddium.impl.render.ShaderModBridge;
 import org.embeddedt.embeddium.impl.render.chunk.compile.ChunkBuildBuffers;
 import org.embeddedt.embeddium.impl.render.chunk.compile.buffers.ChunkModelBuilder;
+import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevel;
+import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevelHolder;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.DefaultMaterials;
 import org.embeddedt.embeddium.impl.render.chunk.terrain.material.Material;
 import org.embeddedt.embeddium.impl.render.chunk.vertex.format.ChunkVertexEncoder;
@@ -76,6 +81,8 @@ public class BlockRenderer {
 
     private final ChunkColorWriter colorEncoder = ChunkColorWriter.get();
 
+    private final boolean useRenderPassOptimization;
+
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
@@ -83,6 +90,7 @@ public class BlockRenderer {
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
         this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
+        this.useRenderPassOptimization = Embeddium.options().performance.useRenderPassOptimization && !ShaderModBridge.areShadersEnabled();
     }
 
     /**
@@ -136,7 +144,7 @@ public class BlockRenderer {
 
             if (!quads.isEmpty() && this.isFaceVisible(ctx, face)) {
                 this.useReorienting = true;
-                this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, meshBuilder, quads, face);
+                this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, buffers, meshBuilder, quads, face);
                 if (!this.useReorienting) {
                     // Reorienting was disabled on this side, make sure it's disabled for the null cullface too, in case
                     // a mod layers textures in different lists
@@ -149,7 +157,7 @@ public class BlockRenderer {
 
         if (!all.isEmpty()) {
             this.useReorienting = canReorientNullCullface;
-            this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, meshBuilder, all, null);
+            this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, buffers, meshBuilder, all, null);
         }
     }
 
@@ -202,8 +210,28 @@ public class BlockRenderer {
         return true;
     }
 
+    private ChunkModelBuilder chooseOptimalBuilder(Material defaultMaterial, ChunkBuildBuffers buffers, ChunkModelBuilder defaultBuilder, BakedQuadView quad) {
+        if (defaultMaterial == DefaultMaterials.SOLID || !this.useRenderPassOptimization || (quad.getFlags() & ModelQuadFlags.IS_TRUSTED_SPRITE) == 0 || quad.getSprite() == null) {
+            // No improvement possible
+            return defaultBuilder;
+        }
+
+        SpriteTransparencyLevel level = SpriteTransparencyLevelHolder.getTransparencyLevel(quad.getSprite().contents());
+
+        if (level == SpriteTransparencyLevel.OPAQUE && defaultMaterial.pass.supportsFragmentDiscard()) {
+            // Can use solid with no visual difference
+            return buffers.get(DefaultMaterials.SOLID);
+        } else if (level == SpriteTransparencyLevel.TRANSPARENT && defaultMaterial == DefaultMaterials.TRANSLUCENT) {
+            // Can use cutout_mipped with no visual difference
+            return buffers.get(DefaultMaterials.CUTOUT_MIPPED);
+        } else {
+            // Have to use default
+            return defaultBuilder;
+        }
+    }
+
     private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3 offset,
-                                ChunkModelBuilder builder, List<BakedQuad> quads, Direction cullFace) {
+                                ChunkBuildBuffers buffers, ChunkModelBuilder defaultBuilder, List<BakedQuad> quads, Direction cullFace) {
 
         if(!checkQuadsHaveSameLightingConfig(quads)) {
             // Disable reorienting if quads use different light configurations, as otherwise layered quads
@@ -218,6 +246,8 @@ public class BlockRenderer {
 
             final var lightData = this.getVertexLight(ctx, quad.hasAmbientOcclusion() ? lighter : this.lighters.getLighter(LightMode.FLAT), cullFace, quad);
             final var vertexColors = this.getVertexColors(ctx, colorizer, quad);
+
+            ChunkModelBuilder builder = this.chooseOptimalBuilder(material, buffers, defaultBuilder, quad);
 
             this.writeGeometry(ctx, builder, offset, material, quad, vertexColors, lightData);
 
