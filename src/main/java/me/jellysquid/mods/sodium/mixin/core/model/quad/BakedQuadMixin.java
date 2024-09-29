@@ -97,8 +97,8 @@ public abstract class BakedQuadMixin implements BakedQuadView {
     @Override
     public int getFlags() {
         int f = this.flags;
-        if (f == 0) {
-            this.flags = f = ModelQuadFlags.getQuadFlags(this, direction);
+        if ((f & ModelQuadFlags.IS_POPULATED) == 0) {
+            this.flags = f = (f | ModelQuadFlags.getQuadFlags(this, direction));
         }
         return f;
     }
