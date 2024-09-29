@@ -151,7 +151,7 @@ public class BlockRenderer {
 
             if (!quads.isEmpty() && this.isFaceVisible(ctx, face)) {
                 this.useReorienting = true;
-                this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, buffers, quads, face);
+                this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, buffers, meshBuilder, quads, face);
                 if (!this.useReorienting) {
                     // Reorienting was disabled on this side, make sure it's disabled for the null cullface too, in case
                     // a mod layers textures in different lists
@@ -164,7 +164,7 @@ public class BlockRenderer {
 
         if (!all.isEmpty()) {
             this.useReorienting = canReorientNullCullface;
-            this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, buffers, all, null);
+            this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, buffers, meshBuilder, all, null);
         }
     }
 
@@ -217,28 +217,28 @@ public class BlockRenderer {
         return true;
     }
 
-    private Material chooseOptimalMaterial(Material defaultMaterial, TextureAtlasSprite quadSprite) {
-        if (defaultMaterial == DefaultMaterials.SOLID || !this.useRenderPassOptimization || quadSprite == null) {
+    private ChunkModelBuilder chooseOptimalBuilder(Material defaultMaterial, ChunkBuildBuffers buffers, ChunkModelBuilder defaultBuilder, BakedQuadView quad) {
+        if (defaultMaterial == DefaultMaterials.SOLID || !this.useRenderPassOptimization || (quad.getFlags() & ModelQuadFlags.IS_TRUSTED_SPRITE) == 0 || quad.getSprite() == null) {
             // No improvement possible
-            return defaultMaterial;
+            return defaultBuilder;
         }
 
-        SpriteTransparencyLevel level = SpriteTransparencyLevelHolder.getTransparencyLevel(quadSprite.contents());
+        SpriteTransparencyLevel level = SpriteTransparencyLevelHolder.getTransparencyLevel(quad.getSprite().contents());
 
         if (level == SpriteTransparencyLevel.OPAQUE && defaultMaterial.pass.supportsFragmentDiscard()) {
             // Can use solid with no visual difference
-            return DefaultMaterials.SOLID;
+            return buffers.get(DefaultMaterials.SOLID);
         } else if (level == SpriteTransparencyLevel.TRANSPARENT && defaultMaterial == DefaultMaterials.TRANSLUCENT) {
             // Can use cutout_mipped with no visual difference
-            return DefaultMaterials.CUTOUT_MIPPED;
+            return buffers.get(DefaultMaterials.CUTOUT_MIPPED);
         } else {
             // Have to use default
-            return defaultMaterial;
+            return defaultBuilder;
         }
     }
 
     private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3 offset,
-                                ChunkBuildBuffers buffers, List<BakedQuad> quads, Direction cullFace) {
+                                ChunkBuildBuffers buffers, ChunkModelBuilder defaultBuilder, List<BakedQuad> quads, Direction cullFace) {
 
         if(!checkQuadsHaveSameLightingConfig(quads)) {
             // Disable reorienting if quads use different light configurations, as otherwise layered quads
@@ -254,7 +254,7 @@ public class BlockRenderer {
             final var lightData = this.getVertexLight(ctx, quad.hasAmbientOcclusion() ? lighter : this.lighters.getLighter(LightMode.FLAT), cullFace, quad);
             final var vertexColors = this.getVertexColors(ctx, colorizer, quad);
 
-            ChunkModelBuilder builder = buffers.get((quad.getFlags() & ModelQuadFlags.IS_TRUSTED_SPRITE) != 0 ? this.chooseOptimalMaterial(material, quad.getSprite()) : material);
+            ChunkModelBuilder builder = this.chooseOptimalBuilder(material, buffers, defaultBuilder, quad);
 
             this.writeGeometry(ctx, builder, offset, material, quad, vertexColors, lightData);
 
