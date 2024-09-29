@@ -366,6 +366,15 @@ public class SodiumGameOptionPages {
                         .setFlags(OptionFlag.REQUIRES_RENDERER_UPDATE)
                         .build()
                 )
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setId(StandardOptions.Option.RENDER_PASS_OPTIMIZATION)
+                        .setName(new TranslatableComponent("embeddium.options.use_render_pass_optimization.name"))
+                        .setTooltip(new TranslatableComponent("embeddium.options.use_render_pass_optimization.tooltip"))
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.LOW)
+                        .setBinding((opts, value) -> opts.performance.useRenderPassOptimization = value, opts -> opts.performance.useRenderPassOptimization)
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
+                        .build())
                 .build());
 
         return new OptionPage(new TranslatableComponent("sodium.options.pages.performance"), ImmutableList.copyOf(groups));
