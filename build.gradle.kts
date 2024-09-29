@@ -175,15 +175,6 @@ java {
     withSourcesJar()
 }
 
-tasks.named<Jar>("jar") {
-    from("COPYING", "COPYING.LESSER", "README.md")
-
-    extraSourceSets.forEach {
-        from(sourceSets[it].output.classesDirs)
-        from(sourceSets[it].output.resourcesDir)
-    }
-}
-
 tasks.named<Jar>("sourcesJar").configure {
     extraSourceSets.forEach {
         from(sourceSets[it].allJava)
@@ -196,6 +187,14 @@ tasks.named<ShadowJar>("shadowJar").configure {
     relocate("com.llamalad7.mixinextras", "org.embeddedt.embeddium.impl.shadow.mixinextras")
     relocate("org.joml", "org.embeddedt.embeddium.impl.shadow.joml")
     mergeServiceFiles()
+
+    from("COPYING", "COPYING.LESSER", "README.md")
+
+    extraSourceSets.forEach {
+        from(sourceSets[it].output.classesDirs)
+        from(sourceSets[it].output.resourcesDir)
+    }
+
 }
 
 tasks.named<RemapJarTask>("remapJar") {
