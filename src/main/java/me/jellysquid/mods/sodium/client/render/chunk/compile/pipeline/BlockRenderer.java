@@ -2,6 +2,7 @@ package me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.compat.ccl.SinkingVertexBuilder;
 import me.jellysquid.mods.sodium.client.model.color.ColorProvider;
 import me.jellysquid.mods.sodium.client.model.color.ColorProviderRegistry;
@@ -11,6 +12,7 @@ import me.jellysquid.mods.sodium.client.model.light.LightPipelineProvider;
 import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
 import me.jellysquid.mods.sodium.client.model.quad.BakedQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFlags;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadOrientation;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
@@ -28,12 +30,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SingleThreadedRandomSource;
 import net.minecraft.world.phys.Vec3;
 import org.embeddedt.embeddium.api.BlockRendererRegistry;
 import org.embeddedt.embeddium.api.model.EmbeddiumBakedModelExtension;
+import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevel;
+import org.embeddedt.embeddium.impl.render.chunk.sprite.SpriteTransparencyLevelHolder;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import org.embeddedt.embeddium.render.chunk.ChunkColorWriter;
 import org.embeddedt.embeddium.render.frapi.FRAPIModelUtils;
 import org.embeddedt.embeddium.render.frapi.FRAPIRenderHandler;
@@ -84,6 +88,8 @@ public class BlockRenderer {
 
     private final ChunkColorWriter colorEncoder = ChunkColorWriter.get();
 
+    private final boolean useRenderPassOptimization;
+
     public BlockRenderer(ColorProviderRegistry colorRegistry, LightPipelineProvider lighters) {
         this.colorProviderRegistry = colorRegistry;
         this.lighters = lighters;
@@ -91,6 +97,7 @@ public class BlockRenderer {
         this.occlusionCache = new BlockOcclusionCache();
         this.useAmbientOcclusion = Minecraft.useAmbientOcclusion();
         this.fabricModelRenderingHandler = FRAPIRenderHandler.INDIGO_PRESENT ? new IndigoBlockRenderContext(this.occlusionCache, lighters.getLightData()) : null;
+        this.useRenderPassOptimization = SodiumClientMod.options().performance.useRenderPassOptimization && !ShaderModBridge.areShadersEnabled();
     }
 
     /**
@@ -144,7 +151,7 @@ public class BlockRenderer {
 
             if (!quads.isEmpty() && this.isFaceVisible(ctx, face)) {
                 this.useReorienting = true;
-                this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, meshBuilder, quads, face);
+                this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, buffers, meshBuilder, quads, face);
                 if (!this.useReorienting) {
                     // Reorienting was disabled on this side, make sure it's disabled for the null cullface too, in case
                     // a mod layers textures in different lists
@@ -157,7 +164,7 @@ public class BlockRenderer {
 
         if (!all.isEmpty()) {
             this.useReorienting = canReorientNullCullface;
-            this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, meshBuilder, all, null);
+            this.renderQuadList(ctx, material, lighter, colorizer, renderOffset, buffers, meshBuilder, all, null);
         }
     }
 
@@ -210,8 +217,28 @@ public class BlockRenderer {
         return true;
     }
 
+    private ChunkModelBuilder chooseOptimalBuilder(Material defaultMaterial, ChunkBuildBuffers buffers, ChunkModelBuilder defaultBuilder, BakedQuadView quad) {
+        if (defaultMaterial == DefaultMaterials.SOLID || !this.useRenderPassOptimization || (quad.getFlags() & ModelQuadFlags.IS_TRUSTED_SPRITE) == 0 || quad.getSprite() == null) {
+            // No improvement possible
+            return defaultBuilder;
+        }
+
+        SpriteTransparencyLevel level = SpriteTransparencyLevelHolder.getTransparencyLevel(quad.getSprite().contents());
+
+        if (level == SpriteTransparencyLevel.OPAQUE && defaultMaterial.pass.supportsFragmentDiscard()) {
+            // Can use solid with no visual difference
+            return buffers.get(DefaultMaterials.SOLID);
+        } else if (level == SpriteTransparencyLevel.TRANSPARENT && defaultMaterial == DefaultMaterials.TRANSLUCENT) {
+            // Can use cutout_mipped with no visual difference
+            return buffers.get(DefaultMaterials.CUTOUT_MIPPED);
+        } else {
+            // Have to use default
+            return defaultBuilder;
+        }
+    }
+
     private void renderQuadList(BlockRenderContext ctx, Material material, LightPipeline lighter, ColorProvider<BlockState> colorizer, Vec3 offset,
-                                ChunkModelBuilder builder, List<BakedQuad> quads, Direction cullFace) {
+                                ChunkBuildBuffers buffers, ChunkModelBuilder defaultBuilder, List<BakedQuad> quads, Direction cullFace) {
 
         if(!checkQuadsHaveSameLightingConfig(quads)) {
             // Disable reorienting if quads use different light configurations, as otherwise layered quads
@@ -226,6 +253,8 @@ public class BlockRenderer {
 
             final var lightData = this.getVertexLight(ctx, quad.hasAmbientOcclusion() ? lighter : this.lighters.getLighter(LightMode.FLAT), cullFace, quad);
             final var vertexColors = this.getVertexColors(ctx, colorizer, quad);
+
+            ChunkModelBuilder builder = this.chooseOptimalBuilder(material, buffers, defaultBuilder, quad);
 
             this.writeGeometry(ctx, builder, offset, material, quad, vertexColors, lightData);
 

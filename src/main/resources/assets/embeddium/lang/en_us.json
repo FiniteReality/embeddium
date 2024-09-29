@@ -5,5 +5,7 @@
   "embeddium.options.added_by_mod_string": "Added by mod: %s",
   "embeddium.options.fullscreen.resolution.tooltip": "Controls the resolution of the game in fullscreen mode.",
   "embeddium.options.use_quad_normals_for_lighting.name": "Use Accurate Quad Shading",
-  "embeddium.options.use_quad_normals_for_lighting.tooltip": "When enabled, Embeddium will apply shading to non-vanilla block faces based on the true direction they are facing, not their axis-aligned direction. This can improve lighting quality when the Forge experimental light pipeline is disabled (which is recommended for best performance).\n\nIt has no effect if the experimental light pipeline is enabled."
+  "embeddium.options.use_quad_normals_for_lighting.tooltip": "When enabled, Embeddium will apply shading to non-vanilla block faces based on the true direction they are facing, not their axis-aligned direction. This can improve lighting quality when the Forge experimental light pipeline is disabled (which is recommended for best performance).\n\nIt has no effect if the experimental light pipeline is enabled.",
+  "embeddium.options.use_render_pass_optimization.name": "Use Render Pass Optimization",
+  "embeddium.options.use_render_pass_optimization.tooltip": "When enabled, Embeddium will detect block model faces that are marked as transparent (or translucent) when the texture is actually opaque (or transparent) and automatically use a more optimal render pass for them.\n\nThis optimization has no effect when a shader pack is active."
 }
