@@ -12,7 +12,12 @@ import java.util.stream.Stream;
 public class MuiGuiScaleHook {
     private static final Method calcGuiScalesMethod;
     static {
-        calcGuiScalesMethod = Stream.of("icyllis.modernui.forge.MForgeCompat", "icyllis.modernui.forge.MuiForgeApi").flatMap(clzName -> {
+        calcGuiScalesMethod = Stream.of(
+                "icyllis.modernui.forge.MForgeCompat",
+                "icyllis.modernui.forge.MuiForgeApi",
+                "icyllis.modernui.mc.forge.MuiForgeApi",
+                "icyllis.modernui.mc.MuiModApi"
+        ).flatMap(clzName -> {
             try {
                 return Stream.of(Class.forName(clzName));
             } catch(Throwable e) {
