@@ -1,5 +1,9 @@
 {
   "embeddium.conflicting_mod": "Embeddium виявив наявність модів, які, як відомо, спричиняють проблеми з візуалізацією/збої у роботі. Рекомендується видалити їх. Дивіться список нижче.",
   "embeddium.conflicting_mod_list": "[{2}]",
-  "embeddium.search_bar_empty": "Пошук параметрів..."
+  "embeddium.search_bar_empty": "Пошук параметрів...",
+  "embeddium.options.added_by_mod_string": "Додано модом: %s",
+  "embeddium.options.fullscreen.resolution.tooltip": "Керує роздільністю гри в режимі на весь екран.",
+  "embeddium.options.use_quad_normals_for_lighting.name": "Точне випромінене затінення",
+  "embeddium.options.use_quad_normals_for_lighting.tooltip": "Якщо ввімкнено, Embeddium застосовуватиме затінення до граней не ванільних блоків, залежно від справжнього напрямку, куди вони звернені, а не напрямку, вирівняного за віссю. Це може покращити якість освітлення, коли експериментальну обробку світла Forge вимкнено (рекомендовано для найкращої швидкодії).\n\nЦе не впливає, якщо ввімкнено експериментальну обробку світла."
 }
