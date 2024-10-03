@@ -279,6 +279,13 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> opts.quality.useQuadNormalsForShading = value, opts -> opts.quality.useQuadNormalsForShading)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
+                .add(OptionImpl.createBuilder(boolean.class, sodiumOpts)
+                        .setId(StandardOptions.Option.SMOOTH_ENTITY_LIGHTING)
+                        .setControl(TickBoxControl::new)
+                        .setImpact(OptionImpact.LOW)
+                        .setBinding((opts, value) -> opts.quality.useSmoothEntityLighting = value, opts -> opts.quality.useSmoothEntityLighting)
+                        .setFlags(OptionFlag.REQUIRES_RENDERER_UPDATE)
+                        .build())
                 .build());
 
         return new OptionPage(new TranslatableComponent("sodium.options.pages.quality"), ImmutableList.copyOf(groups));

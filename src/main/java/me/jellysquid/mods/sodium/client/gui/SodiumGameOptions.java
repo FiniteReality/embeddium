@@ -70,6 +70,7 @@ public class SodiumGameOptions {
         public boolean enableVignette = true;
 
         public boolean useQuadNormalsForShading = false;
+        public boolean useSmoothEntityLighting = false;
     }
 
     public static class NotificationSettings {

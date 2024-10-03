@@ -61,5 +61,6 @@ public final class StandardOptions {
         public static final ResourceLocation TRANSLUCENT_FACE_SORTING = new ResourceLocation(SodiumClientMod.MODID, "translucent_face_sorting");
         public static final ResourceLocation USE_QUAD_NORMALS_FOR_LIGHTING = new ResourceLocation(SodiumClientMod.MODID, "use_quad_normals_for_lighting");
         public static final ResourceLocation RENDER_PASS_OPTIMIZATION = new ResourceLocation(SodiumClientMod.MODID, "render_pass_optimization");
+        public static final ResourceLocation SMOOTH_ENTITY_LIGHTING = new ResourceLocation(SodiumClientMod.MODID, "smooth_entity_lighting");
     }
 }
