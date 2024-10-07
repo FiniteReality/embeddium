@@ -1,0 +1,6 @@
+{
+  "embeddium.conflicting_mod": "Embeddium은 렌더링 문제/충돌을 일으키는 것으로 알려진 모드의 존재를 감지했습니다. 이 모드를 제거하는 것이 좋습니다. 아래 목록을 참조하십시오.",
+  "embeddium.conflicting_mod_list": "[{2}]",
+  "embeddium.search_bar_empty": "옵션 검색...",
+  "embeddium.options.added_by_mod_string": "모드에서 추가됨: %s"
+}
