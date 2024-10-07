@@ -4,11 +4,7 @@ body:
   - type: markdown
     attributes:
       value: >-
-        **Note: This issue tracker is not intended for support requests!** If you need help with crashes or other issues, then
-        you should [ask on our Discord server](https://discord.gg/rN9Y7caguP) instead. Unless you are certain that you
-        have found a defect, and you are able to point to where the problem is, you should not open an issue.
-        <br><br>
-        Additionally, please make sure you have done the following:
+        Please make sure you have done the following:
 
         - **Are you playing on a modern version of Minecraft?** We currently support 1.20.1 and 1.21.1. Older versions are no longer supported.
         
