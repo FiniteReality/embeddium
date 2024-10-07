@@ -9,7 +9,7 @@
 
 Embeddium is a free and open-source performance mod for Minecraft clients. It is based on the last FOSS-licensed version of the Sodium codebase, and includes additional bugfixes & features for better mod compatibility.
 
-Despite being forked from Sodium, Embeddium is **not supported by CaffeineMC**. Do not report issues encountered with it to their bug tracker or in their Discord. I have my own [Discord server](https://discord.gg/rN9Y7caguP) for my mods.
+Despite being forked from Sodium, Embeddium is **not supported by CaffeineMC**. Do not report issues encountered with it to their bug tracker or in their Discord - please open an issue on our [Issues page](https://github.com/FiniteReality/embeddium).
 
 ## Highlights
 
@@ -22,7 +22,7 @@ Despite being forked from Sodium, Embeddium is **not supported by CaffeineMC**. 
 
 ## For developers
 
-If you're looking to add Embeddium to your development environment, please take a look at the [dedicated wiki page](https://github.com/embeddedt/embeddium/wiki/For-Developers) for instructions & recommended guidelines for integration.
+If you're looking to add Embeddium to your development environment, please take a look at the [dedicated wiki page](https://github.com/FiniteReality/embeddium/wiki/For-Developers) for instructions & recommended guidelines for integration.
 
 ## Credits
 
