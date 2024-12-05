@@ -7,5 +7,5 @@ public interface BakedQuadView extends ModelQuadView {
     
     boolean hasShade();
 
-    void setFlags(int flags);
+    void addFlags(int flags);
 }

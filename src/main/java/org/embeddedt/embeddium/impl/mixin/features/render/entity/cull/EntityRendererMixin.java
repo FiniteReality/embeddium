@@ -24,7 +24,7 @@ public abstract class EntityRendererMixin<T extends Entity> {
 
         var renderer = EmbeddiumWorldRenderer.instanceNullable();
 
-        return renderer == null || renderer.isEntityVisible(entity);
+        return renderer == null || renderer.isEntityVisible(entity, (EntityRenderer)(Object)this);
     }
 
     @ModifyExpressionValue(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/culling/Frustum;isVisible(Lnet/minecraft/world/phys/AABB;)Z", ordinal = 1))
@@ -37,6 +37,6 @@ public abstract class EntityRendererMixin<T extends Entity> {
 
         var renderer = EmbeddiumWorldRenderer.instanceNullable();
 
-        return renderer == null || renderer.isEntityVisible(leashable.getLeashHolder());
+        return renderer == null || renderer.isEntityVisible(leashable.getLeashHolder(), (EntityRenderer)(Object)this);
     }
 }

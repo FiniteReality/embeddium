@@ -20,7 +20,7 @@ public class BakedQuadFactoryMixin {
      * (meaning the particle sprite matches the encoded UVs)
      */
     @ModifyReturnValue(method = "bakeQuad", at = @At("RETURN"))
-    private BakedQuad setMaterialClassification(BakedQuad quad, @Local(ordinal = 0, argsOnly = true) BlockElementFace face, @Local(ordinal = 0, argsOnly = true) TextureAtlasSprite sprite) {
+    private static BakedQuad setMaterialClassification(BakedQuad quad, @Local(ordinal = 0, argsOnly = true) BlockElementFace face, @Local(ordinal = 0, argsOnly = true) TextureAtlasSprite sprite) {
         if (sprite.getClass() == TextureAtlasSprite.class && sprite.contents().getClass() == SpriteContents.class) {
             float[] uvs = face.uv().uvs;
             float minUV = Float.MAX_VALUE, maxUV = Float.MIN_VALUE;
@@ -31,13 +31,10 @@ public class BakedQuadFactoryMixin {
             }
 
             if (minUV >= 0 && maxUV <= 16) {
-                // Quad UVs do not extend outside texture boundary, we can trust the given sprite
-                BakedQuadView view = (BakedQuadView)quad;
-                view.setFlags(view.getFlags() | ModelQuadFlags.IS_TRUSTED_SPRITE);
+                var view = (BakedQuadView)quad;
+                view.addFlags(ModelQuadFlags.IS_TRUSTED_SPRITE);
             }
-
         }
-
         return quad;
     }
 }

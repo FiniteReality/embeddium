@@ -35,7 +35,7 @@ public class MultipartBakedModelMixin {
 
     @Shadow
     @Final
-    private List<Pair<Predicate<BlockState>, BakedModel>> selectors;
+    private List<MultiPartBakedModel.Selector> selectors;
 
     @Unique
     private boolean embeddium$hasCustomRenderTypes;
@@ -57,8 +57,8 @@ public class MultipartBakedModelMixin {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void checkSubModelRenderTypes(CallbackInfo ci) {
         boolean hasRenderTypes = false;
-        for (var pair : selectors) {
-            var model = pair.getRight();
+        for (var selector : selectors) {
+            var model = selector.model();
             // Check for the exact class in case someone extends SimpleBakedModel
             if (model.getClass() == SimpleBakedModel.class) {
                 // SimpleBakedModel delegates to ItemBlockRenderTypes unless there is an explicit override
@@ -90,9 +90,9 @@ public class MultipartBakedModelMixin {
             try {
                 List<BakedModel> modelList = new ArrayList<>(this.selectors.size());
 
-                for (Pair<Predicate<BlockState>, BakedModel> pair : this.selectors) {
-                    if (pair.getLeft().test(state)) {
-                        modelList.add(pair.getRight());
+                for (var selector : this.selectors) {
+                    if (selector.condition().test(state)) {
+                        modelList.add(selector.model());
                     }
                 }
 

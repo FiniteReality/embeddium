@@ -7,9 +7,12 @@ import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.util.profiling.Profiler;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.gl.device.CommandList;
 import org.embeddedt.embeddium.impl.gl.device.RenderDevice;
+import org.embeddedt.embeddium.impl.mixin.features.render.entity.cull.EntityRendererAccessor;
 import org.embeddedt.embeddium.impl.model.quad.blender.BlendedColorProvider;
 import org.embeddedt.embeddium.impl.render.chunk.ChunkRenderMatrices;
 import org.embeddedt.embeddium.impl.render.chunk.RenderSectionManager;
@@ -175,7 +178,7 @@ public class EmbeddiumWorldRenderer {
             this.reload();
         }
 
-        ProfilerFiller profiler = this.client.getProfiler();
+        ProfilerFiller profiler = Profiler.get();
         profiler.push("camera_setup");
 
         LocalPlayer player = this.client.player;
@@ -187,7 +190,7 @@ public class EmbeddiumWorldRenderer {
         Vec3 pos = camera.getPosition();
         float pitch = camera.getXRot();
         float yaw = camera.getYRot();
-        float fogDistance = RenderSystem.getShaderFogEnd();
+        float fogDistance = RenderSystem.getShaderFog().end();
 
         boolean dirty = pos.x != this.lastCameraX || pos.y != this.lastCameraY || pos.z != this.lastCameraZ ||
                 pitch != this.lastCameraPitch || yaw != this.lastCameraYaw || fogDistance != this.lastFogDistance;
@@ -393,7 +396,7 @@ public class EmbeddiumWorldRenderer {
         }
     }
 
-    public void renderBlockEntities(Matrix4f pose,
+    public void renderBlockEntities(PoseStack poseStack,
                                     RenderBuffers bufferBuilders,
                                     Long2ObjectMap<SortedSet<BlockDestructionProgress>> blockBreakingProgressions,
                                     Camera camera,
@@ -408,8 +411,6 @@ public class EmbeddiumWorldRenderer {
         BlockEntityRenderDispatcher blockEntityRenderer = Minecraft.getInstance().getBlockEntityRenderDispatcher();
 
         this.blockEntityRequestedOutline = false;
-
-        final PoseStack poseStack = new PoseStack();
         
         this.renderBlockEntities(poseStack, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
         this.renderGlobalBlockEntities(poseStack, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer);
@@ -460,10 +461,6 @@ public class EmbeddiumWorldRenderer {
                     if(ENABLE_BLOCKENTITY_CULLING && !isBlockEntityRendererVisible(blockEntityRenderer, blockEntity))
                         continue;
 
-                    if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
-                        this.blockEntityRequestedOutline = true;
-                    }
-
                     renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
                 }
             }
@@ -489,10 +486,6 @@ public class EmbeddiumWorldRenderer {
             for (var blockEntity : blockEntities) {
                 if(ENABLE_BLOCKENTITY_CULLING && !isBlockEntityRendererVisible(blockEntityRenderer, blockEntity))
                     continue;
-
-                if (blockEntity.hasCustomOutlineRendering(this.client.player)) {
-                    this.blockEntityRequestedOutline = true;
-                }
 
                 renderBlockEntity(matrices, bufferBuilders, blockBreakingProgressions, tickDelta, immediate, x, y, z, blockEntityRenderer, blockEntity);
             }
@@ -559,7 +552,7 @@ public class EmbeddiumWorldRenderer {
      * Returns whether or not the entity intersects with any visible chunks in the graph.
      * @return True if the entity is visible, otherwise false
      */
-    public boolean isEntityVisible(Entity entity) {
+    public boolean isEntityVisible(Entity entity, EntityRenderer renderer) {
         if (!this.useEntityCulling) {
             return true;
         }
@@ -569,7 +562,8 @@ public class EmbeddiumWorldRenderer {
             return true;
         }
 
-        AABB box = entity.getBoundingBoxForCulling();
+        var accessor = (EntityRendererAccessor)renderer;
+        AABB box = accessor.callGetBoundingBoxForCulling(entity);
 
         if (isInfiniteExtentsBox(box)) {
             return true;
@@ -588,7 +582,7 @@ public class EmbeddiumWorldRenderer {
     public boolean isBoxVisible(double x1, double y1, double z1, double x2, double y2, double z2) {
         // Boxes outside the valid world height will never map to a rendered chunk
         // Always render these boxes or they'll be culled incorrectly!
-        if (y2 < this.world.getMinBuildHeight() + 0.5D || y1 > this.world.getMaxBuildHeight() - 0.5D) {
+        if (y2 < this.world.getMinY() + 0.5D || y1 > this.world.getMaxY() - 0.5D) {
             return true;
         }
 

@@ -1,8 +1,8 @@
 package org.embeddedt.embeddium.impl.mixin.features.textures.mipmaps;
 
+import net.minecraft.util.ARGB;
 import org.embeddedt.embeddium.impl.util.color.ColorSRGB;
 import net.minecraft.client.renderer.texture.MipmapGenerator;
-import net.minecraft.util.FastColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
@@ -42,8 +42,8 @@ public class MipmapHelperMixin {
 
     @Unique
     private static int weightedAverageColor(int one, int two) {
-        int alphaOne = FastColor.ABGR32.alpha(one);
-        int alphaTwo = FastColor.ABGR32.alpha(two);
+        int alphaOne = ARGB.alpha(one);
+        int alphaTwo = ARGB.alpha(two);
 
         // In the case where the alpha values of the same, we can get by with an unweighted average.
         if (alphaOne == alphaTwo) {
@@ -68,13 +68,13 @@ public class MipmapHelperMixin {
         float relativeWeightTwo = alphaTwo * scale;
 
         // Convert the color components into linear space, then multiply the corresponding weight.
-        float oneR = ColorSRGB.srgbToLinear(FastColor.ABGR32.red(one)) * relativeWeightOne;
-        float oneG = ColorSRGB.srgbToLinear(FastColor.ABGR32.green(one)) * relativeWeightOne;
-        float oneB = ColorSRGB.srgbToLinear(FastColor.ABGR32.blue(one)) * relativeWeightOne;
+        float oneR = ColorSRGB.srgbToLinear(ARGB.red(one)) * relativeWeightOne;
+        float oneG = ColorSRGB.srgbToLinear(ARGB.green(one)) * relativeWeightOne;
+        float oneB = ColorSRGB.srgbToLinear(ARGB.blue(one)) * relativeWeightOne;
 
-        float twoR = ColorSRGB.srgbToLinear(FastColor.ABGR32.red(two)) * relativeWeightTwo;
-        float twoG = ColorSRGB.srgbToLinear(FastColor.ABGR32.green(two)) * relativeWeightTwo;
-        float twoB = ColorSRGB.srgbToLinear(FastColor.ABGR32.blue(two)) * relativeWeightTwo;
+        float twoR = ColorSRGB.srgbToLinear(ARGB.red(two)) * relativeWeightTwo;
+        float twoG = ColorSRGB.srgbToLinear(ARGB.green(two)) * relativeWeightTwo;
+        float twoB = ColorSRGB.srgbToLinear(ARGB.blue(two)) * relativeWeightTwo;
 
         // Combine the color components of each color
         float linearR = oneR + twoR;
@@ -91,13 +91,13 @@ public class MipmapHelperMixin {
     // Computes a non-weighted average of the two sRGB colors in linear space, avoiding brightness losses.
     @Unique
     private static int averageRgb(int a, int b, int alpha) {
-        float ar = ColorSRGB.srgbToLinear(FastColor.ABGR32.red(a));
-        float ag = ColorSRGB.srgbToLinear(FastColor.ABGR32.green(a));
-        float ab = ColorSRGB.srgbToLinear(FastColor.ABGR32.blue(a));
+        float ar = ColorSRGB.srgbToLinear(ARGB.red(a));
+        float ag = ColorSRGB.srgbToLinear(ARGB.green(a));
+        float ab = ColorSRGB.srgbToLinear(ARGB.blue(a));
 
-        float br = ColorSRGB.srgbToLinear(FastColor.ABGR32.red(b));
-        float bg = ColorSRGB.srgbToLinear(FastColor.ABGR32.green(b));
-        float bb = ColorSRGB.srgbToLinear(FastColor.ABGR32.blue(b));
+        float br = ColorSRGB.srgbToLinear(ARGB.red(b));
+        float bg = ColorSRGB.srgbToLinear(ARGB.green(b));
+        float bb = ColorSRGB.srgbToLinear(ARGB.blue(b));
 
         return ColorSRGB.linearToSrgb((ar + br) * 0.5f, (ag + bg) * 0.5f, (ab + bb) * 0.5f, alpha);
     }

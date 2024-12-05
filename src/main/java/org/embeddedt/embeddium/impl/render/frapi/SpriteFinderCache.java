@@ -2,7 +2,9 @@ package org.embeddedt.embeddium.impl.render.frapi;
 
 import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -54,7 +56,7 @@ public class SpriteFinderCache {
                 protected void apply(Object pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
                     var modelManager = Minecraft.getInstance().getModelManager();
                     Finder finder = NULL_FINDER;
-                    var fabricFinder = SpriteFinder.get(modelManager.getAtlas(InventoryMenu.BLOCK_ATLAS));
+                    var fabricFinder = SpriteFinder.get(modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS));
                     try {
                         MethodType bootstrapType = MethodType.methodType(Finder.class, SpriteFinder.class);
                         MethodType invocationType = MethodType.methodType(TextureAtlasSprite.class, float.class, float.class);

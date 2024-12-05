@@ -41,8 +41,8 @@ public class BlockOcclusionCache {
             // Explicitly asked to skip rendering this face
             return false;
         } else if (adjState.canOcclude()) {
-            VoxelShape selfShape = selfState.getFaceOcclusionShape(view, pos, facing);
-            VoxelShape adjShape = adjState.getFaceOcclusionShape(view, adjPos, facing.getOpposite());
+            VoxelShape selfShape = selfState.getFaceOcclusionShape(facing);
+            VoxelShape adjShape = adjState.getFaceOcclusionShape(facing.getOpposite());
 
             if (selfShape == Shapes.block() && adjShape == Shapes.block()) {
                 // If both blocks use full-cube occlusion shapes, then the neighbor certainly occludes us, and we

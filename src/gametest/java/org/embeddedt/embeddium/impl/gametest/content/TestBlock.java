@@ -19,7 +19,7 @@ public class TestBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos) {
+    public VoxelShape getOcclusionShape(BlockState pState) {
         return Shapes.empty();
     }
 

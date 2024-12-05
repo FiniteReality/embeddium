@@ -44,7 +44,7 @@ public class SpriteContentsAnimatorImplMixin {
         if (onDemand && !parent.sodium$isActive()) {
             this.subFrame++;
             List<SpriteContents.FrameInfo> frames = ((SpriteContentsAnimationAccessor)this.animationInfo).getFrames();
-            if (this.subFrame >= ((SpriteContentsAnimationFrameAccessor)frames.get(this.frame)).getTime()) {
+            if (this.subFrame >= ((SpriteContentsAnimationFrameAccessor)(Object)frames.get(this.frame)).getTime()) {
                 this.frame = (this.frame + 1) % frames.size();
                 this.subFrame = 0;
             }

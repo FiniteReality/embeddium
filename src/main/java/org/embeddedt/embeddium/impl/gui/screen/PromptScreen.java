@@ -50,7 +50,7 @@ public class PromptScreen extends Screen {
     }
 
     @Override
-    protected void renderBlurredBackground(float f) {
+    protected void renderBlurredBackground() {
         // Disable the blur
     }
 

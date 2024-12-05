@@ -1,6 +1,7 @@
 package org.embeddedt.embeddium.impl.mixin.core;
 
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
+import net.minecraft.util.profiling.Profiler;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.gui.screen.ConfigCorruptedScreen;
 import net.minecraft.client.Minecraft;
@@ -41,7 +42,7 @@ public class MinecraftClientMixin {
      */
     @Inject(method = "runTick", at = @At("HEAD"))
     private void preRender(boolean tick, CallbackInfo ci) {
-        ProfilerFiller profiler = Minecraft.getInstance().getProfiler();
+        ProfilerFiller profiler = Profiler.get();
         profiler.push("wait_for_gpu");
 
         while (this.fences.size() > Embeddium.options().advanced.cpuRenderAheadLimit) {

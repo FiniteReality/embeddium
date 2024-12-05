@@ -88,7 +88,7 @@ public class WindowMixin {
         return caps;
     }
 
-    @Inject(method = "updateDisplay", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;flipFrame(J)V", shift = At.Shift.AFTER))
+    @Inject(method = "updateDisplay", at = @At(value = "RETURN"))
     private void preSwapBuffers(CallbackInfo ci) {
         if (this.wglPrevContext == MemoryUtil.NULL) {
             // There is no prior recorded context.

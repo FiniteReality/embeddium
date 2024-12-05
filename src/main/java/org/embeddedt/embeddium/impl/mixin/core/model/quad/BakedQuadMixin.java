@@ -104,8 +104,8 @@ public class BakedQuadMixin implements BakedQuadView {
     }
 
     @Override
-    public void setFlags(int flags) {
-        this.flags = flags;
+    public void addFlags(int flags) {
+        this.flags |= flags;
     }
 
     @Override

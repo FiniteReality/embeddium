@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.ChatFormatting;
+import net.minecraft.server.level.ParticleStatus;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForgeConfig;
 import org.embeddedt.embeddium.api.options.structure.OptionFlag;
@@ -31,11 +32,15 @@ import org.embeddedt.embeddium.api.options.structure.StandardOptions;
 import org.embeddedt.embeddium.impl.render.ShaderModBridge;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EmbeddiumGameOptionPages {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddiumGameOptionPages.class);
+
     private static final EmbeddiumOptionsStorage sodiumOpts = new EmbeddiumOptionsStorage();
     private static final MinecraftOptionsStorage vanillaOpts = MinecraftOptionsStorage.INSTANCE;
 
@@ -127,7 +132,8 @@ public class EmbeddiumGameOptionPages {
                         .setControl(option -> new SliderControl(option, 10, 260, 10, ControlValueFormatter.fpsLimit()))
                         .setBinding((opts, value) -> {
                             opts.framerateLimit().set(value);
-                            Minecraft.getInstance().getWindow().setFramerateLimit(value);
+                            LOGGER.warn("getWindow().setFramerateLimit(...) Not Yet Implemented");
+                            //Minecraft.getInstance().getWindow().setFramerateLimit(value);
                         }, opts -> opts.framerateLimit().get())
                         .build())
                 .build());
@@ -191,7 +197,7 @@ public class EmbeddiumGameOptionPages {
                             if (Minecraft.useShaderTransparency()) {
                                 RenderTarget framebuffer = Minecraft.getInstance().levelRenderer.getCloudsTarget();
                                 if (framebuffer != null) {
-                                    framebuffer.clear(Minecraft.ON_OSX);
+                                    framebuffer.clear();
                                 }
                             }
                         }, opts -> opts.cloudStatus().get())

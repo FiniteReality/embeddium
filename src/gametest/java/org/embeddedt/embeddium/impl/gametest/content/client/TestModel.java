@@ -3,12 +3,12 @@ package org.embeddedt.embeddium.impl.gametest.content.client;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.DelegateBakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.client.model.data.ModelProperty;
 import org.embeddedt.embeddium.impl.gametest.content.TestBlockEntity;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-public class TestModel extends BakedModelWrapper<BakedModel> {
+public class TestModel extends DelegateBakedModel {
     public static final ModelProperty<Object> TEST_MODEL_PROPERTY = new ModelProperty<>();
     public static final Object TEST_MODEL_VALUE = new Object();
 

@@ -2,7 +2,6 @@ package org.embeddedt.embeddium.impl.compatibility.checks;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 
 import java.util.List;
@@ -18,6 +17,5 @@ public record SodiumResourcePackMetadata(List<String> ignoredShaders) {
                     .forGetter(SodiumResourcePackMetadata::ignoredShaders))
                     .apply(instance, SodiumResourcePackMetadata::new)
     );
-    public static final MetadataSectionType<SodiumResourcePackMetadata> SERIALIZER =
-            MetadataSectionType.fromCodec("sodium", CODEC);
+    public static final MetadataSectionType<SodiumResourcePackMetadata> SERIALIZER = new MetadataSectionType<>("sodium", CODEC);
 }

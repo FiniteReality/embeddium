@@ -12,6 +12,7 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
@@ -66,7 +67,7 @@ public class TestRegistry {
 
     public static final DeferredHolder<Block, TestBlock> TEST_BLOCK = BLOCKS.register("test_block", TestBlock::new);
     public static final DeferredHolder<Block, NotAnAirBlock> NOT_AN_AIR_BLOCK = BLOCKS.register("not_an_air_block", NotAnAirBlock::new);
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<?>> TEST_BLOCK_ENTITY = BLOCK_ENTITIES.register("test_block_entity", () -> BlockEntityType.Builder.of(TestBlockEntity::new, TEST_BLOCK.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<?>> TEST_BLOCK_ENTITY = BLOCK_ENTITIES.register("test_block_entity", () -> new BlockEntityType<>(TestBlockEntity::new, TEST_BLOCK.get()));
 
     public static final ResourceLocation EMPTY_TEMPLATE = ResourceLocation.fromNamespaceAndPath(EmbeddiumConstants.MODID, "empty_structure");
     public static final String EMPTY_TEMPLATE_STR = EMPTY_TEMPLATE.toString();
@@ -93,7 +94,7 @@ public class TestRegistry {
 
     private static void registerModelForAllStates(ModelEvent.ModifyBakingResult event, Block block, BakedModel model) {
         for(BlockState state : block.getStateDefinition().getPossibleStates()) {
-            event.getModels().put(BlockModelShaper.stateToModelLocation(state), model);
+            event.getBakingResult().blockStateModels().put(BlockModelShaper.stateToModelLocation(state), model);
         }
     }
 
@@ -102,8 +103,8 @@ public class TestRegistry {
      */
     @SubscribeEvent
     public static void onBakingModify(ModelEvent.ModifyBakingResult event) {
-        registerModelForAllStates(event, TEST_BLOCK.get(), new TestModel(event.getModels().get(ModelBakery.MISSING_MODEL_VARIANT)));
-        registerModelForAllStates(event, NOT_AN_AIR_BLOCK.get(), new InstrumentingModelWrapper<>(event.getModels().get(BlockModelShaper.stateToModelLocation(Blocks.STONE.defaultBlockState()))));
+        registerModelForAllStates(event, TEST_BLOCK.get(), new TestModel(event.getBakingResult().missingModel()));
+        registerModelForAllStates(event, NOT_AN_AIR_BLOCK.get(), new InstrumentingModelWrapper<>(event.getBakingResult().blockStateModels().get(BlockModelShaper.stateToModelLocation(Blocks.STONE.defaultBlockState()))));
     }
 
     static class GameEvents {
@@ -132,9 +133,9 @@ public class TestRegistry {
                 var messageScreen = new GenericMessageScreen(Component.literal("Bootstrapping gametests..."));
                 mc.forceSetScreen(messageScreen);
                 String levelName = "embeddium-test-" + UUID.randomUUID();
-                LevelSettings settings = new LevelSettings(levelName, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
+                LevelSettings settings = new LevelSettings(levelName, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, new GameRules(FeatureFlagSet.of()), WorldDataConfiguration.DEFAULT);
                 mc.createWorldOpenFlows().createFreshLevel(settings.levelName(), settings, new WorldOptions(1024, false, false), registry -> {
-                    return registry.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions();
+                    return registry.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.FLAT).value().createWorldDimensions();
                 }, messageScreen);
             }
         }

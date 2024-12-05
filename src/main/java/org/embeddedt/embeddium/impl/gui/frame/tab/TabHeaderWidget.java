@@ -1,6 +1,7 @@
 package org.embeddedt.embeddium.impl.gui.frame.tab;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.renderer.RenderType;
 import org.embeddedt.embeddium.impl.Embeddium;
 import org.embeddedt.embeddium.impl.gui.widgets.FlatButtonWidget;
 import org.embeddedt.embeddium.api.math.Dim2i;
@@ -81,6 +82,6 @@ public class TabHeaderWidget extends FlatButtonWidget {
         ResourceLocation icon = Objects.requireNonNullElse(this.logoTexture, FALLBACK_LOCATION);
         int fontHeight = Minecraft.getInstance().font.lineHeight;
         int imgY = this.dim.getCenterY() - (fontHeight / 2);
-        drawContext.blit(icon, this.dim.x() + 5, imgY, 0.0f, 0.0f, fontHeight, fontHeight, fontHeight, fontHeight);
+        drawContext.blit(RenderType::guiTextured, icon, this.dim.x() + 5, imgY, 0.0f, 0.0f, fontHeight, fontHeight, fontHeight, fontHeight);
     }
 }

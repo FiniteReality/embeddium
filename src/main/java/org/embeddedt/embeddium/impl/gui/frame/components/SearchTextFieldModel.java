@@ -91,7 +91,7 @@ public class SearchTextFieldModel {
             }
         }
 
-        Minecraft.getInstance().tell(() -> this.mainScreen.rebuildUI());
+        Minecraft.getInstance().schedule(() -> this.mainScreen.rebuildUI());
     }
 
     void erase(int offset) {

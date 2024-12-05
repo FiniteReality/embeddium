@@ -1,9 +1,14 @@
 package org.embeddedt.embeddium.impl.render.immediate;
 
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.shaders.CompiledShader;
 import com.mojang.blaze3d.shaders.FogShape;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.FogParameters;
+import net.minecraft.client.renderer.ShaderManager;
 import org.embeddedt.embeddium.api.util.ColorABGR;
 import org.embeddedt.embeddium.api.util.ColorARGB;
 import org.embeddedt.embeddium.api.util.ColorMixer;
@@ -16,7 +21,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.CompiledShaderProgram;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -74,7 +79,7 @@ public class CloudRenderer {
 
     private VertexBuffer vertexBuffer;
     private CloudEdges edges;
-    private ShaderInstance shader;
+    private CompiledShaderProgram shader;
     private final FogRenderer.FogData fogData = new FogRenderer.FogData(FogRenderer.FogMode.FOG_TERRAIN);
 
     private int prevCenterCellX, prevCenterCellY, cachedRenderDistance;
@@ -83,8 +88,8 @@ public class CloudRenderer {
     private CloudStatus cloudRenderMode;
     private boolean hasCloudGeometry;
 
-    public CloudRenderer(ResourceProvider factory) {
-        this.reloadTextures(factory);
+    public CloudRenderer(ShaderManager shaderManager) {
+        this.reloadTextures(shaderManager);
     }
 
     private static int fireModifyCloudRenderDistanceEvent(int distance) {
@@ -105,7 +110,7 @@ public class CloudRenderer {
             return;
         }
 
-        Vec3 color = world.getCloudColor(tickDelta);
+        Vec3 color = Vec3.fromRGB24(world.getCloudColor(tickDelta));
 
         double cloudTime = (ticks + tickDelta) * 0.03F;
         double cloudCenterX = (cameraX + cloudTime);
@@ -125,7 +130,7 @@ public class CloudRenderer {
             this.rebuildGeometry(bufferBuilder, cloudDistance, centerCellX, centerCellZ);
 
             if (this.vertexBuffer == null) {
-                this.vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+                this.vertexBuffer = new VertexBuffer(BufferUsage.DYNAMIC_WRITE);
             }
 
             this.vertexBuffer.bind();
@@ -151,16 +156,24 @@ public class CloudRenderer {
             return;
         }
 
-        float previousEnd = RenderSystem.getShaderFogEnd();
-        float previousStart = RenderSystem.getShaderFogStart();
+        var previousData = RenderSystem.getShaderFog();
+        float previousEnd = previousData.end();
+        float previousStart = previousData.start();
         this.fogData.end = cloudDistance * this.fogDistanceMultiplier;
         this.fogData.start = (cloudDistance * this.fogDistanceMultiplier) - 16;
 
         applyFogModifiers(world, this.fogData, player, (int)(cloudDistance * this.fogDistanceMultiplier), tickDelta);
 
 
-        RenderSystem.setShaderFogEnd(this.fogData.end);
-        RenderSystem.setShaderFogStart(this.fogData.start);
+        RenderSystem.setShaderFog(
+            new FogParameters(
+                this.fogData.start,
+                this.fogData.end,
+                this.fogData.shape,
+                previousData.red(),
+                previousData.green(),
+                previousData.blue(),
+                previousData.alpha()));
 
         float translateX = (float) (cloudCenterX - (centerCellX * this.cloudSizeX));
         float translateZ = (float) (cloudCenterZ - (centerCellZ * this.cloudSizeZ));
@@ -197,8 +210,7 @@ public class CloudRenderer {
         
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        RenderSystem.setShaderFogEnd(previousEnd);
-        RenderSystem.setShaderFogStart(previousStart);
+        RenderSystem.setShaderFog(previousData);
     }
 
     private void applyFogModifiers(ClientLevel world, FogRenderer.FogData fogData, LocalPlayer player, int cloudDistance, float tickDelta) {
@@ -364,7 +376,7 @@ public class CloudRenderer {
         return buffer + ColorVertex.STRIDE;
     }
 
-    public void reloadTextures(ResourceProvider factory) {
+    public void reloadTextures(ShaderManager manager) {
         this.destroy();
 
         this.edges = createCloudEdges();
@@ -382,11 +394,7 @@ public class CloudRenderer {
         this.cloudDistanceMinimum = (int) (width * CLOUD_PIXELS_TO_MINIMUM_RENDER_DISTANCE);
         this.cloudDistanceMaximum = (int) (width * CLOUD_PIXELS_TO_MAXIMUM_RENDER_DISTANCE);
 
-        try {
-            this.shader = new ShaderInstance(factory, "clouds", DefaultVertexFormat.POSITION_COLOR);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.shader = manager.getProgram(CoreShaders.RENDERTYPE_CLOUDS);
     }
 
     public void destroy() {
@@ -433,7 +441,7 @@ public class CloudRenderer {
             for (int x = 0; x < width; x++) {
                 for (int z = 0; z < height; z++) {
                     int index = index(x, z, width, height);
-                    int cell = texture.getPixelRGBA(x, z);
+                    int cell = texture.getPixel(x, z);
 
                     this.colors[index] = cell;
 
@@ -442,25 +450,25 @@ public class CloudRenderer {
                     if (isOpaqueCell(cell)) {
                         edges |= DIR_NEG_Y | DIR_POS_Y;
 
-                        int negX = texture.getPixelRGBA(wrap(x - 1, width), wrap(z, height));
+                        int negX = texture.getPixel(wrap(x - 1, width), wrap(z, height));
 
                         if (cell != negX) {
                             edges |= DIR_NEG_X;
                         }
 
-                        int posX = texture.getPixelRGBA(wrap(x + 1, width), wrap(z, height));
+                        int posX = texture.getPixel(wrap(x + 1, width), wrap(z, height));
 
                         if (!isOpaqueCell(posX) && cell != posX) {
                             edges |= DIR_POS_X;
                         }
 
-                        int negZ = texture.getPixelRGBA(wrap(x, width), wrap(z - 1, height));
+                        int negZ = texture.getPixel(wrap(x, width), wrap(z - 1, height));
 
                         if (cell != negZ) {
                             edges |= DIR_NEG_Z;
                         }
 
-                        int posZ = texture.getPixelRGBA(wrap(x, width), wrap(z + 1, height));
+                        int posZ = texture.getPixel(wrap(x, width), wrap(z + 1, height));
 
                         if (!isOpaqueCell(posZ) && cell != posZ) {
                             edges |= DIR_POS_Z;

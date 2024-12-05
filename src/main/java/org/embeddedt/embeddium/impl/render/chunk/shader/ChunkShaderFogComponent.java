@@ -30,6 +30,7 @@ public abstract class ChunkShaderFogComponent {
     }
 
     public static class Smooth extends ChunkShaderFogComponent {
+        private final float[] fogColorBuffer;
         private final GlUniformFloat4v uFogColor;
 
         private final GlUniformInt uFogShape;
@@ -37,6 +38,7 @@ public abstract class ChunkShaderFogComponent {
         private final GlUniformFloat uFogEnd;
 
         public Smooth(ShaderBindingContext context) {
+            this.fogColorBuffer = new float[4];
             this.uFogColor = context.bindUniform("u_FogColor", GlUniformFloat4v::new);
             this.uFogShape = context.bindUniform("u_FogShape", GlUniformInt::new);
             this.uFogStart = context.bindUniform("u_FogStart", GlUniformFloat::new);
@@ -45,11 +47,16 @@ public abstract class ChunkShaderFogComponent {
 
         @Override
         public void setup() {
-            this.uFogColor.set(RenderSystem.getShaderFogColor());
-            this.uFogShape.set(RenderSystem.getShaderFogShape().getIndex());
+            var fogProperties = RenderSystem.getShaderFog();
+            fogColorBuffer[0] = fogProperties.red();
+            fogColorBuffer[1] = fogProperties.green();
+            fogColorBuffer[2] = fogProperties.blue();
+            fogColorBuffer[3] = fogProperties.alpha();
 
-            this.uFogStart.setFloat(RenderSystem.getShaderFogStart());
-            this.uFogEnd.setFloat(RenderSystem.getShaderFogEnd());
+            this.uFogColor.set(fogColorBuffer);
+            this.uFogShape.set(fogProperties.shape().getIndex());
+            this.uFogStart.setFloat(fogProperties.start());
+            this.uFogEnd.setFloat(fogProperties.end());
         }
     }
 

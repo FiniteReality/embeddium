@@ -88,28 +88,6 @@ public class IndigoBlockRenderContext extends BlockRenderContext implements FRAP
     }
 
     @Override
-    public boolean isFaceCulled(@Nullable Direction face) {
-        if (face == null) {
-            return false;
-        }
-
-        int fM = (1 << face.ordinal());
-
-        // Use a bitmask to cache the cull checks so we don't run them more than once per face
-        if((cullChecked & fM) != 0) {
-            return (cullValue & fM) != 0;
-        } else {
-            var ctx = this.currentContext;
-            boolean flag = !this.occlusionCache.shouldDrawSide(ctx.state(), ctx.localSlice(), ctx.pos(), face);
-            if(flag) {
-                cullValue |= fM;
-            }
-            cullChecked |= fM;
-            return flag;
-        }
-    }
-
-    @Override
     protected VertexConsumer getVertexConsumer(RenderType layer) {
         var material = DefaultMaterials.forRenderLayer(layer);
         var consumer = currentBuffers.get(material).asVertexConsumer(material);

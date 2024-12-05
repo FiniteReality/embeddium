@@ -1,5 +1,6 @@
 package org.embeddedt.embeddium.impl.mixin.core.world.biome;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import org.embeddedt.embeddium.impl.world.BiomeSeedProvider;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -23,17 +24,7 @@ public class ClientWorldMixin implements BiomeSeedProvider {
     private long biomeSeed;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void captureSeed(ClientPacketListener networkHandler,
-                             ClientLevel.ClientLevelData properties,
-                             ResourceKey<Level> registryRef,
-                             Holder<DimensionType> dimensionTypeEntry,
-                             int loadDistance,
-                             int simulationDistance,
-                             Supplier<ProfilerFiller> profiler,
-                             LevelRenderer worldRenderer,
-                             boolean debugWorld,
-                             long seed,
-                             CallbackInfo ci) {
+    private void captureSeed(CallbackInfo ci, @Local(ordinal = 0, argsOnly = true) long seed) {
         this.biomeSeed = seed;
     }
 
