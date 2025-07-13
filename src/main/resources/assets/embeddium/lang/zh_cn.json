@@ -1,8 +1,9 @@
 {
-  "sodium.options.use_compact_vertex_format.name": "使用紧凑型顶点格式",
-  "sodium.options.use_compact_vertex_format.tooltip": "启用后，游戏将使用更紧凑的顶点格式来渲染区块。这可以显著减少显存使用和带宽需求，尤其是对于集成显卡而言。但是，由于它降低了位置和纹理坐标属性的精度，可能会导致一些资源包出现深度冲突（z-fighting）的问题。",
-  "sodium.options.translucent_face_sorting.name": "半透明面排序",
-  "sodium.options.translucent_face_sorting.tooltip": "启用后，游戏将正确应用彩色玻璃、水等方块表面的半透明效果。",
-  "embeddium.conflicting_mod": "Embeddium 检测到已安装的模组中有些可能会导致渲染问题或崩溃。建议卸载它们。请参考以下列表。",
-  "embeddium.conflicting_mod_list": "[{2}]"
+  "embeddium.conflicting_mod": "Embeddium检测到存在已知会导致渲染问题/崩溃的模组。建议卸载这些模组。查看下方列表。",
+  "embeddium.conflicting_mod_list": "[{2}]",
+  "embeddium.search_bar_empty": "搜索选项...",
+  "embeddium.options.added_by_mod_string": "由模组添加：%s",
+  "embeddium.options.fullscreen.resolution.tooltip": "控制全屏模式下的游戏分辨率。",
+  "embeddium.options.use_quad_normals_for_lighting.name": "使用精确四边形着色",
+  "embeddium.options.use_quad_normals_for_lighting.tooltip": "启用时，Embeddium将根据非原版方块面的真实朝向（而非轴对齐方向）进行着色处理。当禁用Forge实验性光照管线时（推荐禁用以获得最佳性能），可提升光照质量。\n\n若启用实验性光照管线则此选项无效。"
 }
