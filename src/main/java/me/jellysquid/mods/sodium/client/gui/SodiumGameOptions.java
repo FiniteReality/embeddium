@@ -47,17 +47,17 @@ public class SodiumGameOptions {
         public boolean animateOnlyVisibleTextures = true;
         public boolean useEntityCulling = true;
         public boolean useFogOcclusion = true;
-        public boolean useBlockFaceCulling = true;
-        public boolean useCompactVertexFormat = true;
+        public boolean useBlockFaceCulling = false;
+        public boolean useCompactVertexFormat = false;
         @SerializedName("use_translucent_face_sorting_v2")
         public boolean useTranslucentFaceSorting = true;
         public boolean useRenderPassOptimization = true;
-        public boolean useNoErrorGLContext = true;
+        public boolean useNoErrorGLContext = false;
     }
 
     public static class AdvancedSettings {
         public boolean enableMemoryTracing = false;
-        public boolean useAdvancedStagingBuffers = true;
+        public boolean useAdvancedStagingBuffers = false;
         public boolean disableIncompatibleModWarnings = false;
 
         public int cpuRenderAheadLimit = 3;

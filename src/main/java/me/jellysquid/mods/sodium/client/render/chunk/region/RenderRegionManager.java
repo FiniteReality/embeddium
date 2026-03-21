@@ -207,10 +207,8 @@ public class RenderRegionManager {
 
 
     private static StagingBuffer createStagingBuffer(CommandList commandList) {
-        if (SodiumClientMod.options().advanced.useAdvancedStagingBuffers && MappedStagingBuffer.isSupported(RenderDevice.INSTANCE)) {
-            return new MappedStagingBuffer(commandList);
-        }
-
+        // [AMD RDNA WORKAROUND]: Force FallbackStagingBuffer to prevent glMapBufferRange crashes on Windows Drivers.
+        // This ensures compatibility with Adrenalin drivers even if the JSON option is left enabled.
         return new FallbackStagingBuffer(commandList);
     }
 }

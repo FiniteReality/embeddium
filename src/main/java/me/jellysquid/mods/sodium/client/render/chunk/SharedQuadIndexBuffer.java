@@ -45,12 +45,19 @@ public class SharedQuadIndexBuffer {
     private void grow(CommandList commandList, int primitiveCount) {
         var bufferSize = primitiveCount * this.indexType.getBytesPerElement() * ELEMENTS_PER_PRIMITIVE;
 
-        commandList.allocateStorage(this.buffer, bufferSize, GlBufferUsage.STATIC_DRAW);
-
-        var mapped = commandList.mapBuffer(this.buffer, 0, bufferSize, EnumBitField.of(GlBufferMapFlags.INVALIDATE_BUFFER, GlBufferMapFlags.WRITE, GlBufferMapFlags.UNSYNCHRONIZED));
-        this.indexType.createIndexBuffer(mapped.getMemoryBuffer(), primitiveCount);
-
-        commandList.unmap(mapped);
+        // [AMD RDNA WORKAROUND]: Use safe RAM allocations and bulk copy (glBufferData)
+        // instead of mapping (glMapBufferRange). AMD drivers frequently fail mapped 
+        // synchronizations for index buffers, causing severe geometry corruption.
+        java.nio.ByteBuffer tempBuffer = org.lwjgl.system.MemoryUtil.memAlloc(bufferSize);
+        try {
+            this.indexType.createIndexBuffer(tempBuffer, primitiveCount);
+            // TempBuffer is already at position 0 with limit=bufferSize. 
+            // The writer array modifies it locally with absolute indices, 
+            // so we don't need to flip() here.
+            commandList.uploadData(this.buffer, tempBuffer, GlBufferUsage.STATIC_DRAW);
+        } finally {
+            org.lwjgl.system.MemoryUtil.memFree(tempBuffer);
+        }
 
         this.maxPrimitives = primitiveCount;
     }

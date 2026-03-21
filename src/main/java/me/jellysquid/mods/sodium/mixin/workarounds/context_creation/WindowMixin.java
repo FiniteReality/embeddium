@@ -5,6 +5,7 @@ import me.jellysquid.mods.sodium.client.compatibility.checks.ModuleScanner;
 import me.jellysquid.mods.sodium.client.compatibility.checks.LateDriverScanner;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.Workarounds;
 import me.jellysquid.mods.sodium.client.compatibility.workarounds.nvidia.NvidiaWorkarounds;
+import me.jellysquid.mods.sodium.client.compatibility.workarounds.amd.AmdWorkarounds;
 import net.minecraft.Util;
 import net.minecraftforge.fml.loading.FMLConfig;
 import net.minecraftforge.fml.loading.ImmediateWindowHandler;
@@ -51,6 +52,8 @@ public class WindowMixin {
         if (applyNvidiaWorkarounds) {
             NvidiaWorkarounds.install();
         }
+        
+        AmdWorkarounds.applyEnvironmentChanges();
 
         /**
          * @author Asek3
@@ -73,6 +76,7 @@ public class WindowMixin {
             if (applyNvidiaWorkarounds) {
                 NvidiaWorkarounds.uninstall();
             }
+            AmdWorkarounds.undoEnvironmentChanges();
         }
     }
 
