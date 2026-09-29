@@ -403,7 +403,7 @@ public class RenderSectionManager {
         this.needsUpdate = true;
     }
 
-    private void processChunkBuildResults(ArrayList<ChunkBuildOutput> results) {
+    private void processChunkBuildResults(List<ChunkBuildOutput> results) {
         var filtered = filterChunkBuildResults(results);
 
         this.regions.uploadMeshes(RenderDevice.INSTANCE.createCommandList(), filtered);
@@ -447,7 +447,7 @@ public class RenderSectionManager {
         }
     }
 
-    private static List<ChunkBuildOutput> filterChunkBuildResults(ArrayList<ChunkBuildOutput> outputs) {
+    private static List<ChunkBuildOutput> filterChunkBuildResults(List<ChunkBuildOutput> outputs) {
         var map = new Reference2ReferenceLinkedOpenHashMap<RenderSection, ChunkBuildOutput>();
 
         for (var output : outputs) {
@@ -466,12 +466,19 @@ public class RenderSectionManager {
         return new ArrayList<>(map.values());
     }
 
-    private ArrayList<ChunkBuildOutput> collectChunkBuildResults() {
-        ArrayList<ChunkBuildOutput> results = new ArrayList<>();
-        ChunkJobResult<ChunkBuildOutput> result;
+    private List<ChunkBuildOutput> collectChunkBuildResults() {
+        ChunkJobResult<ChunkBuildOutput> result = this.buildResults.poll();
 
-        while ((result = this.buildResults.poll()) != null) {
+        // Avoid allocating a list on frames where no jobs have finished
+        if (result == null) {
+            return Collections.emptyList();
+        }
+
+        List<ChunkBuildOutput> results = new ArrayList<>();
+
+        while (result != null) {
             results.add(result.unwrap());
+            result = this.buildResults.poll();
         }
 
         return results;

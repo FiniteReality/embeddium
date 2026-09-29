@@ -50,9 +50,33 @@ public class RenderRegionManager {
 
     public void uploadMeshes(CommandList commandList, Collection<ChunkBuildOutput> results) {
         for (var entry : this.createMeshUploadQueues(results)) {
-            this.uploadMeshes(commandList, entry.getKey(), entry.getValue().stream().filter(o -> !o.isIndexOnlyUpload()).toList());
-            this.uploadResorts(commandList, entry.getKey(), entry.getValue().stream().filter(ChunkBuildOutput::isIndexOnlyUpload).toList());
+            this.uploadMeshes(commandList, entry.getKey(), filterOutputs(entry.getValue(), false));
+            this.uploadResorts(commandList, entry.getKey(), filterOutputs(entry.getValue(), true));
         }
+    }
+
+    // Selects the outputs whose index-only flag matches. Either group is often empty, so the list is only
+    // allocated once an output matches.
+    private static List<ChunkBuildOutput> filterOutputs(List<ChunkBuildOutput> outputs, boolean indexOnly) {
+        List<ChunkBuildOutput> filtered = null;
+
+        for (ChunkBuildOutput output : outputs) {
+            if (output.isIndexOnlyUpload() != indexOnly) {
+                continue;
+            }
+
+            if (filtered == null) {
+                filtered = new ArrayList<>();
+            }
+
+            filtered.add(output);
+        }
+
+        if (filtered == null) {
+            return Collections.emptyList();
+        }
+
+        return filtered;
     }
 
     private void uploadMeshes(CommandList commandList, RenderRegion region, Collection<ChunkBuildOutput> results) {
@@ -83,11 +107,20 @@ public class RenderRegionManager {
         var resources = region.createResources(commandList);
         var geometryArena = resources.getGeometryArena();
 
-        boolean bufferChanged = geometryArena.upload(commandList, uploads.stream()
-                .map(upload -> upload.vertexUpload));
+        var vertexUploads = new ArrayList<PendingUpload>(uploads.size());
+        var indexUploads = new ArrayList<PendingUpload>();
 
-        bufferChanged |= resources.getIndexArena().upload(commandList, uploads.stream()
-                .map(upload -> upload.indexUpload).filter(Objects::nonNull));
+        for (PendingSectionUpload upload : uploads) {
+            vertexUploads.add(upload.vertexUpload);
+
+            if (upload.indexUpload != null) {
+                indexUploads.add(upload.indexUpload);
+            }
+        }
+
+        boolean bufferChanged = geometryArena.upload(commandList, vertexUploads);
+
+        bufferChanged |= resources.getIndexArena().upload(commandList, indexUploads);
 
         // If any of the buffers changed, the tessellation will need to be updated
         // Once invalidated the tessellation will be re-created on the next attempted use
@@ -133,8 +166,13 @@ public class RenderRegionManager {
 
         var resources = region.createResources(commandList);
 
-        boolean bufferChanged = resources.getIndexArena().upload(commandList, uploads.stream()
-                .map(upload -> upload.indexUpload).filter(Objects::nonNull));
+        var indexUploads = new ArrayList<PendingUpload>(uploads.size());
+
+        for (PendingResortUpload upload : uploads) {
+            indexUploads.add(upload.indexUpload);
+        }
+
+        boolean bufferChanged = resources.getIndexArena().upload(commandList, indexUploads);
 
         // If any of the buffers changed, the tessellation will need to be updated
         // Once invalidated the tessellation will be re-created on the next attempted use
