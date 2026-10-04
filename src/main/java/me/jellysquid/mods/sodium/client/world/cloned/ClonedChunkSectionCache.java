@@ -27,8 +27,15 @@ public class ClonedChunkSectionCache {
 
     public synchronized void cleanup() {
         this.time = getMonotonicTimeSource();
-        this.positionToEntry.values()
-                .removeIf(entry -> this.time > (entry.getLastUsedTimestamp() + MAX_CACHE_DURATION));
+
+        // The map is kept in order of last use, as acquire() moves each entry it returns to the end and stamps it with
+        // the current time. The expired entries are therefore always at the front, so stop at the first one which has
+        // not expired rather than checking every entry.
+        var iterator = this.positionToEntry.values().iterator();
+
+        while (iterator.hasNext() && this.time > (iterator.next().getLastUsedTimestamp() + MAX_CACHE_DURATION)) {
+            iterator.remove();
+        }
     }
 
     @Nullable
