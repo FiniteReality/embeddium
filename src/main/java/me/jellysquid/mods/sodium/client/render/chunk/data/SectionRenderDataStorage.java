@@ -1,6 +1,7 @@
 package me.jellysquid.mods.sodium.client.render.chunk.data;
 
 import me.jellysquid.mods.sodium.client.gl.arena.GlBufferSegment;
+import me.jellysquid.mods.sodium.client.render.chunk.DrawBatchCache;
 import me.jellysquid.mods.sodium.client.gl.util.VertexRange;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
 import me.jellysquid.mods.sodium.client.render.chunk.region.RenderRegion;
@@ -13,6 +14,11 @@ public class SectionRenderDataStorage {
     private final GlBufferSegment[] indexAllocations = new GlBufferSegment[RenderRegion.REGION_SIZE];
 
     private final long pMeshDataArray;
+    private final DrawBatchCache.Slots drawBatchCache = new DrawBatchCache.Slots();
+
+    public DrawBatchCache.Slots getDrawBatchCache() {
+        return this.drawBatchCache;
+    }
 
     public SectionRenderDataStorage() {
         this.pMeshDataArray = SectionRenderDataUnsafe.allocateHeap(RenderRegion.REGION_SIZE);
@@ -20,6 +26,7 @@ public class SectionRenderDataStorage {
 
     public void setMeshes(int localSectionIndex,
                           GlBufferSegment allocation, @Nullable GlBufferSegment indexAllocation, VertexRange[] ranges) {
+        this.drawBatchCache.invalidate();
         if (this.allocations[localSectionIndex] != null) {
             this.allocations[localSectionIndex].delete();
             this.allocations[localSectionIndex] = null;
@@ -33,7 +40,7 @@ public class SectionRenderDataStorage {
         this.allocations[localSectionIndex] = allocation;
         this.indexAllocations[localSectionIndex] = indexAllocation;
 
-        var pMeshData = this.getDataPointer(localSectionIndex);
+        var pMeshData = this.getInternalDataPointer(localSectionIndex);
 
         int sliceMask = 0;
         int vertexOffset = allocation.getOffset();
@@ -67,17 +74,19 @@ public class SectionRenderDataStorage {
     }
 
     public void removeMeshes(int localSectionIndex) {
+        this.drawBatchCache.invalidate();
         if (this.allocations[localSectionIndex] != null) {
             this.allocations[localSectionIndex].delete();
             this.allocations[localSectionIndex] = null;
 
-            SectionRenderDataUnsafe.clear(this.getDataPointer(localSectionIndex));
+            SectionRenderDataUnsafe.clear(this.getInternalDataPointer(localSectionIndex));
         }
 
         removeIndexBuffer(localSectionIndex);
     }
 
     public void removeIndexBuffer(int localSectionIndex) {
+        this.drawBatchCache.invalidate();
         if (this.indexAllocations[localSectionIndex] != null) {
             this.indexAllocations[localSectionIndex].delete();
             this.indexAllocations[localSectionIndex] = null;
@@ -85,11 +94,12 @@ public class SectionRenderDataStorage {
     }
 
     public void replaceIndexBuffer(int localSectionIndex, GlBufferSegment indexAllocation) {
+        this.drawBatchCache.invalidate();
         removeIndexBuffer(localSectionIndex);
 
         this.indexAllocations[localSectionIndex] = indexAllocation;
 
-        var pMeshData = this.getDataPointer(localSectionIndex);
+        var pMeshData = this.getInternalDataPointer(localSectionIndex);
 
         int indexOffset = indexAllocation != null ? indexAllocation.getOffset() * 4 : 0;
 
@@ -101,6 +111,7 @@ public class SectionRenderDataStorage {
     }
 
     public void onBufferResized() {
+        this.drawBatchCache.invalidate();
         for (int sectionIndex = 0; sectionIndex < RenderRegion.REGION_SIZE; sectionIndex++) {
             this.updateMeshes(sectionIndex);
         }
@@ -118,7 +129,7 @@ public class SectionRenderDataStorage {
         var vertexOffset = allocation.getOffset();
         var indexOffset = indexAllocation != null ? indexAllocation.getOffset() * 4 : 0;
 
-        var data = this.getDataPointer(sectionIndex);
+        var data = this.getInternalDataPointer(sectionIndex);
 
         for (int facing = 0; facing < ModelQuadFacing.COUNT; facing++) {
             SectionRenderDataUnsafe.setVertexOffset(data, facing, vertexOffset);
@@ -130,11 +141,28 @@ public class SectionRenderDataStorage {
         }
     }
 
+    /**
+     * Exposes a mutable pointer. The caller may retain it, so command caching stays disabled for this storage.
+     */
     public long getDataPointer(int sectionIndex) {
+        this.drawBatchCache.disable();
+        return this.getInternalDataPointer(sectionIndex);
+    }
+
+    /**
+     * Returns a pointer for reading render data only. Callers must not write through this pointer;
+     * use the storage mutation methods or {@link #getDataPointer(int)} for mutable access.
+     */
+    public long getDataPointerForRead(int sectionIndex) {
+        return this.getInternalDataPointer(sectionIndex);
+    }
+
+    private long getInternalDataPointer(int sectionIndex) {
         return SectionRenderDataUnsafe.heapPointer(this.pMeshDataArray, sectionIndex);
     }
 
     public void delete() {
+        this.drawBatchCache.invalidate();
         for (var allocation : this.allocations) {
             if (allocation != null) {
                 allocation.delete();
