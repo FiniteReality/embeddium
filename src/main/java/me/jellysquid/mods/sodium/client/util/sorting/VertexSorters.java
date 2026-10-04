@@ -34,7 +34,8 @@ public class VertexSorters {
                 keys[index] = this.getKey(positions[index]);
             }
 
-            return MergeSort.mergeSort(keys);
+            int[] order = RadixSort.sort(keys);
+            return order != null ? order : MergeSort.mergeSort(keys);
         }
 
         protected abstract float getKey(Vector3f object);
