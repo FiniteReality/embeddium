@@ -26,6 +26,7 @@ import me.jellysquid.mods.sodium.client.render.chunk.vertex.format.ChunkVertexTy
 import me.jellysquid.mods.sodium.client.render.viewport.CameraTransform;
 import me.jellysquid.mods.sodium.client.util.BitwiseMath;
 import org.lwjgl.system.MemoryUtil;
+import org.embeddedt.embeddium.render.ShaderModBridge;
 import java.util.Iterator;
 
 public class DefaultChunkRenderer extends ShaderChunkRenderer {
@@ -102,6 +103,18 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
                                           CameraTransform camera,
                                           TerrainRenderPass pass,
                                           boolean useBlockFaceCulling) {
+        boolean merged = !pass.isSorted() && !ShaderModBridge.areShadersEnabled();
+        int count = renderList.getSectionsWithGeometryCount();
+        long faceBits = useBlockFaceCulling && !pass.isSorted() && count > 0
+                ? DrawBatchCache.faceBits(renderRegion, camera) : 0L;
+        var cache = renderDataStorage.getDrawBatchCache();
+        var hit = cache.find(count, renderList, pass.isReverseOrder(), pass.isSorted(),
+                useBlockFaceCulling, merged, faceBits);
+        if (hit != null) {
+            hit.load(batch);
+            return;
+        }
+
         batch.clear();
 
         var iterator = renderList.sectionsWithGeometryIterator(pass.isReverseOrder());
@@ -123,7 +136,7 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
             int chunkY = originY + LocalSectionIndex.unpackY(sectionIndex);
             int chunkZ = originZ + LocalSectionIndex.unpackZ(sectionIndex);
 
-            var pMeshData = renderDataStorage.getDataPointer(sectionIndex);
+            var pMeshData = renderDataStorage.getDataPointerForRead(sectionIndex);
 
             int slices;
 
@@ -138,6 +151,14 @@ public class DefaultChunkRenderer extends ShaderChunkRenderer {
             if (slices != 0) {
                 addDrawCommands(batch, pMeshData, slices, indexPointerMask);
             }
+        }
+
+        if (merged) {
+            MergedDraws.merge(batch);
+        }
+        if (cache.isEnabled()) {
+            cache.victim().store(batch, count, renderList, pass.isReverseOrder(), pass.isSorted(),
+                    useBlockFaceCulling, merged, faceBits);
         }
     }
 

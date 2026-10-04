@@ -81,6 +81,15 @@ public class ChunkRenderList {
         return new ByteArrayIterator(this.sectionsWithEntities, this.sectionsWithEntitiesCount);
     }
 
+    public boolean matchesGeometry(byte[] sections, int count) {
+        return count == this.sectionsWithGeometryCount
+                && java.util.Arrays.equals(this.sectionsWithGeometry, 0, count, sections, 0, count);
+    }
+
+    public void copyGeometry(byte[] destination) {
+        System.arraycopy(this.sectionsWithGeometry, 0, destination, 0, this.sectionsWithGeometryCount);
+    }
+
     public int getSectionsWithGeometryCount() {
         return this.sectionsWithGeometryCount;
     }
