@@ -34,6 +34,9 @@ public class VertexSerializerRegistryImpl implements VertexSerializerRegistry {
     private final Long2ReferenceMap<VertexSerializer> cache = new Long2ReferenceOpenHashMap<>();
     private final StampedLock lock = new StampedLock();
 
+    // Never modified after publication. Serializers are only added to the cache.
+    private volatile Long2ReferenceMap<VertexSerializer> snapshot;
+
     @Override
     public VertexSerializer get(VertexFormatDescription srcFormat, VertexFormatDescription dstFormat) {
         var identifier = createKey(srcFormat, dstFormat);
@@ -67,10 +70,21 @@ public class VertexSerializerRegistryImpl implements VertexSerializerRegistry {
     }
 
     private VertexSerializer find(long identifier) {
-        var stamp = this.lock.readLock();
+        var snapshot = this.snapshot;
+        if (snapshot != null) {
+            var serializer = snapshot.get(identifier);
+            if (serializer != null) {
+                return serializer;
+            }
+        }
 
+        var stamp = this.lock.readLock();
         try {
-            return this.cache.get(identifier);
+            var serializer = this.cache.get(identifier);
+            if (snapshot == null || snapshot.size() != this.cache.size()) {
+                this.snapshot = new Long2ReferenceOpenHashMap<>(this.cache);
+            }
+            return serializer;
         } finally {
             this.lock.unlockRead(stamp);
         }
