@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.textures.animations.tracking;
 
+import com.google.common.collect.ImmutableList;
 import me.jellysquid.mods.sodium.client.SodiumClientMod;
 import me.jellysquid.mods.sodium.client.render.texture.SpriteContentsExtended;
 import net.minecraft.client.renderer.texture.SpriteContents;
@@ -26,6 +27,9 @@ public class SpriteContentsAnimatorImplMixin {
     @Unique
     private SpriteContents parent;
 
+    @Unique
+    private int[] frameTimes;
+
     /**
      * @author IMS
      * @reason Replace fragile Shadow
@@ -33,6 +37,20 @@ public class SpriteContentsAnimatorImplMixin {
     @Inject(method = "<init>", at = @At("RETURN"))
     public void assignParent(SpriteContents spriteContents, SpriteContents.AnimatedTexture animation, SpriteContents.InterpolationData interpolation, CallbackInfo ci) {
         this.parent = spriteContents;
+        List<SpriteContents.FrameInfo> frames = ((SpriteContentsAnimationAccessor) animation).getFrames();
+        Class<?> type = frames.getClass();
+        // Mutable lists supplied by other mods must continue to be read each tick.
+        if (frames instanceof ImmutableList<?> || type == List.of(0).getClass()
+                || type == List.of(0, 1, 2).getClass()) {
+            int[] times = new int[frames.size()];
+            for (int i = 0; i < times.length; i++) {
+                if (frames.get(i) == null) {
+                    return;
+                }
+                times[i] = ((SpriteContentsAnimationFrameAccessor) frames.get(i)).getTime();
+            }
+            this.frameTimes = times;
+        }
     }
 
     @Inject(method = "tickAndUpload", at = @At("HEAD"), cancellable = true)
@@ -43,10 +61,18 @@ public class SpriteContentsAnimatorImplMixin {
 
         if (onDemand && !parent.sodium$isActive()) {
             this.subFrame++;
-            List<SpriteContents.FrameInfo> frames = ((SpriteContentsAnimationAccessor)this.animationInfo).getFrames();
-            if (this.subFrame >= ((SpriteContentsAnimationFrameAccessor)frames.get(this.frame)).getTime()) {
-                this.frame = (this.frame + 1) % frames.size();
-                this.subFrame = 0;
+            int[] times = this.frameTimes;
+            if (times != null && this.frame >= 0 && this.frame < times.length) {
+                if (this.subFrame >= times[this.frame]) {
+                    this.frame = (this.frame + 1) % times.length;
+                    this.subFrame = 0;
+                }
+            } else {
+                List<SpriteContents.FrameInfo> frames = ((SpriteContentsAnimationAccessor) this.animationInfo).getFrames();
+                if (this.subFrame >= ((SpriteContentsAnimationFrameAccessor) frames.get(this.frame)).getTime()) {
+                    this.frame = (this.frame + 1) % frames.size();
+                    this.subFrame = 0;
+                }
             }
             ci.cancel();
         }
